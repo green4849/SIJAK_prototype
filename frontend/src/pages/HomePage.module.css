@@ -27,7 +27,7 @@
   gap: var(--card-gap);
 }
 
-/* 홈 카드는 시안처럼 더 크게 */
+/* 홈 메뉴 카드: 높이는 내용대로(글자가 커지면 같이 늘어남), 최소 높이만 넉넉히 */
 .cards > * {
-  min-height: calc(var(--touch-min) * 2.2);
+  min-height: calc(var(--touch-min) * 1.6);
 }
