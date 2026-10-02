@@ -70,7 +70,7 @@
 |---|---|---|
 | D1 | E2E 테스트를 저장소에 (`frontend/e2e`, 데모 빌드 대상 → 백엔드 없이 CI에서 실행) | ✅ |
 | D2 | 브랜치·PR 흐름, PR·이슈 템플릿 | ✅ |
-| D3 | **API 타입 자동 생성** — 백엔드 OpenAPI → `frontend/src/shared/api/schema.d.ts`. 프론트 타입·데모 핸들러가 백엔드와 어긋나면 빌드에서 잡힘 | ⬜ M · P1 |
+| D3 | **API 타입 자동 생성** — 백엔드 OpenAPI → `frontend/src/shared/api/schema.d.ts`. 프론트 타입·데모 핸들러가 백엔드와 어긋나면 빌드에서 잡힘 | ✅ |
 | D4 | 프론트 단위·컴포넌트 테스트 (Vitest + Testing Library) — 훅·폼 검증 | ⬜ M · P2 |
 | D5 | 시각 회귀 (스크린샷 비교) — 폴리싱 중 의도치 않은 화면 변화 감지 | ⬜ S · P2 |
 

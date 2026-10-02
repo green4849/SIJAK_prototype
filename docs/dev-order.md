@@ -87,6 +87,15 @@ app (라우터·프로바이더·가드) ──► pages, features/*
 3. 백엔드 호출은 각 feature의 `api/` 에서만, 반드시 `shared/api/client` 를 통해.
 4. feature 밖(pages·app)에서는 **`features/<f>/index.ts` 공개 API로만** 접근한다. (lint로 강제)
 5. 시니어 접근성 기준(글자 18px↑, 터치 56px↑, 대비 7:1↑)은 `shared/styles` 토큰으로만 적용. 컴포넌트에 매직 넘버 금지.
+6. **API 타입은 손으로 쓰지 않는다.** 백엔드 OpenAPI에서 생성한 `shared/api/schema.d.ts` 를 `Schema<'이름'>` 으로 꺼내 쓴다 (`shared/api/types.ts`). 데모 가짜 서버의 응답도 같은 타입으로 검사된다.
+
+### API 계약을 바꿀 때 (D3)
+
+```
+backend 스키마 수정 → (backend) uv run python -m scripts.export_openapi
+                    → (frontend) npm run gen:api   → tsc 오류가 나는 곳 = 고쳐야 할 화면·데모
+```
+`openapi.json`·`schema.d.ts` 둘 다 커밋한다. 갱신을 잊으면 CI(backend `--check`, frontend `git diff`)가 실패한다.
 
 ---
 
