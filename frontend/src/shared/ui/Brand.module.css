@@ -1,0 +1,35 @@
+.brand {
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.word {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  font-family: var(--font-display);
+  line-height: 1.1;
+}
+
+.brand[data-size='md'] .word { font-size: var(--font-xl); }
+.brand[data-size='hero'] .word { font-size: var(--font-hero); }
+
+.tagline {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text);
+  font-size: var(--font-base);
+  font-weight: 500;
+}
+
+.leaf {
+  color: var(--color-primary);
+}
+
+.leafLight {
+  fill: var(--color-leaf-light);
+}
+
+:root[data-contrast='high'] .leafLight {
+  fill: var(--color-primary);
+}

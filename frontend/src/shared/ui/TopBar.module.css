@@ -1,0 +1,39 @@
+.bar {
+  min-height: calc(var(--touch-min) + var(--space-1));
+  display: grid;
+  grid-template-columns: minmax(var(--touch-min), 1fr) auto minmax(var(--touch-min), 1fr);
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.side {
+  display: flex;
+  align-items: center;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.back {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-1) 0 0;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: none;
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 아이콘만 있으면 시니어가 '뒤로'인지 모른다 — 글자도 함께 */
+.backLabel {
+  font-size: var(--font-sm);
+}
+
+.title {
+  font-size: var(--font-lg);
+  text-align: center;
+}

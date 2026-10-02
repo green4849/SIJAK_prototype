@@ -15,10 +15,23 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   line-height: var(--line-height);
   word-break: keep-all;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400; /* Jua는 한 굵기 — 가짜 볼드 방지 */
+  line-height: 1.3;
+  margin: 0;
+}
+
+a {
+  color: var(--color-primary);
 }
 
 button,

@@ -1,0 +1,27 @@
+import styles from './Avatar.module.css'
+
+interface Props {
+  name: string
+  /** 색을 고정하기 위한 키 (보통 사용자 id) */
+  seed?: string
+  size?: 'md' | 'lg' | 'xl'
+}
+
+const TONES = ['pink', 'mint', 'yellow', 'sky', 'beige'] as const
+
+function hash(s: string) {
+  let h = 0
+  for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return h
+}
+
+/** 사진 대신 이름으로 만든 아바타. 3글자 이름이면 이름 두 글자(예: 김영희 → 영희) */
+export function Avatar({ name, seed, size = 'md' }: Props) {
+  const label = name.length === 3 ? name.slice(1) : name.slice(0, 2)
+  const tone = TONES[hash(seed ?? name) % TONES.length]
+  return (
+    <span className={styles.avatar} data-size={size} data-tone={tone} aria-hidden="true">
+      {label}
+    </span>
+  )
+}

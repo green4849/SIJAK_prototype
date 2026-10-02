@@ -41,7 +41,7 @@
   gap: var(--space-1);
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--color-bg);
+  background: var(--color-surface);
   color: var(--color-text);
   font-size: var(--font-base);
   font-weight: 600;

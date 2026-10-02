@@ -74,8 +74,8 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div>
-        <h1 className={styles.title}>본인 확인</h1>
-        <p className={styles.lead}>안전한 이용을 위해 한 번만 확인할게요.</p>
+        <h1 className={styles.title}>휴대폰 인증</h1>
+        <p className={styles.lead}>처음 한 번만 확인하면 다음부터는 자동으로 들어가요.</p>
       </div>
 
       <TextField
