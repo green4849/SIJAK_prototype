@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { formatDuration } from '@/shared/lib/datetime'
 import { chatApi } from '../api/chatApi'
 import styles from './VoiceMessage.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   audioUrl: string
@@ -52,7 +53,7 @@ export function VoiceMessage({ audioUrl, durationSec }: Props) {
   return (
     <button type="button" className={styles.voice} onClick={toggle} aria-pressed={playing}>
       <span className={styles.icon} aria-hidden="true">
-        {playing ? <Pause /> : <Play />}
+        {playing ? <Pause size={ICON.md} strokeWidth={ICON_STROKE} /> : <Play size={ICON.md} strokeWidth={ICON_STROKE} />}
       </span>
       <span>
         {failed ? '재생하지 못했어요' : loading ? '불러오는 중…' : playing ? '듣는 중' : '음성 듣기'}

@@ -19,10 +19,10 @@
   align-items: center;
 }
 
-/* 아이콘 그림이 아니라 글자 시작점이 정렬선(--gutter)에 오도록 아이콘 여백만큼 당긴다 */
+/* 꺾쇠 그림의 왼쪽 빈 여백(26px 아이콘의 약 7px)만큼 당겨 그림이 정렬선(--gutter)에 닿게 */
 .back {
   min-height: var(--touch-min);
-  margin-left: -0.35em;
+  margin-left: -7px;
   padding: 0 var(--space-1) 0 0;
   display: inline-flex;
   align-items: center;

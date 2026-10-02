@@ -4,6 +4,7 @@ import { Alert } from '@/shared/ui/Alert'
 import type { ActivityData } from '../api/activityApi'
 import { ActivityThumb } from './ActivityThumb'
 import styles from './ActivityList.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   items: ActivityData[] | null
@@ -29,7 +30,7 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
               <span className={styles.title}>{a.title}</span>
               <span className={styles.meta}>{a.schedule_text}</span>
               <span className={styles.meta}>
-                <MapPin aria-hidden="true" size="0.9em" /> {a.place}
+                <MapPin aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> {a.place}
               </span>
               {(a.applied || a.is_full) && (
                 <span className={styles.badge} data-kind={a.applied ? 'applied' : 'full'}>
@@ -37,7 +38,7 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
                 </span>
               )}
             </span>
-            <ChevronRight aria-hidden="true" className={styles.chevron} />
+            <ChevronRight aria-hidden="true" className={styles.chevron} size={ICON.sm} strokeWidth={ICON_STROKE} />
           </Link>
         </li>
       ))}

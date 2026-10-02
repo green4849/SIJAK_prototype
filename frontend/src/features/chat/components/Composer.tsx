@@ -5,6 +5,7 @@ import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { useVoiceRecorder, MAX_RECORD_SEC } from '../hooks/useVoiceRecorder'
 import styles from './Composer.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   onSendText: (text: string) => Promise<void>
@@ -81,7 +82,7 @@ export function Composer({ onSendText, onSendVoice, disabled }: Props) {
         />
         {text.trim() ? (
           <button type="submit" className={styles.iconBtn} disabled={sending} aria-label="보내기">
-            <Send aria-hidden="true" />
+            <Send aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
             <span className={styles.iconText}>보내기</span>
           </button>
         ) : (
@@ -92,7 +93,7 @@ export function Composer({ onSendText, onSendVoice, disabled }: Props) {
             disabled={disabled || sending}
             aria-label="음성으로 말하기"
           >
-            <Mic aria-hidden="true" />
+            <Mic aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
             <span className={styles.iconText}>말하기</span>
           </button>
         )}

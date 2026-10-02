@@ -41,7 +41,7 @@ export function ChatRoomPage() {
         }
       />
       <header className={styles.peer}>
-        <Avatar name={room.peer.name} seed={room.peer.user_id} />
+        <Avatar name={room.peer.name} seed={room.peer.user_id} size="header" />
         <div>
           <h1 className={styles.name}>{room.peer.name}님</h1>
           <p className={styles.meta}>

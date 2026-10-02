@@ -1,6 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import type { RiskWarningData } from '../api/safetyApi'
 import styles from './RiskWarning.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   warning: RiskWarningData
@@ -17,7 +18,7 @@ export function RiskWarning({ warning, onReport }: Props) {
     // alert가 아니라 note — 지난 경고까지 매번 읽히지 않게 (새 메시지는 목록의 aria-live가 알림)
     <div className={styles.box} data-strong={strong} role="note" aria-label="위험 경고">
       <p className={styles.title}>
-        <TriangleAlert aria-hidden="true" size="1.2em" />
+        <TriangleAlert aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
         {strong ? '잠깐만요! 조심하세요' : '한 번 더 생각해 보세요'}
       </p>
       <p className={styles.text}>

@@ -2,6 +2,7 @@ import { ChevronRight, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './ActionCard.module.css'
+import { ICON, ICON_STROKE } from './icon'
 
 /** 작은 아이콘 배경 색 — 큰 면에는 쓰지 않는다 (디자인 리뷰 공통 10) */
 export type CardAccent = 'pink' | 'mint' | 'yellow' | 'sky' | 'beige'
@@ -49,7 +50,7 @@ export function ActionCard({
   const body = (
     <>
       <span className={styles.icon} data-accent={accent} aria-hidden="true">
-        <Icon size={26} strokeWidth={2} />
+        <Icon size={ICON.md} strokeWidth={ICON_STROKE} />
       </span>
       <span className={styles.text}>
         <span className={styles.title}>
@@ -58,7 +59,7 @@ export function ActionCard({
         </span>
         {description && <span className={styles.desc}>{description}</span>}
       </span>
-      {interactive && <ChevronRight className={styles.chevron} aria-hidden="true" size={22} />}
+      {interactive && <ChevronRight className={styles.chevron} aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />}
     </>
   )
 

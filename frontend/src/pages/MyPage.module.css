@@ -4,14 +4,6 @@
   gap: var(--section-gap);
 }
 
-.iconLink {
-  min-width: var(--touch-min);
-  min-height: var(--touch-min);
-  display: grid;
-  place-items: center;
-  color: var(--color-text);
-  border-radius: var(--radius-control);
-}
 
 .profile {
   display: flex;

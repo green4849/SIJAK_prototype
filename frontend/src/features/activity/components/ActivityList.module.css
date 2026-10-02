@@ -67,6 +67,7 @@
 
 .chevron {
   flex: none;
+  color: var(--color-text-muted);
 }
 
 .empty {

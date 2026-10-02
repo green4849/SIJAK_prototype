@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import styles from './ActivityThumb.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 /** 시안의 활동 사진 자리 — 사진 대신 활동 종류별 아이콘 + 색 */
 const KINDS: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -29,7 +30,7 @@ export function ActivityThumb({ kind, size = 'md' }: { kind: string; size?: 'md'
   const { icon: Icon, tone } = KINDS[kind] ?? KINDS.walk
   return (
     <span className={styles.thumb} data-tone={tone} data-size={size} aria-hidden="true">
-      <Icon size={size === 'hero' ? '3.5em' : '1.8em'} strokeWidth={1.8} />
+      <Icon size={size === 'hero' ? ICON.lg : ICON.md + 4} strokeWidth={ICON_STROKE} />
     </span>
   )
 }

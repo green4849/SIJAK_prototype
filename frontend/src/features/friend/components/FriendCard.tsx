@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Avatar } from '@/shared/ui/Avatar'
 import type { FriendCardData } from '../api/friendApi'
 import styles from './FriendCard.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   card: FriendCardData
@@ -26,7 +27,7 @@ export function FriendCard({ card, actions }: Props) {
             {card.name}님 <span className={styles.age}>{card.age}세</span>
           </h3>
           <p className={styles.where}>
-            <MapPin aria-hidden="true" size="1em" /> {where(card)}
+            <MapPin aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> {where(card)}
           </p>
         </div>
       </div>

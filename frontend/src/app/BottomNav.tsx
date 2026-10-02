@@ -4,6 +4,7 @@ import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
 import { Badge } from '@/shared/ui/Badge'
 import styles from './BottomNav.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 /** 하단 탭 4개 (시안 ③) — 아이콘 + 글자 항상 함께, 새 소식은 배지로 (A1) */
 export function BottomNav() {
@@ -42,7 +43,7 @@ export function BottomNav() {
           <li key={to}>
             <NavLink to={to} end={end} className={styles.tab}>
               <span className={styles.iconWrap}>
-                <Icon aria-hidden="true" size="1.5em" strokeWidth={2.2} />
+                <Icon aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
                 {badge && (
                   <span className={styles.badge}>
                     <Badge {...badge} part="dot" />

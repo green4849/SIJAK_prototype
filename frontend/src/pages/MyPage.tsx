@@ -16,6 +16,7 @@ import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
+import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './MyPage.module.css'
@@ -34,14 +35,12 @@ export function MyPage() {
         title="마이페이지"
         back={false}
         right={
-          <Link to="/me/settings" className={styles.iconLink} aria-label="설정">
-            <Settings aria-hidden="true" size="1.4em" />
-          </Link>
+          <IconAction icon={Settings} label="설정" to="/me/settings" />
         }
       />
 
       <div className={styles.profile}>
-        <Avatar name={user.name} seed={user.id} size="xl" />
+        <Avatar name={user.name} seed={user.id} size="profile" />
         <div className={styles.who}>
           <p className={styles.name}>
             {user.name}님 <span className={styles.age}>{user.age}세</span>

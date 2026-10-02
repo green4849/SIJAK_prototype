@@ -2,6 +2,7 @@ import { Headset } from 'lucide-react'
 import { ButtonLink } from '@/shared/ui/Button'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './InfoPage.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 const STEPS = [
   '가족이나 복지관 직원에게 이 화면을 보여 주세요.',
@@ -15,7 +16,7 @@ export function AssistPage() {
   return (
     <section className={styles.page}>
       <TopBar backTo="/login" />
-      <Headset aria-hidden="true" size="4em" className={styles.icon} />
+      <Headset aria-hidden="true" size={ICON.lg} strokeWidth={ICON_STROKE} className={styles.icon} />
       <h1 className={styles.title}>함께 해요</h1>
       <p className={styles.body}>혼자 하기 어려우시면 가까운 분께 부탁해 보세요.</p>
       <ol className={styles.steps}>
