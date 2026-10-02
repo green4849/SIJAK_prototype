@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth'
 import { AssistPage } from '@/pages/AssistPage'
 import { ComingSoonPage } from '@/pages/ComingSoonPage'
+import { FriendListPage } from '@/pages/FriendListPage'
+import { FriendsPage } from '@/pages/FriendsPage'
 import { HelpPage } from '@/pages/HelpPage'
 import { HomePage } from '@/pages/HomePage'
 import { IdCardPage } from '@/pages/IdCardPage'
@@ -44,12 +46,14 @@ export function App() {
           <Route element={<RequireAuth />}>
             <Route element={<TabLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="friends" element={<ComingSoonPage title="동네 친구 찾기" tab />} />
+              <Route path="friends" element={<FriendsPage />} />
               <Route path="activities" element={<ComingSoonPage title="지역생활" tab />} />
               <Route path="me" element={<MyPage />} />
             </Route>
             <Route element={<PlainLayout />}>
               <Route path="chats" element={<ComingSoonPage title="대화하기" />} />
+              <Route path="chats/with/:userId" element={<ComingSoonPage title="대화하기" />} />
+              <Route path="me/friends" element={<FriendListPage />} />
               <Route path="safety" element={<SafetyPage />} />
               <Route path="me/profile" element={<ProfileEditPage />} />
               <Route path="me/settings" element={<SettingsPage />} />

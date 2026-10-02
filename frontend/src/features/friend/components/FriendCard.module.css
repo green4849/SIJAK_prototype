@@ -1,0 +1,81 @@
+.card {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.info {
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--font-lg);
+}
+
+.age {
+  font-family: var(--font-body);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+}
+
+.where {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+.intro {
+  margin: 0;
+}
+
+.common {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-sm);
+}
+
+.chip {
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+:root[data-contrast='high'] .chip {
+  border: 1px solid var(--color-primary);
+}
+
+.commonLabel {
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.actions > * {
+  flex: 1;
+}

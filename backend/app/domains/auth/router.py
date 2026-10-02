@@ -14,6 +14,7 @@ from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.auth.schemas import (
     AuthResult,
+    LocationUpdate,
     Option,
     PassStartRequest,
     PassStartResponse,
@@ -123,3 +124,10 @@ async def update_me(body: ProfileUpdate, user: CurrentUser, service: AuthService
         user, intro=body.intro, region_code=body.region_code, interests=body.interests
     )
     return UserOut.from_user(updated)
+
+
+@router.put("/me/location", response_model=UserOut)
+async def update_location(
+    body: LocationUpdate, user: CurrentUser, service: AuthServiceDep
+) -> UserOut:
+    return UserOut.from_user(await service.set_location(user, body.lat, body.lng))

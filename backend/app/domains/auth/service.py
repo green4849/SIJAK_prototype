@@ -167,6 +167,26 @@ class AuthService:
         await self.repo.commit()
         return user
 
+    async def set_location(self, user: User, lat: float, lng: float) -> User:
+        """GPS → 소수점 2자리(≈1.1km)로 뭉개서 저장. 원본 좌표는 남기지 않는다."""
+        user.geo_lat = round(lat, 2)
+        user.geo_lng = round(lng, 2)
+        user.geo_updated_at = datetime.now(UTC)
+        await self.repo.commit()
+        return user
+
+    # ---------- 다른 도메인용 공개 메서드 ----------
+
+    async def list_active_users(
+        self, *, region_code: str | None = None, exclude_ids: set[uuid.UUID] | None = None
+    ) -> list[User]:
+        return await self.repo.list_active_users(
+            region_code=region_code, exclude_ids=exclude_ids or set()
+        )
+
+    async def get_users(self, ids: set[uuid.UUID]) -> dict[uuid.UUID, User]:
+        return {u.id: u for u in await self.repo.get_users(ids)}
+
     async def get_active_user(self, user_id: uuid.UUID) -> User:
         """다른 도메인·의존성이 쓰는 공개 메서드."""
         user = await self.repo.get_user(user_id)

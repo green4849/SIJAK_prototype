@@ -46,6 +46,10 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # 한 줄 소개 — 친구 찾기(④)에 노출. 시안 예: "산책과 영화, 여행을 좋아해요"
     intro: Mapped[str] = mapped_column(String(INTRO_MAX_LEN), default="", server_default="")
+    # 대략 위치 — 소수점 2자리(≈1.1km)로 뭉갠 값만 저장, 원본 GPS 좌표는 저장하지 않음
+    geo_lat: Mapped[float | None]
+    geo_lng: Mapped[float | None]
+    geo_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     interests: Mapped[list["UserInterest"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"

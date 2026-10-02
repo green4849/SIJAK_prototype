@@ -67,6 +67,7 @@ class UserOut(BaseModel):
     region_name: str
     interests: list[str]
     intro: str
+    has_location: bool
 
     @classmethod
     def from_user(cls, user: User) -> "UserOut":
@@ -80,7 +81,15 @@ class UserOut(BaseModel):
             region_name=REGIONS.get(user.region_code, user.region_code),
             interests=[i.category for i in user.interests],
             intro=user.intro,
+            has_location=user.geo_lat is not None,
         )
+
+
+class LocationUpdate(BaseModel):
+    """브라우저 GPS 좌표 — 서버에서 ≈1km 단위로 뭉개서 저장"""
+
+    lat: float = Field(ge=33.0, le=39.0)  # 대한민국 범위
+    lng: float = Field(ge=124.0, le=132.0)
 
 
 class ProfileUpdate(BaseModel):

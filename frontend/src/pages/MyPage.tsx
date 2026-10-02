@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
+import { useMyFriends } from '@/features/friend'
 import { Avatar } from '@/shared/ui/Avatar'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
@@ -18,6 +19,7 @@ import styles from './MyPage.module.css'
 /** ⑨ 마이페이지 */
 export function MyPage() {
   const { user, signOut } = useAuth()
+  const friends = useMyFriends()
   if (!user) return null
 
   return (
@@ -49,10 +51,15 @@ export function MyPage() {
         </div>
       </div>
 
-      {/* 친구·활동 숫자는 해당 스테이지(3·6)에서 채운다 */}
+      {/* 활동 숫자는 Stage 6에서 채운다 */}
       <MenuList label="내 활동">
         <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
-        <MenuItem icon={Users} label="내 친구 목록" to="/friends" />
+        <MenuItem
+          icon={Users}
+          label="내 친구 목록"
+          value={friends.data ? `${friends.data.length}명` : undefined}
+          to="/me/friends"
+        />
         <MenuItem icon={NotebookPen} label="신청한 활동" to="/activities" />
         <MenuItem icon={Heart} label="관심 있는 활동" to="/activities" />
       </MenuList>

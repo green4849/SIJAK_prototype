@@ -1,0 +1,33 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.heading {
+  font-size: var(--font-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.count {
+  min-width: 1.6em;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  font-family: var(--font-body);
+  font-size: var(--font-sm);
+  font-weight: 800;
+  text-align: center;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}

@@ -13,6 +13,7 @@ export interface User {
   region_name: string
   interests: string[]
   intro: string
+  has_location: boolean
 }
 
 export interface ProfileUpdate {
@@ -69,4 +70,7 @@ export const authApi = {
   me: () => api.get<User>('/me'),
 
   updateMe: (patch: ProfileUpdate) => api.patch<User>('/me', patch),
+
+  /** GPS 좌표 → 서버가 ≈1km 단위로 뭉개서 저장 */
+  updateLocation: (lat: number, lng: number) => api.put<User>('/me/location', { lat, lng }),
 }

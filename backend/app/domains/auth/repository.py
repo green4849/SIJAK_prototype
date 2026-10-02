@@ -21,6 +21,21 @@ class AuthRepository:
     async def get_user(self, user_id: uuid.UUID) -> User | None:
         return await self.session.get(User, user_id)
 
+    async def list_active_users(
+        self, *, region_code: str | None = None, exclude_ids: set[uuid.UUID] = frozenset()
+    ) -> list[User]:
+        q = select(User).where(User.status == "active")
+        if region_code:
+            q = q.where(User.region_code == region_code)
+        if exclude_ids:
+            q = q.where(User.id.not_in(exclude_ids))
+        return list(await self.session.scalars(q.order_by(User.last_login_at.desc().nulls_last())))
+
+    async def get_users(self, ids: set[uuid.UUID]) -> list[User]:
+        if not ids:
+            return []
+        return list(await self.session.scalars(select(User).where(User.id.in_(ids))))
+
     async def get_user_by_ci(self, ci: str) -> User | None:
         return await self.session.scalar(select(User).where(User.pass_ci == ci))
 
