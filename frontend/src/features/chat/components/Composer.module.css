@@ -1,0 +1,96 @@
+.composer,
+.recording {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-1);
+  align-items: stretch;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--font-base);
+}
+
+.iconBtn {
+  flex: none;
+  min-width: calc(var(--touch-min) + 16px);
+  min-height: var(--touch-min);
+  padding: 4px var(--space-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  cursor: pointer;
+}
+
+.iconBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 아이콘만으로는 뜻을 모를 수 있어 짧은 글자를 함께 */
+.iconText {
+  font-size: min(var(--font-sm), 16px);
+  font-weight: 700;
+}
+
+.recording {
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--color-card-pink);
+}
+
+:root[data-contrast='high'] .recording {
+  border: 2px solid var(--color-border);
+}
+
+.recLabel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-lg);
+  font-weight: 700;
+}
+
+.recHint {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.dot {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--color-danger);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.recActions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-1);
+}

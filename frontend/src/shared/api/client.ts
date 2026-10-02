@@ -49,7 +49,9 @@ async function send(method: string, path: string, body: unknown, token: string |
   const isForm = body instanceof FormData
   if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
 
-  return fetch(`${API_PREFIX}${path}`, {
+  // 절대 경로(/api/v1/...)로 받은 URL도 그대로 쓸 수 있게
+  const url = path.startsWith(API_PREFIX) ? path : `${API_PREFIX}${path}`
+  return fetch(url, {
     method,
     headers,
     credentials: 'same-origin', // refresh 쿠키 전송
@@ -81,7 +83,19 @@ async function request<T>(
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T)
 }
 
+/** 파일 받기 (음성 등) — <audio src>는 인증 헤더를 못 보내므로 Blob으로 받아 로컬 URL을 만든다 */
+async function blob(path: string): Promise<Blob> {
+  let res = await send('GET', path, undefined, auth.getAccessToken())
+  if (res.status === 401) {
+    const fresh = await auth.refreshAccessToken()
+    if (fresh) res = await send('GET', path, undefined, fresh)
+  }
+  if (!res.ok) throw new ApiError(res.status, 'download_failed', '파일을 불러오지 못했어요.')
+  return res.blob()
+}
+
 export const api = {
+  blob,
   get: <T>(path: string, opts?: RequestOptions) => request<T>('GET', path, undefined, opts),
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     request<T>('POST', path, body, opts),

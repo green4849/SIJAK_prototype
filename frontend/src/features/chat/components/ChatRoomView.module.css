@@ -1,0 +1,29 @@
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.scroll {
+  flex: 1;
+  /* 입력줄 높이만큼 아래 여유 */
+  padding-bottom: calc(var(--touch-min) * 2);
+}
+
+/* 입력줄은 화면 아래에 고정 */
+.composer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+}
+
+.composer > * {
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+}

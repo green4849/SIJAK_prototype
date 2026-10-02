@@ -1,6 +1,9 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth'
 import { AssistPage } from '@/pages/AssistPage'
+import { ChatListPage } from '@/pages/ChatListPage'
+import { ChatOpenPage } from '@/pages/ChatOpenPage'
+import { ChatRoomPage } from '@/pages/ChatRoomPage'
 import { ComingSoonPage } from '@/pages/ComingSoonPage'
 import { FriendListPage } from '@/pages/FriendListPage'
 import { FriendsPage } from '@/pages/FriendsPage'
@@ -51,8 +54,9 @@ export function App() {
               <Route path="me" element={<MyPage />} />
             </Route>
             <Route element={<PlainLayout />}>
-              <Route path="chats" element={<ComingSoonPage title="대화하기" />} />
-              <Route path="chats/with/:userId" element={<ComingSoonPage title="대화하기" />} />
+              <Route path="chats" element={<ChatListPage />} />
+              <Route path="chats/with/:userId" element={<ChatOpenPage />} />
+              <Route path="chats/:roomId" element={<ChatRoomPage />} />
               <Route path="me/friends" element={<FriendListPage />} />
               <Route path="safety" element={<SafetyPage />} />
               <Route path="me/profile" element={<ProfileEditPage />} />

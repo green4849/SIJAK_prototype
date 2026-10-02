@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # 본인인증 provider: "mock" | (추후) "pass"
     identity_provider: Literal["mock"] = "mock"
 
+    # 음성 메시지 등 업로드 파일 저장 위치 (backend/ 기준, git 제외)
+    media_dir: str = "data/media"
+    voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
+
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60
 

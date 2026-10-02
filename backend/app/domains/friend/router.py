@@ -1,22 +1,14 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from app.core.deps import DbSession
-from app.domains.auth.deps import AuthServiceDep, CurrentUser
-from app.domains.friend.repository import FriendRepository
+from app.domains.auth.deps import CurrentUser
+from app.domains.friend.deps import FriendServiceDep
 from app.domains.friend.schemas import FriendCard, FriendRequestCreate
-from app.domains.friend.service import FriendService, Tab
+from app.domains.friend.service import Tab
 
 router = APIRouter(prefix="/friends", tags=["friend"])
-
-
-def get_friend_service(session: DbSession, auth: AuthServiceDep) -> FriendService:
-    return FriendService(FriendRepository(session), auth)
-
-
-FriendServiceDep = Annotated[FriendService, Depends(get_friend_service)]
 
 
 @router.get("/recommendations", response_model=list[FriendCard])

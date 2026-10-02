@@ -3,4 +3,5 @@
  * 페이지가 여기서 만들어 props로 넘긴다 (예: 친구 카드 → 대화방).
  */
 export const chatWith = (userId: string) => `/chats/with/${userId}`
+export const chatRoom = (roomId: string) => `/chats/${roomId}`
 export const activityDetail = (activityId: string) => `/activities/${activityId}`
