@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -11,7 +12,7 @@ class ActivityOut(BaseModel):
     id: uuid.UUID
     title: str
     subtitle: str
-    category: str
+    category: Literal["culture", "health", "learning"]  # models.CATEGORIES
     category_label: str
     place: str
     schedule_text: str
