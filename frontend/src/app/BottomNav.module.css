@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   color: var(--color-text-muted);
   /* 탭 4개가 한 줄에 들어가야 하므로 아주 큰 글씨 설정에서도 상한을 둔다 */
   font-size: var(--text-nav);

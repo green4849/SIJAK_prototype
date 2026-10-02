@@ -20,15 +20,21 @@ export function LoginPage() {
 
       <div className={styles.options}>
         <ActionCard
-          tone="primary"
+          variant="primary"
           icon={Smartphone}
           title="휴대폰 인증"
           description="가장 간편해요"
           to="/login/phone"
         />
-        <ActionCard tone="yellow" icon={IdCard} title="신분증 인증" to="/login/id-card" />
         <ActionCard
-          tone="beige"
+          accent="yellow"
+          icon={IdCard}
+          title="신분증 인증"
+          description="주민등록증·운전면허증 (준비 중)"
+          to="/login/id-card"
+        />
+        <ActionCard
+          variant="subtle"
           icon={Headset}
           title="도움받기"
           description="가족·직원이 도와드려요"

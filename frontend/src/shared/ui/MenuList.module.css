@@ -3,7 +3,7 @@
   padding: 0;
   list-style: none;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
@@ -32,6 +32,11 @@
   cursor: pointer;
 }
 
+.row:active {
+  background: var(--color-card-beige);
+}
+
+/* 주의(빨강)는 글자 색만 — 크기·면으로 더 강조하지 않는다 (리뷰 ⑨-9) */
 .row[data-danger='true'] {
   color: var(--color-danger);
 }

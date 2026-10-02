@@ -41,7 +41,7 @@
   background:
     radial-gradient(120% 90% at 20% 100%, var(--color-card-mint) 60%, transparent 61%),
     radial-gradient(120% 80% at 85% 100%, var(--color-primary-soft) 55%, transparent 56%);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
 }
 
 :root[data-contrast='high'] .hills {

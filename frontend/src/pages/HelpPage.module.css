@@ -12,7 +12,7 @@
 
 .item {
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
 

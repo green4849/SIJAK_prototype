@@ -20,7 +20,7 @@
   align-items: center;
   gap: var(--space-1);
   border: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--color-text);
   color: var(--color-bg);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);

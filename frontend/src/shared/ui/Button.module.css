@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   border: 2px solid transparent;
   font-size: var(--text-button);
   font-weight: var(--weight-medium);
@@ -15,9 +15,16 @@
   cursor: pointer;
 }
 
+.button:active:not(:disabled) {
+  filter: var(--pressed-filter);
+}
+
+/* 비활성: 색이 아니라 회색 면으로 — 글자는 계속 읽힌다 */
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  border-color: transparent;
 }
 
 .primary {

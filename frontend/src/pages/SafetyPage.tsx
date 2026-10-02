@@ -22,25 +22,25 @@ export function SafetyPage() {
 
       <div className={styles.list}>
         <ActionCard
-          tone="mint"
+          accent="mint"
           icon={ShieldCheck}
           title="실명 인증"
           description="본인 확인을 마친 분들만 이용해요."
         />
         <ActionCard
-          tone="yellow"
+          accent="yellow"
           icon={ShieldEllipsis}
           title="위험한 대화 자동 감지"
           description="돈·계좌·비밀번호를 묻는 대화는 바로 알려 드려요."
         />
         <ActionCard
-          tone="pink"
+          accent="pink"
           icon={CircleAlert}
           title="신고 및 차단"
           description="불편한 분은 바로 신고하고 차단할 수 있어요."
         />
         <ActionCard
-          tone="sky"
+          accent="sky"
           icon={Lock}
           title="개인정보 보호"
           description="전화번호는 암호화해서 보관하고, 다른 분께 보이지 않아요."

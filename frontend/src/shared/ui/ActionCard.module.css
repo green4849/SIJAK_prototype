@@ -1,51 +1,81 @@
 .card {
   width: 100%;
-  min-height: calc(var(--touch-min) * 1.6);
+  min-height: calc(var(--touch-min) + var(--space-3));
   padding: var(--card-pad);
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  border: 2px solid transparent;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
   color: var(--color-text);
   text-align: left;
   text-decoration: none;
   font: inherit;
+}
+
+/* 누를 수 있는 카드만 그림자 + 눌림 표시 */
+.card[data-interactive='true'] {
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 }
 
-div.card {
-  cursor: default;
+.card[data-interactive='true']:active {
+  filter: var(--pressed-filter);
 }
 
 .card:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  box-shadow: none;
 }
 
-.card[data-tone='pink'] { background: var(--color-card-pink); --icon: var(--color-icon-pink); }
-.card[data-tone='mint'] { background: var(--color-card-mint); --icon: var(--color-icon-mint); }
-.card[data-tone='yellow'] { background: var(--color-card-yellow); --icon: var(--color-icon-yellow); }
-.card[data-tone='sky'] { background: var(--color-card-sky); --icon: var(--color-icon-sky); }
-.card[data-tone='beige'] { background: var(--color-card-beige); --icon: var(--color-icon-beige); }
-
-.card[data-tone='primary'] {
+.card[data-variant='primary'] {
   background: var(--color-primary);
   color: var(--color-on-primary);
-  --icon: var(--color-on-primary);
 }
 
-/* 고대비 모드에서는 파스텔이 검정이 되므로 테두리로 구분 */
-:root[data-contrast='high'] .card:not([data-tone='primary']) {
-  border-color: var(--color-border);
+/* 낮은 강조: 면·그림자 없이 글자와 아이콘만 */
+.card[data-variant='subtle'] {
+  background: transparent;
+  box-shadow: none;
 }
 
+/* 고대비: 면 구분이 없으므로 테두리로 */
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+:root[data-contrast='high'] .card[data-variant='primary'] {
+  border-color: var(--color-primary);
+}
+
+/* 아이콘 칸 — 크기 고정(글자 크기와 무관), 색은 이 작은 원에만 */
 .icon {
   flex: none;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  color: var(--icon);
+  border-radius: 50%;
+}
+
+.icon[data-accent='pink'] { background: var(--color-card-pink); color: var(--color-icon-pink); }
+.icon[data-accent='mint'] { background: var(--color-card-mint); color: var(--color-icon-mint); }
+.icon[data-accent='yellow'] { background: var(--color-card-yellow); color: var(--color-icon-yellow); }
+.icon[data-accent='sky'] { background: var(--color-card-sky); color: var(--color-icon-sky); }
+.icon[data-accent='beige'] { background: var(--color-card-beige); color: var(--color-icon-beige); }
+
+/* 녹색 카드 위 아이콘: 반투명 흰 원 */
+.card[data-variant='primary'] .icon {
+  background: rgb(255 255 255 / 0.16);
+  color: var(--color-on-primary);
+}
+
+:root[data-contrast='high'] .icon {
+  background: transparent;
+  border: 2px solid currentColor;
 }
 
 .text {
@@ -63,16 +93,18 @@ div.card {
 
 .desc {
   margin-top: var(--gap-tight);
-  font-size: var(--text-meta);
-  color: inherit;
-  opacity: 0.92;
+  color: var(--color-text-muted);
 }
 
-.card:not([data-tone='primary']) .desc {
-  color: var(--color-text-muted);
-  opacity: 1;
+.card[data-variant='primary'] .desc {
+  color: var(--color-on-primary);
 }
 
 .chevron {
   flex: none;
+  color: var(--color-text-muted);
+}
+
+.card[data-variant='primary'] .chevron {
+  color: var(--color-on-primary);
 }
