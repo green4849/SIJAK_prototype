@@ -3,6 +3,7 @@ import { INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, newId, relatedBlocks, save, type DUser } from '../store'
 import { requireUser } from './auth'
+import type { Schema } from '@/shared/api/types'
 
 type Relation = 'none' | 'sent' | 'received' | 'friends'
 
@@ -22,7 +23,8 @@ export function areFriends(a: string, b: string) {
   return relations(a).get(b)?.[0] === 'friends'
 }
 
-function card(u: DUser, me: DUser, rel: Map<string, [Relation, string]>) {
+/** 응답 모양은 백엔드 계약(FriendCard)과 같아야 한다 — 어긋나면 타입 오류 (D3) */
+function card(u: DUser, me: DUser, rel: Map<string, [Relation, string]>): Schema<'FriendCard'> {
   const [relation, request_id] = rel.get(u.id) ?? ['none', null]
   return {
     user_id: u.id,

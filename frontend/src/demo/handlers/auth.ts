@@ -2,6 +2,7 @@
 import { INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type DemoRequest, type Route } from '../http'
 import { ageOf, db, DEMO_ME_ID, newId, save, type DUser } from '../store'
+import type { Schema } from '@/shared/api/types'
 
 const verifySessions = new Map<string, { name: string; birth_date: string; phone: string; gender: 'M' | 'F'; code: string }>()
 const digits = (s: string) => s.replace(/\D/g, '')
@@ -18,7 +19,8 @@ export function requireUser(req: DemoRequest): DUser {
   return u
 }
 
-export function userOut(u: DUser) {
+/** 응답 모양은 백엔드 계약과 같아야 한다 — 어긋나면 타입 오류 (D3) */
+export function userOut(u: DUser): Schema<'UserOut'> {
   return {
     id: u.id,
     name: u.name,
@@ -33,7 +35,7 @@ export function userOut(u: DUser) {
   }
 }
 
-function login(u: DUser) {
+function login(u: DUser): Schema<'LoggedInResult'> {
   const s = db()
   s.me = u.id
   u.last_login = Date.now()
@@ -75,7 +77,7 @@ export const authRoutes: Route[] = [
       gender: b.gender === 'F' ? 'F' : 'M',
       code,
     })
-    return json({ session_id: id, dev_code: code })
+    return json({ session_id: id, dev_code: code } satisfies Schema<'PassStartResponse'>)
   }],
 
   ['POST', '/auth/pass/verify', (req) => {
@@ -91,7 +93,11 @@ export const authRoutes: Route[] = [
     if (s.users.some((u) => u.phone === v.phone))
       return fail(409, 'phone_in_use', '이미 다른 분이 쓰고 있는 전화번호예요.')
     // 데모는 누구나 둘러볼 수 있게 나이 제한을 두지 않는다 (실서비스: 만 60세 이상)
-    return json({ status: 'signup_required', signup_token: btoa(encodeURIComponent(JSON.stringify(v))), name: v.name })
+    return json({
+      status: 'signup_required',
+      signup_token: btoa(encodeURIComponent(JSON.stringify(v))),
+      name: v.name,
+    } satisfies Schema<'SignupRequiredResult'>)
   }],
 
   ['POST', '/auth/signup', (req) => {
@@ -114,7 +120,7 @@ export const authRoutes: Route[] = [
 
   ['POST', '/auth/refresh', () => {
     const me = db().me
-    return me ? json({ access_token: tokenFor(me), token_type: 'bearer' }) : fail(401, 'not_authenticated', '로그인이 필요해요.')
+    return me ? json({ access_token: tokenFor(me), token_type: 'bearer' } satisfies Schema<'TokenResponse'>) : fail(401, 'not_authenticated', '로그인이 필요해요.')
   }],
 
   ['POST', '/auth/logout', () => {

@@ -1,23 +1,11 @@
-/** friend 백엔드 계약 — backend/app/domains/friend/schemas.py 와 1:1 */
+/** friend API — 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts) */
 import { api } from '@/shared/api/client'
+import type { Schema } from '@/shared/api/types'
 
-export type Relation = 'none' | 'sent' | 'received' | 'friends'
+/** 친구 카드. distance_km 은 거리를 모를 때 null */
+export type FriendCardData = Schema<'FriendCard'>
+export type Relation = FriendCardData['relation']
 export type FriendTab = 'recommended' | 'nearby'
-
-export interface FriendCardData {
-  user_id: string
-  name: string
-  age: number
-  gender: 'M' | 'F'
-  intro: string
-  region_name: string
-  interests: string[]
-  common_interests: string[]
-  /** 반경 검색 미구현이면 null (docs/deferred.md §1) */
-  distance_km: number | null
-  relation: Relation
-  request_id: string | null
-}
 
 export const friendApi = {
   recommendations: (tab: FriendTab) =>
@@ -25,7 +13,7 @@ export const friendApi = {
   friends: () => api.get<FriendCardData[]>('/friends'),
   received: () => api.get<FriendCardData[]>('/friends/requests'),
   request: (toUserId: string) =>
-    api.post<FriendCardData>('/friends/requests', { to_user_id: toUserId }),
+    api.post<FriendCardData>('/friends/requests', { to_user_id: toUserId } satisfies Schema<'FriendRequestCreate'>),
   accept: (requestId: string) => api.post<void>(`/friends/requests/${requestId}/accept`),
   decline: (requestId: string) => api.post<void>(`/friends/requests/${requestId}/decline`),
 }
