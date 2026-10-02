@@ -2,10 +2,12 @@ import { CalendarDays, FileText, Heart, MapPin, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { formatDate, formatTime } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
+import { IconAction } from '@/shared/ui/IconAction'
 import { Button } from '@/shared/ui/Button'
 import { useActivity } from '../hooks/useActivities'
 import { ActivityThumb } from './ActivityThumb'
 import styles from './ActivityDetail.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 function Row({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
   return (
@@ -26,17 +28,17 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
   if (error) return <Alert>{error}</Alert>
   if (!a) return <p role="status">불러오는 중…</p>
 
+  // 선택 상태는 채운 하트 + aria-pressed 로. 글자는 그대로 두어 버튼 폭·위치가 바뀌지 않게 (리뷰 ⑦-11)
   const likeButton = (
-    <button
-      type="button"
-      className={styles.like}
+    <IconAction
+      icon={Heart}
+      label="관심"
+      tone="danger"
+      filled={a.liked}
       aria-pressed={a.liked}
       onClick={toggleLike}
       disabled={pending}
-    >
-      <Heart aria-hidden="true" fill={a.liked ? 'currentColor' : 'none'} />
-      <span className={styles.likeText}>{a.liked ? '관심 있음' : '관심'}</span>
-    </button>
+    />
   )
 
   return (
@@ -51,19 +53,19 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
       </div>
 
       <dl className={styles.info}>
-        <Row icon={<CalendarDays aria-hidden="true" />} label="일시">
+        <Row icon={<CalendarDays aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="일시">
           {formatDate(a.starts_at)}
           <br />
           {formatTime(a.starts_at)} ~ {formatTime(a.ends_at)}
         </Row>
-        <Row icon={<MapPin aria-hidden="true" />} label="장소">
+        <Row icon={<MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="장소">
           {a.place}
         </Row>
-        <Row icon={<Users aria-hidden="true" />} label="참여 인원">
+        <Row icon={<Users aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="참여 인원">
           {a.applied_count}명 (선착순 {a.capacity}명)
         </Row>
         {a.description && (
-          <Row icon={<FileText aria-hidden="true" />} label="활동 소개">
+          <Row icon={<FileText aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="활동 소개">
             {a.description}
           </Row>
         )}
@@ -87,7 +89,7 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
           </Button>
         ) : (
           <Button block large onClick={apply} disabled={pending}>
-            {pending ? '신청하는 중…' : '신청하기 →'}
+            {pending ? '신청하는 중…' : '신청하기'}
           </Button>
         )}
       </div>

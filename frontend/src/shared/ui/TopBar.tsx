@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './TopBar.module.css'
+import { ICON, ICON_STROKE } from './icon'
 
 interface Props {
   title?: string
@@ -36,7 +37,7 @@ export function TopBar({ title, description, backTo, back = true, right }: Props
               className={styles.back}
               onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
             >
-              <ChevronLeft aria-hidden="true" size="1.4em" />
+              <ChevronLeft aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
               <span className={styles.backLabel}>뒤로</span>
             </button>
             {right && <div className={styles.right}>{right}</div>}

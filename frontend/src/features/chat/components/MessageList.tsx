@@ -6,6 +6,7 @@ import type { ChatMessageData, ChatPeer } from '../api/chatApi'
 import { useStickToBottom } from '../hooks/useStickToBottom'
 import { VoiceMessage } from './VoiceMessage'
 import styles from './MessageList.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   peer: ChatPeer
@@ -42,7 +43,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
                 </li>
               )}
               <li className={styles.row} data-mine={m.mine}>
-                {!m.mine && <Avatar name={peer.name} seed={peer.user_id} />}
+                {!m.mine && <Avatar name={peer.name} seed={peer.user_id} size="bubble" />}
                 <div className={styles.stack}>
                   <span className="sr-only">{m.mine ? '내가 보냄' : `${peer.name}님`}: </span>
                   <div className={styles.bubble}>
@@ -64,7 +65,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
       </ol>
       {unseen > 0 && (
         <button type="button" className={styles.newMessages} onClick={() => scrollToBottom(true)}>
-          새 메시지 {unseen > 99 ? '99+' : unseen}개 <ArrowDown aria-hidden="true" size="1.1em" />
+          새 메시지 {unseen > 99 ? '99+' : unseen}개 <ArrowDown aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
         </button>
       )}
     </>

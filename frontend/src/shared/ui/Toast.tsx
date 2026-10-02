@@ -2,6 +2,7 @@ import { CircleAlert, CircleCheck, Info } from 'lucide-react'
 import { type CSSProperties, useLayoutEffect, useState, useSyncExternalStore } from 'react'
 import { currentToast, dismissToast, subscribeToast } from '@/shared/lib/toast'
 import styles from './Toast.module.css'
+import { ICON, ICON_STROKE } from './icon'
 
 const ICONS = { success: CircleCheck, info: Info, error: CircleAlert }
 
@@ -55,7 +56,7 @@ export function ToastHost() {
           onClick={dismissToast}
           aria-label={`${item.message} (누르면 닫혀요)`}
         >
-          <Icon aria-hidden="true" size="1.3em" />
+          <Icon aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
           <span>{item.message}</span>
         </button>
       )}

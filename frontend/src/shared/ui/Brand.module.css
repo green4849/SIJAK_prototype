@@ -13,7 +13,7 @@
 }
 
 .brand[data-size='md'] .word { font-size: var(--text-title); }
-.brand[data-size='hero'] .word { font-size: var(--text-hero); }
+.brand[data-size='hero'] .word { font-size: min(var(--text-hero), 64px); } /* 로고 글자는 큰 글씨 설정에서도 상한 */
 
 .tagline {
   margin: var(--space-1) 0 0;

@@ -5,6 +5,7 @@ import { toast } from '@/shared/lib/toast'
 import { Button, ButtonLink } from '@/shared/ui/Button'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './InfoPage.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 /** ⑨ → 홈 화면에 아이콘 놓기 — 주소를 치지 않고 아이콘으로 열 수 있게 */
 export function InstallPage() {
@@ -18,7 +19,7 @@ export function InstallPage() {
   return (
     <section className={styles.page}>
       <TopBar title="홈 화면에 아이콘 놓기" backTo="/me" />
-      <Smartphone className={styles.icon} size={56} aria-hidden="true" />
+      <Smartphone className={styles.icon} size={ICON.lg} strokeWidth={ICON_STROKE} aria-hidden="true" />
 
       {installed ? (
         <p className={styles.body}>

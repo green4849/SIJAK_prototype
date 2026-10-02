@@ -23,7 +23,7 @@ export function HomePage() {
             좋은 하루 되세요! <span aria-hidden="true">☀️</span>
           </p>
         </div>
-        <Avatar name={user.name} seed={user.id} size="lg" />
+        <Avatar name={user.name} seed={user.id} size="list" />
       </header>
 
       <nav aria-label="바로 가기" className={styles.cards}>

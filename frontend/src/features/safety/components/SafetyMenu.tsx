@@ -2,12 +2,12 @@ import { CircleAlert, Ban, EllipsisVertical, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
+import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { Sheet } from '@/shared/ui/Sheet'
 import { toast } from '@/shared/lib/toast'
 import { safetyApi } from '../api/safetyApi'
 import { ReportSheet } from './ReportSheet'
-import styles from './SafetyMenu.module.css'
 
 interface Props {
   userId: string
@@ -37,10 +37,7 @@ export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
 
   return (
     <>
-      <button type="button" className={styles.trigger} onClick={() => setMenu(true)}>
-        <EllipsisVertical aria-hidden="true" />
-        <span className={styles.label}>더보기</span>
-      </button>
+      <IconAction icon={EllipsisVertical} label="더보기" onClick={() => setMenu(true)} />
 
       <Sheet open={menu} title={`${name}님`} onClose={() => setMenu(false)}>
         <MenuList>

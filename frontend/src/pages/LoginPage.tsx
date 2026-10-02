@@ -1,6 +1,5 @@
 import { Headset, IdCard, Smartphone } from 'lucide-react'
 import { ActionCard } from '@/shared/ui/ActionCard'
-import { Brand } from '@/shared/ui/Brand'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './LoginPage.module.css'
 
@@ -41,10 +40,6 @@ export function LoginPage() {
           to="/login/help"
         />
       </div>
-
-      <footer className={styles.footer}>
-        <Brand tagline="같은 동네, 좋은 이웃과" />
-      </footer>
     </section>
   )
 }

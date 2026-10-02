@@ -23,8 +23,3 @@
   flex-direction: column;
   gap: var(--card-gap);
 }
-
-.footer {
-  margin-top: auto;
-  padding-top: var(--space-3);
-}

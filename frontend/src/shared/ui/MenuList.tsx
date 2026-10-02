@@ -2,6 +2,7 @@ import { ChevronRight, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './MenuList.module.css'
+import { ICON, ICON_STROKE } from './icon'
 
 export function MenuList({ children, label }: { children: ReactNode; label?: string }) {
   return (
@@ -25,10 +26,12 @@ interface ItemProps {
 export function MenuItem({ icon: Icon, label, value, to, onClick, danger }: ItemProps) {
   const body = (
     <>
-      <Icon aria-hidden="true" size="1.2em" className={styles.icon} />
+      <Icon aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} className={styles.icon} />
       <span className={styles.label}>{label}</span>
       {value && <span className={styles.value}>{value}</span>}
-      {!danger && <ChevronRight aria-hidden="true" size="1.1em" />}
+      {!danger && (
+        <ChevronRight aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} className={styles.chevron} />
+      )}
     </>
   )
   return (

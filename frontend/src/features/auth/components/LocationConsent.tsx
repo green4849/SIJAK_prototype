@@ -8,6 +8,7 @@ import { toast } from '@/shared/lib/toast'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../hooks/useAuth'
 import styles from './LocationConsent.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 interface Props {
   onDone?: () => void
@@ -40,7 +41,7 @@ export function LocationConsent({ onDone }: Props) {
   return (
     <div className={styles.card}>
       <p className={styles.title}>
-        <MapPin aria-hidden="true" /> 가까운 이웃을 찾아 드릴까요?
+        <MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} /> 가까운 이웃을 찾아 드릴까요?
       </p>
       <p className={styles.body}>
         내 위치를 <strong>동네 정도(약 1km)</strong>로만 저장해요. 정확한 주소는 저장하지 않고, 다른

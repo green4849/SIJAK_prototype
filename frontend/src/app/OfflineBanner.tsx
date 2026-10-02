@@ -1,6 +1,7 @@
 import { WifiOff } from 'lucide-react'
 import { useOnline } from '@/shared/lib/useOnline'
 import styles from './OfflineBanner.module.css'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 /** 인터넷이 끊기면 화면 맨 위에 알림 — 다시 연결되면 저절로 사라진다 */
 export function OfflineBanner() {
@@ -8,7 +9,7 @@ export function OfflineBanner() {
   if (online) return null
   return (
     <div className={styles.banner} role="status">
-      <WifiOff aria-hidden="true" size="1.3em" />
+      <WifiOff aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
       <span>인터넷이 끊겼어요. 다시 연결되면 저절로 이어져요.</span>
     </div>
   )

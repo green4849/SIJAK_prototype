@@ -7,9 +7,11 @@
   color: var(--color-text);
 }
 
-.avatar[data-size='md'] { width: 3.2em; height: 3.2em; font-size: var(--text-body); }
-.avatar[data-size='lg'] { width: 3.6em; height: 3.6em; font-size: var(--text-card-title); }
-.avatar[data-size='xl'] { width: 3.4em; height: 3.4em; font-size: var(--text-title); }
+.avatar { width: var(--avatar); height: var(--avatar); font-size: calc(var(--avatar) * 0.34); }
+.avatar[data-size='bubble'] { --avatar: 40px; }
+.avatar[data-size='header'] { --avatar: 48px; }
+.avatar[data-size='list'] { --avatar: 56px; }
+.avatar[data-size='profile'] { --avatar: 72px; }
 
 .avatar[data-tone='pink'] { background: var(--color-card-pink); }
 .avatar[data-tone='mint'] { background: var(--color-card-mint); }

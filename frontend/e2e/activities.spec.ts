@@ -12,7 +12,7 @@ test('⑥ 분류 탭 → ⑦ 상세 → 관심·신청 → ⑨ 개수 반영 →
   await page.getByRole('link', { name: /의자 요가/ }).click()
   await expect(page.getByRole('heading', { name: '의자 요가' })).toBeVisible()
   await page.getByRole('button', { name: '관심', exact: true }).click()
-  await expect(page.getByRole('button', { name: '관심 있음' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '관심', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: /신청하기/ }).click()
   await expect(page.getByText('신청했어요. 그날 만나요!')).toBeVisible()
 

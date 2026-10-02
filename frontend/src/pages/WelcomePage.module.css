@@ -2,8 +2,6 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: var(--section-gap);
 }
 
 .hero {
@@ -12,42 +10,30 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
-.emblem {
-  width: 9em;
-  height: 9em;
-  display: grid;
-  place-items: center;
-  border-radius: 32%;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-}
-
-:root[data-contrast='high'] .emblem {
-  border: 2px solid var(--color-border);
-}
-
+/* 앱 이름(크게) → 슬로건(본문) → 설명(보조): 크기보다 간격과 대비로 위계 */
 .sub {
-  margin: 0;
+  margin: var(--space-1) 0 0;
   color: var(--color-text-muted);
 }
 
-/* 시안의 언덕 풍경을 단순한 곡선으로 (장식) */
+/* 시안의 언덕 풍경 — 낮은 강조: 옅은 한 가지 색, 낮은 높이, 버튼과는 떨어뜨림 */
 .hills {
   flex: 1;
-  min-height: 80px;
-  background:
-    radial-gradient(120% 90% at 20% 100%, var(--color-card-mint) 60%, transparent 61%),
-    radial-gradient(120% 80% at 85% 100%, var(--color-primary-soft) 55%, transparent 56%);
-  border-radius: var(--radius-card);
+  min-height: 64px;
+  max-height: 160px;
+  margin-top: auto;
+  background: radial-gradient(130% 100% at 50% 100%, var(--color-primary-soft) 55%, transparent 56%);
+  opacity: 0.7;
 }
 
 :root[data-contrast='high'] .hills {
-  display: none;
+  visibility: hidden;
 }
 
+/* 시작 버튼 주변은 단색 여백 */
 .cta {
-  margin-bottom: var(--space-2);
+  margin: var(--space-4) 0 var(--space-2);
 }
