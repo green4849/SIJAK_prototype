@@ -13,7 +13,7 @@
 | [A1](A1-unread-badges.md) | 하단 탭·홈 카드에 안 읽은 메시지·받은 친구 신청 배지 | S | P1 | ✅ |
 | [A2](A2-chat-scroll.md) | 대화 스크롤 — 위로 읽는 중이면 끌어내리지 않기 + '새 메시지 ↓' | S | P1 | ✅ |
 | [A3](A3-chat-history.md) | 지난 대화 더 보기 (100개 초과 이력) | M | P2 | ⬜ |
-| [A4](A4-action-feedback.md) | 동작 후 피드백 — 토스트·진동 | S | P1 | ⬜ |
+| [A4](A4-action-feedback.md) | 동작 후 피드백 — 토스트·진동 | S | P1 | ✅ |
 | [A5](A5-voice-input.md) | 입력칸 옆 음성 입력(받아쓰기) 버튼 | M | P1 | ⬜ |
 | [A6](A6-screen-reader-tts.md) | 화면 읽어 주기(TTS) 버튼 | M | P2 | ⬜ |
 | [A7](A7-skeleton-offline.md) | 불러오는 중 스켈레톤, 연결 끊김 안내 | S | P2 | ⬜ |

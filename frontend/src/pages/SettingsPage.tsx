@@ -11,12 +11,17 @@ const SCALES = [
   { value: '4', label: '아주 크게' },
 ]
 
+const VIBRATION = [
+  { value: 'on', label: '켜기' },
+  { value: 'off', label: '끄기' },
+]
+
 const CONTRASTS = [
   { value: 'normal', label: '기본 화면' },
   { value: 'high', label: '선명한 화면' },
 ]
 
-/** ⑨ → 설정: 글자 크기 4단계 · 고대비 (바꾸는 즉시 적용) */
+/** ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 (바꾸는 즉시 적용) */
 export function SettingsPage() {
   const { prefs, update } = useA11yPrefs()
 
@@ -38,6 +43,14 @@ export function SettingsPage() {
         options={CONTRASTS}
         selected={[prefs.contrast]}
         onToggle={(v) => update({ contrast: v as Contrast })}
+      />
+
+      <OptionGrid
+        legend="진동"
+        hint="저장·신청 같은 일을 마치면 짧게 진동해요 (지원하는 휴대폰만)"
+        options={VIBRATION}
+        selected={[prefs.vibration ? 'on' : 'off']}
+        onToggle={(v) => update({ vibration: v === 'on' })}
       />
 
       <div className={styles.preview} aria-hidden="true">

@@ -27,7 +27,7 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
           <MessageList peer={peer} messages={messages} renderAfter={renderAfterMessage} />
         )}
       </div>
-      <div className={styles.composer}>
+      <div className={styles.composer} data-bottom-bar>
         {blocked ? (
           <p className={styles.blocked} role="status">
             차단된 대화예요. 메시지를 보낼 수 없어요.

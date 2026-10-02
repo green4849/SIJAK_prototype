@@ -4,6 +4,7 @@ import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { Sheet } from '@/shared/ui/Sheet'
+import { toast } from '@/shared/lib/toast'
 import { safetyApi } from '../api/safetyApi'
 import { useReportReasons } from '../hooks/useSafety'
 
@@ -30,6 +31,7 @@ export function ReportSheet({ open, targetUserId, targetName, messageId, onClose
     setError(null)
     try {
       await safetyApi.report(targetUserId, reason, messageId)
+      toast('신고했어요. 이제 이 분과는 대화할 수 없어요')
       onDone()
     } catch (e) {
       setError(errorMessage(e))

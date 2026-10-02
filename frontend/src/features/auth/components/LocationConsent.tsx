@@ -4,6 +4,7 @@ import { errorMessage } from '@/shared/api/client'
 import { getCurrentPosition, GeoError } from '@/shared/lib/geolocation'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
+import { toast } from '@/shared/lib/toast'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../hooks/useAuth'
 import styles from './LocationConsent.module.css'
@@ -27,6 +28,7 @@ export function LocationConsent({ onDone }: Props) {
     try {
       const pos = await getCurrentPosition()
       updateUser(await authApi.updateLocation(pos.lat, pos.lng))
+      toast('내 위치를 동네 정도로만 저장했어요')
       onDone?.()
     } catch (e) {
       setError(e instanceof GeoError ? e.message : errorMessage(e))

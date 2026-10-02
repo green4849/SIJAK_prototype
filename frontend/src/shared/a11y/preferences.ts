@@ -1,5 +1,5 @@
 /**
- * 접근성 설정 (글자 크기 4단계 · 고대비) — 기기별로 저장.
+ * 접근성 설정 (글자 크기 4단계 · 고대비 · 진동) — 기기별로 저장.
  * <html data-font-scale data-contrast> 속성만 바꾸고, 실제 값은 tokens.css가 정한다.
  */
 
@@ -9,13 +9,15 @@ export type Contrast = 'normal' | 'high'
 export interface A11yPrefs {
   fontScale: FontScale
   contrast: Contrast
+  /** 동작 성공 시 짧은 진동 (A4) */
+  vibration: boolean
 }
 
 const KEY = 'wipi.a11y'
 
 function systemDefaults(): A11yPrefs {
   const high = typeof matchMedia === 'function' && matchMedia('(prefers-contrast: more)').matches
-  return { fontScale: 1, contrast: high ? 'high' : 'normal' }
+  return { fontScale: 1, contrast: high ? 'high' : 'normal', vibration: true }
 }
 
 export function loadPrefs(): A11yPrefs {
@@ -27,6 +29,7 @@ export function loadPrefs(): A11yPrefs {
     return {
       fontScale: [1, 2, 3, 4].includes(p.fontScale as number) ? (p.fontScale as FontScale) : 1,
       contrast: p.contrast === 'high' ? 'high' : defaults.contrast,
+      vibration: p.vibration !== false,
     }
   } catch {
     return defaults // 사생활 보호 모드 등에서 저장소 접근 불가

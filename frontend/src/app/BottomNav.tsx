@@ -36,7 +36,7 @@ export function BottomNav() {
   ]
 
   return (
-    <nav className={styles.nav} aria-label="주요 메뉴">
+    <nav className={styles.nav} aria-label="주요 메뉴" data-bottom-bar>
       <ul className={styles.list}>
         {tabs.map(({ to, label, icon: Icon, end, badge }) => (
           <li key={to}>
