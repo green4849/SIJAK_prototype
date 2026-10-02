@@ -59,9 +59,9 @@
   width: 40px;
 }
 
-/* 말풍선 최대 폭 — 본문 영역의 약 78% (리뷰 ⑤-5) */
+/* 말풍선 최대 폭 — 본문 영역의 약 78% (리뷰 ⑤-5), 넓은 화면에서도 한 줄 32글자 안팎 */
 .stack {
-  max-width: 78%;
+  max-width: min(78%, 32rem);
   display: flex;
   flex-direction: column;
   gap: var(--gap-tight);

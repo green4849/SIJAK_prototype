@@ -5,6 +5,7 @@ import { useRecommendations } from '../hooks/useFriends'
 import { FriendActionButton } from './FriendActionButton'
 import { FriendCard } from './FriendCard'
 import styles from './FriendList.module.css'
+import { CardGrid } from '@/shared/ui/CardGrid'
 
 interface Props {
   tab: FriendTab
@@ -29,13 +30,17 @@ export function FriendFinder({ tab, chatHref, header }: Props) {
           <br />곧 새로운 이웃이 찾아올 거예요.
         </p>
       )}
-      {data?.map((card) => (
-        <FriendCard
-          key={card.user_id}
-          card={card}
-          actions={<FriendActionButton card={card} onRequest={request} chatHref={chatHref} />}
-        />
-      ))}
+      {data && data.length > 0 && (
+        <CardGrid>
+          {data.map((card) => (
+            <FriendCard
+              key={card.user_id}
+              card={card}
+              actions={<FriendActionButton card={card} onRequest={request} chatHref={chatHref} />}
+            />
+          ))}
+        </CardGrid>
+      )}
     </section>
   )
 }

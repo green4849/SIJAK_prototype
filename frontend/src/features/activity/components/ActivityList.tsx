@@ -5,6 +5,7 @@ import type { ActivityData } from '../api/activityApi'
 import { ActivityThumb } from './ActivityThumb'
 import styles from './ActivityList.module.css'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
+import { CardGrid } from '@/shared/ui/CardGrid'
 
 interface Props {
   items: ActivityData[] | null
@@ -21,7 +22,7 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
   if (!items || items.length === 0) return <p className={styles.empty}>{emptyText}</p>
 
   return (
-    <ul className={styles.list}>
+    <CardGrid as="ul">
       {items.map((a) => (
         <li key={a.id}>
           <Link to={detailHref(a.id)} className={styles.item}>
@@ -42,6 +43,6 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
           </Link>
         </li>
       ))}
-    </ul>
+    </CardGrid>
   )
 }
