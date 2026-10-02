@@ -123,7 +123,7 @@ app (라우터·프로바이더·가드) ──► pages, features/*
 시안 화면이 다 나온 뒤부터는 **로드맵 항목 1개 = 작업 파일 1개(`docs/tasks/`) = 브랜치 1개**로 간다.
 
 ```
-docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → PR(템플릿 체크) → 브랜치 push(CI 자동) → 리뷰·PR → main 병합(--no-ff) → 작업 파일 ✅ → 데모 링크 자동 갱신
+docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → 브랜치 push(CI 자동) → PR(템플릿 체크)·리뷰 → main 병합(--no-ff) → 작업 파일 ✅ → 데모 링크 자동 갱신
 ```
 
 - 브랜치 이름: `<영역>/<ID>-<짧은설명>` — 예: `polish/A1-unread-badge`, `prod/B1-secret-guard`, `feat/C2-stt`
