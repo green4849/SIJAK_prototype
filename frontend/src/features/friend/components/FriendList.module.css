@@ -28,5 +28,5 @@
   text-align: center;
   color: var(--color-text-muted);
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
 }

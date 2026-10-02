@@ -13,7 +13,7 @@
   align-items: center;
   gap: var(--space-2);
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   color: var(--color-text);
   text-decoration: none;

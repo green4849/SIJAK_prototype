@@ -4,7 +4,7 @@
   margin: auto auto 0;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
   background: var(--color-bg);
   color: var(--color-text);
 }
@@ -31,7 +31,7 @@
 .close {
   min-height: var(--touch-min);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   background: var(--color-surface);
   font-size: var(--text-button);
   font-weight: var(--weight-medium);

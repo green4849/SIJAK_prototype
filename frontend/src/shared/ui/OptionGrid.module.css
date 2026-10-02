@@ -40,12 +40,16 @@
   justify-content: center;
   gap: var(--space-1);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   background: var(--color-surface);
   color: var(--color-text);
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
   cursor: pointer;
+}
+
+.option:active {
+  filter: var(--pressed-filter);
 }
 
 .option[data-selected='true'] {

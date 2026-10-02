@@ -17,7 +17,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-2);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--color-surface);
   font-size: var(--text-body);
 }
@@ -33,15 +33,20 @@
   justify-content: center;
   gap: 0;
   border: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   background: var(--color-primary);
   color: var(--color-on-primary);
   cursor: pointer;
 }
 
+.iconBtn:active:not(:disabled) {
+  filter: var(--pressed-filter);
+}
+
 .iconBtn:disabled {
-  opacity: 0.6;
   cursor: not-allowed;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
 }
 
 /* 아이콘만으로는 뜻을 모를 수 있어 짧은 글자를 함께 */
@@ -52,7 +57,7 @@
 
 .recording {
   padding: var(--card-pad);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--color-card-pink);
 }
 

@@ -2,7 +2,7 @@
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   color: var(--color-text);
 }
 
@@ -14,7 +14,7 @@
 .thumb[data-size='hero'] {
   width: 100%;
   height: 10em;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
 }
 
 .thumb[data-tone='pink'] { background: var(--color-card-pink); color: var(--color-icon-pink); }

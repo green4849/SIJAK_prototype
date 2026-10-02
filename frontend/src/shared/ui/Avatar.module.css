@@ -5,8 +5,6 @@
   border-radius: 50%;
   font-weight: var(--weight-semibold);
   color: var(--color-text);
-  border: 2px solid var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
 .avatar[data-size='md'] { width: 3.2em; height: 3.2em; font-size: var(--text-body); }
@@ -20,5 +18,5 @@
 .avatar[data-tone='beige'] { background: var(--color-card-beige); }
 
 :root[data-contrast='high'] .avatar {
-  border-color: var(--color-border);
+  border: 2px solid var(--color-border);
 }

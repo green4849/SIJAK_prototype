@@ -16,6 +16,11 @@
   cursor: pointer;
 }
 
+.tab:active {
+  filter: var(--pressed-filter);
+}
+
+/* 선택 = 녹색 (색 역할 규칙). 고대비에서도 면 색이 바뀌어 구분된다 */
 .tab[aria-selected='true'] {
   background: var(--color-primary);
   border-color: var(--color-primary);
