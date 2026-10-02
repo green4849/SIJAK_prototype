@@ -36,6 +36,19 @@ h3 {
   font-size: var(--text-card-title);
 }
 
+/* 줄바꿈 정돈 (디자인 리뷰 공통 5) — 제목은 줄 길이를 고르게, 문장은 마지막 줄에 한 단어만 남지 않게 */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li,
+span {
+  text-wrap: pretty;
+}
+
 /* 굵게 표시는 제목 굵기까지만 (본문 속 강조) */
 strong,
 b {
