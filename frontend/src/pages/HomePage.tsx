@@ -1,12 +1,17 @@
 import { MapPin, MessageCircleMore, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
+import { useUnreadTotal } from '@/features/chat'
+import { useReceivedCount } from '@/features/friend'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { Avatar } from '@/shared/ui/Avatar'
+import { Badge } from '@/shared/ui/Badge'
 import styles from './HomePage.module.css'
 
 /** ③ 홈 — 큰 카드 세 개로 핵심 기능에 바로 (3-tap rule) */
 export function HomePage() {
   const { user } = useAuth()
+  const unread = useUnreadTotal()
+  const received = useReceivedCount()
   if (!user) return null
 
   return (
@@ -28,6 +33,7 @@ export function HomePage() {
           title="친구 찾기"
           description="같은 동네 좋은 이웃을 만나보세요"
           to="/friends"
+          badge={<Badge count={received} label={(n) => `새 친구 신청 ${n}개`} />}
         />
         <ActionCard
           tone="mint"
@@ -35,6 +41,7 @@ export function HomePage() {
           title="대화하기"
           description="새로운 이웃과 이야기를 나눠요"
           to="/chats"
+          badge={<Badge count={unread} label={(n) => `안 읽은 메시지 ${n}개`} />}
         />
         <ActionCard
           tone="yellow"

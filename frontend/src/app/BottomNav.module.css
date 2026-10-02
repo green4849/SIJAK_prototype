@@ -49,3 +49,15 @@
 :root[data-contrast='high'] .tab[aria-current='page'] {
   outline: 2px solid var(--color-primary);
 }
+
+/* 아이콘 오른쪽 위에 배지 */
+.iconWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.badge {
+  position: absolute;
+  top: -0.45em;
+  left: 55%;
+}
