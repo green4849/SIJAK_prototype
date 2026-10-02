@@ -16,16 +16,13 @@ applyPrefs(loadPrefs())
 
 async function start() {
   // 데모 빌드(서버 없음)에서만 가짜 서버를 끼운다 — 일반 빌드에서는 이 코드가 통째로 빠진다
-  let banner = null
   if (import.meta.env.VITE_DEMO === '1') {
     const demo = await import('@/demo')
-    demo.installDemo()
-    banner = <demo.DemoBanner />
+    await demo.installDemo()
   }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      {banner}
       <App />
     </StrictMode>,
   )
