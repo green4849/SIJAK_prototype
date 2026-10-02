@@ -5,6 +5,7 @@ import {
   LogOut,
   NotebookPen,
   Settings,
+  Smartphone,
   ShieldCheck,
   UserRound,
   Users,
@@ -13,6 +14,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
+import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
@@ -23,6 +25,7 @@ export function MyPage() {
   const { user, signOut } = useAuth()
   const friends = useMyFriends()
   const counts = useActivityCounts()
+  const { installed } = useInstallState()
   if (!user) return null
 
   return (
@@ -80,6 +83,9 @@ export function MyPage() {
         <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
         <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
         <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
+        {!installed && (
+          <MenuItem icon={Smartphone} label="홈 화면에 아이콘 놓기" to="/me/install" />
+        )}
         <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
       </MenuList>
 

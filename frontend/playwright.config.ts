@@ -20,6 +20,8 @@ export default defineConfig({
     launchOptions: process.env.PW_CHROMIUM_PATH
       ? { executablePath: process.env.PW_CHROMIUM_PATH }
       : undefined,
+    // 서비스 워커의 저장본이 테스트끼리 섞이지 않게 — PWA 테스트(e2e/pwa.spec.ts)만 켠다
+    serviceWorkers: 'block',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

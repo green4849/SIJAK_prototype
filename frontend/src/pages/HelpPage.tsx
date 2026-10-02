@@ -18,6 +18,14 @@ export function HelpPage() {
         </details>
 
         <details className={styles.item}>
+          <summary>매번 주소를 치기 어려워요</summary>
+          <p>
+            휴대폰 첫 화면에 새싹 아이콘을 놓아 두면 눌러서 바로 열려요.{' '}
+            <Link to="/me/install">홈 화면에 아이콘 놓기</Link>
+          </p>
+        </details>
+
+        <details className={styles.item}>
           <summary>인증번호가 오지 않아요</summary>
           <p>
             1~2분 기다려도 오지 않으면 &lsquo;인증번호 다시 받기&rsquo;를 눌러 주세요. 휴대폰이 본인
