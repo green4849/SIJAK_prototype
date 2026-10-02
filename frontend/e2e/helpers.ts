@@ -1,9 +1,8 @@
 import { expect, type Page } from '@playwright/test'
 
-/** 데모 안내 띠의 '바로 둘러보기' → 시드 계정(김시작)으로 홈까지 */
+/** 둘러보기 링크(?tour) → 시드 계정(김시작)으로 홈까지 */
 export async function startTour(page: Page) {
-  await page.goto('/')
-  await page.getByRole('button', { name: '김시작님으로 바로 둘러보기' }).click()
+  await page.goto('/?tour')
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
 }
 
