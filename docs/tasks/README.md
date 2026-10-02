@@ -40,7 +40,7 @@
 | [B11](B11-error-tracking.md) | 오류 수집·로그 | S | P1 | ⬜ |
 | [B12](B12-backup-keys.md) | 백업·키 관리 | M | P1 | ⬜ |
 | [C1](C1-realtime-chat.md) | 실시간 대화 (WebSocket) | M | P1 | ⬜ |
-| [C2](C2-stt-tts.md) | STT/TTS 연동 | L | P1 | ⬜ |
+| [C2](C2-stt-tts.md) | STT/TTS 연동 | L | P1 | ⏸ |
 | [C3](C3-nearby-radius.md) | 같은 동네 반경 검색 | S | P1 | ✅ |
 | [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | ⬜ |
 | [C5](C5-pwa.md) | PWA — 홈 화면에 추가 | S | P1 | ✅ |
