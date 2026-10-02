@@ -5,6 +5,7 @@ import { assessText } from '../rules'
 import { ageOf, db, newId, relatedBlocks, save, userById, voiceBlobs, type DMessage, type DRoom, type DUser } from '../store'
 import { requireUser } from './auth'
 import { areFriends } from './friend'
+import type { Schema } from '@/shared/api/types'
 
 const PREFIX = '/api/v1'
 
@@ -18,11 +19,12 @@ const REPLIES = [
 
 const other = (r: DRoom, me: string) => (r.a === me ? r.b : r.a)
 
-function peer(u: DUser) {
+/** 응답 모양은 백엔드 계약과 같아야 한다 — 어긋나면 타입 오류 (D3) */
+function peer(u: DUser): Schema<'ChatPeer'> {
   return { user_id: u.id, name: u.name, age: ageOf(u.birth_date), region_name: REGIONS[u.region_code] ?? u.region_code }
 }
 
-function roomOut(r: DRoom, me: string) {
+function roomOut(r: DRoom, me: string): Schema<'RoomOut'> {
   const msgs = db().messages.filter((m) => m.room === r.id)
   const last = msgs.at(-1)
   const lastRead = r.read[me] ?? 0
@@ -36,7 +38,7 @@ function roomOut(r: DRoom, me: string) {
   }
 }
 
-function messageOut(m: DMessage, me: string) {
+function messageOut(m: DMessage, me: string): Schema<'MessageOut'> {
   return {
     id: m.id,
     sender_id: m.sender,

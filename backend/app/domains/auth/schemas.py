@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import UTC, date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -37,7 +37,7 @@ class PassStartRequest(BaseModel):
 
 class PassStartResponse(BaseModel):
     session_id: str
-    dev_code: str | None = Field(None, description="Mock 인증 전용 — 실제 PASS에서는 항상 null")
+    dev_code: str | None = Field(description="Mock 인증 전용 — 실제 PASS에서는 항상 null")
 
 
 class PassVerifyRequest(BaseModel):
@@ -100,14 +100,24 @@ class ProfileUpdate(BaseModel):
     interests: list[str] | None = Field(None, max_length=12)
 
 
-class AuthResult(BaseModel):
-    """verify 결과: 기존 회원이면 status=logged_in, 신규면 status=signup_required."""
+class LoggedInResult(BaseModel):
+    """기존 회원 — 바로 로그인 (refresh 토큰은 httpOnly 쿠키로)"""
 
-    status: Literal["logged_in", "signup_required"]
-    access_token: str | None = None
-    user: UserOut | None = None
-    signup_token: str | None = None
-    name: str | None = None
+    status: Literal["logged_in"] = "logged_in"
+    access_token: str
+    user: UserOut
+
+
+class SignupRequiredResult(BaseModel):
+    """신규 — 가입 단계로 (signup_token 은 짧게 유효)"""
+
+    status: Literal["signup_required"] = "signup_required"
+    signup_token: str
+    name: str
+
+
+# verify 응답: status 로 구분되는 둘 중 하나 → 프론트 타입도 구분되게 생성된다 (D3)
+AuthResult = Annotated[LoggedInResult | SignupRequiredResult, Field(discriminator="status")]
 
 
 class TokenResponse(BaseModel):

@@ -15,6 +15,7 @@ from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.auth.schemas import (
     AuthResult,
     LocationUpdate,
+    LoggedInResult,
     Option,
     PassStartRequest,
     PassStartResponse,
@@ -23,6 +24,7 @@ from app.domains.auth.schemas import (
     RefreshRequest,
     SignupOptions,
     SignupRequest,
+    SignupRequiredResult,
     TokenResponse,
     UserOut,
 )
@@ -46,10 +48,9 @@ def _set_refresh_cookie(response: Response, tokens: TokenPair) -> None:
     )
 
 
-def _logged_in(response: Response, result: LoggedIn) -> AuthResult:
+def _logged_in(response: Response, result: LoggedIn) -> LoggedInResult:
     _set_refresh_cookie(response, result.tokens)
-    return AuthResult(
-        status="logged_in",
+    return LoggedInResult(
         access_token=result.tokens.access_token,
         user=UserOut.from_user(result.user),
     )
@@ -81,11 +82,13 @@ async def pass_verify(
     result = await service.verify(body.session_id, body.code)
     if isinstance(result, LoggedIn):
         return _logged_in(response, result)
-    return AuthResult(status="signup_required", signup_token=result.signup_token, name=result.name)
+    return SignupRequiredResult(signup_token=result.signup_token, name=result.name)
 
 
-@router.post("/auth/signup", response_model=AuthResult, status_code=status.HTTP_201_CREATED)
-async def signup(body: SignupRequest, service: AuthServiceDep, response: Response) -> AuthResult:
+@router.post("/auth/signup", response_model=LoggedInResult, status_code=status.HTTP_201_CREATED)
+async def signup(
+    body: SignupRequest, service: AuthServiceDep, response: Response
+) -> LoggedInResult:
     result = await service.signup(body.signup_token, body.region_code, body.interests)
     return _logged_in(response, result)
 

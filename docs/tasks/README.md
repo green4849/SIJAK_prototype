@@ -50,7 +50,7 @@
 | [C9](C9-voice-call.md) | 음성 통화 (시안 ⑤ 📞) | L | P2 | ⬜ |
 | [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | ⬜ |
 | [C11](C11-wellbeing.md) | 고립 지수·자가평가 | M | P2 | ⬜ |
-| [D3](D3-openapi-types.md) | API 타입 자동 생성 | M | P1 | ⬜ |
+| [D3](D3-openapi-types.md) | API 타입 자동 생성 | M | P1 | ✅ |
 | [D4](D4-unit-tests.md) | 프론트 단위·컴포넌트 테스트 | M | P2 | ⬜ |
 | [D5](D5-visual-regression.md) | 시각 회귀 테스트 | S | P2 | ⬜ |
 

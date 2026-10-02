@@ -5,7 +5,13 @@ from fastapi import APIRouter
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.risk.deps import RiskServiceDep
 from app.domains.risk.models import REPORT_REASONS
-from app.domains.risk.schemas import BlockCreate, BlockedUser, ReasonOption, ReportCreate
+from app.domains.risk.schemas import (
+    BlockCreate,
+    BlockedUser,
+    ReasonOption,
+    ReportCreate,
+    ReportResult,
+)
 
 router = APIRouter(prefix="/safety", tags=["safety"])
 
@@ -15,12 +21,12 @@ async def report_reasons() -> list[ReasonOption]:
     return [ReasonOption(code=k, label=v) for k, v in REPORT_REASONS.items()]
 
 
-@router.post("/reports", status_code=201)
-async def report(body: ReportCreate, me: CurrentUser, risk: RiskServiceDep) -> dict[str, bool]:
+@router.post("/reports", status_code=201, response_model=ReportResult)
+async def report(body: ReportCreate, me: CurrentUser, risk: RiskServiceDep) -> ReportResult:
     await risk.report(me.id, body.target_user_id, body.reason, body.message_id)
     if body.also_block:
         await risk.block(me.id, body.target_user_id)
-    return {"blocked": body.also_block}
+    return ReportResult(blocked=body.also_block)
 
 
 @router.get("/blocks", response_model=list[BlockedUser])

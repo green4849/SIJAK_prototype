@@ -34,6 +34,8 @@ jobs:
       - run: uv run ruff check .
       - run: uv run alembic upgrade head
       - run: uv run alembic check
+      # API 계약(OpenAPI)이 커밋된 파일과 같은지 — 백엔드만 고치고 프론트 타입 갱신을 잊으면 실패 (D3)
+      - run: uv run python -m scripts.export_openapi --check
       - run: uv run pytest -q
 
   frontend:
@@ -49,6 +51,8 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      # 생성 타입(schema.d.ts)이 openapi.json 과 같은지 (D3)
+      - run: npm run gen:api && git diff --exit-code src/shared/api/schema.d.ts
       - run: npm run lint
       - run: npm run build
       - run: npm run build:demo

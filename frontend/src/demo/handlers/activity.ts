@@ -3,8 +3,10 @@ import { CATEGORIES } from '../constants'
 import { fail, json, type Route } from '../http'
 import { db, save, type DActivity, type DUser } from '../store'
 import { requireUser } from './auth'
+import type { Schema } from '@/shared/api/types'
 
-function out(a: DActivity, me: DUser) {
+/** 응답 모양은 백엔드 계약(ActivityOut)과 같아야 한다 — 어긋나면 타입 오류 (D3) */
+function out(a: DActivity, me: DUser): Schema<'ActivityOut'> {
   const s = db()
   const applied = s.applications.some((x) => x.aid === a.id && x.uid === me.id)
   const count = a.base_applied + s.applications.filter((x) => x.aid === a.id).length
@@ -44,7 +46,7 @@ export const activityRoutes: Route[] = [
     return json({
       applied: s.applications.filter((x) => x.uid === me.id).length,
       liked: s.likes.filter((x) => x.uid === me.id).length,
-    })
+    } satisfies Schema<'MyActivityCounts'>)
   }],
 
   ['GET', '/activities/mine', (req) => {

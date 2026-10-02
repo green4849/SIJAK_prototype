@@ -4,6 +4,10 @@
  * 음성 파일(Blob)은 메모리에만 둔다 (새로고침하면 재생 불가로 표시됨).
  */
 
+import type { Schema } from '@/shared/api/types'
+
+type ActivityCategory = Schema<'ActivityOut'>['category']
+
 export interface DUser {
   id: string
   name: string
@@ -49,7 +53,7 @@ export interface DActivity {
   id: string
   title: string
   subtitle: string
-  category: string
+  category: ActivityCategory
   region_code: string
   place: string
   schedule_text: string
@@ -161,7 +165,7 @@ function seed(): DemoState {
   roomDeoksu.read = { [DEMO_ME_ID]: 4, 'u-deoksu': 5 }
 
   const act = (
-    title: string, subtitle: string, category: string, region: string, place: string,
+    title: string, subtitle: string, category: ActivityCategory, region: string, place: string,
     days: number, hour: number, minutes: number, capacity: number, image: string,
     description: string, applied: number,
   ): DActivity => {

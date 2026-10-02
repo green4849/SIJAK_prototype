@@ -3,6 +3,7 @@ import { REPORT_REASONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { db, save, userById } from '../store'
 import { requireUser } from './auth'
+import type { Schema } from '@/shared/api/types'
 
 function block(me: string, target: string) {
   if (target === me) fail(422, 'invalid_report', '나를 차단할 수는 없어요.')
@@ -24,7 +25,7 @@ export const safetyRoutes: Route[] = [
     const alsoBlock = b.also_block !== false
     if (alsoBlock) block(me.id, b.target_user_id)
     save()
-    return json({ blocked: alsoBlock }, 201)
+    return json({ blocked: alsoBlock } satisfies Schema<'ReportResult'>, 201)
   }],
 
   ['GET', '/safety/blocks', (req) => {
