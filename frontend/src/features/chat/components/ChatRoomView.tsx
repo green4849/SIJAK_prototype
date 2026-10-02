@@ -9,11 +9,12 @@ import styles from './ChatRoomView.module.css'
 interface Props {
   roomId: string
   peer: ChatPeer
+  blocked?: boolean
   renderAfterMessage?: (m: ChatMessageData) => ReactNode
 }
 
 /** ⑤ 대화방 본문 — 메시지 목록 + 아래 고정 입력줄 */
-export function ChatRoomView({ roomId, peer, renderAfterMessage }: Props) {
+export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage }: Props) {
   const { messages, loading, error, sendText, sendVoice } = useMessages(roomId)
 
   return (
@@ -27,7 +28,13 @@ export function ChatRoomView({ roomId, peer, renderAfterMessage }: Props) {
         )}
       </div>
       <div className={styles.composer}>
-        <Composer onSendText={sendText} onSendVoice={sendVoice} disabled={loading} />
+        {blocked ? (
+          <p className={styles.blocked} role="status">
+            차단된 대화예요. 메시지를 보낼 수 없어요.
+          </p>
+        ) : (
+          <Composer onSendText={sendText} onSendVoice={sendVoice} disabled={loading} />
+        )}
       </div>
     </div>
   )

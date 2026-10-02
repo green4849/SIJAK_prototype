@@ -30,7 +30,8 @@ export function TopBar({ title, backTo, back = true, right }: Props) {
           </button>
         )}
       </div>
-      {title && <h1 className={styles.title}>{title}</h1>}
+      {/* 제목이 없어도 가운데 칸을 비워 둬야 오른쪽 버튼이 오른쪽에 붙는다 */}
+      {title ? <h1 className={styles.title}>{title}</h1> : <span />}
       <div className={`${styles.side} ${styles.right}`}>{right}</div>
     </header>
   )

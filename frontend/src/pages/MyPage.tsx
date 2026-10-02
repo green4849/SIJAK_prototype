@@ -1,4 +1,5 @@
 import {
+  Ban,
   CircleHelp,
   Heart,
   LogOut,
@@ -67,6 +68,7 @@ export function MyPage() {
       <MenuList label="도움">
         <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
         <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
+        <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
         <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
       </MenuList>
 

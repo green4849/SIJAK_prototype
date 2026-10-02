@@ -1,0 +1,44 @@
+.box {
+  margin-top: 4px;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-icon-yellow);
+  border-radius: var(--radius);
+  background: var(--color-card-yellow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.box[data-strong='true'] {
+  border-color: var(--color-danger);
+  background: var(--color-card-pink);
+}
+
+.title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.box[data-strong='true'] .title {
+  color: var(--color-danger);
+}
+
+.text {
+  margin: 0;
+  font-size: var(--font-sm);
+}
+
+.report {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-danger);
+  font-weight: 800;
+  cursor: pointer;
+}

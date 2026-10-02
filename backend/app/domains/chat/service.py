@@ -12,6 +12,7 @@ from app.domains.auth.service import AuthService
 from app.domains.chat.models import ChatMessage, ChatRoom
 from app.domains.chat.repository import ChatRepository
 from app.domains.friend.service import FriendService
+from app.domains.risk.service import RiskService
 
 if TYPE_CHECKING:
     from app.domains.auth.models import User
@@ -31,6 +32,7 @@ class RoomSummary:
     other: "User"
     last_message: ChatMessage | None
     unread: int
+    blocked: bool = False
 
 
 class ChatService:
@@ -39,16 +41,20 @@ class ChatService:
         repo: ChatRepository,
         auth: AuthService,
         friends: FriendService,
+        risk: RiskService,
         storage: LocalMediaStorage,
     ) -> None:
         self.repo = repo
         self.auth = auth
         self.friends = friends
+        self.risk = risk
         self.storage = storage
 
     # ---------- 방 ----------
 
     async def open_with(self, me: "User", other_id: uuid.UUID) -> ChatRoom:
+        if await self.risk.is_blocked_between(me.id, other_id):
+            raise ForbiddenError("차단한(된) 분과는 대화할 수 없어요.", code="blocked")
         if not await self.friends.are_friends(me.id, other_id):
             raise ForbiddenError("친구가 된 분과만 대화할 수 있어요.", code="not_friends")
         room = await self.repo.get_room_between(me.id, other_id)
@@ -60,6 +66,7 @@ class ChatService:
     async def list_rooms(self, me: "User") -> list[RoomSummary]:
         rooms = await self.repo.list_rooms(me.id)
         others = await self.auth.get_users({r.other(me.id) for r in rooms})
+        blocked = await self.risk.related_block_ids(me.id)
         out = []
         for r in rooms:
             other = others.get(r.other(me.id))
@@ -71,6 +78,7 @@ class ChatService:
                     other=other,
                     last_message=await self.repo.last_message(r.id),
                     unread=await self.repo.count_unread(r, me.id),
+                    blocked=r.other(me.id) in blocked,
                 )
             )
         return out
@@ -78,7 +86,8 @@ class ChatService:
     async def get_room(self, me: "User", room_id: uuid.UUID) -> RoomSummary:
         room = await self._member_room(me, room_id)
         other = (await self.auth.get_users({room.other(me.id)}))[room.other(me.id)]
-        return RoomSummary(room, other, None, 0)
+        blocked = await self.risk.is_blocked_between(me.id, other.id)
+        return RoomSummary(room, other, None, 0, blocked)
 
     # ---------- 메시지 ----------
 
@@ -94,20 +103,26 @@ class ChatService:
         return msgs
 
     async def send_text(self, me: "User", room_id: uuid.UUID, text: str) -> ChatMessage:
-        room = await self._member_room(me, room_id)
+        room = await self._sendable_room(me, room_id)
         body = text.strip()
         if not body:
             raise InvalidMessageError("보낼 내용을 적어 주세요.")
         if len(body) > TEXT_MAX:
             raise InvalidMessageError(f"한 번에 {TEXT_MAX}자까지 보낼 수 있어요.")
-        return await self._save(
+        msg = await self.repo.add_message(
             room, ChatMessage(room_id=room.id, sender_id=me.id, kind="text", body=body)
         )
+        # 위험 대화 감지 (1단계 룰) — 받는 사람 화면에 경고로 노출
+        result = self.risk.assess_message(me.id, msg.id, body)
+        msg.risk_level = result.level
+        msg.risk_labels = ",".join(result.labels)
+        return await self._save(room, msg)
 
     async def send_voice(
         self, me: "User", room_id: uuid.UUID, data: bytes, content_type: str, duration_sec: int
     ) -> ChatMessage:
-        room = await self._member_room(me, room_id)
+        # 음성은 STT가 없어 위험 감지 대상이 아님 (docs/deferred.md §3)
+        room = await self._sendable_room(me, room_id)
         base_type = content_type.split(";")[0].strip()
         ext = VOICE_TYPES.get(base_type)
         if ext is None:
@@ -135,8 +150,14 @@ class ChatService:
 
     # ---------- 내부 ----------
 
+    async def _sendable_room(self, me: "User", room_id: uuid.UUID) -> ChatRoom:
+        room = await self._member_room(me, room_id)
+        if await self.risk.is_blocked_between(me.id, room.other(me.id)):
+            raise ForbiddenError("차단한(된) 분께는 메시지를 보낼 수 없어요.", code="blocked")
+        return room
+
     async def _save(self, room: ChatRoom, msg: ChatMessage) -> ChatMessage:
-        saved = await self.repo.add_message(room, msg)
+        saved = msg if msg.id else await self.repo.add_message(room, msg)
         self.repo.mark_read(room, msg.sender_id, saved.id)  # 내가 보낸 건 읽은 것
         await self.repo.commit()
         return saved

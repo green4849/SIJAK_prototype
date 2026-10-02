@@ -17,6 +17,11 @@ class ChatPeer(BaseModel):
     region_name: str
 
 
+class RiskWarning(BaseModel):
+    level: int  # 1 주의 · 2 경고 · 3 위험
+    reasons: list[str]
+
+
 class MessageOut(BaseModel):
     id: int
     sender_id: uuid.UUID
@@ -26,6 +31,7 @@ class MessageOut(BaseModel):
     duration_sec: int | None
     audio_url: str | None
     created_at: datetime
+    warning: RiskWarning | None  # 받는 사람에게만 (보낸 사람에게는 null)
 
     @classmethod
     def of(cls, m: ChatMessage, me: uuid.UUID, api_prefix: str) -> "MessageOut":
@@ -38,6 +44,11 @@ class MessageOut(BaseModel):
             duration_sec=m.duration_sec,
             audio_url=f"{api_prefix}/chats/voice/{m.id}" if m.kind == "voice" else None,
             created_at=m.created_at,
+            warning=(
+                RiskWarning(level=m.risk_level, reasons=[r for r in m.risk_labels.split(",") if r])
+                if m.risk_level > 0 and m.sender_id != me
+                else None
+            ),
         )
 
 
@@ -47,6 +58,7 @@ class RoomOut(BaseModel):
     last_message: str | None  # 목록 미리보기 문구
     last_message_at: datetime | None
     unread: int
+    blocked: bool
 
     @classmethod
     def of(cls, s: RoomSummary) -> "RoomOut":
@@ -65,6 +77,7 @@ class RoomOut(BaseModel):
             last_message=preview,
             last_message_at=s.room.last_message_at,
             unread=s.unread,
+            blocked=s.blocked,
         )
 
 

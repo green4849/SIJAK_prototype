@@ -30,6 +30,7 @@
 
 - 현재: **1단계 룰(키워드)만** — `backend/app/domains/risk/rules.py`
 - 꽂는 곳: `backend/app/domains/risk/service.py` 의 `assess_message()` — 룰 통과 메시지를 ML 분류기로 넘기는 자리
+- **음성 메시지는 탐지 대상 아님** (STT 없음). STT를 붙이면 `chat/service.py` `send_voice()`에서 변환 텍스트로 `assess_message()` 호출
 
 ## 4. 지역 활동 데이터
 

@@ -14,6 +14,8 @@ export interface ChatRoomData {
   last_message: string | null
   last_message_at: string | null
   unread: number
+  /** 내가 차단했거나 차단당함 → 보내기 불가 */
+  blocked: boolean
 }
 
 export interface ChatMessageData {
@@ -25,6 +27,8 @@ export interface ChatMessageData {
   duration_sec: number | null
   audio_url: string | null
   created_at: string
+  /** 위험 대화 경고 — 받은 메시지에만 (표시는 safety feature가 담당, 페이지에서 조합) */
+  warning: { level: number; reasons: string[] } | null
 }
 
 export const chatApi = {

@@ -8,10 +8,13 @@ from app.core.deps import DbSession
 from app.domains.auth.deps import AuthServiceDep
 from app.domains.friend.repository import FriendRepository
 from app.domains.friend.service import FriendService
+from app.domains.risk.deps import RiskServiceDep
 
 
-def get_friend_service(session: DbSession, auth: AuthServiceDep) -> FriendService:
-    return FriendService(FriendRepository(session), auth)
+def get_friend_service(
+    session: DbSession, auth: AuthServiceDep, risk: RiskServiceDep
+) -> FriendService:
+    return FriendService(FriendRepository(session), auth, risk)
 
 
 FriendServiceDep = Annotated[FriendService, Depends(get_friend_service)]

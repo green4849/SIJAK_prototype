@@ -9,6 +9,7 @@ from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
 from app.domains.friend.nearby import find_nearby
 from app.domains.friend.repository import FriendRepository
+from app.domains.risk.service import RiskService
 
 if TYPE_CHECKING:
     from app.domains.auth.models import User
@@ -32,9 +33,10 @@ class CannotRequestSelfError(DomainError):
 
 
 class FriendService:
-    def __init__(self, repo: FriendRepository, auth: AuthService) -> None:
+    def __init__(self, repo: FriendRepository, auth: AuthService, risk: RiskService) -> None:
         self.repo = repo
         self.auth = auth
+        self.risk = risk
 
     # ---------- 추천 ----------
 
@@ -124,8 +126,8 @@ class FriendService:
     # ---------- 내부 ----------
 
     async def _blocked_ids(self, user_id: uuid.UUID) -> set[uuid.UUID]:
-        """차단 관계 (Stage 5 risk 도메인에서 채움)"""
-        return set()
+        """차단 관계(양방향) — 추천·친구 목록·신청에서 모두 제외"""
+        return await self.risk.related_block_ids(user_id)
 
     async def _relations(self, me_id: uuid.UUID) -> dict[uuid.UUID, tuple[Relation, uuid.UUID]]:
         out: dict[uuid.UUID, tuple[Relation, uuid.UUID]] = {}
@@ -140,6 +142,7 @@ class FriendService:
     async def _list_by_relation(self, me: "User", wanted: Relation) -> list[Candidate]:
         relations = await self._relations(me.id)
         ids = {uid for uid, (rel, _) in relations.items() if rel == wanted}
+        ids -= await self._blocked_ids(me.id)
         users = await self.auth.get_users(ids)
         mine = {i.category for i in me.interests}
         return [self._candidate(u, mine, relations) for u in users.values()]

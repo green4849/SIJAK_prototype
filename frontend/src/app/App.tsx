@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth'
 import { AssistPage } from '@/pages/AssistPage'
+import { BlockedPage } from '@/pages/BlockedPage'
 import { ChatListPage } from '@/pages/ChatListPage'
 import { ChatOpenPage } from '@/pages/ChatOpenPage'
 import { ChatRoomPage } from '@/pages/ChatRoomPage'
@@ -58,6 +59,7 @@ export function App() {
               <Route path="chats/with/:userId" element={<ChatOpenPage />} />
               <Route path="chats/:roomId" element={<ChatRoomPage />} />
               <Route path="me/friends" element={<FriendListPage />} />
+              <Route path="me/blocks" element={<BlockedPage />} />
               <Route path="safety" element={<SafetyPage />} />
               <Route path="me/profile" element={<ProfileEditPage />} />
               <Route path="me/settings" element={<SettingsPage />} />

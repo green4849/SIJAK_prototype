@@ -11,15 +11,20 @@ from app.domains.chat.repository import ChatRepository
 from app.domains.chat.schemas import MessageOut, RoomOut, TextMessageCreate
 from app.domains.chat.service import ChatService
 from app.domains.friend.deps import FriendServiceDep
+from app.domains.risk.deps import RiskServiceDep
 
 router = APIRouter(prefix="/chats", tags=["chat"])
 PREFIX = get_settings().api_prefix
 
 
 def get_chat_service(
-    session: DbSession, auth: AuthServiceDep, friends: FriendServiceDep, storage: MediaStorage
+    session: DbSession,
+    auth: AuthServiceDep,
+    friends: FriendServiceDep,
+    risk: RiskServiceDep,
+    storage: MediaStorage,
 ) -> ChatService:
-    return ChatService(ChatRepository(session), auth, friends, storage)
+    return ChatService(ChatRepository(session), auth, friends, risk, storage)
 
 
 ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
