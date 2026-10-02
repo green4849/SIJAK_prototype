@@ -79,3 +79,31 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report
           retention-days: 7
+
+  deploy-smoke:
+    # 운영 구성(B10)을 그대로 띄워 확인 — 이미지 빌드, 마이그레이션 자동 적용, HTTPS, /api 프록시, SPA 주소
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 시험용 운영 환경값 (비밀값은 매번 새로 생성)
+        run: |
+          cp infra/.env.prod.example infra/.env.prod
+          sh infra/gen-secrets.sh >> infra/.env.prod
+          sed -i 's/^DOMAIN=.*/DOMAIN=localhost/; s/^ALLOW_MOCK_IDENTITY_IN_PROD=.*/ALLOW_MOCK_IDENTITY_IN_PROD=true/' infra/.env.prod
+      - name: 띄우기
+        run: docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build --wait --wait-timeout 180
+      - name: 확인
+        run: |
+          set -e
+          c() { curl -sk --retry 10 --retry-delay 2 --retry-all-errors "$@"; }
+          c -f https://localhost/api/v1/health | grep -q '"ok"'
+          c -f https://localhost/ | grep -q 'id="root"'
+          c -f https://localhost/friends | grep -q 'id="root"'          # 화면 주소 → index.html
+          test "$(c -o /dev/null -w '%{http_code}' https://localhost/api/v1/me)" = 401
+          c -I https://localhost/sw.js | grep -qi 'cache-control: no-cache'
+          c -sI http://localhost/ | grep -qi '^location: https://'       # http → https
+          # 운영 안전장치(B1): 기본 비밀값이면 API가 뜨지 않아야 한다
+          ! docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod run --rm --no-deps \
+              --entrypoint python -e 'JWT_SECRET=change-me-local-only-32bytes-minimum!!' api -c "from app.main import app"
+      - if: failure()
+        run: docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod logs --no-color | tail -200

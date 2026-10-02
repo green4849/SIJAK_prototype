@@ -16,6 +16,8 @@ AI 말동무, 사기 대화 탐지, 음성 매칭 통화, 지역 복지시설 �
 > 데모는 실제 서버 대신 **브라우저 안 가짜 서버**(`frontend/src/demo`)로 동작합니다.
 > 입력한 내용은 그 탭에만 남고 다른 사람과 공유되지 않아요. 이웃 답장·친구 수락은 시연용 자동 응답입니다.
 
+> **배포:** [`docs/deploy.md`](docs/deploy.md) — 서버 1대에 Docker로 (HTTPS 자동)
+>
 > **개발 전 필독:** [`docs/dev-order.md`](docs/dev-order.md) 레이어 규칙·작업 흐름 · [`docs/roadmap.md`](docs/roadmap.md) 다음 할 일 · [`docs/deferred.md`](docs/deferred.md) 비워 둔 기능
 
 ## 구조

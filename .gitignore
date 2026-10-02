@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!infra/.env.prod.example
 # 데모 빌드 설정은 비밀이 아니므로 커밋
 !frontend/.env.demo
 
