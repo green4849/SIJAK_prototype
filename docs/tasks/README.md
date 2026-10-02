@@ -21,7 +21,7 @@
 | [A9](A9-profile-photo.md) | 프로필 사진 (선택) | M | P2 | ⬜ |
 | [A10](A10-online-status.md) | '지금 접속 중' 표시 (시안 ⑤) | S | P2 | ⬜ |
 | [A11](A11-usability-test.md) | 실사용자 접근성 점검 | M | P1 | ⬜ |
-| [A12](A12-type-spacing.md) | 글자 체계·여백 정리 (디자인 리뷰 1) | M | P1 | 🔨 |
+| [A12](A12-type-spacing.md) | 글자 체계·여백 정리 (디자인 리뷰 1) | M | P1 | ✅ |
 | [A13](A13-color-cards.md) | 색 역할·카드 표현 통일 (디자인 리뷰 2) | M | P1 | ⬜ |
 | [A14](A14-icons-images.md) | 아이콘·이미지 크기 규칙 (디자인 리뷰 3) | S | P1 | ⬜ |
 | [A15](A15-screen-layout.md) | 화면별 세부 배치 (디자인 리뷰 4) | M | P1 | ⬜ |
