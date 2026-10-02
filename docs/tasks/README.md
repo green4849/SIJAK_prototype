@@ -36,7 +36,7 @@
 | [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | ⬜ |
 | [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ⬜ |
 | [B9](B9-external-session.md) | 인증 세션 외부 저장 (Redis) | S | P1 | ⬜ |
-| [B10](B10-deployment.md) | 배포 구성 | M | P0 | ⬜ |
+| [B10](B10-deployment.md) | 배포 구성 | M | P0 | ✅ 구성 |
 | [B11](B11-error-tracking.md) | 오류 수집·로그 | S | P1 | ⬜ |
 | [B12](B12-backup-keys.md) | 백업·키 관리 | M | P1 | ⬜ |
 | [C1](C1-realtime-chat.md) | 실시간 대화 (WebSocket) | M | P1 | ⬜ |
