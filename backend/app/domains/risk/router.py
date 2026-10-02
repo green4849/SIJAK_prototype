@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter
 
+from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.risk.deps import RiskServiceDep
 from app.domains.risk.models import REPORT_REASONS
@@ -15,6 +16,9 @@ from app.domains.risk.schemas import (
 
 router = APIRouter(prefix="/safety", tags=["safety"])
 
+# 요청 횟수 제한 (B2) — 신고 남용 막기 (차단은 제한 없음: 위험할 때 바로 할 수 있어야)
+REPORT_PER_USER = Rule("report:user", limit=10, window_sec=3600, action="신고")
+
 
 @router.get("/report-reasons", response_model=list[ReasonOption])
 async def report_reasons() -> list[ReasonOption]:
@@ -23,6 +27,7 @@ async def report_reasons() -> list[ReasonOption]:
 
 @router.post("/reports", status_code=201, response_model=ReportResult)
 async def report(body: ReportCreate, me: CurrentUser, risk: RiskServiceDep) -> ReportResult:
+    await enforce(REPORT_PER_USER, me.id)
     await risk.report(me.id, body.target_user_id, body.reason, body.message_id)
     if body.also_block:
         await risk.block(me.id, body.target_user_id)

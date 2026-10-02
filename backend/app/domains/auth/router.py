@@ -6,10 +6,11 @@ access 토큰은 응답 본문으로 주고, 프론트는 메모리에만 보관
 
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Response, status
+from fastapi import APIRouter, Cookie, Request, Response, status
 
 from app.core.config import get_settings
 from app.core.errors import UnauthorizedError
+from app.core.ratelimit import Rule, enforce
 from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.auth.schemas import (
@@ -34,6 +35,16 @@ from app.integrations.identity.base import IdentityRequest
 router = APIRouter(tags=["auth"])
 settings = get_settings()
 RefreshCookie = Annotated[str | None, Cookie(alias=settings.refresh_cookie_name)]
+
+# 요청 횟수 제한 (B2) — 문자 발송 비용·무차별 대입 막기
+PASS_START_PER_PHONE = Rule("pass_start:phone", limit=5, window_sec=600, action="인증번호 요청")
+PASS_START_PER_IP = Rule("pass_start:ip", limit=20, window_sec=600, action="인증번호 요청")
+PASS_VERIFY_PER_IP = Rule("pass_verify:ip", limit=30, window_sec=600, action="인증번호 확인")
+
+
+def _client_ip(request: Request) -> str:
+    # 프록시 뒤에서는 uvicorn --proxy-headers --forwarded-allow-ips 로 실제 IP가 들어온다 (B10)
+    return request.client.host if request.client else "unknown"
 
 
 def _set_refresh_cookie(response: Response, tokens: TokenPair) -> None:
@@ -66,7 +77,11 @@ async def signup_options() -> SignupOptions:
 
 
 @router.post("/auth/pass/start", response_model=PassStartResponse)
-async def pass_start(body: PassStartRequest, service: AuthServiceDep) -> PassStartResponse:
+async def pass_start(
+    body: PassStartRequest, request: Request, service: AuthServiceDep
+) -> PassStartResponse:
+    await enforce(PASS_START_PER_IP, _client_ip(request))
+    await enforce(PASS_START_PER_PHONE, body.phone)
     session = await service.start_verification(
         IdentityRequest(
             name=body.name, birth_date=body.birth_date, phone=body.phone, gender=body.gender
@@ -77,8 +92,9 @@ async def pass_start(body: PassStartRequest, service: AuthServiceDep) -> PassSta
 
 @router.post("/auth/pass/verify", response_model=AuthResult)
 async def pass_verify(
-    body: PassVerifyRequest, service: AuthServiceDep, response: Response
+    body: PassVerifyRequest, request: Request, service: AuthServiceDep, response: Response
 ) -> AuthResult:
+    await enforce(PASS_VERIFY_PER_IP, _client_ip(request))
     result = await service.verify(body.session_id, body.code)
     if isinstance(result, LoggedIn):
         return _logged_in(response, result)

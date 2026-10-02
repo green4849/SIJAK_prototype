@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     media_dir: str = "data/media"
     voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
 
+    # 요청 횟수 제한 (B2). 규칙은 각 router, 저장은 core/ratelimit (지금은 메모리)
+    rate_limit_enabled: bool = True
+
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60
 

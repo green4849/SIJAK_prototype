@@ -3,12 +3,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
+from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import CurrentUser
 from app.domains.friend.deps import FriendServiceDep
 from app.domains.friend.schemas import FriendCard, FriendRequestCreate
 from app.domains.friend.service import Tab
 
 router = APIRouter(prefix="/friends", tags=["friend"])
+
+# 요청 횟수 제한 (B2) — 모르는 사람에게 무더기 신청 막기
+FRIEND_REQUEST_PER_USER = Rule("friend_request:user", limit=30, window_sec=3600, action="친구 신청")
 
 
 @router.get("/recommendations", response_model=list[FriendCard])
@@ -32,6 +36,7 @@ async def received_requests(me: CurrentUser, service: FriendServiceDep) -> list[
 async def send_request(
     body: FriendRequestCreate, me: CurrentUser, service: FriendServiceDep
 ) -> FriendCard:
+    await enforce(FRIEND_REQUEST_PER_USER, me.id)
     return FriendCard.of(await service.send_request(me, body.to_user_id))
 
 
