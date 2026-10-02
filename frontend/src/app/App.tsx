@@ -12,6 +12,7 @@ import { FriendsPage } from '@/pages/FriendsPage'
 import { HelpPage } from '@/pages/HelpPage'
 import { HomePage } from '@/pages/HomePage'
 import { IdCardPage } from '@/pages/IdCardPage'
+import { InstallPage } from '@/pages/InstallPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MyActivitiesPage } from '@/pages/MyActivitiesPage'
 import { MyPage } from '@/pages/MyPage'
@@ -24,6 +25,7 @@ import { SignupPage } from '@/pages/SignupPage'
 import { WelcomePage } from '@/pages/WelcomePage'
 import { ToastHost } from '@/shared/ui/Toast'
 import { PlainLayout, TabLayout } from './AppLayout'
+import { OfflineBanner } from './OfflineBanner'
 import { RequireAuth, RequireGuest } from './guards'
 
 /**
@@ -36,6 +38,7 @@ export function App() {
   return (
     <AuthProvider>
       {/* GitHub Pages 같은 하위 경로(/저장소명/)에서도 동작하도록 */}
+      <OfflineBanner />
       <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <Routes>
           {/* 비회원 */}
@@ -70,6 +73,7 @@ export function App() {
               <Route path="me/profile" element={<ProfileEditPage />} />
               <Route path="me/settings" element={<SettingsPage />} />
               <Route path="me/help" element={<HelpPage />} />
+              <Route path="me/install" element={<InstallPage />} />
             </Route>
           </Route>
 

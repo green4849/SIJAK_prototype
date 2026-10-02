@@ -9,6 +9,7 @@ import '@fontsource/noto-sans-kr/700.css'
 import '@fontsource/noto-sans-kr/800.css'
 import '@/shared/styles/base.css'
 import { applyPrefs, loadPrefs } from '@/shared/a11y/preferences'
+import { registerServiceWorker } from '@/shared/lib/pwa'
 
 // 첫 화면부터 글자 크기·대비 적용 (깜빡임 방지)
 applyPrefs(loadPrefs())
@@ -31,3 +32,5 @@ async function start() {
 }
 
 void start()
+// 홈 화면 아이콘·오프라인 첫 화면 (운영·데모 빌드에서만)
+registerServiceWorker()
