@@ -77,7 +77,7 @@ class ActivityService:
             raise ActivityClosedError("이미 시작한 활동이에요.")
         if (await self.repo.applied_counts([a.id])).get(a.id, 0) >= a.capacity:
             raise ConflictError("아쉽게도 자리가 다 찼어요.", code="activity_full")
-        self.repo.add_application(a.id, me.id)
+        await self.repo.add_application(a.id, me.id)
         await self.repo.commit()
         return await self.detail(me, activity_id)
 
@@ -91,7 +91,7 @@ class ActivityService:
     async def set_like(self, me: "User", activity_id: uuid.UUID, liked: bool) -> ActivityView:
         view = await self.detail(me, activity_id)
         if liked and not view.liked:
-            self.repo.add_like(activity_id, me.id)
+            await self.repo.add_like(activity_id, me.id)
         elif not liked and view.liked:
             await self.repo.remove_like(activity_id, me.id)
         await self.repo.commit()

@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import delete, or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.risk.models import Block, Report, RiskEvent
@@ -16,12 +17,12 @@ class RiskRepository:
     def add_report(self, report: Report) -> None:
         self.session.add(report)
 
-    async def get_block(self, blocker: uuid.UUID, blocked: uuid.UUID) -> Block | None:
-        q = select(Block).where(Block.blocker_id == blocker, Block.blocked_id == blocked)
-        return await self.session.scalar(q)
-
-    def add_block(self, blocker: uuid.UUID, blocked: uuid.UUID) -> None:
-        self.session.add(Block(blocker_id=blocker, blocked_id=blocked))
+    async def add_block(self, blocker: uuid.UUID, blocked: uuid.UUID) -> None:
+        await self.session.execute(
+            insert(Block)
+            .values(blocker_id=blocker, blocked_id=blocked)
+            .on_conflict_do_nothing(index_elements=["blocker_id", "blocked_id"])
+        )
 
     async def remove_block(self, blocker: uuid.UUID, blocked: uuid.UUID) -> None:
         await self.session.execute(

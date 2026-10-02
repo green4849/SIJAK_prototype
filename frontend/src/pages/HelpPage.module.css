@@ -34,3 +34,10 @@
   padding: 0 var(--space-2) var(--space-2);
   color: var(--color-text-muted);
 }
+
+/* 문장 속 링크도 누르기 쉽게 — 위아래 여백으로 터치 영역 44px 이상 */
+.item p a {
+  display: inline-block;
+  padding: 10px 2px;
+  font-weight: 700;
+}

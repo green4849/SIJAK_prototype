@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.activity.models import Activity, ActivityApplication, ActivityLike
@@ -55,8 +56,12 @@ class ActivityRepository:
         q = select(Activity).where(Activity.id == activity_id).with_for_update()
         return await self.session.scalar(q)
 
-    def add_application(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
-        self.session.add(ActivityApplication(activity_id=activity_id, user_id=user_id))
+    async def add_application(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
+        await self.session.execute(
+            insert(ActivityApplication)
+            .values(activity_id=activity_id, user_id=user_id)
+            .on_conflict_do_nothing(index_elements=["activity_id", "user_id"])
+        )
 
     async def remove_application(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
         await self.session.execute(
@@ -68,8 +73,12 @@ class ActivityRepository:
 
     # ---- 관심 ----
 
-    def add_like(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
-        self.session.add(ActivityLike(activity_id=activity_id, user_id=user_id))
+    async def add_like(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
+        await self.session.execute(
+            insert(ActivityLike)
+            .values(activity_id=activity_id, user_id=user_id)
+            .on_conflict_do_nothing(index_elements=["activity_id", "user_id"])
+        )
 
     async def remove_like(self, activity_id: uuid.UUID, user_id: uuid.UUID) -> None:
         await self.session.execute(

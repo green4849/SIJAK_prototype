@@ -2,6 +2,7 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import func, or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.chat.models import ChatMessage, ChatRoom
@@ -21,11 +22,16 @@ class ChatRepository:
         q = select(ChatRoom).where(ChatRoom.user_a_id == lo, ChatRoom.user_b_id == hi)
         return await self.session.scalar(q)
 
-    async def add_room(self, a: uuid.UUID, b: uuid.UUID) -> ChatRoom:
+    async def get_or_create_room(self, a: uuid.UUID, b: uuid.UUID) -> ChatRoom:
+        """동시에 두 번 열려도(더블 탭 등) 방은 하나 — DB에서 원자적으로 처리"""
         lo, hi = sorted([a, b])
-        room = ChatRoom(user_a_id=lo, user_b_id=hi)
-        self.session.add(room)
-        await self.session.flush()
+        await self.session.execute(
+            insert(ChatRoom)
+            .values(id=uuid.uuid4(), user_a_id=lo, user_b_id=hi, a_last_read_id=0, b_last_read_id=0)
+            .on_conflict_do_nothing(index_elements=["user_a_id", "user_b_id"])
+        )
+        room = await self.get_room_between(lo, hi)
+        assert room is not None
         return room
 
     async def list_rooms(self, user_id: uuid.UUID) -> list[ChatRoom]:

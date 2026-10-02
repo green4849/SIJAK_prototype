@@ -58,9 +58,8 @@ class RiskService:
     async def block(self, me: uuid.UUID, target: uuid.UUID) -> None:
         if target == me:
             raise InvalidReportError("나를 차단할 수는 없어요.")
-        if await self.repo.get_block(me, target) is None:
-            self.repo.add_block(me, target)
-            await self.repo.commit()
+        await self.repo.add_block(me, target)  # 이미 있으면 무시
+        await self.repo.commit()
 
     async def unblock(self, me: uuid.UUID, target: uuid.UUID) -> None:
         await self.repo.remove_block(me, target)

@@ -2,6 +2,7 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import and_, or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.friend.models import FriendRequest
@@ -30,11 +31,13 @@ class FriendRepository:
         )
         return list(await self.session.scalars(q.order_by(FriendRequest.created_at.desc())))
 
-    async def add(self, from_id: uuid.UUID, to_id: uuid.UUID) -> FriendRequest:
-        req = FriendRequest(from_user_id=from_id, to_user_id=to_id)
-        self.session.add(req)
-        await self.session.flush()
-        return req
+    async def add(self, from_id: uuid.UUID, to_id: uuid.UUID) -> None:
+        """더블 탭으로 두 번 와도 1건 (UNIQUE from,to)"""
+        await self.session.execute(
+            insert(FriendRequest)
+            .values(id=uuid.uuid4(), from_user_id=from_id, to_user_id=to_id, status="pending")
+            .on_conflict_do_nothing(index_elements=["from_user_id", "to_user_id"])
+        )
 
     async def set_status(self, req: FriendRequest, status: str) -> None:
         req.status = status

@@ -57,10 +57,8 @@ class ChatService:
             raise ForbiddenError("차단한(된) 분과는 대화할 수 없어요.", code="blocked")
         if not await self.friends.are_friends(me.id, other_id):
             raise ForbiddenError("친구가 된 분과만 대화할 수 있어요.", code="not_friends")
-        room = await self.repo.get_room_between(me.id, other_id)
-        if room is None:
-            room = await self.repo.add_room(me.id, other_id)
-            await self.repo.commit()
+        room = await self.repo.get_or_create_room(me.id, other_id)
+        await self.repo.commit()
         return room
 
     async def list_rooms(self, me: "User") -> list[RoomSummary]:
