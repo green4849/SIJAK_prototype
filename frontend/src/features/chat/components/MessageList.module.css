@@ -4,7 +4,20 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+}
+
+/* 간격 규칙: 말하는 사람이 바뀌면 넓게, 같은 사람이 이어 말하면 좁게 */
+.row,
+.day {
+  margin-top: var(--space-3);
+}
+
+.list > :first-child {
+  margin-top: 0;
+}
+
+.row[data-continued='true'] {
+  margin-top: var(--space-1);
 }
 
 .empty {
@@ -24,7 +37,7 @@
   background: var(--color-card-beige);
   color: var(--color-text-muted);
   font-size: var(--text-meta);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-regular);
 }
 
 :root[data-contrast='high'] .day span {
@@ -41,11 +54,17 @@
   justify-content: flex-end;
 }
 
+.avatarSpace {
+  flex: none;
+  width: 40px;
+}
+
+/* 말풍선 최대 폭 — 본문 영역의 약 78% (리뷰 ⑤-5) */
 .stack {
   max-width: 78%;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--gap-tight);
 }
 
 .row[data-mine='true'] .stack {
@@ -53,10 +72,9 @@
 }
 
 .bubble {
-  padding: var(--space-1) var(--space-2);
+  padding: calc(var(--space-1) * 1.5) var(--space-2);
   border-radius: var(--radius-card);
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

@@ -56,6 +56,15 @@
   white-space: pre-line;
 }
 
+.count {
+  color: var(--color-text);
+  font-size: var(--text-card-title);
+}
+
+.capacity {
+  font-size: var(--text-meta);
+}
+
 .cta {
   position: fixed;
   left: 0;

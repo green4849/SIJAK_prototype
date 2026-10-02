@@ -8,14 +8,14 @@
 .row {
   display: flex;
   gap: var(--space-1);
-  align-items: stretch;
+  align-items: stretch; /* 입력칸과 버튼 높이를 같게 → 하나의 입력 막대 */
 }
 
 .input {
   flex: 1;
   min-width: 0;
   min-height: var(--touch-min);
-  padding: 0 var(--space-2);
+  padding: var(--space-1) var(--space-2);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-control);
   background: var(--color-surface);

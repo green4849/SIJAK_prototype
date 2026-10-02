@@ -8,6 +8,11 @@
   overflow: hidden;
 }
 
+.list[data-plain='true'] {
+  background: transparent;
+  box-shadow: none;
+}
+
 :root[data-contrast='high'] .list {
   border: 2px solid var(--color-border);
 }

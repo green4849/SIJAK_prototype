@@ -4,9 +4,16 @@ import { Link } from 'react-router-dom'
 import styles from './MenuList.module.css'
 import { ICON, ICON_STROKE } from './icon'
 
-export function MenuList({ children, label }: { children: ReactNode; label?: string }) {
+interface ListProps {
+  children: ReactNode
+  label?: string
+  /** 카드 면·그림자 없이 (예: 로그아웃 한 줄 — 일반 메뉴보다 강조하지 않음) */
+  plain?: boolean
+}
+
+export function MenuList({ children, label, plain }: ListProps) {
   return (
-    <ul className={styles.list} aria-label={label}>
+    <ul className={styles.list} aria-label={label} data-plain={plain}>
       {children}
     </ul>
   )
