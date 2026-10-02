@@ -2,8 +2,8 @@
 name: CI
 
 on:
+  # 작업 브랜치(polish/·prod/·feat/·infra/)도 병합 전에 검사
   push:
-    branches: [main]
   pull_request:
 
 jobs:
