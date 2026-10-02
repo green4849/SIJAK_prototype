@@ -21,8 +21,11 @@ export function ActivitiesPage() {
 
   return (
     <section className={styles.page}>
-      <TopBar title="지역생활" back={false} />
-      <p className={styles.lead}>{user?.region_name}에서 함께하는 다양한 활동을 만나보세요.</p>
+      <TopBar
+        title="지역생활"
+        back={false}
+        description={`${user?.region_name}에서 함께하는 다양한 활동을 만나보세요.`}
+      />
       <SegmentTabs label="활동 종류" tabs={TABS} value={category} onChange={setCategory} />
       <ActivityList
         items={data}

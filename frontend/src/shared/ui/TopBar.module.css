@@ -1,39 +1,52 @@
 .bar {
-  min-height: calc(var(--touch-min) + var(--space-1));
-  display: grid;
-  grid-template-columns: minmax(var(--touch-min), 1fr) auto minmax(var(--touch-min), 1fr);
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-1);
 }
 
-.side {
+/* 뒤로·제목·오른쪽 동작 한 줄 — 높이는 터치 크기로 고정 */
+.toolbar {
+  min-height: var(--touch-min);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.right {
+  margin-left: auto;
   display: flex;
   align-items: center;
 }
 
-.right {
-  justify-content: flex-end;
-}
-
+/* 아이콘 그림이 아니라 글자 시작점이 정렬선(--gutter)에 오도록 아이콘 여백만큼 당긴다 */
 .back {
   min-height: var(--touch-min);
+  margin-left: -0.35em;
   padding: 0 var(--space-1) 0 0;
   display: inline-flex;
   align-items: center;
   border: 0;
   background: none;
-  font-size: var(--font-base);
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
   cursor: pointer;
 }
 
 /* 아이콘만 있으면 시니어가 '뒤로'인지 모른다 — 글자도 함께 */
 .backLabel {
-  font-size: var(--font-sm);
+  font-size: var(--text-body);
 }
 
 .title {
-  font-size: var(--font-lg);
-  text-align: center;
+  font-size: var(--text-title);
+}
+
+.toolbar + .title {
+  margin-top: var(--space-1);
+}
+
+.description {
+  margin: var(--gap-tight) 0 0;
+  color: var(--color-text-muted);
 }

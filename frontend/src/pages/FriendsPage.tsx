@@ -20,8 +20,7 @@ export function FriendsPage() {
 
   return (
     <section className={styles.page}>
-      <TopBar title="동네 친구 찾기" back={false} />
-      <p className={styles.lead}>우리 동네의 좋은 이웃을 만나보세요.</p>
+      <TopBar title="동네 친구 찾기" back={false} description="우리 동네의 좋은 이웃을 만나보세요." />
 
       <ReceivedRequests onChanged={() => setVersion((v) => v + 1)} />
 
