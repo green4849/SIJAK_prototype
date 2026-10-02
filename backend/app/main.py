@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
+from app.domains.auth.router import router as auth_router
 
 
 def create_app() -> FastAPI:
@@ -27,7 +28,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     # --- 도메인 router 등록 (스테이지 순서대로) ---
-    # Stage 1: api.include_router(auth_router)
+    api.include_router(auth_router)  # Stage 1
     # Stage 2: api.include_router(companion_router)
     # ...
 

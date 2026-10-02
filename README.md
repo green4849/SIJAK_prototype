@@ -43,6 +43,14 @@ npm install
 npm run dev
 ```
 
+## 테스트용 DB
+
+통합 테스트는 `wipi_test` DB를 쓴다 (테스트마다 스키마 재생성).
+
+```bash
+docker exec -it wipi-db psql -U wipi -c "create database wipi_test"
+```
+
 ## 검사 (스테이지 완료 기준)
 
 ```bash

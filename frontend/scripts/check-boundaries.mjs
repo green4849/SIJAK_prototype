@@ -2,6 +2,7 @@
 //  1. shared  → features / pages / app import 금지
 //  2. features/A → features/B import 금지
 //  3. features → pages / app import 금지
+//  4. features 밖에서는 각 feature의 index.ts로만 접근
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 
@@ -44,6 +45,9 @@ for (const file of walk(SRC)) {
       violations.push(`[feature 간 참조] ${where}`)
     if (layer === 'features' && ['pages', 'app'].includes(tLayer))
       violations.push(`[feature→${tLayer}] ${where}`)
+    // feature 밖에서는 공개 API(index.ts)로만 접근: '@/features/auth' 는 OK, '@/features/auth/api/x' 는 위반
+    if (layer !== 'features' && tLayer === 'features' && seg.length > 2)
+      violations.push(`[feature 내부 직접 접근 — index.ts 사용] ${where}`)
   }
 }
 

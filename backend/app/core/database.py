@@ -26,6 +26,17 @@ engine = create_async_engine(get_settings().database_url, pool_pre_ping=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
+def import_all_models() -> None:
+    """모든 도메인의 models.py를 import해 Base.metadata에 등록 (Alembic·테스트용)."""
+    import importlib
+    import pkgutil
+
+    import app.domains as domains
+
+    for mod in pkgutil.iter_modules(domains.__path__):
+        importlib.import_module(f"app.domains.{mod.name}.models")
+
+
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with SessionLocal() as session:
         yield session

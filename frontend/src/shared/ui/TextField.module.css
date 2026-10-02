@@ -1,0 +1,26 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--font-lg);
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+.input {
+  min-height: var(--touch-min);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font-size: var(--font-lg);
+}

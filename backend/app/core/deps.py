@@ -9,4 +9,4 @@ from app.core.database import get_session
 
 DbSession = Annotated[AsyncSession, Depends(get_session)]
 
-# Stage 1에서 추가: CurrentUser = Annotated[User, Depends(get_current_user)]
+# 로그인 사용자 의존성은 auth 도메인 소유 → app.domains.auth.deps.CurrentUser

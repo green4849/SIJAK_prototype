@@ -53,19 +53,21 @@ router  ──►  service  ──►  repository  ──►  DB
 3. **repository** 만 SQLAlchemy 세션을 직접 다룬다.
 4. **integrations** 는 전부 `base.py`의 인터페이스 뒤에 숨긴다. 서비스는 구현체가 아니라 인터페이스에 의존한다. (예: `MockPassProvider` ↔ 나중에 실제 PASS)
 5. **도메인 간 참조는 service → service 만 허용.** 다른 도메인의 repository/model을 직접 import 금지.
+   - 예외: 로그인 사용자는 `app.domains.auth.deps.CurrentUser` 로 얻는다 (auth의 공개 API).
 6. 설정값·키는 `core.config.Settings` 로만 읽는다. 코드에 하드코딩 금지.
 
 ## 3. 프론트 레이어 규칙 (`frontend/src`)
 
 ```
 pages  ──►  features/*  ──►  shared
-app (라우터·프로바이더) ──► pages
+app (라우터·프로바이더·가드) ──► pages, features/*
 ```
 
 1. `shared` 는 `features` 를 import하지 않는다.
 2. `features/A` 는 `features/B` 를 import하지 않는다. 조합은 `pages` 에서.
 3. 백엔드 호출은 각 feature의 `api/` 에서만, 반드시 `shared/api/client` 를 통해.
-4. 시니어 접근성 기준(글자 18px↑, 터치 56px↑, 대비 7:1↑)은 `shared/styles` 토큰으로만 적용. 컴포넌트에 매직 넘버 금지.
+4. feature 밖(pages·app)에서는 **`features/<f>/index.ts` 공개 API로만** 접근한다. (lint로 강제)
+5. 시니어 접근성 기준(글자 18px↑, 터치 56px↑, 대비 7:1↑)은 `shared/styles` 토큰으로만 적용. 컴포넌트에 매직 넘버 금지.
 
 ---
 
@@ -85,4 +87,5 @@ app (라우터·프로바이더) ──► pages
 
 ## 5. 현재 스테이지
 
-**Stage 0 — 기반** ✅
+**Stage 0 — 기반** ✅  
+**Stage 1 — 인증** ✅ → 다음: **Stage 2 — AI 말동무 (텍스트)**

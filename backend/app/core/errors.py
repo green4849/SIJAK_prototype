@@ -5,6 +5,7 @@ HTTP 상태코드 변환은 여기 등록된 핸들러가 한 곳에서 담당�
 """
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
@@ -46,10 +47,25 @@ class ExternalServiceError(DomainError):
     code = "external_service_error"
 
 
+def _error_body(code: str, message: str, **extra: object) -> dict:
+    return {"error": {"code": code, "message": message, **extra}}
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
     async def _handle_domain_error(_: Request, exc: DomainError) -> JSONResponse:
+        return JSONResponse(status_code=exc.status_code, content=_error_body(exc.code, exc.message))
+
+    @app.exception_handler(RequestValidationError)
+    async def _handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # 프론트가 같은 형식({error:{code,message}})으로 받도록 통일.
+        # 첫 번째 오류 메시지를 사용자용 문구로, 전체는 fields로 전달.
+        errors = exc.errors()
+        first = errors[0] if errors else {}
+        msg = str(first.get("msg", "입력값을 다시 확인해 주세요."))
+        msg = msg.removeprefix("Value error, ")
+        fields = [".".join(str(p) for p in e.get("loc", ())[1:]) for e in errors]
         return JSONResponse(
-            status_code=exc.status_code,
-            content={"error": {"code": exc.code, "message": exc.message}},
+            status_code=422,
+            content=_error_body("validation_error", msg, fields=fields),
         )

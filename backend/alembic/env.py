@@ -16,16 +16,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-import importlib  # noqa: E402
-import pkgutil  # noqa: E402
-
-import app.domains  # noqa: E402
 from app.core.config import get_settings  # noqa: E402
-from app.core.database import Base  # noqa: E402
+from app.core.database import Base, import_all_models  # noqa: E402
 
 # 모든 도메인의 models.py를 자동 import → autogenerate가 테이블을 빠짐없이 인식
-for _mod in pkgutil.iter_modules(app.domains.__path__):
-    importlib.import_module(f"app.domains.{_mod.name}.models")
+import_all_models()
 
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
