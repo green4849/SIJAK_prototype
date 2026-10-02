@@ -11,9 +11,12 @@ interface Props {
   actions?: ReactNode
 }
 
+/** 거리는 서버가 0.5km 단위로 대략만 준다 → '0.5km 이내' / '약 1km' / '약 1.5km' */
 function where(card: FriendCardData) {
-  if (card.distance_km == null) return card.region_name
-  return card.distance_km < 1 ? '1km 이내' : `약 ${card.distance_km.toFixed(1)}km`
+  const km = card.distance_km
+  if (km == null) return card.region_name
+  if (km <= 0.5) return '0.5km 이내'
+  return `약 ${Number.isInteger(km) ? km : km.toFixed(1)}km`
 }
 
 /** ④ 친구 카드 — 이름·나이·소개·겹치는 관심사 */

@@ -2,6 +2,7 @@
 import { INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, newId, relatedBlocks, save, type DUser } from '../store'
+import { findNearby } from '../rules'
 import { requireUser } from './auth'
 import type { Schema } from '@/shared/api/types'
 
@@ -24,7 +25,12 @@ export function areFriends(a: string, b: string) {
 }
 
 /** 응답 모양은 백엔드 계약(FriendCard)과 같아야 한다 — 어긋나면 타입 오류 (D3) */
-function card(u: DUser, me: DUser, rel: Map<string, [Relation, string]>): Schema<'FriendCard'> {
+function card(
+  u: DUser,
+  me: DUser,
+  rel: Map<string, [Relation, string]>,
+  distance: number | null = null,
+): Schema<'FriendCard'> {
   const [relation, request_id] = rel.get(u.id) ?? ['none', null]
   return {
     user_id: u.id,
@@ -35,7 +41,7 @@ function card(u: DUser, me: DUser, rel: Map<string, [Relation, string]>): Schema
     region_name: REGIONS[u.region_code] ?? u.region_code,
     interests: u.interests.map((i) => INTERESTS[i] ?? i),
     common_interests: u.interests.filter((i) => me.interests.includes(i)).map((i) => INTERESTS[i] ?? i),
-    distance_km: null, // 반경 검색은 비워 둔 기능 (docs/deferred.md §1)
+    distance_km: distance,
     relation,
     request_id,
   }
@@ -57,15 +63,16 @@ export const friendRoutes: Route[] = [
     const pool = db().users.filter(
       (u) => u.id !== me.id && rel.get(u.id)?.[0] !== 'friends' && !blocked.has(u.id),
     )
+    if (req.query.get('tab') === 'nearby') {
+      const near = findNearby(me, pool).slice(0, 30)
+      return json(near.map(([u, km]) => card(u, me, rel, km)))
+    }
     const overlap = (u: DUser) => u.interests.filter((i) => me.interests.includes(i)).length
-    const list =
-      req.query.get('tab') === 'nearby'
-        ? pool.filter((u) => u.region_code === me.region_code).sort((a, b) => b.last_login - a.last_login)
-        : [...pool].sort(
-            (a, b) =>
-              overlap(b) - overlap(a) ||
-              Number(a.region_code !== me.region_code) - Number(b.region_code !== me.region_code),
-          )
+    const list = [...pool].sort(
+      (a, b) =>
+        overlap(b) - overlap(a) ||
+        Number(a.region_code !== me.region_code) - Number(b.region_code !== me.region_code),
+    )
     return json(list.slice(0, 30).map((u) => card(u, me, rel)))
   }],
 

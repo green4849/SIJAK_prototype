@@ -1,5 +1,5 @@
 /** backend/app/domains/auth 와 같은 계약 */
-import { INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
+import { DEMO_HOME, INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type DemoRequest, type Route } from '../http'
 import { ageOf, db, DEMO_ME_ID, newId, save, type DUser } from '../store'
 import type { Schema } from '@/shared/api/types'
@@ -31,7 +31,7 @@ export function userOut(u: DUser): Schema<'UserOut'> {
     region_name: REGIONS[u.region_code] ?? u.region_code,
     interests: u.interests,
     intro: u.intro,
-    has_location: u.has_location,
+    has_location: u.geo !== null,
   }
 }
 
@@ -112,7 +112,7 @@ export const authRoutes: Route[] = [
     validateProfile(String(b.region_code), interests)
     const u: DUser = {
       id: newId(), ...ident, region_code: String(b.region_code), interests: [...new Set(interests)],
-      intro: '', has_location: false, last_login: Date.now(),
+      intro: '', geo: null, last_login: Date.now(),
     }
     db().users.push(u)
     return json(login(u), 201)
@@ -147,7 +147,9 @@ export const authRoutes: Route[] = [
 
   ['PUT', '/me/location', (req) => {
     const u = requireUser(req)
-    u.has_location = true // 데모는 좌표를 저장하지 않는다
+    // 데모: 실제 GPS 대신 시연 동네 한가운데로 둔다 — 보는 사람이 어디 있든 '같은 동네' 이웃이 보이게.
+    // (실서버는 받은 좌표를 소수점 2자리로 뭉개 저장 — backend auth.service)
+    u.geo = DEMO_HOME
     save()
     return json(userOut(u))
   }],
