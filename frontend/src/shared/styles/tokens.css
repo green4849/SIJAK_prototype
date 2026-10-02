@@ -1,0 +1,49 @@
+/*
+ * 시니어 접근성 디자인 토큰 — 컴포넌트는 이 변수만 사용한다 (매직 넘버 금지)
+ * 기준: 기본 글자 18px, 4단계 조절(18/21/24/28), 터치 56px 이상, 대비 7:1 이상(WCAG AAA)
+ */
+:root {
+  /* 글자 크기 — data-font-scale 로 4단계 전환 */
+  --font-base: 18px;
+  --font-sm: calc(var(--font-base) * 0.89);
+  --font-lg: calc(var(--font-base) * 1.33);
+  --font-xl: calc(var(--font-base) * 1.78);
+  --line-height: 1.6;
+
+  /* 터치·간격 */
+  --touch-min: 56px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --radius: 14px;
+
+  /* 색 — 모든 전경/배경 조합 대비 7:1 이상 */
+  --color-bg: #ffffff;
+  --color-surface: #f3f4f6;
+  --color-text: #111111; /* on bg 18.9:1 */
+  --color-text-muted: #3d3d3d; /* on bg 10.9:1, on surface 9.9:1 */
+  --color-primary: #0b3d91; /* on bg 10.0:1 */
+  --color-on-primary: #ffffff;
+  --color-danger: #8b0000; /* on bg 10.0:1 */
+  --color-on-danger: #ffffff;
+  --color-border: #3d3d3d;
+  --focus-ring: 0 0 0 4px #ffbf00;
+}
+
+:root[data-font-scale='2'] { --font-base: 21px; }
+:root[data-font-scale='3'] { --font-base: 24px; }
+:root[data-font-scale='4'] { --font-base: 28px; }
+
+/* 고대비 모드 */
+:root[data-contrast='high'] {
+  --color-bg: #000000;
+  --color-surface: #111111;
+  --color-text: #ffffff;
+  --color-text-muted: #e6e6e6;
+  --color-primary: #ffd400;
+  --color-on-primary: #000000;
+  --color-danger: #ff6b6b;
+  --color-on-danger: #000000;
+  --color-border: #ffffff;
+}

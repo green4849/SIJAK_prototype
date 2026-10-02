@@ -1,0 +1,22 @@
+# 로컬 개발용 인프라. 앱(백/프론트)은 로컬에서 직접 실행하고 DB만 컨테이너로 띄운다.
+#   docker compose -f infra/docker-compose.yml up -d
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: wipi-db
+    environment:
+      POSTGRES_USER: wipi
+      POSTGRES_PASSWORD: wipi
+      POSTGRES_DB: wipi
+    ports:
+      - "5432:5432"
+    volumes:
+      - wipi-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wipi -d wipi"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  wipi-db:
