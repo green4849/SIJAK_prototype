@@ -1,0 +1,35 @@
+# 운영 웹 서버 (B10) — HTTPS 자동 발급(Let's Encrypt), 프론트 정적 파일, /api → 백엔드
+# DOMAIN 환경변수에 실제 도메인 (예: sijak.example.kr). 로컬 확인용 기본값은 localhost(자체 서명).
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	# 음성 메시지 업로드 (백엔드 제한 2MB) 보다 조금 넉넉히
+	request_body {
+		max_size 5MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# 위치(같은 동네)·마이크(음성 메시지)만 이 사이트에서 허용
+		Permissions-Policy "geolocation=(self), microphone=(self), camera=()"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		root * /srv
+		# 기본: 매번 새로 확인 (index.html·sw.js·manifest — 배포 즉시 반영)
+		header Cache-Control "no-cache"
+		# 해시 이름 파일은 1년 캐시
+		@immutable path /assets/* /icons/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		# 화면 주소(SPA)는 모두 index.html 로
+		try_files {path} /index.html
+		file_server
+	}
+}

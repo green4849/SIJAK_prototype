@@ -1,0 +1,63 @@
+# 운영 구성 (B10) — 서버 1대: DB + API + 웹(HTTPS)
+#
+#   cp infra/.env.prod.example infra/.env.prod   # 값 채우기 (infra/gen-secrets.sh 로 비밀값 생성)
+#   docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build
+#
+# 자세한 순서: docs/deploy.md
+name: sijak
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wipi
+      POSTGRES_DB: wipi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD 필요}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wipi -d wipi"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # 포트를 외부에 열지 않는다
+
+  api:
+    build: ../backend
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      ENV: prod
+      DATABASE_URL: postgresql+asyncpg://wipi:${POSTGRES_PASSWORD}@db:5432/wipi
+      CORS_ORIGINS: '["https://${DOMAIN:?DOMAIN 필요}"]'
+      MEDIA_DIR: /data/media
+    volumes:
+      - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+    # 포트를 외부에 열지 않는다 — web(Caddy)만 접근
+
+  web:
+    build: ../frontend
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  media:
+  caddy-data:
+  caddy-config:
