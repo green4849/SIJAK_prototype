@@ -9,7 +9,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { startTour } from './helpers'
 
 const STATIC_ROUTES = [
-  '/', '/friends', '/activities', '/chats', '/me', '/me/profile', '/me/settings', '/me/help',
+  '/', '/friends', '/activities', '/chats', '/me', '/me/profile', '/me/settings', '/me/help', '/me/install',
   '/me/friends', '/me/blocks', '/me/activities/applied', '/me/activities/liked', '/safety',
 ]
 
