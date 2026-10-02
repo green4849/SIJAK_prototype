@@ -4,6 +4,7 @@ import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { Sheet } from '@/shared/ui/Sheet'
+import { toast } from '@/shared/lib/toast'
 import { safetyApi } from '../api/safetyApi'
 import { ReportSheet } from './ReportSheet'
 import styles from './SafetyMenu.module.css'
@@ -26,6 +27,7 @@ export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
     setError(null)
     try {
       await (blocked ? safetyApi.unblock(userId) : safetyApi.block(userId))
+      toast(blocked ? `${name}님 차단을 풀었어요` : `${name}님을 차단했어요`)
       setMenu(false)
       onChanged()
     } catch (e) {

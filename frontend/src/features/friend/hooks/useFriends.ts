@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
+import { toast } from '@/shared/lib/toast'
 import { friendApi, type FriendCardData, type FriendTab } from '../api/friendApi'
 import { refreshReceivedCount } from './useReceivedCount'
 
@@ -14,7 +15,12 @@ export function useRecommendations(tab: FriendTab) {
     try {
       const updated = await friendApi.request(userId)
       state.setData((cur) => cur?.map((c) => (c.user_id === userId ? updated : c)) ?? null)
-      if (updated.relation === 'friends') void refreshReceivedCount() // 받은 신청을 맞신청으로 수락
+      if (updated.relation === 'friends') {
+        void refreshReceivedCount() // 받은 신청을 맞신청으로 수락
+        toast(`${updated.name}님과 친구가 됐어요`)
+      } else {
+        toast(`${updated.name}님께 친구 신청을 보냈어요`)
+      }
     } catch (e) {
       setActionError(errorMessage(e))
     }
@@ -32,6 +38,7 @@ export function useReceivedRequests(onChanged?: () => void) {
     await (accept ? friendApi.accept(card.request_id) : friendApi.decline(card.request_id))
     state.setData((cur) => cur?.filter((c) => c.user_id !== card.user_id) ?? null)
     void refreshReceivedCount()
+    toast(accept ? `${card.name}님과 친구가 됐어요` : '신청을 넘겼어요', accept ? 'success' : 'info')
     onChanged?.()
   }
 

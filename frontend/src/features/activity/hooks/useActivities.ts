@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
+import { toast } from '@/shared/lib/toast'
 import { activityApi, type ActivityData, type Category, type MineKind } from '../api/activityApi'
 
 export function useActivityList(category: Category) {
@@ -21,11 +22,13 @@ export function useActivity(id: string) {
   const [pending, setPending] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
-  async function act(fn: () => Promise<ActivityData>) {
+  async function act(fn: () => Promise<ActivityData>, done: (a: ActivityData) => string) {
     setPending(true)
     setActionError(null)
     try {
-      state.setData(await fn())
+      const a = await fn()
+      state.setData(a)
+      toast(done(a))
     } catch (e) {
       setActionError(errorMessage(e))
       void state.reload() // 정원 마감 등 → 최신 상태 다시
@@ -38,9 +41,12 @@ export function useActivity(id: string) {
     ...state,
     pending,
     actionError,
-    apply: () => act(() => activityApi.apply(id)),
-    cancel: () => act(() => activityApi.cancel(id)),
+    apply: () => act(() => activityApi.apply(id), (a) => `'${a.title}' 신청했어요`),
+    cancel: () => act(() => activityApi.cancel(id), () => '신청을 취소했어요'),
     toggleLike: () =>
-      act(() => (state.data?.liked ? activityApi.unlike(id) : activityApi.like(id))),
+      act(
+        () => (state.data?.liked ? activityApi.unlike(id) : activityApi.like(id)),
+        (a) => (a.liked ? '관심 있는 활동에 담았어요' : '관심 있는 활동에서 뺐어요'),
+      ),
   }
 }
