@@ -1,0 +1,28 @@
+.thumb {
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  color: var(--color-text);
+}
+
+.thumb[data-size='md'] {
+  width: 4.2em;
+  height: 4.2em;
+}
+
+.thumb[data-size='hero'] {
+  width: 100%;
+  height: 10em;
+  border-radius: var(--radius-lg);
+}
+
+.thumb[data-tone='pink'] { background: var(--color-card-pink); color: var(--color-icon-pink); }
+.thumb[data-tone='mint'] { background: var(--color-card-mint); color: var(--color-icon-mint); }
+.thumb[data-tone='yellow'] { background: var(--color-card-yellow); color: var(--color-icon-yellow); }
+.thumb[data-tone='sky'] { background: var(--color-card-sky); color: var(--color-icon-sky); }
+.thumb[data-tone='beige'] { background: var(--color-card-beige); color: var(--color-icon-beige); }
+
+:root[data-contrast='high'] .thumb {
+  border: 2px solid var(--color-border);
+}

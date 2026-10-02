@@ -1,0 +1,104 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* 아래 고정 버튼에 가려지지 않게 */
+  padding-bottom: calc(var(--touch-min) * 2.6);
+}
+
+.category {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.title {
+  font-size: var(--font-xl);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-lg);
+}
+
+.info {
+  margin: 0;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .info {
+  border: 2px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 800;
+}
+
+.value {
+  margin: 0 0 0 calc(24px + var(--space-1));
+  color: var(--color-text-muted);
+  white-space: pre-line;
+}
+
+.like {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.likeText {
+  font-size: min(var(--font-sm), 15px);
+  font-weight: 700;
+}
+
+.cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-1) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+}
+
+.cta > * {
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+}
+
+.applied {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.appliedText {
+  margin: 0;
+  text-align: center;
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: var(--font-lg);
+}

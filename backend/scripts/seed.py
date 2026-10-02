@@ -121,8 +121,181 @@ async def seed_users() -> None:
         print(f"users: +{added} (총 {len(DEMO_USERS)}명 중)")
 
 
+# (제목, 부제, 분류, 지역, 장소, 일정 문구, 며칠 뒤, 시작 시, 시간(분), 정원, 아이콘, 소개)
+DEMO_ACTIVITIES = [
+    (
+        "건강 걷기 모임",
+        "함께 걸으며 건강도 챙기고 좋은 이웃도 만나요!",
+        "health",
+        "41",
+        "○○근린공원 (시작 광장)",
+        "매주 화·목 오전 10시",
+        3,
+        10,
+        90,
+        20,
+        "walk",
+        "우리 동네를 함께 걸으며 건강도 챙기고 이웃과 이야기 나누는 시간입니다. "
+        "편한 운동화와 물을 챙겨 오세요. 걷는 속도는 천천히 맞춰요.",
+    ),
+    (
+        "스마트폰 활용 교육",
+        "사진 보내기부터 영상통화까지 차근차근",
+        "learning",
+        "41",
+        "○○주민센터 2층 교육실",
+        "9월 15일 (월) 오후 2시",
+        5,
+        14,
+        120,
+        12,
+        "phone",
+        "카카오톡 사진 보내기, 영상통화, 버스 도착 시간 보기를 배워요. 휴대폰을 꼭 챙겨 오세요.",
+    ),
+    (
+        "동네 영화 상영회",
+        "추억의 명작 영화를 함께 봐요",
+        "culture",
+        "41",
+        "○○문화회관 소극장",
+        "토요일 오후 3시",
+        8,
+        15,
+        150,
+        40,
+        "movie",
+        "옛날 명작 영화를 큰 화면으로 함께 봐요. 상영 후 차 한 잔 하며 이야기 나눠요.",
+    ),
+    (
+        "전통 차 모임",
+        "향긋한 차와 함께하는 담소",
+        "culture",
+        "41",
+        "○○복지관 1층 사랑방",
+        "목요일 오전 10시",
+        11,
+        10,
+        90,
+        15,
+        "tea",
+        "제철 전통차를 우려 마시며 이웃과 이야기 나누는 시간이에요.",
+    ),
+    (
+        "노래 교실",
+        "흘러간 옛 노래 함께 불러요",
+        "culture",
+        "41",
+        "○○복지관 강당",
+        "매주 수요일 오후 2시",
+        2,
+        14,
+        90,
+        30,
+        "music",
+        "트로트와 가곡을 함께 불러요. 목 풀기 체조로 시작해요.",
+    ),
+    (
+        "의자 요가",
+        "앉아서 하는 쉬운 스트레칭",
+        "health",
+        "41",
+        "○○경로당",
+        "매주 월요일 오전 11시",
+        4,
+        11,
+        60,
+        12,
+        "exercise",
+        "무릎이 불편하셔도 괜찮아요. 의자에 앉아서 천천히 몸을 풀어요.",
+    ),
+    (
+        "텃밭 가꾸기",
+        "상자 텃밭에 상추를 심어요",
+        "learning",
+        "11",
+        "○○구민 공동텃밭",
+        "토요일 오전 9시",
+        6,
+        9,
+        120,
+        15,
+        "garden",
+        "흙을 만지며 상추와 깻잎을 심어요. 장갑은 준비해 드려요.",
+    ),
+    (
+        "그림책 읽기 모임",
+        "손주에게 읽어 줄 그림책을 함께",
+        "learning",
+        "11",
+        "○○구립도서관",
+        "금요일 오후 2시",
+        9,
+        14,
+        90,
+        10,
+        "book",
+        "손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.",
+    ),
+]
+
+
+async def seed_activities() -> None:
+    from datetime import UTC, datetime, timedelta
+
+    from sqlalchemy import func, select
+
+    from app.domains.activity.models import Activity
+
+    async with SessionLocal() as session:
+        if await session.scalar(select(func.count()).select_from(Activity)):
+            print("activities: 이미 있음 — 건너뜀")
+            return
+        today = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+        for (
+            title,
+            sub,
+            cat,
+            region,
+            place,
+            _sched_hint,  # 참고용 원래 문구 — 실제 표시는 날짜로 생성
+            days,
+            hour,
+            mins,
+            cap,
+            icon,
+            desc,
+        ) in DEMO_ACTIVITIES:
+            # 한국 시각 hour시 → UTC
+            start = today + timedelta(days=days, hours=hour - 9)
+            # 목록 문구는 실제 날짜로 만든다 (고정 문구는 날짜와 어긋남)
+            local = start + timedelta(hours=9)
+            ampm = "오전" if local.hour < 12 else "오후"
+            sched = (
+                f"{local.month}월 {local.day}일 ({'월화수목금토일'[local.weekday()]}) "
+                f"{ampm} {local.hour % 12 or 12}시" + (f" {local.minute}분" if local.minute else "")
+            )
+            session.add(
+                Activity(
+                    title=title,
+                    subtitle=sub,
+                    category=cat,
+                    region_code=region,
+                    place=place,
+                    schedule_text=sched,
+                    starts_at=start,
+                    ends_at=start + timedelta(minutes=mins),
+                    capacity=cap,
+                    description=desc,
+                    image_kind=icon,
+                )
+            )
+        await session.commit()
+        print(f"activities: +{len(DEMO_ACTIVITIES)}")
+
+
 async def main() -> None:
     await seed_users()
+    await seed_activities()
 
 
 if __name__ == "__main__":

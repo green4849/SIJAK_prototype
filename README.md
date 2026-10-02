@@ -57,7 +57,7 @@ cd backend && uv run python -m scripts.seed   # 여러 번 실행해도 안전
 | 박정호 | 1954-11-20 | 010-2000-0002 | 남 | 경기 |
 | 김영희 | 1956-02-14 | 010-2000-0003 | 여 | 경기 |
 
-(전체 목록: `backend/scripts/seed.py`)
+(전체 목록: `backend/scripts/seed.py`. 지역 활동 8개도 함께 들어가며, 날짜는 실행일 기준 며칠 뒤로 잡힌다)
 
 ## 테스트용 DB
 

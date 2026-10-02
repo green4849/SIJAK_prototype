@@ -1,17 +1,19 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth'
 import { AssistPage } from '@/pages/AssistPage'
+import { ActivitiesPage } from '@/pages/ActivitiesPage'
+import { ActivityDetailPage } from '@/pages/ActivityDetailPage'
 import { BlockedPage } from '@/pages/BlockedPage'
 import { ChatListPage } from '@/pages/ChatListPage'
 import { ChatOpenPage } from '@/pages/ChatOpenPage'
 import { ChatRoomPage } from '@/pages/ChatRoomPage'
-import { ComingSoonPage } from '@/pages/ComingSoonPage'
 import { FriendListPage } from '@/pages/FriendListPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { HelpPage } from '@/pages/HelpPage'
 import { HomePage } from '@/pages/HomePage'
 import { IdCardPage } from '@/pages/IdCardPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { MyActivitiesPage } from '@/pages/MyActivitiesPage'
 import { MyPage } from '@/pages/MyPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { PhoneVerifyPage } from '@/pages/PhoneVerifyPage'
@@ -27,7 +29,7 @@ import { RequireAuth, RequireGuest } from './guards'
  * 라우트 등록 지점 — 화면 번호는 docs/design/screens-v1.png
  *   Stage 1: ① /welcome ② /login(+phone·id-card·help) /signup ⑧ /safety
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
- *   Stage 3: ④ /friends    Stage 4: ⑤ /chats    Stage 6: ⑥⑦ /activities
+ *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
  */
 export function App() {
   return (
@@ -51,7 +53,7 @@ export function App() {
             <Route element={<TabLayout />}>
               <Route index element={<HomePage />} />
               <Route path="friends" element={<FriendsPage />} />
-              <Route path="activities" element={<ComingSoonPage title="지역생활" tab />} />
+              <Route path="activities" element={<ActivitiesPage />} />
               <Route path="me" element={<MyPage />} />
             </Route>
             <Route element={<PlainLayout />}>
@@ -60,6 +62,8 @@ export function App() {
               <Route path="chats/:roomId" element={<ChatRoomPage />} />
               <Route path="me/friends" element={<FriendListPage />} />
               <Route path="me/blocks" element={<BlockedPage />} />
+              <Route path="me/activities/:kind" element={<MyActivitiesPage />} />
+              <Route path="activities/:activityId" element={<ActivityDetailPage />} />
               <Route path="safety" element={<SafetyPage />} />
               <Route path="me/profile" element={<ProfileEditPage />} />
               <Route path="me/settings" element={<SettingsPage />} />

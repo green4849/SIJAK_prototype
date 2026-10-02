@@ -4,7 +4,7 @@ import { FriendFinder, ReceivedRequests, type FriendTab } from '@/features/frien
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
 import { TopBar } from '@/shared/ui/TopBar'
 import { chatWith } from './routes'
-import styles from './FriendsPage.module.css'
+import styles from './TabPage.module.css'
 
 const TABS: { value: FriendTab; label: string }[] = [
   { value: 'recommended', label: '추천 친구' },

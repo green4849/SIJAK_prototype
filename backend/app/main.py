@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
+from app.domains.activity.router import router as activity_router
 from app.domains.auth.router import router as auth_router
 from app.domains.chat.router import router as chat_router
 from app.domains.friend.router import router as friend_router
@@ -35,6 +36,7 @@ def create_app() -> FastAPI:
     api.include_router(friend_router)  # Stage 3
     api.include_router(chat_router)  # Stage 4
     api.include_router(risk_router)  # Stage 5
+    api.include_router(activity_router)  # Stage 6
 
     app.include_router(api)
     return app

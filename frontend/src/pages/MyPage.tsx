@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
+import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
 import { Avatar } from '@/shared/ui/Avatar'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
@@ -21,6 +22,7 @@ import styles from './MyPage.module.css'
 export function MyPage() {
   const { user, signOut } = useAuth()
   const friends = useMyFriends()
+  const counts = useActivityCounts()
   if (!user) return null
 
   return (
@@ -52,7 +54,6 @@ export function MyPage() {
         </div>
       </div>
 
-      {/* 활동 숫자는 Stage 6에서 채운다 */}
       <MenuList label="내 활동">
         <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
         <MenuItem
@@ -61,8 +62,18 @@ export function MyPage() {
           value={friends.data ? `${friends.data.length}명` : undefined}
           to="/me/friends"
         />
-        <MenuItem icon={NotebookPen} label="신청한 활동" to="/activities" />
-        <MenuItem icon={Heart} label="관심 있는 활동" to="/activities" />
+        <MenuItem
+          icon={NotebookPen}
+          label="신청한 활동"
+          value={counts.data ? `${counts.data.applied}개` : undefined}
+          to="/me/activities/applied"
+        />
+        <MenuItem
+          icon={Heart}
+          label="관심 있는 활동"
+          value={counts.data ? `${counts.data.liked}개` : undefined}
+          to="/me/activities/liked"
+        />
       </MenuList>
 
       <MenuList label="도움">
