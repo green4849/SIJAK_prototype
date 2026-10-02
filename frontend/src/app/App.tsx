@@ -1,29 +1,36 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth'
 import { AssistPage } from '@/pages/AssistPage'
+import { ComingSoonPage } from '@/pages/ComingSoonPage'
+import { HelpPage } from '@/pages/HelpPage'
 import { HomePage } from '@/pages/HomePage'
 import { IdCardPage } from '@/pages/IdCardPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { MyPage } from '@/pages/MyPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { PhoneVerifyPage } from '@/pages/PhoneVerifyPage'
+import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { SafetyPage } from '@/pages/SafetyPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 import { SignupPage } from '@/pages/SignupPage'
 import { WelcomePage } from '@/pages/WelcomePage'
-import { PlainLayout } from './AppLayout'
+import { PlainLayout, TabLayout } from './AppLayout'
 import { RequireAuth, RequireGuest } from './guards'
 
 /**
  * 라우트 등록 지점 — 화면 번호는 docs/design/screens-v1.png
  *   Stage 1: ① /welcome ② /login(+phone·id-card·help) /signup ⑧ /safety
- *   Stage 2: ③ / ⑨ /me (탭 레이아웃)
+ *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
+ *   Stage 3: ④ /friends    Stage 4: ⑤ /chats    Stage 6: ⑥⑦ /activities
  */
 export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route element={<PlainLayout />}>
-            <Route element={<RequireGuest />}>
+          {/* 비회원 */}
+          <Route element={<RequireGuest />}>
+            <Route element={<PlainLayout />}>
               <Route path="welcome" element={<WelcomePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="login/phone" element={<PhoneVerifyPage />} />
@@ -31,10 +38,26 @@ export function App() {
               <Route path="login/help" element={<AssistPage />} />
               <Route path="signup" element={<SignupPage />} />
             </Route>
-            <Route element={<RequireAuth />}>
+          </Route>
+
+          {/* 회원 */}
+          <Route element={<RequireAuth />}>
+            <Route element={<TabLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="safety" element={<SafetyPage />} />
+              <Route path="friends" element={<ComingSoonPage title="동네 친구 찾기" tab />} />
+              <Route path="activities" element={<ComingSoonPage title="지역생활" tab />} />
+              <Route path="me" element={<MyPage />} />
             </Route>
+            <Route element={<PlainLayout />}>
+              <Route path="chats" element={<ComingSoonPage title="대화하기" />} />
+              <Route path="safety" element={<SafetyPage />} />
+              <Route path="me/profile" element={<ProfileEditPage />} />
+              <Route path="me/settings" element={<SettingsPage />} />
+              <Route path="me/help" element={<HelpPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<PlainLayout />}>
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

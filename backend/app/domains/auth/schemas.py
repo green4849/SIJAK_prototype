@@ -1,14 +1,15 @@
 """auth API 요청/응답 스키마 (HTTP 계약)."""
 
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.security import normalize_phone
-from app.domains.auth.constants import REGIONS
+from app.domains.auth.constants import INTRO_MAX_LEN, REGIONS
 from app.domains.auth.models import User
+from app.domains.auth.service import age_on
 
 
 class PassStartRequest(BaseModel):
@@ -60,10 +61,12 @@ class UserOut(BaseModel):
     id: uuid.UUID
     name: str
     birth_date: date
+    age: int
     gender: Literal["M", "F"]
     region_code: str
     region_name: str
     interests: list[str]
+    intro: str
 
     @classmethod
     def from_user(cls, user: User) -> "UserOut":
@@ -71,11 +74,21 @@ class UserOut(BaseModel):
             id=user.id,
             name=user.name,
             birth_date=user.birth_date,
+            age=age_on(user.birth_date, datetime.now(UTC).date()),
             gender=user.gender,  # type: ignore[arg-type]
             region_code=user.region_code,
             region_name=REGIONS.get(user.region_code, user.region_code),
             interests=[i.category for i in user.interests],
+            intro=user.intro,
         )
+
+
+class ProfileUpdate(BaseModel):
+    """PATCH /me — 보낸 항목만 바뀐다"""
+
+    intro: str | None = Field(None, max_length=INTRO_MAX_LEN)
+    region_code: str | None = None
+    interests: list[str] | None = Field(None, max_length=12)
 
 
 class AuthResult(BaseModel):

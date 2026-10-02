@@ -1,19 +1,49 @@
+import { MapPin, MessageCircleMore, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
-import { Button } from '@/shared/ui/Button'
+import { ActionCard } from '@/shared/ui/ActionCard'
+import { Avatar } from '@/shared/ui/Avatar'
+import styles from './HomePage.module.css'
 
-/** 홈 — 스테이지가 진행되며 각 feature 진입 버튼이 여기에 추가된다. */
+/** ③ 홈 — 큰 카드 세 개로 핵심 기능에 바로 (3-tap rule) */
 export function HomePage() {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
+  if (!user) return null
 
   return (
-    <section>
-      <h1>{user?.name}님, 안녕하세요</h1>
-      <p>
-        {user?.region_name} · 위피 시작에 오신 것을 환영해요.
-      </p>
-      <Button variant="secondary" onClick={signOut}>
-        로그아웃
-      </Button>
+    <section className={styles.page}>
+      <header className={styles.greeting}>
+        <div>
+          <h1 className={styles.name}>{user.name}님</h1>
+          <p className={styles.hello}>
+            좋은 하루 되세요! <span aria-hidden="true">☀️</span>
+          </p>
+        </div>
+        <Avatar name={user.name} seed={user.id} size="lg" />
+      </header>
+
+      <nav aria-label="바로 가기" className={styles.cards}>
+        <ActionCard
+          tone="pink"
+          icon={Users}
+          title="친구 찾기"
+          description="같은 동네 좋은 이웃을 만나보세요"
+          to="/friends"
+        />
+        <ActionCard
+          tone="mint"
+          icon={MessageCircleMore}
+          title="대화하기"
+          description="새로운 이웃과 이야기를 나눠요"
+          to="/chats"
+        />
+        <ActionCard
+          tone="yellow"
+          icon={MapPin}
+          title="지역생활"
+          description="우리 동네 다양한 활동을 함께해요"
+          to="/activities"
+        />
+      </nav>
     </section>
   )
 }

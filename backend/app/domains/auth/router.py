@@ -18,6 +18,7 @@ from app.domains.auth.schemas import (
     PassStartRequest,
     PassStartResponse,
     PassVerifyRequest,
+    ProfileUpdate,
     RefreshRequest,
     SignupOptions,
     SignupRequest,
@@ -114,3 +115,11 @@ async def logout(
 @router.get("/me", response_model=UserOut)
 async def me(user: CurrentUser) -> UserOut:
     return UserOut.from_user(user)
+
+
+@router.patch("/me", response_model=UserOut)
+async def update_me(body: ProfileUpdate, user: CurrentUser, service: AuthServiceDep) -> UserOut:
+    updated = await service.update_profile(
+        user, intro=body.intro, region_code=body.region_code, interests=body.interests
+    )
+    return UserOut.from_user(updated)

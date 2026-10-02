@@ -33,6 +33,14 @@ class AuthRepository:
         await self.session.flush()
         return user
 
+    async def set_interests(self, user: User, categories: list[str]) -> None:
+        """차이만 반영 — 전부 지우고 다시 넣으면 (user_id, category) 유니크 제약과 충돌"""
+        wanted = list(dict.fromkeys(categories))
+        user.interests = [i for i in user.interests if i.category in wanted]
+        have = {i.category for i in user.interests}
+        user.interests.extend(UserInterest(category=c) for c in wanted if c not in have)
+        await self.session.flush()
+
     async def touch_last_login(self, user: User) -> None:
         user.last_login_at = datetime.now(UTC)
         await self.session.flush()

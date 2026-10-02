@@ -32,8 +32,10 @@ class VerificationFailedError(DomainError):
 
 
 class InvalidSignupInputError(DomainError):
+    """가입·프로필 수정 입력 오류"""
+
     status_code = 422
-    code = "invalid_signup_input"
+    code = "invalid_profile_input"
 
 
 @dataclass(frozen=True)
@@ -143,6 +145,28 @@ class AuthService:
         await self.repo.revoke_refresh_token(claims["jti"])
         await self.repo.commit()
 
+    # ---------- 프로필 (⑨ 마이페이지) ----------
+
+    async def update_profile(
+        self,
+        user: User,
+        *,
+        intro: str | None = None,
+        region_code: str | None = None,
+        interests: list[str] | None = None,
+    ) -> User:
+        """None인 항목은 그대로 둔다 (부분 수정)."""
+        if region_code is not None:
+            self._validate_region(region_code)
+            user.region_code = region_code
+        if interests is not None:
+            self._validate_interests(interests)
+            await self.repo.set_interests(user, interests)
+        if intro is not None:
+            user.intro = " ".join(intro.split())  # 줄바꿈·연속 공백 정리
+        await self.repo.commit()
+        return user
+
     async def get_active_user(self, user_id: uuid.UUID) -> User:
         """다른 도메인·의존성이 쓰는 공개 메서드."""
         user = await self.repo.get_user(user_id)
@@ -205,10 +229,18 @@ class AuthService:
             messages.get(user.status, "이용할 수 없는 계정이에요."), code=f"user_{user.status}"
         )
 
+    @classmethod
+    def _validate_profile(cls, region_code: str, interests: list[str]) -> None:
+        cls._validate_region(region_code)
+        cls._validate_interests(interests)
+
     @staticmethod
-    def _validate_profile(region_code: str, interests: list[str]) -> None:
+    def _validate_region(region_code: str) -> None:
         if region_code not in REGIONS:
             raise InvalidSignupInputError("사는 곳을 다시 골라 주세요.")
+
+    @staticmethod
+    def _validate_interests(interests: list[str]) -> None:
         if not interests:
             raise InvalidSignupInputError("좋아하는 것을 하나 이상 골라 주세요.")
         unknown = [i for i in interests if i not in INTERESTS]

@@ -41,3 +41,5 @@ INTERESTS: dict[str, str] = {
 }
 
 MAX_INTERESTS = 5
+
+INTRO_MAX_LEN = 60

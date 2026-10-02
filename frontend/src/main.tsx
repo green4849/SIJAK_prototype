@@ -8,6 +8,10 @@ import '@fontsource/noto-sans-kr/500.css'
 import '@fontsource/noto-sans-kr/700.css'
 import '@fontsource/noto-sans-kr/800.css'
 import '@/shared/styles/base.css'
+import { applyPrefs, loadPrefs } from '@/shared/a11y/preferences'
+
+// 첫 화면부터 글자 크기·대비 적용 (깜빡임 방지)
+applyPrefs(loadPrefs())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

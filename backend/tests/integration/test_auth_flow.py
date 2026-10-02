@@ -100,7 +100,7 @@ async def test_invalid_signup_input(client: AsyncClient) -> None:
         "/api/v1/auth/signup",
         json={"signup_token": v["signup_token"], "region_code": "99", "interests": ["walking"]},
     )
-    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_signup_input"
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_profile_input"
 
 
 async def test_validation_error_format(client: AsyncClient) -> None:
@@ -124,3 +124,51 @@ async def _verify_raw(client: AsyncClient, person: dict):  # noqa: ANN202
         "/api/v1/auth/pass/verify",
         json={"session_id": start["session_id"], "code": start["dev_code"]},
     )
+
+
+# ---------- 프로필 (⑨ 마이페이지) ----------
+
+
+async def _auth_headers(client: AsyncClient) -> dict:
+    body = await _signup(client)
+    return {"Authorization": f"Bearer {body['access_token']}"}
+
+
+async def test_me_includes_age_and_intro(client: AsyncClient) -> None:
+    h = await _auth_headers(client)
+    me = (await client.get("/api/v1/me", headers=h)).json()
+    assert me["intro"] == ""
+    assert 60 <= me["age"] <= 100  # 1955년생
+
+
+async def test_update_profile_partial(client: AsyncClient) -> None:
+    h = await _auth_headers(client)
+    r = await client.patch("/api/v1/me", headers=h, json={"intro": "  산책과 \n 영화를 좋아해요 "})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["intro"] == "산책과 영화를 좋아해요"
+    assert body["region_code"] == "41"  # 안 보낸 항목은 그대로
+    assert sorted(body["interests"]) == ["music", "walking"]
+
+
+async def test_update_interests_keeps_overlap(client: AsyncClient) -> None:
+    h = await _auth_headers(client)
+    r = await client.patch(
+        "/api/v1/me", headers=h, json={"interests": ["music", "cooking"], "region_code": "11"}
+    )
+    assert r.status_code == 200, r.text
+    assert sorted(r.json()["interests"]) == ["cooking", "music"]
+    assert r.json()["region_name"] == "서울특별시"
+    # 다시 조회해도 반영돼 있어야 함
+    me = (await client.get("/api/v1/me", headers=h)).json()
+    assert sorted(me["interests"]) == ["cooking", "music"]
+
+
+async def test_update_profile_validation(client: AsyncClient) -> None:
+    h = await _auth_headers(client)
+    too_long = await client.patch("/api/v1/me", headers=h, json={"intro": "가" * 61})
+    assert too_long.status_code == 422
+    empty = await client.patch("/api/v1/me", headers=h, json={"interests": []})
+    assert empty.status_code == 422 and empty.json()["error"]["code"] == "invalid_profile_input"
+    unauth = await client.patch("/api/v1/me", json={"intro": "x"})
+    assert unauth.status_code == 401

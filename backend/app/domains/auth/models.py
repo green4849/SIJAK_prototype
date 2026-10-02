@@ -21,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.domains.auth.constants import INTRO_MAX_LEN
 
 USER_STATUSES = ("active", "suspended", "banned", "deleted")
 
@@ -43,6 +44,8 @@ class User(Base):
     status: Mapped[str] = mapped_column(String(20), default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # 한 줄 소개 — 친구 찾기(④)에 노출. 시안 예: "산책과 영화, 여행을 좋아해요"
+    intro: Mapped[str] = mapped_column(String(INTRO_MAX_LEN), default="", server_default="")
 
     interests: Mapped[list["UserInterest"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"

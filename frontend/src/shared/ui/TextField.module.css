@@ -24,3 +24,9 @@
   background: var(--color-surface);
   font-size: var(--font-lg);
 }
+
+.multiline {
+  min-height: calc(var(--touch-min) * 2);
+  resize: vertical;
+  line-height: var(--line-height);
+}

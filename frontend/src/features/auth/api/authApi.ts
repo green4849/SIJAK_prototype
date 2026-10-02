@@ -7,10 +7,18 @@ export interface User {
   id: string
   name: string
   birth_date: string
+  age: number
   gender: Gender
   region_code: string
   region_name: string
   interests: string[]
+  intro: string
+}
+
+export interface ProfileUpdate {
+  intro?: string
+  region_code?: string
+  interests?: string[]
 }
 
 export interface Option {
@@ -59,4 +67,6 @@ export const authApi = {
   logout: () => api.post<void>('/auth/logout', undefined, noRetry),
 
   me: () => api.get<User>('/me'),
+
+  updateMe: (patch: ProfileUpdate) => api.patch<User>('/me', patch),
 }
