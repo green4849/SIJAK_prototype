@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 
 from app.core.config import get_settings
 from app.core.deps import DbSession, MediaStorage
+from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.chat.repository import ChatRepository
 from app.domains.chat.schemas import MessageOut, RoomOut, TextMessageCreate
@@ -15,6 +16,10 @@ from app.domains.risk.deps import RiskServiceDep
 
 router = APIRouter(prefix="/chats", tags=["chat"])
 PREFIX = get_settings().api_prefix
+
+# 요청 횟수 제한 (B2) — 사람이 손으로 보내는 속도보다 넉넉하게, 도배는 막게
+SEND_TEXT_PER_USER = Rule("chat_text:user", limit=20, window_sec=60, action="메시지 보내기")
+SEND_VOICE_PER_USER = Rule("chat_voice:user", limit=10, window_sec=60, action="음성 메시지 보내기")
 
 
 def get_chat_service(
@@ -60,6 +65,7 @@ async def messages(
 async def send_text(
     room_id: uuid.UUID, body: TextMessageCreate, me: CurrentUser, service: ChatServiceDep
 ) -> MessageOut:
+    await enforce(SEND_TEXT_PER_USER, me.id)
     return MessageOut.of(await service.send_text(me, room_id, body.text), me.id, PREFIX)
 
 
@@ -71,6 +77,7 @@ async def send_voice(
     audio: Annotated[UploadFile, File()],
     duration_sec: Annotated[int, Form(ge=0)] = 0,
 ) -> MessageOut:
+    await enforce(SEND_VOICE_PER_USER, me.id)
     data = await audio.read()
     msg = await service.send_voice(me, room_id, data, audio.content_type or "", duration_sec)
     return MessageOut.of(msg, me.id, PREFIX)

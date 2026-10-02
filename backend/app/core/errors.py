@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 class DomainError(Exception):
     status_code: int = 400
     code: str = "domain_error"
+    headers: dict[str, str] | None = None
 
     def __init__(self, message: str = "", *, code: str | None = None) -> None:
         super().__init__(message)
@@ -54,7 +55,11 @@ def _error_body(code: str, message: str, **extra: object) -> dict:
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
     async def _handle_domain_error(_: Request, exc: DomainError) -> JSONResponse:
-        return JSONResponse(status_code=exc.status_code, content=_error_body(exc.code, exc.message))
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=_error_body(exc.code, exc.message),
+            headers=exc.headers,  # 예: 429의 Retry-After
+        )
 
     @app.exception_handler(RequestValidationError)
     async def _handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:

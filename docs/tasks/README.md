@@ -28,7 +28,7 @@
 | [A16](A16-remove-demo-banner.md) | 데모 안내 띠 제거 → 링크로 둘러보기 | S | P1 | ✅ |
 | [A17](A17-responsive.md) | 기기 크기에 맞는 화면 (휴대폰·태블릿·PC) | M | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
-| [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ⬜ |
+| [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
 | [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ⬜ |
 | [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | ⬜ |
 | [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |

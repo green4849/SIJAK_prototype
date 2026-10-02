@@ -8,10 +8,17 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.database import Base, get_session, import_all_models
+from app.core.ratelimit import get_rate_limit_store
 from app.integrations.identity import get_identity_provider
 from app.main import app as fastapi_app
 
 import_all_models()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits() -> None:
+    """요청 횟수 기록은 테스트마다 비운다 (같은 IP·메모리를 공유하므로)"""
+    get_rate_limit_store().clear()
 
 
 @pytest.fixture
