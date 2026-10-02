@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from '@/app/App'
-// 폰트는 번들에 포함 (외부 CDN 없음 — 오프라인·개인정보 측면)
+// 폰트는 번들에 포함 (외부 CDN 없음 — 오프라인·개인정보 측면). Jua는 로고 전용, 굵기는 tokens.css --weight-*
 import '@fontsource/jua/400.css'
 import '@fontsource/noto-sans-kr/400.css'
 import '@fontsource/noto-sans-kr/500.css'
+import '@fontsource/noto-sans-kr/600.css'
 import '@fontsource/noto-sans-kr/700.css'
-import '@fontsource/noto-sans-kr/800.css'
 import '@/shared/styles/base.css'
 import { applyPrefs, loadPrefs } from '@/shared/a11y/preferences'
 import { registerServiceWorker } from '@/shared/lib/pwa'

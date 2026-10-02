@@ -5,14 +5,14 @@
 }
 
 .label {
-  font-size: var(--font-lg);
-  font-weight: 700;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
 }
 
 .hint {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }
 
 .input {
@@ -22,11 +22,12 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface);
-  font-size: var(--font-lg);
+  font-size: var(--text-card-title);
 }
 
 .multiline {
   min-height: calc(var(--touch-min) * 2);
   resize: vertical;
-  line-height: var(--line-height);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
 }

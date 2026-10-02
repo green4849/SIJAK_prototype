@@ -2,11 +2,5 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-}
-
-.lead {
-  margin: calc(var(--space-2) * -1) 0 0;
-  text-align: center;
-  color: var(--color-text-muted);
+  gap: var(--section-gap);
 }

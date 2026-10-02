@@ -9,7 +9,7 @@ export function LoginPage() {
   return (
     <section className={styles.page}>
       <TopBar backTo="/welcome" />
-      <div className={styles.head}>
+      <div>
         <h1 className={styles.title}>
           안녕하세요
           <br />

@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-weight: 800;
+  font-weight: var(--weight-semibold);
 }
 
 .box[data-strong='true'] .title {
@@ -28,7 +28,7 @@
 
 .text {
   margin: 0;
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }
 
 .report {
@@ -39,6 +39,6 @@
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-danger);
-  font-weight: 800;
+  font-weight: var(--weight-medium);
   cursor: pointer;
 }

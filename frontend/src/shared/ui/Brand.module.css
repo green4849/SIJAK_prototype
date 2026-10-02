@@ -8,18 +8,18 @@
   display: inline-flex;
   align-items: center;
   gap: 0.15em;
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   line-height: 1.1;
 }
 
-.brand[data-size='md'] .word { font-size: var(--font-xl); }
-.brand[data-size='hero'] .word { font-size: var(--font-hero); }
+.brand[data-size='md'] .word { font-size: var(--text-title); }
+.brand[data-size='hero'] .word { font-size: var(--text-hero); }
 
 .tagline {
   margin: var(--space-1) 0 0;
   color: var(--color-text);
-  font-size: var(--font-base);
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
 }
 
 .leaf {

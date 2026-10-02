@@ -1,13 +1,13 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--section-gap);
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--card-gap);
 }
 
 .item {
@@ -22,16 +22,16 @@
 
 .item summary {
   min-height: var(--touch-min);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--card-pad);
   display: flex;
   align-items: center;
-  font-weight: 700;
+  font-weight: var(--weight-medium);
   cursor: pointer;
 }
 
 .item p {
   margin: 0;
-  padding: 0 var(--space-2) var(--space-2);
+  padding: 0 var(--card-pad) var(--card-pad);
   color: var(--color-text-muted);
 }
 
@@ -39,5 +39,5 @@
 .item p a {
   display: inline-block;
   padding: 10px 2px;
-  font-weight: 700;
+  font-weight: var(--weight-medium);
 }

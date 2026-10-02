@@ -19,7 +19,7 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
-  font-size: var(--font-base);
+  font-size: var(--text-body);
 }
 
 .iconBtn {
@@ -46,12 +46,12 @@
 
 /* 아이콘만으로는 뜻을 모를 수 있어 짧은 글자를 함께 */
 .iconText {
-  font-size: min(var(--font-sm), 16px);
-  font-weight: 700;
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
 }
 
 .recording {
-  padding: var(--space-2);
+  padding: var(--card-pad);
   border-radius: var(--radius-lg);
   background: var(--color-card-pink);
 }
@@ -65,13 +65,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--font-lg);
-  font-weight: 700;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
 }
 
 .recHint {
-  font-size: var(--font-sm);
-  font-weight: 500;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
   color: var(--color-text-muted);
 }
 

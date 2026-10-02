@@ -7,15 +7,15 @@
 
 .legend {
   padding: 0;
-  font-size: var(--font-lg);
-  font-weight: 700;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
   margin-bottom: var(--space-1);
 }
 
 .hint {
   margin: 0 0 var(--space-1);
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }
 
 .grid {
@@ -43,8 +43,8 @@
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: var(--font-base);
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
   cursor: pointer;
 }
 
@@ -57,5 +57,5 @@
 .check {
   display: inline-block;
   min-width: 1em;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }

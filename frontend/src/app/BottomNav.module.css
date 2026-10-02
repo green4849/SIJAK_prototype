@@ -33,17 +33,16 @@
   border-radius: var(--radius);
   color: var(--color-text-muted);
   /* 탭 4개가 한 줄에 들어가야 하므로 아주 큰 글씨 설정에서도 상한을 둔다 */
-  font-size: min(var(--font-sm), 20px);
-  font-weight: 600;
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
   text-decoration: none;
   white-space: nowrap;
 }
 
-/* 현재 탭: 색 + 배경 + 굵기 (색만으로 구분하지 않음) */
+/* 현재 탭: 색 + 배경 (색만으로 구분하지 않음). 굵기는 그대로 — 글자 폭이 바뀌어 흔들리지 않게 */
 .tab[aria-current='page'] {
   color: var(--color-primary);
   background: var(--color-primary-soft);
-  font-weight: 800;
 }
 
 :root[data-contrast='high'] .tab[aria-current='page'] {

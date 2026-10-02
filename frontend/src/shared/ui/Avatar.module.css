@@ -3,15 +3,15 @@
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
-  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
   color: var(--color-text);
   border: 2px solid var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
-.avatar[data-size='md'] { width: 3.2em; height: 3.2em; font-size: var(--font-base); }
-.avatar[data-size='lg'] { width: 3.6em; height: 3.6em; font-size: var(--font-lg); }
-.avatar[data-size='xl'] { width: 3.4em; height: 3.4em; font-size: var(--font-xl); }
+.avatar[data-size='md'] { width: 3.2em; height: 3.2em; font-size: var(--text-body); }
+.avatar[data-size='lg'] { width: 3.6em; height: 3.6em; font-size: var(--text-card-title); }
+.avatar[data-size='xl'] { width: 3.4em; height: 3.4em; font-size: var(--text-title); }
 
 .avatar[data-tone='pink'] { background: var(--color-card-pink); }
 .avatar[data-tone='mint'] { background: var(--color-card-mint); }
