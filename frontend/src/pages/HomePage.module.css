@@ -22,9 +22,15 @@
 }
 
 .cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--card-gap);
+}
+
+/* 태블릿 가로·PC처럼 넓으면 메뉴 세 개를 한 줄에 (A17) — 2+1로 어색하게 나뉘지 않도록 3칸이 들어갈 때만 */
+@container page (min-width: 44rem) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* 홈 메뉴 카드: 높이는 내용대로(글자가 커지면 같이 늘어남), 최소 높이만 넉넉히 */

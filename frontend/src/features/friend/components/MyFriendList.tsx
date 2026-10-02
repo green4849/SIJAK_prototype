@@ -3,6 +3,7 @@ import { Alert } from '@/shared/ui/Alert'
 import { useMyFriends } from '../hooks/useFriends'
 import { FriendCard } from './FriendCard'
 import styles from './FriendList.module.css'
+import { CardGrid } from '@/shared/ui/CardGrid'
 
 /** ⑨ → 내 친구 목록 */
 export function MyFriendList({ chatHref }: { chatHref: (userId: string) => string }) {
@@ -19,17 +20,21 @@ export function MyFriendList({ chatHref }: { chatHref: (userId: string) => strin
           &lsquo;친구 찾기&rsquo;에서 이웃에게 먼저 인사해 보세요.
         </p>
       )}
-      {data?.map((card) => (
-        <FriendCard
-          key={card.user_id}
-          card={card}
-          actions={
-            <ButtonLink to={chatHref(card.user_id)} block>
-              대화하기
-            </ButtonLink>
-          }
-        />
-      ))}
+      {data && data.length > 0 && (
+        <CardGrid>
+          {data.map((card) => (
+            <FriendCard
+              key={card.user_id}
+              card={card}
+              actions={
+                <ButtonLink to={chatHref(card.user_id)} block>
+                  대화하기
+                </ButtonLink>
+              }
+            />
+          ))}
+        </CardGrid>
+      )}
     </section>
   )
 }

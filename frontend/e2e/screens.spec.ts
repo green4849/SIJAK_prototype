@@ -1,7 +1,8 @@
 /**
  * 화면 캡처 — 디자인 점검용 (기본 실행에서는 건너뜀).
  *   SCREENS=1 SCREENS_DIR=out npx playwright test e2e/screens.spec.ts
- * 390px 폭(디자인 프레임 기준) · 글자 크기 1단계 / 4단계 두 벌.
+ * 390px 폭(디자인 프레임 기준) · 글자 크기 1단계 / 4단계, 태블릿 820px(1단계) 세 벌.
+ * 파일 이름 앞: 1-/4- (휴대폰 글자 단계), t- (태블릿)
  */
 import { expect, test, type Page } from '@playwright/test'
 import { startTour } from './helpers'
@@ -17,15 +18,22 @@ async function shot(page: Page, name: string) {
   await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true })
 }
 
-for (const scale of ['1', '4']) {
-  test(`화면 캡처 (글자 ${scale}단계)`, async ({ page }) => {
+const RUNS = [
+  { prefix: '1', scale: '1', width: 390 },
+  { prefix: '4', scale: '4', width: 390 },
+  { prefix: 't', scale: '1', width: 820 },
+]
+
+for (const { prefix, scale, width } of RUNS) {
+  test(`화면 캡처 (${prefix})`, async ({ page }) => {
     test.setTimeout(90_000)
+    await page.setViewportSize({ width, height: width > 600 ? 1180 : 844 })
     await page.addInitScript((s) => {
       const k = 'wipi.a11y'
       const cur = JSON.parse(localStorage.getItem(k) ?? '{}')
       localStorage.setItem(k, JSON.stringify({ ...cur, fontScale: Number(s) }))
     }, scale)
-    const p = (n: string) => `${scale}-${n}`
+    const p = (n: string) => `${prefix}-${n}`
 
     await page.goto('/welcome')
     await shot(page, p('01-welcome'))

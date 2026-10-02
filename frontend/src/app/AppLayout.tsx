@@ -13,10 +13,10 @@ export function PlainLayout() {
   )
 }
 
-/** 하단 탭이 있는 화면 (홈·친구·지역생활·마이페이지) */
+/** 하단 탭이 있는 화면 (홈·친구·지역생활·마이페이지) — 목록 화면이라 넓은 화면에서 카드 여러 열 */
 export function TabLayout() {
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${styles.wide}`}>
       <main className={`${styles.main} ${styles.withNav}`}>
         <Outlet />
       </main>

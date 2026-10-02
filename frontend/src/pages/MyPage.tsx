@@ -20,6 +20,7 @@ import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './MyPage.module.css'
+import { CardGrid } from '@/shared/ui/CardGrid'
 
 /** ⑨ 마이페이지 */
 export function MyPage() {
@@ -56,37 +57,39 @@ export function MyPage() {
         </div>
       </div>
 
-      <MenuList label="내 활동">
-        <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
-        <MenuItem
-          icon={Users}
-          label="내 친구 목록"
-          value={friends.data ? `${friends.data.length}명` : undefined}
-          to="/me/friends"
-        />
-        <MenuItem
-          icon={NotebookPen}
-          label="신청한 활동"
-          value={counts.data ? `${counts.data.applied}개` : undefined}
-          to="/me/activities/applied"
-        />
-        <MenuItem
-          icon={Heart}
-          label="관심 있는 활동"
-          value={counts.data ? `${counts.data.liked}개` : undefined}
-          to="/me/activities/liked"
-        />
-      </MenuList>
+      <CardGrid gap="section">
+        <MenuList label="내 활동">
+          <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
+          <MenuItem
+            icon={Users}
+            label="내 친구 목록"
+            value={friends.data ? `${friends.data.length}명` : undefined}
+            to="/me/friends"
+          />
+          <MenuItem
+            icon={NotebookPen}
+            label="신청한 활동"
+            value={counts.data ? `${counts.data.applied}개` : undefined}
+            to="/me/activities/applied"
+          />
+          <MenuItem
+            icon={Heart}
+            label="관심 있는 활동"
+            value={counts.data ? `${counts.data.liked}개` : undefined}
+            to="/me/activities/liked"
+          />
+        </MenuList>
 
-      <MenuList label="도움">
-        <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
-        <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
-        <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
-        {!installed && (
-          <MenuItem icon={Smartphone} label="홈 화면에 아이콘 놓기" to="/me/install" />
-        )}
-        <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
-      </MenuList>
+        <MenuList label="도움">
+          <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
+          <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
+          <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
+          {!installed && (
+            <MenuItem icon={Smartphone} label="홈 화면에 아이콘 놓기" to="/me/install" />
+          )}
+          <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
+        </MenuList>
+      </CardGrid>
 
       <MenuList plain>
         <MenuItem icon={LogOut} label="로그아웃" onClick={signOut} danger />

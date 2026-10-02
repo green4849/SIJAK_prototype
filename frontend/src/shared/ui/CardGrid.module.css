@@ -1,0 +1,22 @@
+/* 카드 목록 — 들어갈 자리만큼 칸이 생긴다: 휴대폰·큰 글씨 1열, 태블릿·PC 2~3열 (A17) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min)), 1fr));
+  gap: var(--card-gap);
+  align-items: start;
+}
+
+.grid[data-gap='section'] {
+  gap: var(--section-gap);
+}
+
+/* 같은 줄 카드 높이 맞춤 (메뉴·안내 카드처럼 나란히 비교하는 것) */
+.grid[data-stretch='true'] {
+  align-items: stretch;
+}
+
+ul.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

@@ -18,7 +18,12 @@
    * 글자 크기 — 역할별. 모두 --font-base 의 배수라 4단계 글자 설정에 비례해 커진다.
    * (괄호: 1단계 18px 기준 / 리뷰 제안 범위)
    */
-  --font-base: 18px;
+  /*
+   * 기본 글자: 휴대폰 18px → 화면 폭에 따라 태블릿·PC에서 최대 20px까지 자연스럽게 (A17).
+   * 사용자가 고른 글자 크기 단계(--font-scale)가 그 위에 곱해진다.
+   */
+  --font-scale: 1;
+  --font-base: calc(clamp(18px, 16px + 0.5vw, 20px) * var(--font-scale));
   --text-title: calc(var(--font-base) * 1.45); /* 화면 제목 26 / 24–28 */
   --text-card-title: calc(var(--font-base) * 1.17); /* 카드·목록 제목, 이름 21 / 20–22 */
   --text-button: calc(var(--font-base) * 1.11); /* 주요 버튼 20 */
@@ -50,7 +55,7 @@
   --space-4: 32px;
   --space-5: 48px;
   --gap-tight: 4px;
-  --gutter: 20px; /* 화면 좌우 여백 20 / 20–24 — 모든 화면·고정 막대 공통 정렬선 */
+  --gutter: clamp(20px, 4vw, 32px); /* 화면 좌우 여백 20(휴대폰)~32(태블릿·PC) — 모든 화면·고정 막대 공통 정렬선 */
   --card-pad: 18px; /* 카드 안쪽 16–20 */
   --card-gap: 12px; /* 카드 사이 12–16 */
   --section-gap: var(--space-3);
@@ -69,7 +74,15 @@
   --radius-control: 12px;
   --radius-pill: 999px;
   --shadow-card: 0 1px 2px rgb(60 50 20 / 0.06), 0 2px 8px rgb(60 50 20 / 0.06);
-  --page-max: 560px;
+  /*
+   * 화면 폭 (A17) — 휴대폰에서는 둘 다 화면 전체.
+   *   --page-max     : 읽고 쓰는 화면(대화·폼·상세) — 한 줄이 너무 길어지지 않게
+   *   --page-max-wide: 목록 화면(홈·친구·지역생활·마이페이지) — 태블릿·PC에서 카드 2~3열
+   *   --card-min     : 카드 한 칸의 최소 폭. rem 이라 큰 글씨에서는 자동으로 1열
+   */
+  --page-max: 640px;
+  --page-max-wide: 960px;
+  --card-min: 17rem; /* 휴대폰 1열, 태블릿 세로(≈800px) 2열, 글자 4단계에서는 다시 1열 */
   --nav-height: 76px;
 
   /*
@@ -114,9 +127,9 @@
   --color-icon-beige: #5a4632;
 }
 
-:root[data-font-scale='2'] { --font-base: 21px; }
-:root[data-font-scale='3'] { --font-base: 24px; }
-:root[data-font-scale='4'] { --font-base: 28px; }
+:root[data-font-scale='2'] { --font-scale: 1.17; } /* 휴대폰 21px */
+:root[data-font-scale='3'] { --font-scale: 1.33; } /* 24px */
+:root[data-font-scale='4'] { --font-scale: 1.56; } /* 28px */
 
 /* 고대비 모드 — 파스텔을 모두 검정/흰 테두리로 */
 :root[data-contrast='high'] {
