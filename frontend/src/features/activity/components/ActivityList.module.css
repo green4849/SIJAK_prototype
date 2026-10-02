@@ -10,7 +10,7 @@
 .item {
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* 제목이 길어 두 줄 이상이어도 썸네일·제목 시작선 고정 (리뷰 ⑥-9) */
   gap: var(--space-2);
   background: var(--color-surface);
   border-radius: var(--radius-card);
@@ -67,6 +67,7 @@
 
 .chevron {
   flex: none;
+  align-self: center;
   color: var(--color-text-muted);
 }
 

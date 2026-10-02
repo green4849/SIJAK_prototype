@@ -88,7 +88,7 @@ export function MyPage() {
         <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
       </MenuList>
 
-      <MenuList>
+      <MenuList plain>
         <MenuItem icon={LogOut} label="로그아웃" onClick={signOut} danger />
       </MenuList>
     </section>

@@ -24,7 +24,7 @@
 | [A12](A12-type-spacing.md) | 글자 체계·여백 정리 (디자인 리뷰 1) | M | P1 | ✅ |
 | [A13](A13-color-cards.md) | 색 역할·카드 표현 통일 (디자인 리뷰 2) | M | P1 | ✅ |
 | [A14](A14-icons-images.md) | 아이콘·이미지 크기 규칙 (디자인 리뷰 3) | S | P1 | ✅ |
-| [A15](A15-screen-layout.md) | 화면별 세부 배치 (디자인 리뷰 4) | M | P1 | ⬜ |
+| [A15](A15-screen-layout.md) | 화면별 세부 배치 (디자인 리뷰 4) | M | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ⬜ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ⬜ |
 | [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ⬜ |

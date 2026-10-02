@@ -26,6 +26,8 @@
   font-size: var(--text-card-title);
 }
 
+/* 이름(주)과 나이(보조)는 같은 기준선 — h3 안에서 글자 크기만 다르게 */
+
 .age {
   font-size: var(--text-meta);
   font-weight: var(--weight-regular);
@@ -42,7 +44,7 @@
 }
 
 .intro {
-  margin: 0;
+  margin: var(--gap-tight) 0 0;
 }
 
 .common {
@@ -76,6 +78,14 @@
   margin-top: var(--space-1);
 }
 
+/* 버튼 두 개(수락/다음에)는 반씩 */
 .actions > * {
   flex: 1;
+}
+
+/* 버튼 하나는 카드 전체 폭이 아니라 절반 정도 — 녹색 면이 소개 글보다 눈에 띄지 않게 (리뷰 ④-6) */
+.actions > :only-child {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 50%;
 }

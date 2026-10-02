@@ -62,7 +62,8 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
           {a.place}
         </Row>
         <Row icon={<Users aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="참여 인원">
-          {a.applied_count}명 (선착순 {a.capacity}명)
+          <strong className={styles.count}>{a.applied_count}명</strong> 신청{' '}
+          <span className={styles.capacity}>· 정원 {a.capacity}명 (선착순)</span>
         </Row>
         {a.description && (
           <Row icon={<FileText aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="활동 소개">

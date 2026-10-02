@@ -35,6 +35,8 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
         {messages.map((m, i) => {
           const prev = messages[i - 1]
           const newDay = !prev || !isSameDay(prev.created_at, m.created_at)
+          // 같은 사람이 이어서 보낸 말은 가깝게 + 아바타 생략 (리뷰 ⑤-9)
+          const continued = !newDay && prev.mine === m.mine
           return (
             <Fragment key={m.id}>
               {newDay && (
@@ -42,8 +44,13 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
                   <span>{formatDate(m.created_at)}</span>
                 </li>
               )}
-              <li className={styles.row} data-mine={m.mine}>
-                {!m.mine && <Avatar name={peer.name} seed={peer.user_id} size="bubble" />}
+              <li className={styles.row} data-mine={m.mine} data-continued={continued}>
+                {!m.mine &&
+                  (continued ? (
+                    <span className={styles.avatarSpace} aria-hidden="true" />
+                  ) : (
+                    <Avatar name={peer.name} seed={peer.user_id} size="bubble" />
+                  ))}
                 <div className={styles.stack}>
                   <span className="sr-only">{m.mine ? '내가 보냄' : `${peer.name}님`}: </span>
                   <div className={styles.bubble}>
