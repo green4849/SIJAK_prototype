@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
 import { friendApi, type FriendCardData, type FriendTab } from '../api/friendApi'
+import { refreshReceivedCount } from './useReceivedCount'
 
 /** 추천 목록 + 신청 (카드 상태를 즉시 '신청했어요'로 바꾼다) */
 export function useRecommendations(tab: FriendTab) {
@@ -13,6 +14,7 @@ export function useRecommendations(tab: FriendTab) {
     try {
       const updated = await friendApi.request(userId)
       state.setData((cur) => cur?.map((c) => (c.user_id === userId ? updated : c)) ?? null)
+      if (updated.relation === 'friends') void refreshReceivedCount() // 받은 신청을 맞신청으로 수락
     } catch (e) {
       setActionError(errorMessage(e))
     }
@@ -29,6 +31,7 @@ export function useReceivedRequests(onChanged?: () => void) {
     if (!card.request_id) return
     await (accept ? friendApi.accept(card.request_id) : friendApi.decline(card.request_id))
     state.setData((cur) => cur?.filter((c) => c.user_id !== card.user_id) ?? null)
+    void refreshReceivedCount()
     onChanged?.()
   }
 

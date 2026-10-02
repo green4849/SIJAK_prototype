@@ -36,11 +36,20 @@ function parseBody(init: RequestInit): unknown {
   return undefined
 }
 
+/** e2e용 호출 수 (예: 배지가 여러 곳이어도 요청이 한 번인지) — 데모 빌드에만 존재 */
+declare global {
+  interface Window {
+    __demoCalls?: Record<string, number>
+  }
+}
+
 export const demoTransport: Transport = async (url, init) => {
   await new Promise((r) => setTimeout(r, LATENCY_MS))
   const u = new URL(url, 'http://demo.local')
   const path = u.pathname.startsWith(PREFIX) ? u.pathname.slice(PREFIX.length) : u.pathname
   const method = (init.method ?? 'GET').toUpperCase()
+  const calls = (window.__demoCalls ??= {})
+  calls[`${method} ${path}`] = (calls[`${method} ${path}`] ?? 0) + 1
   const auth = new Headers(init.headers).get('Authorization')
 
   for (const [m, pattern, handler] of routes) {
