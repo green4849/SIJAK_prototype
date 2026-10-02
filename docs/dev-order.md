@@ -74,6 +74,9 @@ router  ──►  service  ──►  repository  ──►  DB
 
 ## 3. 프론트 레이어 규칙 (`frontend/src`)
 
+> `src/demo/` 는 데모 빌드 전용 가짜 서버. shared만 import 가능, 화면 코드(app·pages·features)를 몰라야 한다.
+
+
 ```
 pages  ──►  features/*  ──►  shared
 app (라우터·프로바이더·가드) ──► pages, features/*

@@ -1,0 +1,60 @@
+.banner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-card-yellow);
+  border-bottom: 2px solid var(--color-icon-yellow);
+  font-size: var(--font-sm);
+}
+
+:root[data-contrast='high'] .banner {
+  border-bottom-color: var(--color-border);
+}
+
+.text {
+  margin: 0 0 var(--space-1);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.primary,
+.secondary {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-sm);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary {
+  border: 0;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.secondary {
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* 접힌 상태: 화면 위 얇은 띠 (겹쳐 떠 있으면 상단 버튼을 가리므로 흐름 안에 둔다) */
+.pill {
+  display: block;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-bottom: 2px solid var(--color-icon-yellow);
+  background: var(--color-card-yellow);
+  color: var(--color-text);
+  font-weight: 800;
+  cursor: pointer;
+}

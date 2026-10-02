@@ -3,6 +3,8 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  // GitHub Pages: https://<계정>.github.io/<저장소명>/ → VITE_BASE=/<저장소명>/ 로 빌드
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },

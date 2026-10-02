@@ -34,7 +34,8 @@ import { RequireAuth, RequireGuest } from './guards'
 export function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      {/* GitHub Pages 같은 하위 경로(/저장소명/)에서도 동작하도록 */}
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <Routes>
           {/* 비회원 */}
           <Route element={<RequireGuest />}>

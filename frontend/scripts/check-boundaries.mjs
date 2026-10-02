@@ -3,6 +3,7 @@
 //  2. features/A → features/B import 금지
 //  3. features → pages / app import 금지
 //  4. features 밖에서는 각 feature의 index.ts로만 접근
+//  5. demo(가짜 서버)는 shared만 사용
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 
@@ -39,8 +40,11 @@ for (const file of walk(SRC)) {
     if (!seg) continue
     const [tLayer, tFeature] = seg
     const where = `${relative(SRC, file)} → ${spec}`
-    if (layer === 'shared' && ['features', 'pages', 'app'].includes(tLayer))
+    if (layer === 'shared' && ['features', 'pages', 'app', 'demo'].includes(tLayer))
       violations.push(`[shared→${tLayer}] ${where}`)
+    // demo(가짜 서버)는 API 계약만 흉내 낸다 — 화면 코드에 의존 금지
+    if (layer === 'demo' && ['features', 'pages', 'app'].includes(tLayer))
+      violations.push(`[demo→${tLayer}] ${where}`)
     if (layer === 'features' && tLayer === 'features' && tFeature !== feature)
       violations.push(`[feature 간 참조] ${where}`)
     if (layer === 'features' && ['pages', 'app'].includes(tLayer))

@@ -13,8 +13,21 @@ import { applyPrefs, loadPrefs } from '@/shared/a11y/preferences'
 // 첫 화면부터 글자 크기·대비 적용 (깜빡임 방지)
 applyPrefs(loadPrefs())
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+async function start() {
+  // 데모 빌드(서버 없음)에서만 가짜 서버를 끼운다 — 일반 빌드에서는 이 코드가 통째로 빠진다
+  let banner = null
+  if (import.meta.env.VITE_DEMO === '1') {
+    const demo = await import('@/demo')
+    demo.installDemo()
+    banner = <demo.DemoBanner />
+  }
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      {banner}
+      <App />
+    </StrictMode>,
+  )
+}
+
+void start()

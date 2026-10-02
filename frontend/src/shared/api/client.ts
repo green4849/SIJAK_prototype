@@ -43,6 +43,17 @@ interface RequestOptions {
   skipAuthRetry?: boolean
 }
 
+/**
+ * 실제 네트워크 전송 함수. 기본은 fetch.
+ * 데모 빌드(서버 없음)에서는 앱 시작 시 브라우저 안 가짜 서버로 교체한다 (src/demo).
+ */
+export type Transport = (url: string, init: RequestInit) => Promise<Response>
+let transport: Transport = (url, init) => fetch(url, init)
+
+export function setTransport(t: Transport) {
+  transport = t
+}
+
 async function send(method: string, path: string, body: unknown, token: string | null) {
   const headers: Record<string, string> = {}
   if (token) headers.Authorization = `Bearer ${token}`
@@ -51,7 +62,7 @@ async function send(method: string, path: string, body: unknown, token: string |
 
   // 절대 경로(/api/v1/...)로 받은 URL도 그대로 쓸 수 있게
   const url = path.startsWith(API_PREFIX) ? path : `${API_PREFIX}${path}`
-  return fetch(url, {
+  return transport(url, {
     method,
     headers,
     credentials: 'same-origin', // refresh 쿠키 전송
