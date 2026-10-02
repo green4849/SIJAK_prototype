@@ -11,7 +11,7 @@ AI 말동무, 사기 대화 탐지, 음성 매칭 통화, 지역 복지시설 �
 > 데모는 실제 서버 대신 **브라우저 안 가짜 서버**(`frontend/src/demo`)로 동작합니다.
 > 입력한 내용은 그 탭에만 남고 다른 사람과 공유되지 않아요. 이웃 답장·친구 수락은 시연용 자동 응답입니다.
 
-> **개발 전 필독: [`docs/dev-order.md`](docs/dev-order.md)** — 스테이지 순서와 레이어 규칙.
+> **개발 전 필독:** [`docs/dev-order.md`](docs/dev-order.md) 레이어 규칙·작업 흐름 · [`docs/roadmap.md`](docs/roadmap.md) 다음 할 일 · [`docs/deferred.md`](docs/deferred.md) 비워 둔 기능
 
 ## 구조
 
@@ -95,4 +95,8 @@ cd backend  && uv run pytest && uv run ruff check .
 cd frontend && npm run build && npm run lint   # lint에 레이어 경계 검사 포함
 ```
 
-push·PR마다 `.github/workflows/ci.yml` 이 같은 검사를 자동으로 돌린다.
+```bash
+cd frontend && npm run e2e   # 데모 빌드로 전체 흐름 + 접근성 스윕 (백엔드 불필요)
+```
+
+push·PR마다 `.github/workflows/ci.yml` 이 같은 검사(백엔드·프론트·e2e)를 자동으로 돌린다.
