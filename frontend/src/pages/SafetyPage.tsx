@@ -15,7 +15,7 @@ export function SafetyPage() {
   return (
     <section className={styles.page}>
       <TopBar back={!afterSignup} backTo="/me" />
-      <div className={styles.head}>
+      <div>
         <h1 className={styles.title}>안전한 시작을 약속합니다</h1>
         <p className={styles.lead}>안심하고 이용하세요.</p>
       </div>

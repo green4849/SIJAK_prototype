@@ -7,25 +7,23 @@
 }
 
 .icon {
-  align-self: center;
-  margin-top: var(--space-3);
+  align-self: flex-start;
+  margin-top: var(--space-1);
   color: var(--color-primary);
 }
 
 .title {
-  text-align: center;
-  font-size: var(--font-xl);
+  font-size: var(--text-title);
 }
 
 .body {
   margin: 0;
-  text-align: center;
   color: var(--color-text-muted);
 }
 
 .steps {
   margin: var(--space-2) 0 0;
-  padding: var(--space-2) var(--space-2) var(--space-2) calc(var(--space-2) + 1.4em);
+  padding: var(--card-pad) var(--card-pad) var(--card-pad) calc(var(--card-pad) + 1.4em);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);

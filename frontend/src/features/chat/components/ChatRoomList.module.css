@@ -4,12 +4,12 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--card-gap);
 }
 
 .item {
   min-height: calc(var(--touch-min) + var(--space-3));
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--card-pad);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -32,8 +32,9 @@
 }
 
 .name {
-  font-family: var(--font-display);
-  font-size: var(--font-lg);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
 }
 
 .preview {
@@ -53,7 +54,7 @@
 
 .time {
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }
 
 .badge {
@@ -62,6 +63,6 @@
   border-radius: var(--radius-pill);
   background: var(--color-danger);
   color: var(--color-on-danger);
-  font-weight: 800;
+  font-weight: var(--weight-bold);
   text-align: center;
 }

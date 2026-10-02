@@ -13,6 +13,6 @@
 }
 
 .label {
-  font-size: min(var(--font-sm), 15px);
-  font-weight: 700;
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
 }

@@ -23,8 +23,8 @@
   border-radius: var(--radius-pill);
   background: var(--color-card-beige);
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
-  font-weight: 600;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
 }
 
 :root[data-contrast='high'] .day span {
@@ -71,7 +71,7 @@
 
 .time {
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }
 
 /* A2: 위에서 읽는 중 새 메시지 — 입력줄 바로 위에 떠 있음 */
@@ -91,8 +91,8 @@
   background: var(--color-primary);
   color: var(--color-on-primary);
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
-  font-size: var(--font-base);
-  font-weight: 800;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
   cursor: pointer;
 }

@@ -2,8 +2,8 @@
   padding: var(--space-2);
   border: 2px solid currentColor;
   border-radius: var(--radius);
-  font-size: var(--font-base);
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
 }
 
 .alert[data-tone='error'] {

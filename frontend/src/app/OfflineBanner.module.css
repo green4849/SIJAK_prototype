@@ -7,9 +7,9 @@
   justify-content: center;
   gap: var(--space-1);
   min-height: var(--touch-min);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--gutter);
   background: var(--color-text);
   color: var(--color-bg);
-  font-weight: 700;
+  font-weight: var(--weight-medium);
   text-align: center;
 }

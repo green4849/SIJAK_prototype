@@ -8,8 +8,9 @@
   gap: var(--space-1);
   border-radius: var(--radius-lg);
   border: 2px solid transparent;
-  font-size: var(--font-lg);
-  font-weight: 700;
+  font-size: var(--text-button);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-title);
   text-decoration: none;
   cursor: pointer;
 }
@@ -40,8 +41,6 @@
 }
 
 .large {
-  min-height: calc(var(--touch-min) + 12px);
-  font-size: var(--font-xl);
-  font-family: var(--font-display);
-  font-weight: 400;
+  min-height: calc(var(--touch-min) + 4px); /* 주요 버튼 56–60 */
+  font-weight: var(--weight-semibold);
 }

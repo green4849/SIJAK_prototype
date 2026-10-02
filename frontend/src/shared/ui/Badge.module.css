@@ -9,9 +9,8 @@
   border-radius: var(--radius-pill);
   background: var(--color-danger);
   color: var(--color-on-danger);
-  font-family: var(--font-body);
-  font-size: min(var(--font-sm), 18px);
-  font-weight: 800;
+  font-size: min(var(--text-meta), 18px);
+  font-weight: var(--weight-bold);
   line-height: 1;
 }
 

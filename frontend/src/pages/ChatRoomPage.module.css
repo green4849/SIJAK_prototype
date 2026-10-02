@@ -14,11 +14,11 @@
 }
 
 .name {
-  font-size: var(--font-lg);
+  font-size: var(--text-card-title);
 }
 
 .meta {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--text-meta);
 }

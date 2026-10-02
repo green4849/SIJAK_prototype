@@ -8,7 +8,7 @@
   background: none;
   color: inherit;
   font: inherit;
-  font-weight: 700;
+  font-weight: var(--weight-medium);
   cursor: pointer;
   text-align: left;
 }
@@ -25,5 +25,5 @@
 }
 
 .len {
-  font-weight: 500;
+  font-weight: var(--weight-regular);
 }

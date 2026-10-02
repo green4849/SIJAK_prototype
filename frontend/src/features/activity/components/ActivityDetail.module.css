@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--section-gap);
   /* 아래 고정 버튼에 가려지지 않게 */
   padding-bottom: calc(var(--touch-min) * 2.6);
 }
@@ -9,22 +9,22 @@
 .category {
   margin: 0;
   color: var(--color-primary);
-  font-weight: 800;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
 }
 
 .title {
-  font-size: var(--font-xl);
+  font-size: var(--text-title);
 }
 
 .subtitle {
-  margin: 4px 0 0;
+  margin: var(--gap-tight) 0 0;
   color: var(--color-text-muted);
-  font-size: var(--font-lg);
 }
 
 .info {
   margin: 0;
-  padding: var(--space-2);
+  padding: var(--card-pad);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -40,14 +40,14 @@
 .row {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--gap-tight);
 }
 
 .label {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-weight: 800;
+  font-weight: var(--weight-semibold);
 }
 
 .value {
@@ -70,8 +70,8 @@
 }
 
 .likeText {
-  font-size: min(var(--font-sm), 15px);
-  font-weight: 700;
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
 }
 
 .cta {
@@ -79,7 +79,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: var(--space-1) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  padding: var(--space-1) var(--gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
   background: var(--color-bg);
   border-top: 1px solid var(--color-divider);
 }
@@ -99,6 +99,6 @@
   margin: 0;
   text-align: center;
   color: var(--color-primary);
-  font-family: var(--font-display);
-  font-size: var(--font-lg);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
 }
