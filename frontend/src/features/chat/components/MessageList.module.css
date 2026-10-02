@@ -73,3 +73,26 @@
   color: var(--color-text-muted);
   font-size: var(--font-sm);
 }
+
+/* A2: 위에서 읽는 중 새 메시지 — 입력줄 바로 위에 떠 있음 */
+.newMessages {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--touch-min) + var(--space-4) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 5;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+  font-size: var(--font-base);
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
