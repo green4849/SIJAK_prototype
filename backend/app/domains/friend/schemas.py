@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.domains.auth.constants import INTERESTS, REGIONS
 from app.domains.auth.service import age_on
@@ -20,7 +20,9 @@ class FriendCard(BaseModel):
     region_name: str
     interests: list[str]  # 표시용 라벨
     common_interests: list[str]  # 나와 겹치는 관심사 라벨
-    distance_km: float | None  # 반경 검색 미구현 시 null (docs/deferred.md)
+    distance_km: float | None = Field(
+        description="대략적인 거리(km, 0.5 단위). 어느 한쪽이라도 위치를 모르면 null"
+    )
     relation: Literal["none", "sent", "received", "friends"]
     request_id: uuid.UUID | None
 

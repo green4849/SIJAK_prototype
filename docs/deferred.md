@@ -12,14 +12,10 @@
 |---|---|
 | 프론트: 위치 동의 → `navigator.geolocation` → `PUT /api/v1/me/location` | ✅ 구현 |
 | 백엔드: 좌표 저장 (소수점 2자리 ≈ 1.1km 단위로 뭉개서 저장, 원본 좌표 미저장) | ✅ 구현 |
-| 백엔드: **반경 내 사용자 검색 + 거리(km) 계산** | ⬜ 비움 |
+| 백엔드: **반경 내 사용자 검색 + 거리(km) 계산** | ✅ 구현 (C3) |
 
-- **꽂는 곳:** `backend/app/domains/friend/nearby.py` 의 `find_nearby()`
-  - 입력: 기준 사용자 좌표, 반경(km), 후보 사용자 목록
-  - 출력: `[(user_id, distance_km)]`
-  - 현재 동작: 좌표와 무관하게 **같은 시·도 사용자**를 반환하고 `distance_km=None`
-  - 프론트는 `distance_km` 가 있으면 "약 1.2km" 를 표시하고, 없으면 지역명만 표시 → 로직만 채우면 화면은 자동으로 바뀜
-- 후보: Python haversine(소규모) 또는 PostGIS `ST_DWithin` (docker 이미지에 PostGIS 포함)
+- `backend/app/domains/friend/nearby.py` `find_nearby()` — Python haversine, 반경 2km, 거리는 0.5km 단위로 반올림해 응답
+- 사용자가 늘면 PostGIS `ST_DWithin` 으로 교체 (docker 이미지에 PostGIS 포함) — 이 함수 안만 바뀐다
 
 ## 2. 실시간 대화
 

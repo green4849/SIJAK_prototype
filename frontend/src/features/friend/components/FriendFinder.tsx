@@ -19,7 +19,11 @@ export function FriendFinder({ tab, chatHref, header }: Props) {
   const { data, loading, error, request, actionError } = useRecommendations(tab)
 
   return (
-    <section className={styles.section} aria-busy={loading}>
+    <section
+      className={styles.section}
+      aria-busy={loading}
+      aria-label={tab === 'nearby' ? '같은 동네 이웃 목록' : '추천 친구 목록'}
+    >
       {header}
       {error && <Alert>{error}</Alert>}
       {actionError && <Alert>{actionError}</Alert>}

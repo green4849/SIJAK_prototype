@@ -18,7 +18,7 @@ async def test_recommend_request_accept(client: AsyncClient) -> None:
     assert rec[0]["relation"] == "none"
     assert "phone" not in rec[0] and "birth_date" not in rec[0]
 
-    # 같은 동네(현재: 같은 시·도, 거리 없음 — deferred)
+    # 같은 동네 — 위치를 아직 안 알렸으면 같은 시·도, 거리 없음 (반경 검색은 test_nearby_radius)
     near = (await client.get("/api/v1/friends/recommendations?tab=nearby", headers=ha)).json()
     assert {c["name"] for c in near} == {"박철수"}
     assert near[0]["distance_km"] is None
@@ -74,3 +74,18 @@ async def test_location_is_coarsened(client: AsyncClient) -> None:
     # 해외 좌표는 거부
     bad = await client.put("/api/v1/me/location", headers=ha, json={"lat": 48.85, "lng": 2.35})
     assert bad.status_code == 422
+
+
+async def test_nearby_radius(client: AsyncClient) -> None:
+    """C3: 위치를 알리면 반경 2km 안의 이웃을 가까운 순으로, 거리(0.5km 단위)와 함께"""
+    ha, _ = await signup_user(client, "김영희")
+    hb, _ = await signup_user(client, "박철수")  # 약 1.1km
+    hc, _ = await signup_user(client, "이순자")  # 약 3.3km — 반경 밖
+    await signup_user(client, "최말순")  # 위치 안 알림 — 같은 시·도라 뒤에 거리 없이
+
+    await client.put("/api/v1/me/location", headers=ha, json={"lat": 37.2701, "lng": 127.0099})
+    await client.put("/api/v1/me/location", headers=hb, json={"lat": 37.28, "lng": 127.01})
+    await client.put("/api/v1/me/location", headers=hc, json={"lat": 37.30, "lng": 127.01})
+
+    near = (await client.get("/api/v1/friends/recommendations?tab=nearby", headers=ha)).json()
+    assert [(c["name"], c["distance_km"]) for c in near] == [("박철수", 1.0), ("최말순", None)]

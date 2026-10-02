@@ -17,7 +17,8 @@ export interface DUser {
   region_code: string
   interests: string[]
   intro: string
-  has_location: boolean
+  /** 동의한 경우만, 백엔드처럼 소수점 2자리(≈1km)로 뭉갠 좌표 [위도, 경도] */
+  geo: [number, number] | null
   last_login: number
 }
 
@@ -81,7 +82,7 @@ export interface DemoState {
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 2 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로)
+const VERSION = 3 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로)
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -108,29 +109,29 @@ function scheduleText(isoStr: string) {
 function seed(): DemoState {
   const user = (
     id: string, name: string, birth: string, gender: 'M' | 'F', phone: string, region: string,
-    interests: string[], intro: string, hasLoc = true,
+    interests: string[], intro: string, geo: [number, number] | null,
   ): DUser => ({
     id, name, birth_date: birth, gender, phone, region_code: region, interests, intro,
-    has_location: hasLoc, last_login: Date.now() - Math.random() * 86400_000,
+    geo, last_login: Date.now() - Math.random() * 86400_000,
   })
 
   const users: DUser[] = [
     user(DEMO_ME_ID, '김시작', '1956-04-12', 'M', '01055551234', '41',
-      ['walking', 'health', 'gardening'], '좋은 벗들과 함께하는 행복한 일상!', false),
+      ['walking', 'health', 'gardening'], '좋은 벗들과 함께하는 행복한 일상!', null),
     user('u-sunja', '이순자', '1958-05-02', 'F', '01020000001', '41',
-      ['walking', 'tv', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!'),
+      ['walking', 'tv', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!', [37.27, 127.01]),
     user('u-jungho', '박정호', '1954-11-20', 'M', '01020000002', '41',
-      ['walking', 'health', 'baduk'], '매일 아침 한강 걷기를 해요. 좋은 친구를 만나고 싶어요.'),
+      ['walking', 'health', 'baduk'], '매일 아침 한강 걷기를 해요. 좋은 친구를 만나고 싶어요.', [37.28, 127.02]),
     user('u-younghee', '김영희', '1956-02-14', 'F', '01020000003', '41',
-      ['cooking', 'gardening'], '요리와 텃밭 가꾸기를 좋아해요.'),
+      ['cooking', 'gardening'], '요리와 텃밭 가꾸기를 좋아해요.', [37.26, 127.0]),
     user('u-malsoon', '최말순', '1952-08-08', 'F', '01020000004', '41',
-      ['music', 'crafts', 'memories'], '옛날 노래 들으며 뜨개질해요.', false),
+      ['music', 'crafts', 'memories'], '옛날 노래 들으며 뜨개질해요.', null),
     user('u-deoksu', '정덕수', '1950-03-30', 'M', '01020000005', '41',
-      ['baduk', 'reading', 'health'], '바둑 두실 분 찾아요.'),
+      ['baduk', 'reading', 'health'], '바둑 두실 분 찾아요.', [37.29, 127.03]),
     user('u-okja', '한옥자', '1957-12-01', 'F', '01020000006', '11',
-      ['music', 'health'], '복지관 노래교실 다녀요.'),
+      ['music', 'health'], '복지관 노래교실 다녀요.', [37.57, 126.98]),
     user('u-gicheol', '윤기철', '1953-06-17', 'M', '01020000007', '11',
-      ['walking', 'travel'], '등산과 사진 찍기를 좋아합니다. 주말마다 가까운 산에 오르고, 찍은 꽃 사진을 손주들에게 보내 주는 게 낙이에요. 천천히 같이 걸으실 분 환영해요!', false),
+      ['walking', 'travel'], '등산과 사진 찍기를 좋아합니다. 주말마다 가까운 산에 오르고, 찍은 꽃 사진을 손주들에게 보내 주는 게 낙이에요. 천천히 같이 걸으실 분 환영해요!', null),
   ]
 
   const now = Date.now()

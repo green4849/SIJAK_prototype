@@ -646,7 +646,10 @@ export interface components {
             age: number;
             /** Common Interests */
             common_interests: string[];
-            /** Distance Km */
+            /**
+             * Distance Km
+             * @description 대략적인 거리(km, 0.5 단위). 어느 한쪽이라도 위치를 모르면 null
+             */
             distance_km: number | null;
             /**
              * Gender
