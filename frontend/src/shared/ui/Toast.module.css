@@ -1,0 +1,48 @@
+/* 하단 고정 막대([data-bottom-bar]: 탭·입력줄·신청 버튼) 위에 뜬다 — 높이는 ToastHost 가 잰다 */
+.host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--toast-offset, 0px) + var(--space-2));
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  max-width: calc(var(--page-max) - var(--space-4));
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-text);
+  color: var(--color-bg);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+  font-size: var(--font-base);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  animation: rise 0.2s ease-out;
+}
+
+.toast[data-tone='error'] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+:root[data-contrast='high'] .toast {
+  border: 2px solid var(--color-border);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}

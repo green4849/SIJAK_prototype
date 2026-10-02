@@ -22,6 +22,7 @@ import { SafetyPage } from '@/pages/SafetyPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SignupPage } from '@/pages/SignupPage'
 import { WelcomePage } from '@/pages/WelcomePage'
+import { ToastHost } from '@/shared/ui/Toast'
 import { PlainLayout, TabLayout } from './AppLayout'
 import { RequireAuth, RequireGuest } from './guards'
 
@@ -76,6 +77,7 @@ export function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
+        <ToastHost />
       </BrowserRouter>
     </AuthProvider>
   )

@@ -71,7 +71,7 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
 
       {actionError && <Alert>{actionError}</Alert>}
 
-      <div className={styles.cta}>
+      <div className={styles.cta} data-bottom-bar>
         {a.applied ? (
           <div className={styles.applied}>
             <p className={styles.appliedText} role="status">
