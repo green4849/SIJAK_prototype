@@ -8,19 +8,28 @@
 
 한 스테이지가 **완료 기준(DoD)** 을 통과하기 전에는 다음 스테이지 코드를 쓰지 않는다.
 
-| # | 스테이지 | 백엔드 도메인 | 프론트 feature | 의존 |
-|---|---|---|---|---|
-| 0 | 기반 | `core`, `main` | `app`, `shared` | — |
-| 1 | 인증 | `auth` + `integrations/identity` | `auth` | 0 |
-| 2 | AI 말동무 (텍스트) | `companion` + `integrations/llm` | `companion` | 1 |
-| 3 | AI 말동무 (음성) | `companion` + `integrations/stt`, `tts` | `companion` | 2 |
-| 4 | 위험 탐지 | `risk` | (경고 UI는 `companion`/`call`에 노출) | 2 |
-| 5 | 매칭 + 음성 통화 | `match`, `call` | `match`, `call` | 1, 4 |
-| 6 | 복지 연계 | `welfare` + `integrations/public_data` | `welfare` | 1 |
-| 7 | 고립 지수 + 자가평가 | `wellbeing` | `wellbeing` | 2, 5, 6 |
-| 8 | 긴급 도움 | `emergency` | `emergency` | 1 |
+**화면 기준: [`docs/design/screens-v1.png`](design/screens-v1.png)** (①~⑨). 스테이지는 이 화면 단위로 나눈다.
 
-> 6(복지)은 독립적이라 2~5 사이 어디든 끼울 수 있다. 7(고립 지수)은 다른 도메인의 활동 데이터를 읽어야 하므로 반드시 뒤.
+| # | 스테이지 | 화면 | 백엔드 도메인 | 프론트 feature | 의존 |
+|---|---|---|---|---|---|
+| 0 | 기반 | — | `core`, `main` | `app`, `shared` | — |
+| 1 | 인증 + 온보딩 | ① 시작 ② 로그인/본인인증 ⑧ 보안 안내 | `auth` + `integrations/identity` | `auth` | 0 |
+| 2 | 앱 셸 + 홈 + 마이페이지 | ③ 홈 ⑨ 마이페이지 (+설정·도움말) | `auth` (프로필 수정) | `profile` | 1 |
+| 3 | 동네 친구 찾기 | ④ 추천 친구 / 같은 동네, 친구 신청 | `friend` | `friend` | 2 |
+| 4 | 대화 | ⑤ 1:1 대화 (텍스트 + 음성 메시지) | `chat` | `chat` | 3 |
+| 5 | 안전 | ⑧의 실체: 위험 대화 탐지·경고, 신고·차단 | `risk` | (`chat`, `friend`에 노출) | 4 |
+| 6 | 지역생활 | ⑥ 활동 목록 ⑦ 활동 상세·신청 | `activity` (+ `integrations/public_data`) | `activity` | 2 |
+
+> 6(지역생활)은 3~5와 독립적이라 순서를 당길 수 있다.
+
+### 백로그 (시안에 화면 없음 — 핵심 흐름 완성 후 결정)
+
+| 기능 | 도메인 | 비고 |
+|---|---|---|
+| AI 말동무 (텍스트·음성) | `companion` + `integrations/llm`, `stt`, `tts` | 보고서 핵심 기능이나 시안 홈에 진입점 없음 |
+| 음성 통화 | `call` | ⑤ 상단 📞 아이콘 |
+| 고립 지수 + 자가평가 | `wellbeing` | 3~6의 활동 데이터 필요 |
+| 긴급 도움 (SOS) | `emergency` | |
 
 ### 스테이지 내부 순서 (항상 동일)
 
@@ -88,4 +97,4 @@ app (라우터·프로바이더·가드) ──► pages, features/*
 ## 5. 현재 스테이지
 
 **Stage 0 — 기반** ✅  
-**Stage 1 — 인증** ✅ → 다음: **Stage 2 — AI 말동무 (텍스트)**
+**Stage 1 — 인증** ✅ (화면 ①②⑧ 리디자인 진행 중)
