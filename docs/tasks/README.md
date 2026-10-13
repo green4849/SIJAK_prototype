@@ -47,12 +47,13 @@
 | [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | ⬜ |
 | [C5](C5-pwa.md) | PWA — 홈 화면에 추가 | S | P1 | ✅ |
 | [C6](C6-risk-ml.md) | 위험 탐지 2·3단계 | L | P2 | ⬜ |
-| [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | ⬜ |
+| [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | 🎭 |
 | [C8](C8-ai-companion.md) | AI 말동무 | L | P2 | 🎭 |
 | [C9](C9-voice-call.md) | 음성 통화 (시안 ⑤ 📞) | L | P2 | ⬜ |
 | [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | 🎭 |
 | [C11](C11-wellbeing.md) | 고립 지수·자가평가 | M | P2 | 🎭 |
 | [C12](C12-points-engagement.md) | 포인트·추천 평가·대화 주제·봉사모임 | L | P1 | 🔨 |
+| [C13](C13-brain-games.md) | 두뇌 운동 (인지 훈련) | M | P2 | 🎭 |
 | [D3](D3-openapi-types.md) | API 타입 자동 생성 | M | P1 | ✅ |
 | [D4](D4-unit-tests.md) | 프론트 단위·컴포넌트 테스트 | M | P2 | ⬜ |
 | [D5](D5-visual-regression.md) | 시각 회귀 테스트 | S | P2 | ⬜ |
