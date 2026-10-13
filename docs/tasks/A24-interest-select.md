@@ -1,10 +1,10 @@
-# A23. 가입 — 좋아하는 활동을 둥근 그림으로, 한 화면에 질문 하나
+# A24. 가입 — 좋아하는 활동을 둥근 그림으로, 한 화면에 질문 하나
 
 | 영역 | 크기 | 우선 | 상태 | 브랜치 |
 |---|---|---|---|---|
-| 폴리싱 | S | P1 | ✅ | `polish/A23-interest-select` |
+| 폴리싱 | S | P1 | ✅ | `polish/A23-interest-select` (A23 번호가 겹쳐 A24로 바꿈) |
 
-> 전후 비교·폴리싱 참고: `docs/design/A23-interest-before-after.md` · 보고서용 요약: `docs/ux-changes.md` (2026-10-14)
+> 전후 비교·폴리싱 참고: `docs/design/A24-interest-before-after.md` · 보고서용 요약: `docs/ux-changes.md` (2026-10-14)
 
 ## 왜
 원래 시안(성향조사 — 취미)은 사진을 보고 여러 개 고르는 화면이었는데, 구현에서는 회색 테두리 글자 버튼 12개가 되어 딱딱하고 대충 만든 느낌이 났다.

@@ -103,6 +103,21 @@ test('C12 대화 주제: 고르면 입력칸에 들어가고, 보내기는 직�
   await expect(toggle).toHaveAttribute('aria-expanded', 'false')
 })
 
+test('C12 대화 주제: 위험 경고가 있는 방은 접혀 있고, 펼쳐도 경고가 보인다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/chats')
+  await page.getByRole('link', { name: /정덕수님/ }).click()
+  // 내가 한마디도 안 한 방이지만 경고가 있어서 접혀 있다
+  const toggle = page.getByRole('button', { name: '대화 주제 추천' })
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  const report = page.getByRole('button', { name: '신고하기' }).last()
+  await expect(report).toBeInViewport()
+  // 직접 펼쳐도 맨 아래를 따라 내려가 경고가 입력줄 뒤로 숨지 않는다
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(report).toBeInViewport()
+})
+
 test('C12 첫 친구 미션: 서로 대화한 친구 3명 → 500P 받기', async ({ page }) => {
   test.setTimeout(60_000)
   await startTour(page)

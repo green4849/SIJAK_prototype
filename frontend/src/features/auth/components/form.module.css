@@ -59,7 +59,7 @@
   border: 2px solid var(--color-border);
 }
 
-/* 가입 단계 막대 — 상단 '뒤로' 줄 오른쪽에 (A23) */
+/* 가입 단계 막대 — 상단 '뒤로' 줄 오른쪽에 (A24) */
 .progress {
   width: clamp(140px, 55vw, 280px);
   display: flex;
