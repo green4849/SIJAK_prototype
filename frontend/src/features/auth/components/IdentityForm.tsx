@@ -61,7 +61,7 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
     e.preventDefault()
     const birth = toIsoDate(year, month, day)
     if (!name.trim()) return setLocalError('이름을 적어 주세요.')
-    if (!birth) return setLocalError('태어난 날을 다시 확인해 주세요.')
+    if (!birth) return setLocalError('생년월일을 다시 확인해 주세요.')
     if (digitsOnly(phone, 11).length < 10) return setLocalError('휴대전화 번호를 다시 확인해 주세요.')
     if (!gender) return setLocalError('성별을 골라 주세요.')
     setLocalError(null)
@@ -83,7 +83,7 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
       />
 
       <fieldset className={styles.dateGroup}>
-        <legend className={styles.groupLegend}>태어난 날</legend>
+        <legend className={styles.groupLegend}>생년월일</legend>
         <div className={styles.row}>
           <TextField
             label="년"
