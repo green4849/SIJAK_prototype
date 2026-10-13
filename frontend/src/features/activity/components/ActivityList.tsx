@@ -22,9 +22,9 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
   if (!items || items.length === 0) return <p className={styles.empty}>{emptyText}</p>
 
   return (
-    <CardGrid as="ul">
+    <CardGrid as="ul" stretch>
       {items.map((a) => (
-        <li key={a.id}>
+        <li key={a.id} className={styles.cell}>
           <Link to={detailHref(a.id)} className={styles.item}>
             <ActivityThumb kind={a.image_kind} />
             <span className={styles.main}>

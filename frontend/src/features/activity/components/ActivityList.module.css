@@ -1,4 +1,10 @@
+/* 같은 줄 카드 높이 맞춤 (A23) — 칸 높이를 카드가 꽉 채워, 끝선과 오른쪽 화살표 높이가 줄마다 같다 */
+.cell {
+  display: flex;
+}
+
 .item {
+  flex: 1;
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
   display: flex;
   align-items: flex-start; /* 제목이 길어 두 줄 이상이어도 썸네일·제목 시작선 고정 (리뷰 ⑥-9) */
