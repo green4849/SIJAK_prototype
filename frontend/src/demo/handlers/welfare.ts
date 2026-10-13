@@ -1,6 +1,6 @@
 /**
  * 가까운 복지시설 (C7) · 두뇌 운동 — 백엔드 없음. 계약: shared/api/draft.ts
- * 복지시설은 공공데이터포털 '노인복지시설' 형식을 본뜬 시연용 가상 시설 (실제 기관 아님).
+ * 복지시설은 공공데이터포털 '노인복지시설' 형식을 본뜬 시연 데이터 — 오산시 양산동 기준 (아래 CENTERS 설명).
  */
 import { fail, json, type Route } from '../http'
 import { db, save } from '../store'
@@ -15,54 +15,61 @@ const KIND_LABEL: Record<WelfareKind, string> = {
 
 type Seed = Omit<WelfareCenterOut, 'kind_label'>
 
+/*
+ * 오산시 양산동(세마동 관할) 기준 — 실제 있는 단지·기관 이름을 빌려 '진짜 동네'처럼 보이게 한 시연 데이터.
+ *  - 시설 이름·동네: 실제 (양산동 아파트 단지 경로당, 오산노인종합복지관, 오산시니어클럽)
+ *  - 거리: 양산동 가운데(한신대 앞)에서 어림한 값
+ *  - 프로그램·빈방·운영시간·전화번호: 시연용으로 지어낸 값 → 실제 기관에 확인하지 않음
+ *    (전화번호는 실제 기관 번호가 아니다. 실서비스에서는 공공데이터포털 '노인복지시설' API 값을 쓴다)
+ */
 const CENTERS: Seed[] = [
   {
-    id: 'w-1', name: '○○노인종합복지관', kind: 'welfare_center', address: '○○시 ○○로 120', phone: '0312345678',
-    distance_km: 0.5, open_hours: '평일 9시 ~ 18시',
+    id: 'w-1', name: '세마e편한세상 경로당', kind: 'kyungrodang', address: '경기도 오산시 양산동 세마e편한세상 단지 안',
+    phone: '0312345001', distance_km: 0.3, open_hours: '매일 10시 ~ 17시',
     programs: [
       { id: 'p-1', title: '노래 교실', schedule_text: '매주 화·목 오후 2시', fee_text: '무료', seats_left: 3 },
-      { id: 'p-2', title: '스마트폰 기초반', schedule_text: '매주 수 오전 10시', fee_text: '무료', seats_left: 0 },
-      { id: 'p-3', title: '건강 체조', schedule_text: '매일 오전 9시 30분', fee_text: '무료', seats_left: null },
-      { id: 'p-4', title: '서예 교실', schedule_text: '매주 금 오후 1시', fee_text: '월 1만 원', seats_left: 5 },
-    ],
-    rooms: [
-      { name: '1층 사랑방', capacity: 12, available_text: '평일 오후 비어 있어요' },
-      { name: '3층 소강당', capacity: 40, available_text: '하루 전까지 전화로 예약' },
-    ],
-  },
-  {
-    id: 'w-2', name: '○○동 경로당', kind: 'kyungrodang', address: '○○시 ○○동 34-2', phone: '0312345001',
-    distance_km: 0.5, open_hours: '매일 10시 ~ 17시',
-    programs: [
-      { id: 'p-5', title: '바둑·장기 한마당', schedule_text: '매일 오후', fee_text: '무료', seats_left: null },
-      { id: 'p-6', title: '의자 요가', schedule_text: '매주 월 오전 11시', fee_text: '무료', seats_left: 4 },
+      { id: 'p-2', title: '바둑·장기 한마당', schedule_text: '매일 오후', fee_text: '무료', seats_left: null },
+      { id: 'p-3', title: '의자 요가', schedule_text: '매주 월 오전 11시', fee_text: '무료', seats_left: 4 },
     ],
     rooms: [{ name: '큰방', capacity: 15, available_text: '주말에 비어 있어요' }],
   },
   {
-    id: 'w-3', name: '○○시니어클럽', kind: 'senior_center', address: '○○시 ○○대로 88, 2층', phone: '0312345002',
-    distance_km: 1, open_hours: '평일 9시 ~ 18시',
+    id: 'w-2', name: '양산동 늘푸른오스카빌 경로당', kind: 'kyungrodang', address: '경기도 오산시 양산동 늘푸른오스카빌 단지 안',
+    phone: '0312345003', distance_km: 0.5, open_hours: '매일 10시 ~ 17시',
     programs: [
-      { id: 'p-7', title: '어르신 일자리 상담', schedule_text: '평일 상시', fee_text: '무료', seats_left: null },
-      { id: 'p-8', title: '그림책 읽어 주기 봉사', schedule_text: '매주 목 오후 3시', fee_text: '무료', seats_left: 6 },
+      { id: 'p-4', title: '건강 걷기', schedule_text: '매주 토 오전 8시', fee_text: '무료', seats_left: null },
+      { id: 'p-5', title: '스마트폰 기초반', schedule_text: '매주 수 오전 10시', fee_text: '무료', seats_left: 0 },
     ],
-    rooms: [],
-  },
-  {
-    id: 'w-4', name: '△△경로당', kind: 'kyungrodang', address: '○○시 △△동 7', phone: '0312345003',
-    distance_km: 1.5, open_hours: '매일 10시 ~ 17시',
-    programs: [{ id: 'p-9', title: '건강 걷기', schedule_text: '매주 토 오전 8시', fee_text: '무료', seats_left: null }],
     rooms: [{ name: '작은방', capacity: 8, available_text: '평일 오전 비어 있어요' }],
   },
   {
-    id: 'w-5', name: '△△노인복지관', kind: 'welfare_center', address: '○○시 △△로 15', phone: '0312345004',
-    distance_km: 2.5, open_hours: '평일 9시 ~ 18시, 토 9시 ~ 13시',
+    id: 'w-3', name: '오산세마 효성백년가약 경로당', kind: 'kyungrodang', address: '경기도 오산시 양산동 오산세마 효성백년가약 단지 안',
+    phone: '0312345005', distance_km: 0.7, open_hours: '매일 10시 ~ 17시',
+    programs: [{ id: 'p-6', title: '서예 교실', schedule_text: '매주 금 오후 1시', fee_text: '무료', seats_left: 5 }],
+    rooms: [{ name: '큰방', capacity: 12, available_text: '평일 오후 비어 있어요' }],
+  },
+  {
+    id: 'w-4', name: '오산노인종합복지관', kind: 'welfare_center', address: '경기도 오산시',
+    phone: '0312345678', distance_km: 4, open_hours: '평일 9시 ~ 18시',
     programs: [
-      { id: 'p-10', title: '텃밭 가꾸기', schedule_text: '매주 화 오전 9시', fee_text: '무료', seats_left: 2 },
-      { id: 'p-11', title: '영화 보는 날', schedule_text: '매달 셋째 금 오후 2시', fee_text: '무료', seats_left: 20 },
-      { id: 'p-12', title: '치매 예방 교실', schedule_text: '매주 목 오전 10시', fee_text: '무료', seats_left: 1 },
+      { id: 'p-7', title: '건강 체조', schedule_text: '매일 오전 9시 30분', fee_text: '무료', seats_left: null },
+      { id: 'p-8', title: '텃밭 가꾸기', schedule_text: '매주 화 오전 9시', fee_text: '무료', seats_left: 2 },
+      { id: 'p-9', title: '치매 예방 교실', schedule_text: '매주 목 오전 10시', fee_text: '무료', seats_left: 1 },
+      { id: 'p-10', title: '영화 보는 날', schedule_text: '매달 셋째 금 오후 2시', fee_text: '무료', seats_left: 20 },
     ],
-    rooms: [{ name: '2층 동아리방', capacity: 20, available_text: '평일 오후 비어 있어요' }],
+    rooms: [
+      { name: '1층 사랑방', capacity: 12, available_text: '평일 오후 비어 있어요' },
+      { name: '강당', capacity: 40, available_text: '하루 전까지 전화로 예약' },
+    ],
+  },
+  {
+    id: 'w-5', name: '오산시니어클럽', kind: 'senior_center', address: '경기도 오산시 내삼미동',
+    phone: '0312345002', distance_km: 4.5, open_hours: '평일 9시 ~ 18시',
+    programs: [
+      { id: 'p-11', title: '어르신 일자리 상담', schedule_text: '평일 상시', fee_text: '무료', seats_left: null },
+      { id: 'p-12', title: '그림책 읽어 주기 봉사', schedule_text: '매주 목 오후 3시', fee_text: '무료', seats_left: 6 },
+    ],
+    rooms: [],
   },
 ]
 

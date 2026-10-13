@@ -29,6 +29,8 @@
   height: 64px;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  padding: 4px;
   border-radius: var(--radius-control);
   background: var(--color-card-mint);
   color: var(--color-icon-mint);
@@ -226,4 +228,28 @@
   font-size: var(--text-button);
   font-weight: var(--weight-semibold);
   text-decoration: none;
+}
+
+/* 지금 열려 있는지 (C7 다듬기) — 열림: 초록 글씨 + 점, 닫힘: 보조 글씨. 색만이 아니라 글로도 말한다 */
+.openState {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.openState[data-open='true'] {
+  color: var(--color-primary);
+}
+
+.openState[data-open='true']::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
 }
