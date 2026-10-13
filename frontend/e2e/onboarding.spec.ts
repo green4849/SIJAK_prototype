@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test'
 import { verifyPhone } from './helpers'
 
+// 이 파일의 가입 흐름은 위치 동의를 쓴다 — 위치·역지오코딩(OpenStreetMap)은 고정값으로
+test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
+test.beforeEach(async ({ page }) => {
+  await page.route('https://nominatim.openstreetmap.org/**', (r) =>
+    r.fulfill({ json: { address: { state: '경기도', city: '수원시', borough: '영통구', quarter: '매탄동' } } }),
+  )
+})
+
 test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → ③ 홈', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/welcome$/)
@@ -15,11 +23,9 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
 
   await verifyPhone(page, { name: '홍길순', year: '1957', month: '7', day: '7', phone: '01077778888', gender: '여성' })
   await expect(page).toHaveURL(/\/signup$/)
-  // 위치 없이 직접 고르기 → 창에서 시·도 선택 → 카드에 표시
-  await page.getByRole('button', { name: '직접 고를게요' }).click()
-  await page.getByRole('dialog', { name: '사는 곳 고르기' }).getByRole('radio', { name: '경기도' }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect(page.getByRole('region', { name: '사는 곳' })).toContainText('경기도')
+  // 위치 정보 수집 동의 → 그 자리에서 동네를 찾아 보여 준다
+  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '요리' }).click()
   await page.getByRole('button', { name: '가입 완료' }).click()
 
@@ -29,29 +35,27 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
   await expect(page.getByRole('heading', { name: '홍길순님' })).toBeVisible()
 })
 
-test.describe('내 위치로 사는 곳 찾기', () => {
-  test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
+test('역지오코딩이 안 되면 가까운 시·도로 어림한다', async ({ page }) => {
+  await page.unroute('https://nominatim.openstreetmap.org/**')
+  await page.route('https://nominatim.openstreetmap.org/**', (r) => r.abort())
+  await page.goto('/login/phone')
+  await verifyPhone(page, { name: '최어림', year: '1954', month: '4', day: '4', phone: '01044443333', gender: '남성' })
+  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await expect(page.getByText('경기도', { exact: true })).toBeVisible()
+})
 
-  test('위치를 허락하면 시·도와 동네 이름이 바로 뜬다', async ({ page }) => {
-    // 역지오코딩(OpenStreetMap)은 테스트에서 고정 응답으로
-    await page.route('https://nominatim.openstreetmap.org/**', (r) =>
-      r.fulfill({ json: { address: { state: '경기도', city: '수원시', borough: '영통구', quarter: '매탄동' } } }),
-    )
-    await page.goto('/login/phone')
-    await verifyPhone(page, { name: '박위치', year: '1956', month: '3', day: '3', phone: '01055554444', gender: '여성' })
-    await page.getByRole('button', { name: '내 위치로 찾기' }).click()
-    const region = page.getByRole('region', { name: '사는 곳' })
-    await expect(region).toContainText('경기도')
-    await expect(region).toContainText('수원시 영통구 매탄동')
-    await expect(region.getByRole('button', { name: '바꾸기' })).toBeVisible()
-  })
+test.describe('위치 권한이 없으면', () => {
+  test.use({ permissions: [] })
 
-  test('역지오코딩이 안 되면 가까운 시·도로 어림한다', async ({ page }) => {
-    await page.route('https://nominatim.openstreetmap.org/**', (r) => r.abort())
+  test('동의가 되돌아가고 가입을 마칠 수 없다', async ({ page }) => {
     await page.goto('/login/phone')
-    await verifyPhone(page, { name: '최어림', year: '1954', month: '4', day: '4', phone: '01044443333', gender: '남성' })
-    await page.getByRole('button', { name: '내 위치로 찾기' }).click()
-    await expect(page.getByRole('region', { name: '사는 곳' })).toContainText('경기도')
+    await verifyPhone(page, { name: '정거부', year: '1953', month: '5', day: '5', phone: '01033332222', gender: '여성' })
+    await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).click()
+    await expect(page.getByRole('alert')).toContainText('위치')
+    await expect(page.getByRole('checkbox', { name: /위치 정보 수집 동의/ })).not.toBeChecked()
+    await page.getByRole('button', { name: '요리' }).click()
+    await page.getByRole('button', { name: '가입 완료' }).click()
+    await expect(page.getByRole('alert').filter({ hasText: '위치 정보 수집에 동의해 주세요.' })).toBeVisible()
   })
 })
 

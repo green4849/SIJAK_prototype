@@ -6,7 +6,7 @@ import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { authApi, type User } from '../api/authApi'
 import { setAccessToken } from '../api/session'
 import { useSignupOptions } from '../hooks/useSignupOptions'
-import { RegionPicker } from './RegionPicker'
+import { LocationAgreement, type AgreedLocation } from './LocationAgreement'
 import styles from './form.module.css'
 
 interface Props {
@@ -15,11 +15,10 @@ interface Props {
   onDone: (accessToken: string, user: User) => void
 }
 
-/** 가입 마무리 — 사는 곳 + 좋아하는 것 */
+/** 가입 마무리 — 위치 정보 수집 동의(→ 사는 곳) + 좋아하는 것 */
 export function SignupProfileForm({ signupToken, name, onDone }: Props) {
   const { options, error: loadError } = useSignupOptions()
-  const [region, setRegion] = useState('')
-  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [located, setLocated] = useState<AgreedLocation | null>(null)
   const [interests, setInterests] = useState<string[]>([])
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,19 +36,17 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!region) return setError('사는 곳을 알려 주세요.')
+    if (!located) return setError('위치 정보 수집에 동의해 주세요.')
     if (interests.length === 0) return setError('좋아하는 것을 하나 이상 골라 주세요.')
     setPending(true)
     setError(null)
     try {
-      const r = await authApi.signup(signupToken, region, interests)
+      const r = await authApi.signup(signupToken, located.regionCode, interests)
       if (r.status !== 'logged_in') return
       let user = r.user
-      // 위치로 사는 곳을 찾았으면 '같은 동네' 이웃 찾기용 위치도 같이 저장 — 다시 묻지 않게
-      if (pos) {
-        setAccessToken(r.access_token)
-        user = await authApi.updateLocation(pos.lat, pos.lng).catch(() => user)
-      }
+      // 동의한 위치를 '같은 동네' 이웃 찾기용으로도 저장 — 친구 탭에서 다시 묻지 않게
+      setAccessToken(r.access_token)
+      user = await authApi.updateLocation(located.pos.lat, located.pos.lng).catch(() => user)
       onDone(r.access_token, user)
     } catch (err) {
       setError(errorMessage(err))
@@ -67,12 +64,10 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
         <h1 className={styles.title}>{name}님, 반가워요</h1>
       </div>
 
-      <RegionPicker
+      <LocationAgreement
         regions={options.regions}
-        value={region}
-        onChange={(code, p) => {
-          setRegion(code)
-          setPos(p ?? null)
+        onChange={(l) => {
+          setLocated(l)
           setError(null)
         }}
       />

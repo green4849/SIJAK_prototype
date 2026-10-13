@@ -1,0 +1,79 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* 동의 한 줄 전체가 누르는 곳 (작은 체크박스만 누르게 하지 않는다) */
+.agree {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  padding: var(--card-pad);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+}
+
+.agree[data-on] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.agree:has(.input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+/* 실제 체크박스는 화면 낭독기·키보드용으로 남기고 모양만 숨긴다 */
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-on-primary);
+}
+
+.agree[data-on] .box {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-card-title);
+  line-height: var(--leading-title);
+}
+
+.sub {
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+}
+
+/* 찾은 동네 */
+.place {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.place:empty {
+  display: none;
+}
