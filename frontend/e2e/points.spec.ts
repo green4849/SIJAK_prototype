@@ -23,7 +23,7 @@ test('C12 홈: 포인트 칩·첫 친구 미션 → 내 포인트 화면', async
   await expect(history).toContainText('가입 축하')
 })
 
-test('C12 추천 평가: 고르면 표시 + 포인트, "잘 안 맞아요"는 목록에서 빠짐', async ({ page }) => {
+test('C12 추천 평가: 만나보고 싶어요를 누르면 표시 + 포인트', async ({ page }) => {
   await startTour(page)
   await page.goto('/friends')
   await expect(page.getByText(/평가하면 \+10P · 오늘 5번/)).toBeVisible()
@@ -34,12 +34,10 @@ test('C12 추천 평가: 고르면 표시 + 포인트, "잘 안 맞아요"는 �
   await expect(page.getByRole('status').filter({ hasText: '+10P' })).toBeVisible()
   await expect(page.getByText(/오늘 4번/)).toBeVisible()
 
-  const malsoon = page.getByRole('article', { name: '최말순님' })
-  await malsoon.getByRole('button', { name: '잘 안 맞아요' }).click()
-  await expect(malsoon).toHaveCount(0)
+  await expect(younghee.getByRole('button', { name: /그저 그래요|잘 안 맞아요/ })).toHaveCount(0)
 
   await page.goto('/me')
-  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('130P')
+  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('120P')
 })
 
 test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (무료로 모으기 먼저)', async ({ page }) => {
