@@ -4,7 +4,9 @@ import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { authApi, type User } from '../api/authApi'
+import { setAccessToken } from '../api/session'
 import { useSignupOptions } from '../hooks/useSignupOptions'
+import { RegionPicker } from './RegionPicker'
 import styles from './form.module.css'
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 export function SignupProfileForm({ signupToken, name, onDone }: Props) {
   const { options, error: loadError } = useSignupOptions()
   const [region, setRegion] = useState('')
+  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null)
   const [interests, setInterests] = useState<string[]>([])
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,13 +37,20 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!region) return setError('사는 곳을 골라 주세요.')
+    if (!region) return setError('사는 곳을 알려 주세요.')
     if (interests.length === 0) return setError('좋아하는 것을 하나 이상 골라 주세요.')
     setPending(true)
     setError(null)
     try {
       const r = await authApi.signup(signupToken, region, interests)
-      if (r.status === 'logged_in') onDone(r.access_token, r.user)
+      if (r.status !== 'logged_in') return
+      let user = r.user
+      // 위치로 사는 곳을 찾았으면 '같은 동네' 이웃 찾기용 위치도 같이 저장 — 다시 묻지 않게
+      if (pos) {
+        setAccessToken(r.access_token)
+        user = await authApi.updateLocation(pos.lat, pos.lng).catch(() => user)
+      }
+      onDone(r.access_token, user)
     } catch (err) {
       setError(errorMessage(err))
     } finally {
@@ -57,12 +67,12 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
         <h1 className={styles.title}>{name}님, 반가워요</h1>
       </div>
 
-      <OptionGrid
-        legend="사는 곳"
-        options={options.regions.map((o) => ({ value: o.code, label: o.label }))}
-        selected={region ? [region] : []}
-        onToggle={(v) => {
-          setRegion(v)
+      <RegionPicker
+        regions={options.regions}
+        value={region}
+        onChange={(code, p) => {
+          setRegion(code)
+          setPos(p ?? null)
           setError(null)
         }}
       />

@@ -6,6 +6,7 @@ import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { TextArea } from '@/shared/ui/TextArea'
 import { authApi, type User } from '../api/authApi'
 import { useSignupOptions } from '../hooks/useSignupOptions'
+import { RegionPicker } from './RegionPicker'
 import styles from './form.module.css'
 
 const INTRO_MAX = 60 // backend INTRO_MAX_LEN
@@ -61,12 +62,7 @@ export function ProfileEditForm({ user, onSaved }: Props) {
         onChange={(e) => setIntro(e.target.value)}
       />
 
-      <OptionGrid
-        legend="사는 곳"
-        options={options.regions.map((o) => ({ value: o.code, label: o.label }))}
-        selected={[region]}
-        onToggle={setRegion}
-      />
+      <RegionPicker regions={options.regions} value={region} onChange={(code) => setRegion(code)} />
 
       <OptionGrid
         legend="좋아하는 것"
