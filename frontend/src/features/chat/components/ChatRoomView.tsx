@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Alert } from '@/shared/ui/Alert'
 import type { ChatMessageData, ChatPeer } from '../api/chatApi'
 import { useMessages } from '../hooks/useMessages'
@@ -30,6 +30,19 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+  // 입력줄이 높아지면(대화 주제 펼침 등) 맨 아래를 보던 중이면 따라 내려간다 — 마지막 말풍선·위험 경고가 입력줄 뒤로 숨지 않게
+  const prevBar = useRef<number | undefined>(undefined)
+  useLayoutEffect(() => {
+    if (barHeight === undefined) return
+    const grew = prevBar.current !== undefined && barHeight > prevBar.current
+    prevBar.current = barHeight
+    if (!grew) return
+    const doc = document.documentElement
+    const nearBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - window.innerHeight * 0.5
+    if (nearBottom) window.scrollTo({ top: doc.scrollHeight })
+  }, [barHeight])
+  // 받은 메시지에 위험 경고가 있으면 대화 주제는 접어 둔다 — 경고를 먼저 보게
+  const hasWarning = messages.some((m) => !m.mine && m.warning)
 
   return (
     <div
@@ -54,8 +67,9 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
             {!loading && topics.data && (
               <TopicSuggestions
                 topics={topics.data}
-                // 내가 아직 한마디도 안 했으면 펼쳐 둔다 — 첫마디가 제일 어렵다
-                defaultOpen={!messages.some((m) => m.mine)}
+                // 내가 아직 한마디도 안 했으면 펼쳐 둔다 — 첫마디가 제일 어렵다.
+                // 단, 위험 경고가 있는 방은 접어 둔다 (경고가 먼저, 대화를 권하지 않는다)
+                defaultOpen={!hasWarning && !messages.some((m) => m.mine)}
                 onPick={(text) => setPrefill((p) => ({ text, seq: (p?.seq ?? 0) + 1 }))}
               />
             )}
