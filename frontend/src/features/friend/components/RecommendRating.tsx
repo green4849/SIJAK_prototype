@@ -41,7 +41,6 @@ export function RecommendRating({ card, onRate, disabled }: Props) {
           )
         })}
       </div>
-      <p className={styles.hint}>평가는 상대에게 알려지지 않아요</p>
     </fieldset>
   )
 }

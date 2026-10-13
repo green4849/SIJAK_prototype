@@ -13,7 +13,6 @@ export function WelcomePage() {
         <LeafLogo size="96px" />
         <h1 className="sr-only">시작</h1>
         <Brand size="hero" leaf={false} tagline="시니어의 작지만 큰 변화" />
-        <p className={styles.sub}>같은 동네, 좋은 이웃과 더 따뜻한 일상으로</p>
       </div>
 
       <div className={styles.hills} aria-hidden="true" />

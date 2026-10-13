@@ -13,11 +13,6 @@
   color: var(--color-primary);
 }
 
-.lead {
-  margin: var(--gap-tight) 0 0;
-  color: var(--color-text-muted);
-}
-
 .options {
   display: flex;
   flex-direction: column;

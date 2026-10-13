@@ -17,7 +17,6 @@ export function SafetyPage() {
       <TopBar back={!afterSignup} backTo="/me" />
       <div>
         <h1 className={styles.title}>안전한 시작을 약속합니다</h1>
-        <p className={styles.lead}>안심하고 이용하세요.</p>
       </div>
 
       <div className={styles.list}>
@@ -25,25 +24,25 @@ export function SafetyPage() {
           accent="mint"
           icon={ShieldCheck}
           title="실명 인증"
-          description="본인 확인을 마친 분들만 이용해요."
+          description="본인 확인한 분만 이용해요"
         />
         <ActionCard
           accent="yellow"
           icon={ShieldEllipsis}
           title="위험한 대화 자동 감지"
-          description="돈·계좌·비밀번호를 묻는 대화는 바로 알려 드려요."
+          description="돈·비밀번호 이야기는 바로 알려요"
         />
         <ActionCard
           accent="pink"
           icon={CircleAlert}
           title="신고 및 차단"
-          description="불편한 분은 바로 신고하고 차단할 수 있어요."
+          description="불편하면 바로 막을 수 있어요"
         />
         <ActionCard
           accent="sky"
           icon={Lock}
           title="개인정보 보호"
-          description="전화번호는 암호화해서 보관하고, 다른 분께 보이지 않아요."
+          description="전화번호는 남에게 안 보여요"
         />
       </div>
 

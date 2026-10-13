@@ -44,8 +44,7 @@ export function LocationConsent({ onDone }: Props) {
         <MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} /> 가까운 이웃을 찾아 드릴까요?
       </p>
       <p className={styles.body}>
-        내 위치를 <strong>동네 정도(약 1km)</strong>로만 저장해요. 정확한 주소는 저장하지 않고, 다른
-        분께도 보이지 않아요.
+        <strong>동네 정도(약 1km)</strong>로만 저장해요.
       </p>
       {error && <Alert>{error}</Alert>}
       <Button block onClick={allow} disabled={pending}>

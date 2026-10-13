@@ -29,12 +29,9 @@ export function NotificationSettings() {
     <div className={styles.wrap}>
       <section className={styles.card} aria-labelledby="recommend-title">
         <div className={styles.head}>
-          <div>
-            <h2 id="recommend-title" className={styles.title}>
-              오늘의 추천 친구 알림
-            </h2>
-            <p className={styles.desc}>새 동네 이웃이 추천되면 알려 드려요</p>
-          </div>
+          <h2 id="recommend-title" className={styles.title}>
+            추천 친구 알림
+          </h2>
           <button
             type="button"
             role="switch"
@@ -56,7 +53,7 @@ export function NotificationSettings() {
 
         {on && (
           <fieldset className={styles.times}>
-            <legend className={styles.legend}>받는 시간 (하루 {p.max_per_day}번까지)</legend>
+            <legend className={styles.legend}>받는 시간 · {p.max_per_day}개까지</legend>
             {p.time_options.map((o) => {
               const picked = p.recommend_times.includes(o.code)
               return (
@@ -75,7 +72,6 @@ export function NotificationSettings() {
                 </button>
               )
             })}
-            {full && <p className={styles.hint}>다른 시간을 고르려면 하나를 먼저 꺼 주세요</p>}
           </fieldset>
         )}
       </section>

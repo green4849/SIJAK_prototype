@@ -31,14 +31,12 @@ function MissionCard({
   onClaim: () => void
   claiming: boolean
 }) {
-  const left = m.goal - m.progress
   return (
     <section className={styles.card} aria-label={`미션: ${m.title}`}>
       <div className={styles.cardHead}>
         <h2 className={styles.cardTitle}>{m.title}</h2>
         <span className={styles.reward}>+{m.reward.toLocaleString()}P</span>
       </div>
-      <p className={styles.desc}>{m.description}</p>
       <div
         className={styles.steps}
         role="progressbar"
@@ -59,7 +57,7 @@ function MissionCard({
         </Button>
       ) : (
         <p className={styles.progressText}>
-          {m.progress}명 완료 · {left}명 남았어요
+          {m.goal}명 중 {m.progress}명
         </p>
       )}
     </section>

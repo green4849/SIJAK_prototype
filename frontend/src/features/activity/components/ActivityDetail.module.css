@@ -17,11 +17,6 @@
   font-size: var(--text-title);
 }
 
-.subtitle {
-  margin: var(--gap-tight) 0 0;
-  color: var(--color-text-muted);
-}
-
 .info {
   margin: 0;
   padding: var(--card-pad);

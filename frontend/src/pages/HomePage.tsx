@@ -35,7 +35,6 @@ export function HomePage() {
           accent="pink"
           icon={Users}
           title="친구 찾기"
-          description="같은 동네 좋은 이웃을 만나보세요"
           to="/friends"
           badge={<Badge count={received} label={(n) => `새 친구 신청 ${n}개`} />}
         />
@@ -43,7 +42,6 @@ export function HomePage() {
           accent="mint"
           icon={MessageCircleMore}
           title="대화하기"
-          description="새로운 이웃과 이야기를 나눠요"
           to="/chats"
           badge={<Badge count={unread} label={(n) => `안 읽은 메시지 ${n}개`} />}
         />
@@ -51,7 +49,6 @@ export function HomePage() {
           accent="yellow"
           icon={MapPin}
           title="지역생활"
-          description="우리 동네 다양한 활동을 함께해요"
           to="/activities"
         />
       </nav>

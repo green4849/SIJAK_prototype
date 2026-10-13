@@ -55,7 +55,6 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div>
         <h1 className={styles.title}>{name}님, 반가워요</h1>
-        <p className={styles.lead}>잘 맞는 친구를 찾도록 두 가지만 알려 주세요.</p>
       </div>
 
       <OptionGrid
@@ -70,7 +69,7 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
 
       <OptionGrid
         legend="좋아하는 것"
-        hint={`${max}개까지 고를 수 있어요 (${interests.length}/${max})`}
+        hint={`${interests.length} / ${max}개`}
         multiple
         options={options.interests.map((o) => ({ value: o.code, label: o.label }))}
         selected={interests}
