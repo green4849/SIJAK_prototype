@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react'
 import {
   BookOpen,
   Clapperboard,
@@ -12,6 +13,7 @@ import {
   Sprout,
   type LucideIcon,
 } from 'lucide-react'
+import { CleanupScene, MealScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './ActivityThumb.module.css'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
@@ -31,8 +33,18 @@ const KINDS: Record<string, { icon: LucideIcon; tone: string }> = {
   cleanup: { icon: Recycle, tone: 'mint' },
 }
 
+/** 상세 상단에서 아이콘 대신 인물 장면을 쓰는 종류 (봉사 — A19). 목록 썸네일은 아이콘으로 통일 유지 */
+const HERO_SCENES: Record<string, ComponentType> = { meal: MealScene, cleanup: CleanupScene }
+
 export function ActivityThumb({ kind, size = 'md' }: { kind: string; size?: 'md' | 'hero' }) {
   const { icon: Icon, tone } = KINDS[kind] ?? KINDS.walk
+  const Scene = size === 'hero' ? HERO_SCENES[kind] : undefined
+  if (Scene)
+    return (
+      <span className={styles.thumb} data-tone={tone} data-size={size} aria-hidden="true">
+        <Scene />
+      </span>
+    )
   return (
     <span className={styles.thumb} data-tone={tone} data-size={size} aria-hidden="true">
       <Icon size={size === 'hero' ? ICON.lg : ICON.md + 4} strokeWidth={ICON_STROKE} />

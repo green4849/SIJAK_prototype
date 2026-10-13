@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatRelative } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
+import { PointsScene } from '@/shared/ui/illustrations/Scenes'
 import { usePointHistory, usePointSummary } from '../hooks/usePoints'
 import styles from './Points.module.css'
 
@@ -18,13 +19,16 @@ export function PointBalance() {
   if (!s) return <p role="status">불러오는 중…</p>
   return (
     <section className={styles.balanceCard} aria-label="지금 가진 포인트">
-      <p className={styles.balanceLabel}>지금 가진 포인트</p>
-      <p className={styles.balance}>{won(s.balance)}</p>
-      {s.free_until && (
-        <p className={styles.balanceNote}>
-          {shortDate(s.free_until)}까지 친구 신청 무료
-        </p>
-      )}
+      <div className={styles.balanceText}>
+        <p className={styles.balanceLabel}>지금 가진 포인트</p>
+        <p className={styles.balance}>{won(s.balance)}</p>
+        {s.free_until && (
+          <p className={styles.balanceNote}>
+            {shortDate(s.free_until)}까지 친구 신청 무료
+          </p>
+        )}
+      </div>
+      <PointsScene />
     </section>
   )
 }

@@ -39,3 +39,18 @@
 :root[data-contrast='high'] .hills {
   display: none;
 }
+
+/* 상세 상단 썸네일 칸을 가득 (봉사 장면) — 칸 크기는 ActivityThumb 가 정한다 */
+.fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 카드 옆 작은 그림 (내 포인트 잔액) */
+.side {
+  display: block;
+  flex: none;
+  width: 124px;
+  height: 104px;
+}
