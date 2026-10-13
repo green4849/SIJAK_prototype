@@ -1,4 +1,4 @@
-import { MapPin, MessageCircleMore, Users } from 'lucide-react'
+import { MapPin, MessageCircleMore, Sprout, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
@@ -9,7 +9,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
 
-/** ③ 홈 — 큰 카드 세 개로 핵심 기능에 바로 (3-tap rule) */
+/** ③ 홈 — 큰 카드 네 개로 핵심 기능에 바로 (3-tap rule). 말동무는 C8 */
 export function HomePage() {
   const { user } = useAuth()
   const unread = useUnreadTotal()
@@ -54,6 +54,7 @@ export function HomePage() {
           title="지역생활"
           to="/activities"
         />
+        <ActionCard accent="sky" icon={Sprout} title="말동무" to="/companion" />
       </nav>
 
       {/* 첫 친구 3명 사귀기 (C12) — 받고 나면 홈에서는 사라진다 */}

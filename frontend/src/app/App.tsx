@@ -7,6 +7,7 @@ import { BlockedPage } from '@/pages/BlockedPage'
 import { ChatListPage } from '@/pages/ChatListPage'
 import { ChatOpenPage } from '@/pages/ChatOpenPage'
 import { ChatRoomPage } from '@/pages/ChatRoomPage'
+import { CompanionPage } from '@/pages/CompanionPage'
 import { FriendListPage } from '@/pages/FriendListPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { HelpPage } from '@/pages/HelpPage'
@@ -36,6 +37,7 @@ import { RequireAuth, RequireGuest } from './guards'
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
  *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
  *   C12: /me/points /me/notifications
+ *   화면·데모만(백엔드 없음, docs/deferred.md §7): C8 /companion
  */
 export function App() {
   return (
@@ -79,6 +81,7 @@ export function App() {
               <Route path="me/install" element={<InstallPage />} />
               <Route path="me/points" element={<PointsPage />} />
               <Route path="me/notifications" element={<NotificationSettingsPage />} />
+              <Route path="companion" element={<CompanionPage />} />
             </Route>
           </Route>
 

@@ -12,6 +12,7 @@ const STATIC_ROUTES = [
   '/', '/friends', '/activities', '/chats', '/me', '/me/profile', '/me/settings', '/me/help', '/me/install',
   '/me/friends', '/me/blocks', '/me/activities/applied', '/me/activities/liked', '/safety',
   '/me/points', '/me/notifications', '/activities?category=volunteer', // C12
+  '/companion', // C8 (화면·데모)
 ]
 
 async function dynamicRoutes(page: Page) {
