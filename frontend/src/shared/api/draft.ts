@@ -47,3 +47,80 @@ export interface CompanionInfoOut {
   /** 입력줄 위 '이런 말로 시작해 보세요' 버튼 */
   starters: string[]
 }
+
+// ---------- C11 마음 건강 — /me/isolation-index, /me/self-assessment ----------
+
+/** 고립 지수 단계 (보고서 4.5.3: 0~30 정상 · 30~60 주의 · 60~80 위험 · 80~ 긴급) */
+export type IsolationLevel = 'normal' | 'caution' | 'risk' | 'urgent'
+
+export interface IsolationFactor {
+  code: 'activity' | 'communication' | 'emotion' | 'social' | 'responsiveness'
+  label: string
+  /** 0~100, 높을수록 좋음 */
+  score: number
+}
+
+export interface IsolationIndexOut {
+  /** 0~100, 높을수록 고립 위험 */
+  score: number
+  level: IsolationLevel
+  factors: IsolationFactor[]
+  /** 지난 주들 → 이번 주 (마지막이 지금) */
+  weekly: { label: string; score: number }[]
+  updated_at: string
+}
+
+export type AssessmentKind = 'phq9' | 'gad7'
+
+export interface AssessmentFormOut {
+  kind: AssessmentKind
+  title: string
+  /** '지난 2주 동안 …' */
+  lead: string
+  questions: { id: number; text: string }[]
+  options: { value: number; label: string }[]
+}
+
+export interface AssessmentIn {
+  kind: AssessmentKind
+  answers: number[]
+}
+
+export interface AssessmentResultOut {
+  id: number
+  kind: AssessmentKind
+  title: string
+  score: number
+  max_score: number
+  level: 'minimal' | 'mild' | 'moderate' | 'severe'
+  level_label: string
+  advice: string
+  /** PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내 */
+  crisis: boolean
+  created_at: string
+}
+
+// ---------- C10 긴급 도움·보호자 — /me/guardians, /emergency/sos ----------
+
+export interface GuardianOut {
+  id: string
+  name: string
+  relation: string
+  /** 010-****-5678 */
+  phone_masked: string
+  /** 전화 걸기용 (본인 화면에서만) */
+  phone: string
+}
+
+export interface GuardianIn {
+  name: string
+  relation: string
+  phone: string
+}
+
+export interface SosOut {
+  id: string
+  created_at: string
+  /** 알린 사람들 (보호자 + 담당 복지사) */
+  notified: { name: string; relation: string }[]
+}
