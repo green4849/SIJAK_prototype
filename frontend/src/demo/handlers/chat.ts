@@ -1,7 +1,7 @@
 /** backend/app/domains/chat 와 같은 계약 + 데모용 자동 답장 */
-import { REGIONS, TEXT_MAX } from '../constants'
+import { INTERESTS, REGIONS, TEXT_MAX } from '../constants'
 import { fail, json, type Route } from '../http'
-import { assessText } from '../rules'
+import { assessText, suggestTopics } from '../rules'
 import { ageOf, db, newId, relatedBlocks, save, userById, voiceBlobs, type DMessage, type DRoom, type DUser } from '../store'
 import { requireUser } from './auth'
 import { areFriends } from './friend'
@@ -125,6 +125,15 @@ export const chatRoutes: Route[] = [
   ['GET', '/chats/:roomId', (req) => {
     const me = requireUser(req)
     return json(roomOut(memberRoom(req.params.roomId, me.id), me.id))
+  }],
+
+  ['GET', '/chats/:roomId/topics', (req) => {
+    const me = requireUser(req)
+    const r = db().rooms.find((x) => x.id === req.params.roomId && (x.a === me.id || x.b === me.id))
+    if (!r) return fail(404, 'not_found', '대화방을 찾을 수 없어요.')
+    const them = userById(other(r, me.id))
+    const topics: Schema<'TopicOut'>[] = suggestTopics(me.interests, them?.interests ?? [], (c) => INTERESTS[c] ?? c)
+    return json(topics)
   }],
 
   ['GET', '/chats/:roomId/messages', (req) => {

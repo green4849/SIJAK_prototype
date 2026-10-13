@@ -43,7 +43,29 @@ export const CATEGORIES: Record<string, string> = {
   culture: '문화·여가',
   health: '건강',
   learning: '배움',
+  volunteer: '봉사',
 }
+
+// ---------- C12 — backend/app/domains/point/service.py 와 같은 값 ----------
+export const POINTS = {
+  welcome: 100,
+  rating: 10,
+  ratingDailyLimit: 5,
+  volunteer: 100,
+  firstFriends: 500,
+  friendRequest: 30,
+}
+export const REWARD_CATEGORIES = new Set(['volunteer'])
+export const POINT_REASONS: Record<string, string> = {
+  welcome: '가입 축하',
+  rating: '추천 친구 평가',
+  volunteer: '봉사모임 참여',
+  mission_first_friends: '첫 친구 3명 사귀기',
+  friend_request: '친구 신청',
+}
+// backend/app/domains/notification/models.py
+export const TIME_SLOTS: Record<string, string> = { morning: '아침 9시', noon: '점심 1시', evening: '저녁 7시' }
+export const NOTIF_MAX_PER_DAY = 2
 
 export const REPORT_REASONS: Record<string, string> = {
   money: '돈을 요구해요',

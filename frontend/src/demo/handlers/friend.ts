@@ -3,10 +3,18 @@ import { INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, newId, relatedBlocks, save, type DUser } from '../store'
 import { findNearby } from '../rules'
+import { chargeFriendRequest, earnRating, ratingsLeftToday } from '../points'
 import { requireUser } from './auth'
 import type { Schema } from '@/shared/api/types'
 
 type Relation = 'none' | 'sent' | 'received' | 'friends'
+type Rating = Schema<'RatingCreate'>['rating']
+
+const ratingsBy = (meId: string) =>
+  new Map(db().ratings.filter((r) => r.uid === meId).map((r) => [r.target, r.rating] as const))
+
+// 평가 반영 순서 — backend friend/service.py _RATING_ORDER
+const RATING_ORDER = (r: Rating | undefined) => (r === 'like' ? 0 : r === 'neutral' ? 2 : 1)
 
 function relations(meId: string): Map<string, [Relation, string]> {
   const out = new Map<string, [Relation, string]>()
@@ -44,6 +52,7 @@ function card(
     distance_km: distance,
     relation,
     request_id,
+    my_rating: ratingsBy(me.id).get(u.id) ?? null,
   }
 }
 
@@ -67,13 +76,39 @@ export const friendRoutes: Route[] = [
       const near = findNearby(me, pool).slice(0, 30)
       return json(near.map(([u, km]) => card(u, me, rel, km)))
     }
-    const overlap = (u: DUser) => u.interests.filter((i) => me.interests.includes(i)).length
-    const list = [...pool].sort(
+    // C12: '잘 안 맞아요'는 빼고, 평가 → 관심사 점수(+만나보고 싶은 이웃의 관심사 0.5) → 같은 지역
+    const ratings = ratingsBy(me.id)
+    const candidates = pool.filter((u) => ratings.get(u.id) !== 'dislike')
+    const likedInterests = new Set(candidates.filter((u) => ratings.get(u.id) === 'like').flatMap((u) => u.interests))
+    const score = (u: DUser) =>
+      u.interests.filter((i) => me.interests.includes(i)).length +
+      0.5 * u.interests.filter((i) => likedInterests.has(i)).length
+    const list = [...candidates].sort(
       (a, b) =>
-        overlap(b) - overlap(a) ||
+        RATING_ORDER(ratings.get(a.id)) - RATING_ORDER(ratings.get(b.id)) ||
+        score(b) - score(a) ||
         Number(a.region_code !== me.region_code) - Number(b.region_code !== me.region_code),
     )
     return json(list.slice(0, 30).map((u) => card(u, me, rel)))
+  }],
+
+  ['PUT', '/friends/recommendations/:userId/rating', (req) => {
+    const me = requireUser(req)
+    const target = db().users.find((u) => u.id === req.params.userId)
+    if (!target) return fail(404, 'not_found', '사용자를 찾을 수 없어요.')
+    if (target.id === me.id) return fail(400, 'cannot_request_self', '나는 평가할 수 없어요.')
+    const rating = (req.body as Schema<'RatingCreate'>).rating
+    const s = db()
+    const existing = s.ratings.find((r) => r.uid === me.id && r.target === target.id)
+    if (existing) existing.rating = rating
+    else s.ratings.push({ uid: me.id, target: target.id, rating })
+    const earned = earnRating(me.id, target.id, `${target.name}님 평가`)
+    save()
+    return json({
+      rating,
+      points_earned: earned,
+      ratings_left_today: ratingsLeftToday(me.id),
+    } satisfies Schema<'RatingOut'>)
   }],
 
   ['GET', '/friends', (req) => json(listBy(requireUser(req), 'friends'))],
@@ -92,6 +127,8 @@ export const friendRoutes: Route[] = [
     const theirs = between.find((r) => r.status === 'pending' && r.to === me.id)
     if (theirs) theirs.status = 'accepted'
     else if (!between.some((r) => r.from === me.id && r.status === 'pending')) {
+      // 새 신청 — 포인트 (C12). 모자라면 402로 끝나고 아무것도 저장되지 않는다
+      chargeFriendRequest(me.id, to, `${target.name}님께 친구 신청`)
       const mine = between.find((r) => r.from === me.id)
       if (mine) mine.status = 'pending'
       else s.requests.push({ id: newId(), from: me.id, to, status: 'pending', at: Date.now() })

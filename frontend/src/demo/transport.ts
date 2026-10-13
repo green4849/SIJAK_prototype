@@ -4,6 +4,7 @@ import { activityRoutes } from './handlers/activity'
 import { authRoutes } from './handlers/auth'
 import { chatRoutes } from './handlers/chat'
 import { friendRoutes } from './handlers/friend'
+import { pointRoutes } from './handlers/points'
 import { safetyRoutes } from './handlers/safety'
 import { DemoError, errorResponse, json, match, noContent, type Route } from './http'
 import { reset } from './store'
@@ -22,6 +23,7 @@ const routes: Route[] = [
   ...chatRoutes,
   ...safetyRoutes,
   ...activityRoutes,
+  ...pointRoutes,
 ]
 
 function parseBody(init: RequestInit): unknown {

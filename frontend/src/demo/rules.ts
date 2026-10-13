@@ -66,3 +66,40 @@ export function findNearby<U extends { geo: [number, number] | null; region_code
     .map(([u, km]) => [u, coarseKm(km)] as [U, number])
   return [...within, ...sameRegion.filter((u) => !u.geo).map((u) => [u, null] as [U, null])]
 }
+
+// ---------- 대화 주제 추천 — backend/app/domains/chat/topics.py 의 사본 (C12) ----------
+
+const PHRASES: Record<string, [string, string]> = {
+  walking: ['자주 가시는 산책길이 있으세요?', '날 좋은 날 같이 천천히 걸으실래요?'],
+  music: ['요즘 즐겨 들으시는 노래가 있으세요?', '젊을 때 좋아하시던 가수가 누구세요?'],
+  cooking: ['요즘 자주 해 드시는 음식이 있으세요?', '제일 자신 있는 요리가 뭐예요?'],
+  gardening: ['요즘 텃밭에 뭐 심으셨어요?', '키우시는 꽃이 있으세요?'],
+  baduk: ['바둑은 얼마나 두셨어요?', '다음에 한 판 두실래요?'],
+  travel: ['가 보신 곳 중에 제일 좋았던 데가 어디세요?', '가까운 데 바람 쐬러 가실래요?'],
+  health: ['요즘 건강 챙기시려고 하시는 운동 있으세요?', '아침에 체조 같은 거 하세요?'],
+  tv: ['요즘 재미있게 보시는 드라마 있으세요?', '즐겨 보시는 프로그램이 뭐예요?'],
+  reading: ['요즘 읽고 계신 책이 있으세요?', '신문은 어떤 걸 보세요?'],
+  crafts: ['요즘 뜨고 계신 게 있으세요?', '만드신 것 중에 제일 마음에 드는 게 뭐예요?'],
+  faith: ['다니시는 곳은 가까우세요?', '모임은 일주일에 몇 번 가세요?'],
+  memories: ['어릴 적 고향은 어디세요?', '젊을 때 어떤 일 하셨어요?'],
+}
+const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
+const MAX_TOPICS = 4
+
+export function suggestTopics(
+  mine: string[],
+  theirs: string[],
+  labelOf: (code: string) => string,
+): { label: string; text: string; common: boolean }[] {
+  const common = theirs.filter((c) => mine.includes(c))
+  const only = theirs.filter((c) => !mine.includes(c))
+  const out: { label: string; text: string; common: boolean }[] = []
+  for (const round of [0, 1])
+    for (const [cats, isCommon] of [[common, true], [only, false]] as const)
+      for (const c of cats) {
+        const p = PHRASES[c]
+        if (p) out.push({ label: labelOf(c), text: p[round], common: isCommon })
+      }
+  out.push(...GENERAL.map((text) => ({ label: '일상', text, common: false })))
+  return out.slice(0, MAX_TOPICS)
+}

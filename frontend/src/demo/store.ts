@@ -66,6 +66,17 @@ export interface DActivity {
   base_applied: number // 다른 이웃들이 이미 신청한 수 (시연용)
 }
 
+/** point_entries 사본 (C12) — 잔액은 합계 */
+export interface DPointEntry {
+  id: number
+  uid: string
+  amount: number
+  reason: 'welcome' | 'rating' | 'volunteer' | 'mission_first_friends' | 'friend_request'
+  ref: string
+  memo: string
+  at: string
+}
+
 export interface DemoState {
   version: number
   me: string | null // 로그인한 사용자 id
@@ -78,11 +89,15 @@ export interface DemoState {
   activities: DActivity[]
   applications: { aid: string; uid: string }[]
   likes: { aid: string; uid: string }[]
+  // C12
+  points: DPointEntry[]
+  ratings: { uid: string; target: string; rating: 'like' | 'neutral' | 'dislike' }[]
+  notif: Record<string, { enabled: boolean; times: ('morning' | 'noon' | 'evening')[] }>
   seq: number
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 3 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로)
+const VERSION = 4 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -200,6 +215,24 @@ function seed(): DemoState {
       '○○구민 공동텃밭', 6, 9, 120, 15, 'garden', '흙을 만지며 상추와 깻잎을 심어요. 장갑은 준비해 드려요.', 7),
     act('그림책 읽기 모임', '손주에게 읽어 줄 그림책을 함께', 'learning', '11',
       '○○구립도서관', 9, 14, 90, 10, 'book', '손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.', 3),
+    // 봉사 (C12) — backend/scripts/seed.py 와 같은 내용
+    act('어르신 도시락 나눔', '복지관과 함께 이웃에게 도시락을 전해요', 'volunteer', '41',
+      '○○노인복지관 1층 식당', 4, 10, 120, 15, 'meal',
+      '복지관에서 만든 도시락을 포장해 홀로 사시는 이웃께 전해 드려요. 무거운 짐은 복지관 선생님이 맡아요. 앞치마는 복지관에서 드려요.', 11),
+    act('공원 걷기 + 쓰레기 줍기', '걸으면서 우리 동네도 깨끗하게', 'volunteer', '41',
+      '○○근린공원 입구', 8, 15, 60, 20, 'cleanup',
+      '천천히 공원을 걸으며 쓰레기를 주워요. 집게와 장갑은 복지관에서 준비해요.', 6),
+  ]
+
+  // 포인트 (C12): 가입 보너스 → 이순자님께 첫 신청(무료) → 어제 추천 평가 한 번 = 110P
+  // (유료 신청 세 번이면 20P 남음 → 네 번째에 '포인트가 조금 부족해요' 시연)
+  const pt = (amount: number, reason: DPointEntry['reason'], ref: string, memo: string, at: string): DPointEntry => ({
+    id: ++seq, uid: DEMO_ME_ID, amount, reason, ref, memo, at,
+  })
+  const points: DPointEntry[] = [
+    pt(100, 'welcome', 'welcome', '', new Date(now - 4 * 86400_000).toISOString()),
+    pt(0, 'friend_request', 'friend_request:u-sunja', '이순자님께 친구 신청', new Date(now - 3 * 86400_000).toISOString()),
+    pt(10, 'rating', 'rating:u-gicheol', '윤기철님 평가', iso(-1, 19, 5)),
   ]
 
   return {
@@ -214,6 +247,9 @@ function seed(): DemoState {
     activities,
     applications: [{ aid: activities[0].id, uid: DEMO_ME_ID }],
     likes: [activities[0].id, activities[2].id].map((aid) => ({ aid, uid: DEMO_ME_ID })),
+    points,
+    ratings: [{ uid: DEMO_ME_ID, target: 'u-gicheol', rating: 'neutral' }],
+    notif: {},
     seq,
   }
 }
