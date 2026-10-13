@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.domains.auth.constants import INTERESTS, REGIONS
 from app.domains.auth.service import age_on
-from app.domains.friend.service import Candidate
+from app.domains.friend.service import Candidate, RatingResult
 
 
 class FriendCard(BaseModel):
@@ -25,6 +25,9 @@ class FriendCard(BaseModel):
     )
     relation: Literal["none", "sent", "received", "friends"]
     request_id: uuid.UUID | None
+    my_rating: Literal["like", "neutral", "dislike"] | None = Field(
+        description="내가 남긴 추천 평가. 상대에게는 보이지 않는다"
+    )
 
     @classmethod
     def of(cls, c: Candidate) -> "FriendCard":
@@ -41,8 +44,25 @@ class FriendCard(BaseModel):
             distance_km=c.distance_km,
             relation=c.relation,
             request_id=c.request_id,
+            my_rating=c.my_rating,
         )
 
 
 class FriendRequestCreate(BaseModel):
     to_user_id: uuid.UUID
+
+
+class RatingCreate(BaseModel):
+    rating: Literal["like", "neutral", "dislike"]
+
+
+class RatingOut(BaseModel):
+    rating: Literal["like", "neutral", "dislike"]
+    points_earned: int = Field(description="이번 평가로 받은 포인트 (못 받으면 0)")
+    ratings_left_today: int
+
+    @classmethod
+    def of(cls, r: RatingResult) -> "RatingOut":
+        return cls(
+            rating=r.rating, points_earned=r.points_earned, ratings_left_today=r.ratings_left_today
+        )

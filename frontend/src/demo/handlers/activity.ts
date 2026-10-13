@@ -1,6 +1,7 @@
 /** backend/app/domains/activity 와 같은 계약 */
-import { CATEGORIES } from '../constants'
+import { CATEGORIES, POINTS, REWARD_CATEGORIES } from '../constants'
 import { fail, json, type Route } from '../http'
+import { earn, removeRef } from '../points'
 import { db, save, type DActivity, type DUser } from '../store'
 import { requireUser } from './auth'
 import type { Schema } from '@/shared/api/types'
@@ -27,6 +28,7 @@ function out(a: DActivity, me: DUser): Schema<'ActivityOut'> {
     liked: s.likes.some((x) => x.aid === a.id && x.uid === me.id),
     description: a.description,
     image_kind: a.image_kind,
+    reward_points: REWARD_CATEGORIES.has(a.category) ? POINTS.volunteer : 0,
   }
 }
 
@@ -75,6 +77,7 @@ export const activityRoutes: Route[] = [
     if (!s.applications.some((x) => x.aid === a.id && x.uid === me.id)) {
       if (out(a, me).is_full) return fail(409, 'activity_full', '아쉽게도 자리가 다 찼어요.')
       s.applications.push({ aid: a.id, uid: me.id })
+      if (REWARD_CATEGORIES.has(a.category)) earn(me.id, POINTS.volunteer, 'volunteer', `volunteer:${a.id}`, a.title)
       save()
     }
     return json(out(a, me))
@@ -85,6 +88,7 @@ export const activityRoutes: Route[] = [
     const a = find(req.params.id)
     const s = db()
     s.applications = s.applications.filter((x) => !(x.aid === a.id && x.uid === me.id))
+    removeRef(me.id, `volunteer:${a.id}`)
     save()
     return json(out(a, me))
   }],

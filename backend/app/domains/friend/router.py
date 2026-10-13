@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import CurrentUser
 from app.domains.friend.deps import FriendServiceDep
-from app.domains.friend.schemas import FriendCard, FriendRequestCreate
+from app.domains.friend.schemas import FriendCard, FriendRequestCreate, RatingCreate, RatingOut
 from app.domains.friend.service import Tab
 
 router = APIRouter(prefix="/friends", tags=["friend"])
@@ -20,6 +20,13 @@ async def recommendations(
     me: CurrentUser, service: FriendServiceDep, tab: Annotated[Tab, Query()] = "recommended"
 ) -> list[FriendCard]:
     return [FriendCard.of(c) for c in await service.recommend(me, tab)]
+
+
+@router.put("/recommendations/{user_id}/rating", response_model=RatingOut)
+async def rate(
+    user_id: uuid.UUID, body: RatingCreate, me: CurrentUser, service: FriendServiceDep
+) -> RatingOut:
+    return RatingOut.of(await service.rate(me, user_id, body.rating))
 
 
 @router.get("", response_model=list[FriendCard])

@@ -2,6 +2,7 @@
 
 import base64
 import binascii
+from datetime import date
 from functools import lru_cache
 from typing import Literal, Self
 
@@ -56,6 +57,10 @@ class Settings(BaseSettings):
 
     # 요청 횟수 제한 (B2). 규칙은 각 router, 저장은 core/ratelimit (지금은 메모리)
     rate_limit_enabled: bool = True
+
+    # 포인트 (C12) — 체험단 기간: 이 날짜(한국 날짜)까지 친구 신청에 포인트를 쓰지 않는다.
+    # 비우면 체험 기간 없음
+    point_free_until: date | None = None
 
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60

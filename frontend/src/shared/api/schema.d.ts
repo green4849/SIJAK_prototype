@@ -313,6 +313,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/chats/{room_id}/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Topics */
+        get: operations["topics_api_v1_chats__room_id__topics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/chats/{room_id}/voice": {
         parameters: {
             query?: never;
@@ -357,6 +374,23 @@ export interface paths {
         /** Recommendations */
         get: operations["recommendations_api_v1_friends_recommendations_get"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/friends/recommendations/{user_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Rate */
+        put: operations["rate_api_v1_friends_recommendations__user_id__rating_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -468,6 +502,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/missions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Missions */
+        get: operations["missions_api_v1_missions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/missions/{code}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Claim */
+        post: operations["claim_api_v1_missions__code__claim_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Settings */
+        get: operations["get_settings_api_v1_notifications_settings_get"];
+        /** Update Settings */
+        put: operations["update_settings_api_v1_notifications_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/points": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Summary */
+        get: operations["summary_api_v1_points_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/points/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_v1_points_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/safety/blocks": {
         parameters: {
             query?: never;
@@ -553,7 +673,7 @@ export interface components {
              * Category
              * @enum {string}
              */
-            category: "culture" | "health" | "learning";
+            category: "culture" | "health" | "learning" | "volunteer";
             /** Category Label */
             category_label: string;
             /** Description */
@@ -576,6 +696,11 @@ export interface components {
             liked: boolean;
             /** Place */
             place: string;
+            /**
+             * Reward Points
+             * @description 참여하면 받는 포인트 (봉사). 없으면 0
+             */
+            reward_points: number;
             /** Schedule Text */
             schedule_text: string;
             /**
@@ -660,6 +785,11 @@ export interface components {
             interests: string[];
             /** Intro */
             intro: string;
+            /**
+             * My Rating
+             * @description 내가 남긴 추천 평가. 상대에게는 보이지 않는다
+             */
+            my_rating: ("like" | "neutral" | "dislike") | null;
             /** Name */
             name: string;
             /** Region Name */
@@ -743,12 +873,57 @@ export interface components {
             sender_id: string;
             warning: components["schemas"]["RiskWarning"] | null;
         };
+        /** MissionOut */
+        MissionOut: {
+            /** Claimed */
+            claimed: boolean;
+            /**
+             * Code
+             * @constant
+             */
+            code: "first_friends";
+            /** Description */
+            description: string;
+            /** Done */
+            done: boolean;
+            /** Goal */
+            goal: number;
+            /** Progress */
+            progress: number;
+            /** Reward */
+            reward: number;
+            /** Title */
+            title: string;
+        };
         /** MyActivityCounts */
         MyActivityCounts: {
             /** Applied */
             applied: number;
             /** Liked */
             liked: number;
+        };
+        /** NotificationPrefsOut */
+        NotificationPrefsOut: {
+            /** Max Per Day */
+            max_per_day: number;
+            /**
+             * Quiet Hours
+             * @description 알림을 보내지 않는 시간 안내 문구
+             */
+            quiet_hours: string;
+            /** Recommend Enabled */
+            recommend_enabled: boolean;
+            /** Recommend Times */
+            recommend_times: ("morning" | "noon" | "evening")[];
+            /** Time Options */
+            time_options: components["schemas"]["TimeSlotOption"][];
+        };
+        /** NotificationPrefsUpdate */
+        NotificationPrefsUpdate: {
+            /** Recommend Enabled */
+            recommend_enabled: boolean;
+            /** Recommend Times */
+            recommend_times: ("morning" | "noon" | "evening")[];
         };
         /** Option */
         Option: {
@@ -791,6 +966,53 @@ export interface components {
             /** Session Id */
             session_id: string;
         };
+        /** PointEntryOut */
+        PointEntryOut: {
+            /** Amount */
+            amount: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+            /**
+             * Reason
+             * @enum {string}
+             */
+            reason: "welcome" | "rating" | "volunteer" | "mission_first_friends" | "friend_request";
+        };
+        /**
+         * PointSummaryOut
+         * @description 내 포인트와 지금 적용되는 규칙 — 화면 안내 문구는 이 값으로 만든다
+         */
+        PointSummaryOut: {
+            /** Balance */
+            balance: number;
+            /** First Friends Reward */
+            first_friends_reward: number;
+            /**
+             * Free Until
+             * @description 체험 기간 마지막 날(한국 날짜). 없으면 null
+             */
+            free_until: string | null;
+            /** Friend Request Cost */
+            friend_request_cost: number;
+            /**
+             * Next Request Free
+             * @description 다음 친구 신청이 무료인지 (첫 신청·무료 기간)
+             */
+            next_request_free: boolean;
+            /** Rating Reward */
+            rating_reward: number;
+            /** Ratings Left Today */
+            ratings_left_today: number;
+            /** Volunteer Reward */
+            volunteer_reward: number;
+        };
         /**
          * ProfileUpdate
          * @description PATCH /me — 보낸 항목만 바뀐다
@@ -802,6 +1024,29 @@ export interface components {
             intro?: string | null;
             /** Region Code */
             region_code?: string | null;
+        };
+        /** RatingCreate */
+        RatingCreate: {
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "like" | "neutral" | "dislike";
+        };
+        /** RatingOut */
+        RatingOut: {
+            /**
+             * Points Earned
+             * @description 이번 평가로 받은 포인트 (못 받으면 0)
+             */
+            points_earned: number;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "like" | "neutral" | "dislike";
+            /** Ratings Left Today */
+            ratings_left_today: number;
         };
         /** ReasonOption */
         ReasonOption: {
@@ -906,6 +1151,16 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** TimeSlotOption */
+        TimeSlotOption: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "morning" | "noon" | "evening";
+            /** Label */
+            label: string;
+        };
         /** TokenResponse */
         TokenResponse: {
             /** Access Token */
@@ -916,6 +1171,21 @@ export interface components {
              * @constant
              */
             token_type: "bearer";
+        };
+        /**
+         * TopicOut
+         * @description 대화 주제 추천 — 누르면 입력칸에 들어간다 (자동으로 보내지 않음)
+         */
+        TopicOut: {
+            /**
+             * Common
+             * @description 두 사람 공통 관심사에서 나온 문구인지
+             */
+            common: boolean;
+            /** Label */
+            label: string;
+            /** Text */
+            text: string;
         };
         /** UserOut */
         UserOut: {
@@ -1592,6 +1862,37 @@ export interface operations {
             };
         };
     };
+    topics_api_v1_chats__room_id__topics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                room_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     send_voice_api_v1_chats__room_id__voice_post: {
         parameters: {
             query?: never;
@@ -1665,6 +1966,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FriendCard"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rate_api_v1_friends_recommendations__user_id__rating_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RatingCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingOut"];
                 };
             };
             /** @description Validation Error */
@@ -1893,6 +2229,150 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    missions_api_v1_missions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissionOut"][];
+                };
+            };
+        };
+    };
+    claim_api_v1_missions__code__claim_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: "first_friends";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_settings_api_v1_notifications_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPrefsOut"];
+                };
+            };
+        };
+    };
+    update_settings_api_v1_notifications_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationPrefsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPrefsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    summary_api_v1_points_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PointSummaryOut"];
+                };
+            };
+        };
+    };
+    history_api_v1_points_history_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PointEntryOut"][];
                 };
             };
         };

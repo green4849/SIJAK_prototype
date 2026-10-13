@@ -8,8 +8,8 @@
 
 .scroll {
   flex: 1;
-  /* 입력줄 높이만큼 아래 여유 */
-  padding-bottom: calc(var(--touch-min) * 2);
+  /* 입력줄 높이만큼 아래 여유 (높이는 ChatRoomView 가 재서 --composer-h 로 넣는다) */
+  padding-bottom: calc(var(--composer-h, calc(var(--touch-min) * 2)) + var(--space-1));
 }
 
 /* 입력줄은 화면 아래에 고정 */

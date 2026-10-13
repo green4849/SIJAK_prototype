@@ -20,7 +20,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
-CATEGORIES = {"culture": "문화·여가", "health": "건강", "learning": "배움"}
+CATEGORIES = {"culture": "문화·여가", "health": "건강", "learning": "배움", "volunteer": "봉사"}
+# 참여하면 포인트를 주는 분류 (C12) — 금액은 point 도메인이 정한다
+REWARD_CATEGORIES = {"volunteer"}
 
 
 class Activity(Base):
@@ -41,7 +43,7 @@ class Activity(Base):
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     capacity: Mapped[int] = mapped_column(Integer)
     description: Mapped[str] = mapped_column(Text, default="")
-    # 그림 대신 아이콘 키 (walk·phone·movie·tea·music·craft·exercise·book·garden)
+    # 그림 대신 아이콘 키 (walk·phone·movie·tea·music·craft·exercise·book·garden·meal·cleanup)
     image_kind: Mapped[str] = mapped_column(String(20), default="walk")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

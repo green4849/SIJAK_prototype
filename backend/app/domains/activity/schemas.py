@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.domains.activity.models import CATEGORIES
 from app.domains.activity.service import ActivityView
@@ -12,7 +12,7 @@ class ActivityOut(BaseModel):
     id: uuid.UUID
     title: str
     subtitle: str
-    category: Literal["culture", "health", "learning"]  # models.CATEGORIES
+    category: Literal["culture", "health", "learning", "volunteer"]  # models.CATEGORIES
     category_label: str
     place: str
     schedule_text: str
@@ -25,6 +25,7 @@ class ActivityOut(BaseModel):
     liked: bool
     description: str
     image_kind: str
+    reward_points: int = Field(description="참여하면 받는 포인트 (봉사). 없으면 0")
 
     @classmethod
     def of(cls, v: ActivityView) -> "ActivityOut":
@@ -46,6 +47,7 @@ class ActivityOut(BaseModel):
             liked=v.liked,
             description=a.description,
             image_kind=a.image_kind,
+            reward_points=v.reward_points,
         )
 
 

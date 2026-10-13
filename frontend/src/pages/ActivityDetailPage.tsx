@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { ActivityDetail } from '@/features/activity'
+import { refreshPoints } from '@/features/points'
 import { TopBar } from '@/shared/ui/TopBar'
 
 /** ⑦ 지역 활동 상세 */
@@ -9,6 +10,7 @@ export function ActivityDetailPage() {
     <ActivityDetail
       id={activityId}
       header={(likeButton) => <TopBar backTo="/activities" right={likeButton} />}
+      onPointsChanged={() => void refreshPoints()}
     />
   )
 }

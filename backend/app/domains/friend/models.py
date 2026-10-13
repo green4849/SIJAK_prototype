@@ -30,3 +30,28 @@ class FriendRequest(Base):
     status: Mapped[str] = mapped_column(String(10), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+RATINGS = {"like": 1, "neutral": 0, "dislike": -1}  # 만나보고 싶어요 / 그저 그래요 / 잘 안 맞아요
+
+
+class RecommendationRating(Base):
+    """추천 친구 평가 (C12) — 다음 추천 순서에 반영. 상대에게는 알리지 않는다."""
+
+    __tablename__ = "recommendation_ratings"
+    __table_args__ = (
+        UniqueConstraint("user_id", "target_id"),
+        CheckConstraint("user_id <> target_id", name="not_self"),
+        CheckConstraint(f"rating IN {tuple(RATINGS)}", name="rating"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    target_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    rating: Mapped[str] = mapped_column(String(10))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

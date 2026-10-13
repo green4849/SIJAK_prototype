@@ -1,6 +1,8 @@
 import {
   Ban,
+  Bell,
   CircleHelp,
+  Coins,
   Heart,
   LogOut,
   NotebookPen,
@@ -14,6 +16,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
+import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
 import { IconAction } from '@/shared/ui/IconAction'
@@ -27,6 +30,7 @@ export function MyPage() {
   const { user, signOut } = useAuth()
   const friends = useMyFriends()
   const counts = useActivityCounts()
+  const points = usePointSummary()
   const { installed } = useInstallState()
   if (!user) return null
 
@@ -61,6 +65,12 @@ export function MyPage() {
         <MenuList label="내 활동">
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
           <MenuItem
+            icon={Coins}
+            label="내 포인트"
+            value={points ? `${points.balance.toLocaleString()}P` : undefined}
+            to="/me/points"
+          />
+          <MenuItem
             icon={Users}
             label="내 친구 목록"
             value={friends.data ? `${friends.data.length}명` : undefined}
@@ -82,6 +92,7 @@ export function MyPage() {
 
         <MenuList label="도움">
           <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
+          <MenuItem icon={Bell} label="알림 설정" to="/me/notifications" />
           <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
           <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
           {!installed && (

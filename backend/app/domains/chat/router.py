@@ -1,18 +1,14 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse
 
 from app.core.config import get_settings
-from app.core.deps import DbSession, MediaStorage
 from app.core.ratelimit import Rule, enforce
-from app.domains.auth.deps import AuthServiceDep, CurrentUser
-from app.domains.chat.repository import ChatRepository
-from app.domains.chat.schemas import MessageOut, RoomOut, TextMessageCreate
-from app.domains.chat.service import ChatService
-from app.domains.friend.deps import FriendServiceDep
-from app.domains.risk.deps import RiskServiceDep
+from app.domains.auth.deps import CurrentUser
+from app.domains.chat.deps import ChatServiceDep
+from app.domains.chat.schemas import MessageOut, RoomOut, TextMessageCreate, TopicOut
 
 router = APIRouter(prefix="/chats", tags=["chat"])
 PREFIX = get_settings().api_prefix
@@ -20,19 +16,6 @@ PREFIX = get_settings().api_prefix
 # 요청 횟수 제한 (B2) — 사람이 손으로 보내는 속도보다 넉넉하게, 도배는 막게
 SEND_TEXT_PER_USER = Rule("chat_text:user", limit=20, window_sec=60, action="메시지 보내기")
 SEND_VOICE_PER_USER = Rule("chat_voice:user", limit=10, window_sec=60, action="음성 메시지 보내기")
-
-
-def get_chat_service(
-    session: DbSession,
-    auth: AuthServiceDep,
-    friends: FriendServiceDep,
-    risk: RiskServiceDep,
-    storage: MediaStorage,
-) -> ChatService:
-    return ChatService(ChatRepository(session), auth, friends, risk, storage)
-
-
-ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
 
 
 @router.post("/with/{user_id}", response_model=RoomOut)
@@ -49,6 +32,11 @@ async def list_rooms(me: CurrentUser, service: ChatServiceDep) -> list[RoomOut]:
 @router.get("/{room_id}", response_model=RoomOut)
 async def get_room(room_id: uuid.UUID, me: CurrentUser, service: ChatServiceDep) -> RoomOut:
     return RoomOut.of(await service.get_room(me, room_id))
+
+
+@router.get("/{room_id}/topics", response_model=list[TopicOut])
+async def topics(room_id: uuid.UUID, me: CurrentUser, service: ChatServiceDep) -> list[TopicOut]:
+    return [TopicOut.of(t) for t in await service.topics(me, room_id)]
 
 
 @router.get("/{room_id}/messages", response_model=list[MessageOut])

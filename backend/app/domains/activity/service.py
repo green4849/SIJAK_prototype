@@ -6,8 +6,9 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Literal
 
 from app.core.errors import ConflictError, DomainError, NotFoundError
-from app.domains.activity.models import CATEGORIES, Activity
+from app.domains.activity.models import CATEGORIES, REWARD_CATEGORIES, Activity
 from app.domains.activity.repository import ActivityRepository
+from app.domains.point.service import VOLUNTEER_REWARD, PointService
 
 if TYPE_CHECKING:
     from app.domains.auth.models import User
@@ -30,10 +31,15 @@ class ActivityView:
     def is_full(self) -> bool:
         return self.applied_count >= self.activity.capacity
 
+    @property
+    def reward_points(self) -> int:
+        return VOLUNTEER_REWARD if self.activity.category in REWARD_CATEGORIES else 0
+
 
 class ActivityService:
-    def __init__(self, repo: ActivityRepository) -> None:
+    def __init__(self, repo: ActivityRepository, points: PointService) -> None:
         self.repo = repo
+        self.points = points
 
     async def browse(self, me: "User", category: str | None = None) -> list[ActivityView]:
         """내 지역 활동. 내 지역에 하나도 없으면 전체를 보여 준다 (빈 화면 방지)."""
@@ -78,11 +84,15 @@ class ActivityService:
         if (await self.repo.applied_counts([a.id])).get(a.id, 0) >= a.capacity:
             raise ConflictError("아쉽게도 자리가 다 찼어요.", code="activity_full")
         await self.repo.add_application(a.id, me.id)
+        if a.category in REWARD_CATEGORIES:
+            # 봉사 참여 포인트 (C12). 원래는 복지관 참석 확인 후 지급 — docs/deferred.md §6
+            await self.points.earn_volunteer(me.id, a.id, a.title)
         await self.repo.commit()
         return await self.detail(me, activity_id)
 
     async def cancel(self, me: "User", activity_id: uuid.UUID) -> ActivityView:
         await self.repo.remove_application(activity_id, me.id)
+        await self.points.cancel_volunteer(me.id, activity_id)
         await self.repo.commit()
         return await self.detail(me, activity_id)
 

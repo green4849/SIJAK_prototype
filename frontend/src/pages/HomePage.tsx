@@ -2,6 +2,7 @@ import { MapPin, MessageCircleMore, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
+import { MissionCards, PointChip } from '@/features/points'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { Avatar } from '@/shared/ui/Avatar'
 import { Badge } from '@/shared/ui/Badge'
@@ -23,7 +24,10 @@ export function HomePage() {
             좋은 하루 되세요! <span aria-hidden="true">☀️</span>
           </p>
         </div>
-        <Avatar name={user.name} seed={user.id} size="list" />
+        <div className={styles.side}>
+          <PointChip to="/me/points" />
+          <Avatar name={user.name} seed={user.id} size="list" />
+        </div>
       </header>
 
       <nav aria-label="바로 가기" className={styles.cards}>
@@ -51,6 +55,9 @@ export function HomePage() {
           to="/activities"
         />
       </nav>
+
+      {/* 첫 친구 3명 사귀기 (C12) — 받고 나면 홈에서는 사라진다 */}
+      <MissionCards hideClaimed />
     </section>
   )
 }

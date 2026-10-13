@@ -7,6 +7,8 @@ export type ChatPeer = Schema<'ChatPeer'>
 export type ChatRoomData = Schema<'RoomOut'>
 /** warning: 위험 대화 경고 — 받은 메시지에만 (표시는 safety feature가 담당, 페이지에서 조합) */
 export type ChatMessageData = Schema<'MessageOut'>
+/** 대화 주제 추천 (C12) — 누르면 입력칸에 들어간다 */
+export type TopicData = Schema<'TopicOut'>
 
 export const chatApi = {
   rooms: () => api.get<ChatRoomData[]>('/chats'),
@@ -24,4 +26,5 @@ export const chatApi = {
     return api.post<ChatMessageData>(`/chats/${roomId}/voice`, form)
   },
   voice: (audioUrl: string) => api.blob(audioUrl),
+  topics: (roomId: string) => api.get<TopicData[]>(`/chats/${roomId}/topics`),
 }

@@ -9,12 +9,13 @@ from app.domains.activity.repository import ActivityRepository
 from app.domains.activity.schemas import ActivityOut, CategoryOption, MyActivityCounts
 from app.domains.activity.service import ActivityService, MineKind
 from app.domains.auth.deps import CurrentUser
+from app.domains.point.deps import PointServiceDep
 
 router = APIRouter(prefix="/activities", tags=["activity"])
 
 
-def get_activity_service(session: DbSession) -> ActivityService:
-    return ActivityService(ActivityRepository(session))
+def get_activity_service(session: DbSession, points: PointServiceDep) -> ActivityService:
+    return ActivityService(ActivityRepository(session), points)
 
 
 ActivityServiceDep = Annotated[ActivityService, Depends(get_activity_service)]

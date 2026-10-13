@@ -88,5 +88,18 @@ class ChatRepository:
         else:
             room.b_last_read_id = max(room.b_last_read_id, up_to_id)
 
+    async def rooms_with_reply(self, user_id: uuid.UUID) -> list[ChatRoom]:
+        """두 사람이 모두 한 번 이상 말한 방 (C12 첫 친구 미션)"""
+        talked = (
+            select(ChatMessage.room_id)
+            .group_by(ChatMessage.room_id)
+            .having(func.count(func.distinct(ChatMessage.sender_id)) >= 2)
+        )
+        q = select(ChatRoom).where(
+            or_(ChatRoom.user_a_id == user_id, ChatRoom.user_b_id == user_id),
+            ChatRoom.id.in_(talked),
+        )
+        return list(await self.session.scalars(q))
+
     async def commit(self) -> None:
         await self.session.commit()

@@ -6,7 +6,9 @@ import {
   Footprints,
   Music,
   Palette,
+  Recycle,
   Smartphone,
+  Soup,
   Sprout,
   type LucideIcon,
 } from 'lucide-react'
@@ -24,6 +26,9 @@ const KINDS: Record<string, { icon: LucideIcon; tone: string }> = {
   exercise: { icon: Dumbbell, tone: 'mint' },
   book: { icon: BookOpen, tone: 'sky' },
   garden: { icon: Sprout, tone: 'mint' },
+  // 봉사 (C12)
+  meal: { icon: Soup, tone: 'yellow' },
+  cleanup: { icon: Recycle, tone: 'mint' },
 }
 
 export function ActivityThumb({ kind, size = 'md' }: { kind: string; size?: 'md' | 'hero' }) {

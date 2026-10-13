@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { LocationConsent, useAuth } from '@/features/auth'
 import { FriendFinder, ReceivedRequests, type FriendTab } from '@/features/friend'
+import {
+  InsufficientPointsSheet,
+  RatingRewardNote,
+  friendRequestPrice,
+  refreshPoints,
+  usePointSummary,
+} from '@/features/points'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
 import { TopBar } from '@/shared/ui/TopBar'
 import { chatWith } from './routes'
@@ -17,6 +24,9 @@ export function FriendsPage() {
   const [tab, setTab] = useState<FriendTab>('recommended')
   // 받은 신청을 수락하면 목록을 새로 불러온다
   const [version, setVersion] = useState(0)
+  // 포인트 (C12): 신청 버튼의 가격, 평가 안내, 모자랄 때 안내 창 — friend·points 를 여기서 조합
+  const points = usePointSummary()
+  const [shortOfPoints, setShortOfPoints] = useState(false)
 
   return (
     <section className={styles.page}>
@@ -30,7 +40,22 @@ export function FriendsPage() {
         key={`${tab}-${version}-${user?.has_location}`}
         tab={tab}
         chatHref={chatWith}
-        header={tab === 'nearby' && user && !user.has_location ? <LocationConsent /> : undefined}
+        header={
+          tab === 'nearby' && user && !user.has_location ? (
+            <LocationConsent />
+          ) : tab === 'recommended' ? (
+            <RatingRewardNote />
+          ) : undefined
+        }
+        requestPrice={friendRequestPrice(points)}
+        onPointsChanged={() => void refreshPoints()}
+        onInsufficientPoints={() => setShortOfPoints(true)}
+      />
+
+      <InsufficientPointsSheet
+        open={shortOfPoints}
+        onClose={() => setShortOfPoints(false)}
+        earnHref="/me/points"
       />
     </section>
   )

@@ -56,6 +56,26 @@
   color: var(--color-on-primary);
 }
 
+/* 봉사 참여 포인트 (C12) — 노란 면은 작은 표시에만 */
+.badge[data-kind='reward'] {
+  background: var(--color-card-yellow);
+  color: var(--color-text);
+}
+
+:root[data-contrast='high'] .badge[data-kind='reward'] {
+  border: 1px solid var(--color-border);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badges > .badge {
+  margin-top: 4px;
+}
+
 .badge[data-kind='full'] {
   background: var(--color-card-beige);
   color: var(--color-text);
