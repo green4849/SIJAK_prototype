@@ -181,3 +181,64 @@ export interface BrainResultIn {
   score: number
   total: number
 }
+
+// ---------- 알림함 (C4 푸시와 같은 소식을 앱 안에 모아 둠) — /notifications ----------
+
+export type NotificationKind = 'friend' | 'activity' | 'safety' | 'wellbeing' | 'welfare' | 'points'
+
+export interface NotificationItemOut {
+  id: string
+  kind: NotificationKind
+  title: string
+  body: string
+  created_at: string
+  read: boolean
+  /** 누르면 갈 앱 안 경로 (없으면 null) */
+  link: string | null
+}
+
+// ---------- B3 회원 탈퇴 — /me/withdraw ----------
+
+export interface WithdrawIn {
+  /** 고른 이유 (선택) */
+  reason: string | null
+}
+
+export interface WithdrawOut {
+  /** 이 날 개인정보가 완전히 지워진다 (탈퇴 + 30일) */
+  delete_at: string
+}
+
+// ---------- B7 운영자(복지기관) 화면 — /admin ----------
+
+export type CaseStatus = 'open' | 'warned' | 'suspended' | 'banned' | 'dismissed'
+export type CaseAction = 'warn' | 'suspend' | 'ban' | 'dismiss'
+
+export interface AdminCaseOut {
+  id: string
+  /** report: 이웃이 신고 / auto: 위험 대화 자동 감지 */
+  source: 'report' | 'auto'
+  target_id: string
+  target_name: string
+  reasons: string[]
+  /** 문제 메시지 일부 */
+  excerpt: string | null
+  /** 1 주의 · 2 경고 · 3 위험 */
+  level: number
+  reports_count: number
+  created_at: string
+  status: CaseStatus
+}
+
+export interface AdminWatchOut {
+  user_id: string
+  name: string
+  age: number
+  region_name: string
+  isolation_score: number
+  /** 마지막 접속 '3일 전' */
+  last_seen_text: string
+  /** 최근 신호 (예: 말동무 대화에서 외로움 표현 늘어남) */
+  signal: string
+  guardian_notified: boolean
+}

@@ -109,6 +109,32 @@ export interface DAssessment {
   at: string
 }
 
+/** 알림함 (백엔드 없음) */
+export interface DNotification {
+  id: string
+  uid: string
+  kind: 'friend' | 'activity' | 'safety' | 'wellbeing' | 'welfare' | 'points'
+  title: string
+  body: string
+  at: string
+  read: boolean
+  link: string | null
+}
+
+/** 운영자 화면 사건 (B7, 백엔드 없음) */
+export interface DAdminCase {
+  id: string
+  source: 'report' | 'auto'
+  target_id: string
+  target_name: string
+  reasons: string[]
+  excerpt: string | null
+  level: number
+  reports_count: number
+  at: string
+  status: 'open' | 'warned' | 'suspended' | 'banned' | 'dismissed'
+}
+
 export interface DemoState {
   version: number
   me: string | null // 로그인한 사용자 id
@@ -137,11 +163,17 @@ export interface DemoState {
   isolationHistory: Record<string, number[]>
   // 인지 훈련 — 화면·데모만
   brain: { uid: string; game: 'match' | 'calc'; score: number; total: number; at: string }[]
+  // 알림함·탈퇴·운영자 화면 — 화면·데모만
+  notifications: DNotification[]
+  withdrawn: Record<string, string> // uid → 완전 삭제 예정일
+  adminCases: DAdminCase[]
+  /** 데모 안에서 들어온 신고(reports 순번)의 처리 상태 */
+  reportStatus: Record<number, DAdminCase['status']>
   seq: number
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 7 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동
+const VERSION = 8 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -302,6 +334,35 @@ function seed(): DemoState {
     { id: ++seq, uid: DEMO_ME_ID, kind: 'gad7', answers: [1, 0, 1, 0, 0, 1, 0], at: iso(-7, 10) },
   ]
 
+  // 알림함: 안 읽은 소식 셋 + 읽은 소식 셋
+  const note = (
+    kind: DNotification['kind'], title: string, body: string, at: string, read: boolean, link: string | null,
+  ): DNotification => ({ id: uid(), uid: DEMO_ME_ID, kind, title, body, at, read, link })
+  const notifications: DNotification[] = [
+    note('safety', '조심하세요', '정덕수님 메시지에 돈·송금 이야기가 있어요', iso(0, 9, 31), false, `/chats/${roomDeoksu.id}`),
+    note('friend', '새 친구 신청', '박정호님이 친구 신청을 보냈어요', new Date(now - 3600_000).toISOString(), false, '/friends'),
+    note('activity', '신청한 활동', `건강 걷기 모임 · ${activities[0].schedule_text}`, iso(0, 8, 0), false, `/activities/${activities[0].id}`),
+    note('wellbeing', '이번 주 마음 날씨', '지난주보다 좋아졌어요', iso(-1, 9, 0), true, '/me/wellbeing'),
+    note('welfare', '○○노인종합복지관', '노래 교실 자리가 3개 남았어요', iso(-2, 14, 0), true, '/welfare/w-1'),
+    note('points', '포인트 +10P', '윤기철님 평가', iso(-1, 19, 5), true, '/me/points'),
+  ]
+
+  // 운영자 화면: 자동 감지 1 + 신고 2 (그중 하나는 처리됨)
+  const adminCases: DAdminCase[] = [
+    {
+      id: uid(), source: 'auto', target_id: 'u-deoksu', target_name: '정덕수', reasons: ['돈·송금 이야기', '급하게 서두르게 하는 말'],
+      excerpt: '병원비 때문에 계좌로 송금 좀 해 줄 수 있어요?', level: 3, reports_count: 0, at: iso(0, 9, 30), status: 'open',
+    },
+    {
+      id: uid(), source: 'report', target_id: 'u-x1', target_name: '최강수', reasons: ['개인정보를 물어봐요'],
+      excerpt: '문자로 온 인증번호 좀 불러 주세요', level: 3, reports_count: 2, at: iso(-1, 16, 20), status: 'open',
+    },
+    {
+      id: uid(), source: 'report', target_id: 'u-x2', target_name: '김철수', reasons: ['광고·홍보를 해요'],
+      excerpt: '건강식품 싸게 드려요. 연락 주세요', level: 1, reports_count: 1, at: iso(-2, 11, 5), status: 'warned',
+    },
+  ]
+
   return {
     version: VERSION,
     me: null,
@@ -333,6 +394,10 @@ function seed(): DemoState {
       { uid: DEMO_ME_ID, game: 'match', score: 14, total: 4, at: iso(-2, 9) },
       { uid: DEMO_ME_ID, game: 'calc', score: 5, total: 5, at: iso(-1, 9) },
     ],
+    notifications,
+    withdrawn: {},
+    adminCases,
+    reportStatus: {},
     seq,
   }
 }
