@@ -26,7 +26,7 @@ export function FriendCard({ card, actions, footer }: Props) {
   return (
     <article className={styles.card} aria-label={`${card.name}님`}>
       <div className={styles.top}>
-        <Avatar name={card.name} seed={card.user_id} />
+        <Avatar name={card.name} seed={card.user_id} gender={card.gender} />
         <div className={styles.info}>
           <h3 className={styles.name}>
             {card.name}님 <span className={styles.age}>{card.age}세</span>

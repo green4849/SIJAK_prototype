@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { ButtonLink } from '@/shared/ui/Button'
 import { TopBar } from '@/shared/ui/TopBar'
+import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './SafetyPage.module.css'
 
 /**
@@ -15,6 +16,7 @@ export function SafetyPage() {
   return (
     <section className={styles.page}>
       <TopBar back={!afterSignup} backTo="/me" />
+      <CoupleScene />
       <div>
         <h1 className={styles.title}>안전한 시작을 약속합니다</h1>
       </div>

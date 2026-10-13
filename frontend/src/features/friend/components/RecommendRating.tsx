@@ -1,11 +1,7 @@
 import type { FriendCardData, Rating } from '../api/friendApi'
 import styles from './RecommendRating.module.css'
 
-const OPTIONS: { value: Rating; label: string }[] = [
-  { value: 'like', label: '만나보고 싶어요' },
-  { value: 'neutral', label: '그저 그래요' },
-  { value: 'dislike', label: '잘 안 맞아요' },
-]
+const OPTIONS: { value: Rating; label: string }[] = [{ value: 'like', label: '만나보고 싶어요' }]
 
 interface Props {
   card: FriendCardData

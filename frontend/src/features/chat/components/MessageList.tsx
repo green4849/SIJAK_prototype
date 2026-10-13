@@ -49,7 +49,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
                   (continued ? (
                     <span className={styles.avatarSpace} aria-hidden="true" />
                   ) : (
-                    <Avatar name={peer.name} seed={peer.user_id} size="bubble" />
+                    <Avatar name={peer.name} seed={peer.user_id} gender={peer.gender} size="bubble" />
                   ))}
                 <div className={styles.stack}>
                   <span className="sr-only">{m.mine ? '내가 보냄' : `${peer.name}님`}: </span>

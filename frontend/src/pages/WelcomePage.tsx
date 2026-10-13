@@ -1,5 +1,6 @@
 import { Brand, LeafLogo } from '@/shared/ui/Brand'
 import { ButtonLink } from '@/shared/ui/Button'
+import { WelcomeHills } from '@/shared/ui/illustrations/Scenes'
 import styles from './WelcomePage.module.css'
 
 /**
@@ -15,7 +16,9 @@ export function WelcomePage() {
         <Brand size="hero" leaf={false} tagline="시니어의 작지만 큰 변화" />
       </div>
 
-      <div className={styles.hills} aria-hidden="true" />
+      <div className={styles.hills}>
+        <WelcomeHills />
+      </div>
 
       <ButtonLink to="/login" large block className={styles.cta}>
         시작하기

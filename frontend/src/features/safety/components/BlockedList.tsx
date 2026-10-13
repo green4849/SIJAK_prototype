@@ -16,7 +16,7 @@ export function BlockedList() {
     <ul className={styles.list}>
       {data.map((u) => (
         <li key={u.user_id} className={styles.item}>
-          <Avatar name={u.name} seed={u.user_id} />
+          <Avatar name={u.name} seed={u.user_id} gender={u.gender} />
           <span className={styles.name}>{u.name}님</span>
           <Button variant="secondary" onClick={() => unblock(u.user_id)}>
             차단 풀기
