@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Heart, MapPin, Users } from 'lucide-react'
+import { CalendarDays, Coins, FileText, Heart, MapPin, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { formatDate, formatTime } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
@@ -22,8 +22,15 @@ function Row({ icon, label, children }: { icon: ReactNode; label: string; childr
 }
 
 /** ⑦ 지역 활동 상세 — 일시·장소·참여 인원·소개 + 아래 고정 '신청하기' */
-export function ActivityDetail({ id, header }: { id: string; header: (liked: ReactNode) => ReactNode }) {
-  const { data: a, error, pending, actionError, apply, cancel, toggleLike } = useActivity(id)
+interface Props {
+  id: string
+  header: (liked: ReactNode) => ReactNode
+  /** 신청·취소로 포인트가 바뀌었을 수 있을 때 (봉사, C12) — points feature를 모르므로 페이지가 넘긴다 */
+  onPointsChanged?: () => void
+}
+
+export function ActivityDetail({ id, header, onPointsChanged }: Props) {
+  const { data: a, error, pending, actionError, apply, cancel, toggleLike } = useActivity(id, onPointsChanged)
 
   if (error) return <Alert>{error}</Alert>
   if (!a) return <p role="status">불러오는 중…</p>
@@ -65,6 +72,12 @@ export function ActivityDetail({ id, header }: { id: string; header: (liked: Rea
           <strong className={styles.count}>{a.applied_count}명</strong> 신청{' '}
           <span className={styles.capacity}>· 정원 {a.capacity}명 (선착순)</span>
         </Row>
+        {a.reward_points > 0 && (
+          <Row icon={<Coins aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="포인트">
+            참여하면 <strong className={styles.count}>+{a.reward_points}P</strong>
+            <span className={styles.capacity}> · 신청을 취소하면 돌려드려요</span>
+          </Row>
+        )}
         {a.description && (
           <Row icon={<FileText aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="활동 소개">
             {a.description}

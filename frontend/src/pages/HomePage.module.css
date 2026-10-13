@@ -12,6 +12,13 @@
   padding-top: var(--space-2);
 }
 
+.side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+}
+
 .name {
   font-size: var(--text-title);
 }

@@ -17,7 +17,9 @@ import { LoginPage } from '@/pages/LoginPage'
 import { MyActivitiesPage } from '@/pages/MyActivitiesPage'
 import { MyPage } from '@/pages/MyPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { NotificationSettingsPage } from '@/pages/NotificationSettingsPage'
 import { PhoneVerifyPage } from '@/pages/PhoneVerifyPage'
+import { PointsPage } from '@/pages/PointsPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { SafetyPage } from '@/pages/SafetyPage'
 import { SettingsPage } from '@/pages/SettingsPage'
@@ -33,6 +35,7 @@ import { RequireAuth, RequireGuest } from './guards'
  *   Stage 1: ① /welcome ② /login(+phone·id-card·help) /signup ⑧ /safety
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
  *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
+ *   C12: /me/points /me/notifications
  */
 export function App() {
   return (
@@ -74,6 +77,8 @@ export function App() {
               <Route path="me/settings" element={<SettingsPage />} />
               <Route path="me/help" element={<HelpPage />} />
               <Route path="me/install" element={<InstallPage />} />
+              <Route path="me/points" element={<PointsPage />} />
+              <Route path="me/notifications" element={<NotificationSettingsPage />} />
             </Route>
           </Route>
 

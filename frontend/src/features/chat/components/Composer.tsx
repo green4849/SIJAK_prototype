@@ -1,5 +1,5 @@
 import { Mic, Send } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
@@ -11,11 +11,24 @@ interface Props {
   onSendText: (text: string) => Promise<void>
   onSendVoice: (audio: Blob, seconds: number) => Promise<void>
   disabled?: boolean
+  /** 밖에서 입력칸을 채울 때 (대화 주제 추천) — seq 가 바뀔 때마다 text 로 바꾸고 입력칸에 초점 */
+  prefill?: { text: string; seq: number }
 }
 
 /** ⑤ 아래 입력줄 — 글자 입력 + 보내기, 🎤 한 번 눌러 녹음 시작 / 다시 눌러 보내기 */
-export function Composer({ onSendText, onSendVoice, disabled }: Props) {
+export function Composer({ onSendText, onSendVoice, disabled, prefill }: Props) {
   const [text, setText] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // 대화 주제를 고르면 입력칸을 그 문구로 (렌더 중에 비교 — effect 안 setState 대신)
+  const [seenSeq, setSeenSeq] = useState(prefill?.seq)
+  if (prefill && prefill.seq !== seenSeq) {
+    setSeenSeq(prefill.seq)
+    setText(prefill.text)
+  }
+  useEffect(() => {
+    if (prefill) inputRef.current?.focus()
+  }, [prefill])
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const rec = useVoiceRecorder()
@@ -71,6 +84,7 @@ export function Composer({ onSendText, onSendVoice, disabled }: Props) {
           보낼 메시지
         </label>
         <input
+          ref={inputRef}
           id="composer-input"
           className={styles.input}
           placeholder="메시지를 입력하세요"

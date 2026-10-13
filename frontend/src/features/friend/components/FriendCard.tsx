@@ -9,6 +9,8 @@ interface Props {
   card: FriendCardData
   /** 카드 아래 버튼 영역 (상황마다 다름) */
   actions?: ReactNode
+  /** 버튼 아래 덧붙임 (추천 평가 등) */
+  footer?: ReactNode
 }
 
 /** 거리는 서버가 0.5km 단위로 대략만 준다 → '0.5km 이내' / '약 1km' / '약 1.5km' */
@@ -20,7 +22,7 @@ function where(card: FriendCardData) {
 }
 
 /** ④ 친구 카드 — 이름·나이·소개·겹치는 관심사 */
-export function FriendCard({ card, actions }: Props) {
+export function FriendCard({ card, actions, footer }: Props) {
   return (
     <article className={styles.card} aria-label={`${card.name}님`}>
       <div className={styles.top}>
@@ -49,6 +51,7 @@ export function FriendCard({ card, actions }: Props) {
       )}
 
       {actions && <div className={styles.actions}>{actions}</div>}
+      {footer}
     </article>
   )
 }

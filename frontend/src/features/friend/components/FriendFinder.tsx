@@ -1,22 +1,25 @@
 import type { ReactNode } from 'react'
 import { Alert } from '@/shared/ui/Alert'
 import type { FriendTab } from '../api/friendApi'
-import { useRecommendations } from '../hooks/useFriends'
+import { useRecommendations, type PointHooks } from '../hooks/useFriends'
 import { FriendActionButton } from './FriendActionButton'
 import { FriendCard } from './FriendCard'
+import { RecommendRating } from './RecommendRating'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
 
-interface Props {
+interface Props extends PointHooks {
   tab: FriendTab
   chatHref: (userId: string) => string
-  /** 목록 위에 끼워 넣을 것 (예: 위치 동의 카드) */
+  /** 목록 위에 끼워 넣을 것 (예: 위치 동의 카드, 평가 포인트 안내) */
   header?: ReactNode
+  /** 친구 신청 버튼에 붙일 포인트 ('무료' / '30P') — C12 */
+  requestPrice?: string
 }
 
-/** ④ 추천 친구 / 같은 동네 목록 */
-export function FriendFinder({ tab, chatHref, header }: Props) {
-  const { data, loading, error, request, actionError } = useRecommendations(tab)
+/** ④ 추천 친구 / 같은 동네 목록. 추천 탭에서는 카드마다 3단계 평가 (C12) */
+export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }: Props) {
+  const { data, loading, error, request, rate, actionError } = useRecommendations(tab, points)
 
   return (
     <section
@@ -40,7 +43,15 @@ export function FriendFinder({ tab, chatHref, header }: Props) {
             <FriendCard
               key={card.user_id}
               card={card}
-              actions={<FriendActionButton card={card} onRequest={request} chatHref={chatHref} />}
+              actions={
+                <FriendActionButton
+                  card={card}
+                  onRequest={request}
+                  chatHref={chatHref}
+                  price={requestPrice}
+                />
+              }
+              footer={tab === 'recommended' ? <RecommendRating card={card} onRate={rate} /> : undefined}
             />
           ))}
         </CardGrid>

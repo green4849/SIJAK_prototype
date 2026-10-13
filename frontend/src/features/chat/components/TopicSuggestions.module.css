@@ -1,0 +1,75 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.toggle {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggleText {
+  flex: 1;
+}
+
+.list {
+  padding: var(--space-1) var(--card-pad) var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .list {
+  border: 2px solid var(--color-border);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* 문구 버튼: 왼쪽 정렬된 말풍선 모양 — 누르면 입력칸으로 */
+.topic {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic:active {
+  filter: var(--pressed-filter);
+}
+
+.more {
+  align-self: flex-start;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}

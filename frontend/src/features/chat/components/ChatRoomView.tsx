@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Alert } from '@/shared/ui/Alert'
 import type { ChatMessageData, ChatPeer } from '../api/chatApi'
 import { useMessages } from '../hooks/useMessages'
+import { useTopics } from '../hooks/useTopics'
 import { Composer } from './Composer'
 import { MessageList } from './MessageList'
+import { TopicSuggestions } from './TopicSuggestions'
 import styles from './ChatRoomView.module.css'
 
 interface Props {
@@ -16,9 +18,24 @@ interface Props {
 /** ⑤ 대화방 본문 — 메시지 목록 + 아래 고정 입력줄 */
 export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage }: Props) {
   const { messages, loading, error, sendText, sendVoice } = useMessages(roomId)
+  const topics = useTopics(roomId)
+  const [prefill, setPrefill] = useState<{ text: string; seq: number }>()
+  // 입력줄은 화면 아래 고정 — 대화 주제를 펼치면 높아지므로 실제 높이만큼 목록 아래를 비운다
+  const barRef = useRef<HTMLDivElement>(null)
+  const [barHeight, setBarHeight] = useState<number>()
+  useEffect(() => {
+    const el = barRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setBarHeight(el.offsetHeight))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   return (
-    <div className={styles.view}>
+    <div
+      className={styles.view}
+      style={barHeight ? ({ '--composer-h': `${barHeight}px` } as CSSProperties) : undefined}
+    >
       <div className={styles.scroll}>
         {error && <Alert>{error}</Alert>}
         {loading ? (
@@ -27,13 +44,28 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
           <MessageList peer={peer} messages={messages} renderAfter={renderAfterMessage} />
         )}
       </div>
-      <div className={styles.composer} data-bottom-bar>
+      <div ref={barRef} className={styles.composer} data-bottom-bar>
         {blocked ? (
           <p className={styles.blocked} role="status">
             차단된 대화예요. 메시지를 보낼 수 없어요.
           </p>
         ) : (
-          <Composer onSendText={sendText} onSendVoice={sendVoice} disabled={loading} />
+          <>
+            {!loading && topics.data && (
+              <TopicSuggestions
+                topics={topics.data}
+                // 내가 아직 한마디도 안 했으면 펼쳐 둔다 — 첫마디가 제일 어렵다
+                defaultOpen={!messages.some((m) => m.mine)}
+                onPick={(text) => setPrefill((p) => ({ text, seq: (p?.seq ?? 0) + 1 }))}
+              />
+            )}
+            <Composer
+              onSendText={sendText}
+              onSendVoice={sendVoice}
+              disabled={loading}
+              prefill={prefill}
+            />
+          </>
         )}
       </div>
     </div>

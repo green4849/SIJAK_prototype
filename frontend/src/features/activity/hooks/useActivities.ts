@@ -17,7 +17,7 @@ export function useActivityCounts() {
 }
 
 /** 상세 + 신청/취소/관심 — 서버가 돌려준 최신 상태로 화면을 바꾼다 */
-export function useActivity(id: string) {
+export function useActivity(id: string, onPointsChanged?: () => void) {
   const state = useAsync(() => activityApi.detail(id), [id])
   const [pending, setPending] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -29,6 +29,7 @@ export function useActivity(id: string) {
       const a = await fn()
       state.setData(a)
       toast(done(a))
+      if (a.reward_points > 0) onPointsChanged?.()
     } catch (e) {
       setActionError(errorMessage(e))
       void state.reload() // 정원 마감 등 → 최신 상태 다시
@@ -41,8 +42,16 @@ export function useActivity(id: string) {
     ...state,
     pending,
     actionError,
-    apply: () => act(() => activityApi.apply(id), (a) => `'${a.title}' 신청했어요`),
-    cancel: () => act(() => activityApi.cancel(id), () => '신청을 취소했어요'),
+    apply: () =>
+      act(
+        () => activityApi.apply(id),
+        (a) => `'${a.title}' 신청했어요` + (a.reward_points ? ` · +${a.reward_points}P` : ''),
+      ),
+    cancel: () =>
+      act(
+        () => activityApi.cancel(id),
+        (a) => '신청을 취소했어요' + (a.reward_points ? ` · 포인트를 돌려드렸어요` : ''),
+      ),
     toggleLike: () =>
       act(
         () => (state.data?.liked ? activityApi.unlike(id) : activityApi.like(id)),

@@ -33,9 +33,18 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
               <span className={styles.meta}>
                 <MapPin aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> {a.place}
               </span>
-              {(a.applied || a.is_full) && (
-                <span className={styles.badge} data-kind={a.applied ? 'applied' : 'full'}>
-                  {a.applied ? '신청했어요' : '마감'}
+              {(a.applied || a.is_full || a.reward_points > 0) && (
+                <span className={styles.badges}>
+                  {(a.applied || a.is_full) && (
+                    <span className={styles.badge} data-kind={a.applied ? 'applied' : 'full'}>
+                      {a.applied ? '신청했어요' : '마감'}
+                    </span>
+                  )}
+                  {a.reward_points > 0 && (
+                    <span className={styles.badge} data-kind="reward">
+                      참여하면 +{a.reward_points}P
+                    </span>
+                  )}
                 </span>
               )}
             </span>

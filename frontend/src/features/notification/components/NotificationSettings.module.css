@@ -1,0 +1,123 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+}
+
+.card {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-card-title);
+}
+
+.desc {
+  margin: var(--gap-tight) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* 켜짐/꺼짐 스위치 — 색만이 아니라 글자로도 상태를 보여 준다 */
+.switch {
+  flex: none;
+  min-width: calc(var(--touch-min) * 1.6);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.switch[aria-checked='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+}
+
+.times {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+  gap: var(--space-1);
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.time {
+  min-height: var(--touch-min);
+  padding: var(--space-1);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.time[data-selected='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.time:disabled:not([data-selected='true']) {
+  cursor: not-allowed;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+}
+
+.hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+.quiet {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-primary-soft);
+  font-size: var(--text-meta);
+}
+
+:root[data-contrast='high'] .quiet {
+  border: 1px solid var(--color-border);
+}

@@ -7,10 +7,12 @@ interface Props {
   onRequest: (userId: string) => Promise<void>
   /** 이미 친구일 때 대화로 가는 경로 (chat feature를 모르게 페이지에서 주입) */
   chatHref: (userId: string) => string
+  /** 새 친구 신청에 드는 포인트 표시 ('무료' / '30P') — 없으면 안 보임 */
+  price?: string
 }
 
 /** 관계에 따라 버튼이 바뀐다: 친구 신청 → 신청했어요 / 친구예요 → 대화하기 */
-export function FriendActionButton({ card, onRequest, chatHref }: Props) {
+export function FriendActionButton({ card, onRequest, chatHref, price }: Props) {
   const [pending, setPending] = useState(false)
 
   if (card.relation === 'friends')
@@ -35,7 +37,7 @@ export function FriendActionButton({ card, onRequest, chatHref }: Props) {
         setPending(false)
       }}
     >
-      {card.relation === 'received' ? '친구 수락' : '친구 신청'}
+      {card.relation === 'received' ? '친구 수락' : price ? `친구 신청 · ${price}` : '친구 신청'}
     </Button>
   )
 }

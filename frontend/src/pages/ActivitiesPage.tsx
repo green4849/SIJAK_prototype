@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { ActivityList, useActivityList, type Category } from '@/features/activity'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
@@ -11,12 +12,16 @@ const TABS: { value: Category; label: string }[] = [
   { value: 'culture', label: '문화·여가' },
   { value: 'health', label: '건강' },
   { value: 'learning', label: '배움' },
+  { value: 'volunteer', label: '봉사' },
 ]
 
 /** ⑥ 지역생활 */
 export function ActivitiesPage() {
   const { user } = useAuth()
-  const [category, setCategory] = useState<Category>('all')
+  // ?category=volunteer 로 들어오면 그 분류부터 (내 포인트 → 봉사모임)
+  const [params] = useSearchParams()
+  const initial = TABS.find((t) => t.value === params.get('category'))?.value ?? 'all'
+  const [category, setCategory] = useState<Category>(initial)
   const { data, loading, error } = useActivityList(category)
 
   return (
