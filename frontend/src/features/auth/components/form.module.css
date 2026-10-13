@@ -43,3 +43,18 @@
   text-align: center;
   font-size: var(--text-title);
 }
+
+/* 탈퇴 안내 (B3) */
+.notice {
+  margin: 0;
+  padding: var(--card-pad) var(--card-pad) var(--card-pad) calc(var(--card-pad) + 1.2em);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+:root[data-contrast='high'] .notice {
+  border: 2px solid var(--color-border);
+}

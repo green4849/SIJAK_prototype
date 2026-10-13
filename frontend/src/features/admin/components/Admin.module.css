@@ -1,0 +1,120 @@
+/* 운영자 화면 (B7) — 같은 토큰을 쓰되 정보 밀도는 조금 높게 (운영자·복지사용) */
+
+.empty,
+.summary {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--card-gap);
+}
+
+@container page (min-width: 44rem) {
+  .list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  border-radius: var(--radius-card);
+  background: transparent;
+}
+
+.card[data-open='true'] {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+.card p {
+  margin: 0;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.level {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-card-beige);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.level[data-level='2'] {
+  background: var(--color-card-yellow);
+}
+
+.level[data-level='3'] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+:root[data-contrast='high'] .level {
+  border: 1px solid var(--color-border);
+}
+
+.status {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.status[data-status='open'] {
+  color: var(--color-danger);
+}
+
+.target {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
+}
+
+.reasons {
+  font-weight: var(--weight-medium);
+}
+
+.excerpt {
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1) var(--space-2);
+  border-left: 4px solid var(--color-divider);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  margin-top: var(--space-1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+.actions > * {
+  padding-left: var(--space-1);
+  padding-right: var(--space-1);
+}

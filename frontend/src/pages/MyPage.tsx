@@ -1,6 +1,8 @@
 import {
   Ban,
   Bell,
+  BellRing,
+  DoorOpen,
   CircleHelp,
   Coins,
   Heart,
@@ -18,6 +20,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
+import { useUnreadNotifications } from '@/features/inbox'
 import { useIsolationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
@@ -35,6 +38,7 @@ export function MyPage() {
   const counts = useActivityCounts()
   const points = usePointSummary()
   const mood = useIsolationIndex()
+  const unreadNotes = useUnreadNotifications()
   const { installed } = useInstallState()
   if (!user) return null
 
@@ -67,6 +71,12 @@ export function MyPage() {
 
       <CardGrid gap="section">
         <MenuList label="내 활동">
+          <MenuItem
+            icon={BellRing}
+            label="알림함"
+            value={unreadNotes ? `새 소식 ${unreadNotes}개` : undefined}
+            to="/notifications"
+          />
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
           <MenuItem
             icon={HeartPulse}
@@ -115,6 +125,7 @@ export function MyPage() {
 
       <MenuList plain>
         <MenuItem icon={LogOut} label="로그아웃" onClick={signOut} danger />
+        <MenuItem icon={DoorOpen} label="회원 탈퇴" to="/me/leave" />
       </MenuList>
     </section>
   )
