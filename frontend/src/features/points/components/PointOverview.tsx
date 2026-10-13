@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { formatRelative } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
-import type { PointSummary } from '../api/pointsApi'
 import { usePointHistory, usePointSummary } from '../hooks/usePoints'
 import styles from './Points.module.css'
 
@@ -23,7 +22,7 @@ export function PointBalance() {
       <p className={styles.balance}>{won(s.balance)}</p>
       {s.free_until && (
         <p className={styles.balanceNote}>
-          체험 기간이에요 · {shortDate(s.free_until)}까지 친구 신청에 포인트를 쓰지 않아요
+          {shortDate(s.free_until)}까지 친구 신청 무료
         </p>
       )}
     </section>
@@ -50,18 +49,15 @@ export function PointGuide({ rateHref, volunteerHref }: GuideProps) {
           <GuideRow
             to={rateHref}
             title="추천 친구 평가하기"
-            meta={`하루 5번까지 · 오늘 ${s.ratings_left_today}번 남았어요`}
             amount={`+${won(s.rating_reward)}`}
           />
           <GuideRow
             to={volunteerHref}
             title="봉사모임 참여하기"
-            meta="복지관과 함께하는 지역생활 봉사"
             amount={`+${won(s.volunteer_reward)}`}
           />
           <GuideRow
             title="첫 친구 3명 사귀기"
-            meta="서로 이야기를 나눈 친구 3명"
             amount={`+${won(s.first_friends_reward)}`}
           />
         </ul>
@@ -72,30 +68,18 @@ export function PointGuide({ rateHref, volunteerHref }: GuideProps) {
           포인트 쓰는 곳
         </h2>
         <ul className={styles.rows}>
-          <GuideRow
-            title="친구 신청"
-            meta={spendNote(s)}
-            amount={won(s.friend_request_cost)}
-          />
-          <GuideRow title="받은 친구 신청 수락" meta="언제나 무료예요" amount="0P" />
+          <GuideRow title="친구 신청" amount={won(s.friend_request_cost)} />
+          <GuideRow title="받은 신청 수락" amount="무료" />
         </ul>
       </section>
     </>
   )
 }
 
-function spendNote(s: PointSummary) {
-  if (s.free_until) return '체험 기간에는 무료예요'
-  return s.next_request_free ? '첫 신청은 무료예요' : '같은 분께 다시 신청해도 한 번만'
-}
-
-function GuideRow({ to, title, meta, amount }: { to?: string; title: string; meta: string; amount: string }) {
+function GuideRow({ to, title, amount }: { to?: string; title: string; amount: string }) {
   const body = (
     <>
-      <span className={styles.rowMain}>
-        <span>{title}</span>
-        <span className={styles.rowMeta}>{meta}</span>
-      </span>
+      <span className={styles.rowMain}>{title}</span>
       <span className={styles.amount} data-sign={amount.startsWith('+') ? 'plus' : 'minus'}>
         {amount}
       </span>

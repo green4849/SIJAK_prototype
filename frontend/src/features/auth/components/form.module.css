@@ -10,11 +10,6 @@
   line-height: var(--leading-title);
 }
 
-.lead {
-  margin: var(--gap-tight) 0 0; /* 제목과 같은 묶음(div) 안에서 가깝게 */
-  color: var(--color-text-muted);
-}
-
 .dateGroup {
   border: 0;
   padding: 0;

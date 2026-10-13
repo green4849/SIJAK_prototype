@@ -55,7 +55,7 @@ export function ProfileEditForm({ user, onSaved }: Props) {
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <TextArea
         label="한 줄 소개"
-        hint="이웃에게 보여요. 예: 산책과 옛날 노래를 좋아해요"
+        hint="이웃에게 보여요"
         maxLength={INTRO_MAX}
         value={intro}
         onChange={(e) => setIntro(e.target.value)}
@@ -70,7 +70,7 @@ export function ProfileEditForm({ user, onSaved }: Props) {
 
       <OptionGrid
         legend="좋아하는 것"
-        hint={`${max}개까지 고를 수 있어요 (${interests.length}/${max})`}
+        hint={`${interests.length} / ${max}개`}
         multiple
         options={options.interests.map((o) => ({ value: o.code, label: o.label }))}
         selected={interests}

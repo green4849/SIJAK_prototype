@@ -54,7 +54,6 @@ export function ReportSheet({ open, targetUserId, targetName, messageId, onClose
           }}
         />
       )}
-      <p>신고하면 이 분과는 더 이상 대화할 수 없어요.</p>
       {error && <Alert>{error}</Alert>}
       <Button variant="danger" block large disabled={pending} onClick={submit}>
         {pending ? '보내는 중…' : '신고하고 차단하기'}

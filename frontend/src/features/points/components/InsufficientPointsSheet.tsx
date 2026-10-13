@@ -40,14 +40,12 @@ export function InsufficientPointsSheet({ open, onClose, earnHref }: Props) {
           variant="primary"
           icon={Sprout}
           title="무료로 모으기"
-          description="추천 친구 평가 · 봉사모임 · 첫 친구 미션"
           to={earnHref}
         />
         <ActionCard
           icon={Gift}
           accent="yellow"
           title="구독하고 매달 받기"
-          description="매달 포인트가 들어와요"
           onClick={notYet}
         />
         <ActionCard

@@ -13,12 +13,6 @@
   gap: var(--space-1);
 }
 
-/* 앱 이름(크게) → 슬로건(본문) → 설명(보조): 크기보다 간격과 대비로 위계 */
-.sub {
-  margin: var(--space-1) 0 0;
-  color: var(--color-text-muted);
-}
-
 /* 시안의 언덕 풍경 — 낮은 강조: 옅은 한 가지 색, 낮은 높이, 버튼과는 떨어뜨림 */
 .hills {
   flex: 1;
