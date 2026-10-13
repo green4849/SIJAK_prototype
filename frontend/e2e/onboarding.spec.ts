@@ -15,8 +15,17 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
 
   await verifyPhone(page, { name: '홍길순', year: '1957', month: '7', day: '7', phone: '01077778888', gender: '여성' })
   await expect(page).toHaveURL(/\/signup$/)
-  await page.getByRole('radio', { name: '경기도' }).click()
+  // 1단계: 좋아하는 것 — 안 고르고 넘어가면 안내
+  await expect(page.getByRole('heading', { name: /어떤 활동을 좋아하시나요/ })).toBeVisible()
+  await page.getByRole('button', { name: '다음' }).click()
+  await expect(page.getByRole('alert')).toHaveText('좋아하는 것을 하나 이상 골라 주세요.')
   await page.getByRole('button', { name: '요리' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  // 2단계: 사는 곳 — 뒤로 누르면 1단계로, 고른 것은 그대로
+  await page.getByRole('button', { name: '뒤로' }).click()
+  await expect(page.getByRole('button', { name: '요리' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: '경기도' }).click()
   await page.getByRole('button', { name: '가입 완료' }).click()
 
   await expect(page.getByRole('heading', { name: '안전한 시작을 약속합니다' })).toBeVisible()

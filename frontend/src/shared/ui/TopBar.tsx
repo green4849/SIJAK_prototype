@@ -10,6 +10,8 @@ interface Props {
   description?: ReactNode
   /** 뒤로 갈 경로. 없으면 브라우저 뒤로가기 */
   backTo?: string
+  /** 뒤로를 눌렀을 때 페이지 이동 대신 할 일 (여러 단계 화면에서 이전 단계로) */
+  onBack?: () => void
   /** false면 뒤로가기 버튼 숨김 */
   back?: boolean
   right?: ReactNode
@@ -22,7 +24,7 @@ interface Props {
  *  - 뒤로가기가 없으면(탭 화면): [제목 ……… 오른쪽 동작] 한 줄
  *  → 오른쪽 동작이 있든 없든 제목 위치가 바뀌지 않는다
  */
-export function TopBar({ title, description, backTo, back = true, right }: Props) {
+export function TopBar({ title, description, backTo, onBack, back = true, right }: Props) {
   const navigate = useNavigate()
   if (!back && !title && !right) return null
 
@@ -35,7 +37,7 @@ export function TopBar({ title, description, backTo, back = true, right }: Props
             <button
               type="button"
               className={styles.back}
-              onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+              onClick={() => (onBack ? onBack() : backTo ? navigate(backTo) : navigate(-1))}
             >
               <ChevronLeft aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
               <span className={styles.backLabel}>뒤로</span>

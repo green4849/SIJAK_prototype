@@ -7,6 +7,8 @@ export interface GridOption {
 
 interface Props {
   legend: string
+  /** 화면 제목이 같은 말을 하고 있으면 숨긴다 (화면 읽기 프로그램에는 그대로 읽힘) */
+  legendHidden?: boolean
   hint?: string
   options: GridOption[]
   selected: string[]
@@ -22,6 +24,7 @@ interface Props {
  */
 export function OptionGrid({
   legend,
+  legendHidden = false,
   hint,
   options,
   selected,
@@ -31,7 +34,7 @@ export function OptionGrid({
 }: Props) {
   return (
     <fieldset className={styles.fieldset}>
-      <legend className={styles.legend}>{legend}</legend>
+      <legend className={legendHidden ? 'sr-only' : styles.legend}>{legend}</legend>
       {hint && <p className={styles.hint}>{hint}</p>}
       <div className={styles.grid} data-columns={columns} role={multiple ? 'group' : 'radiogroup'}>
         {options.map((o) => {

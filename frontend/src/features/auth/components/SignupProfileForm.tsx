@@ -2,20 +2,32 @@ import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
+import { ImageOptionGrid } from '@/shared/ui/ImageOptionGrid'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
+import { TopBar } from '@/shared/ui/TopBar'
 import { authApi, type User } from '../api/authApi'
 import { useSignupOptions } from '../hooks/useSignupOptions'
+import { toInterestOptions } from './interestOptions'
 import styles from './form.module.css'
 
 interface Props {
   signupToken: string
   name: string
+  /** 첫 단계에서 뒤로를 누르면 갈 곳 */
+  backTo: string
   onDone: (accessToken: string, user: User) => void
 }
 
-/** 가입 마무리 — 사는 곳 + 좋아하는 것 */
-export function SignupProfileForm({ signupToken, name, onDone }: Props) {
+const STEPS = 2
+
+/**
+ * 가입 마무리 — 한 화면에 한 가지만 묻는다.
+ *  1단계: 좋아하는 것 (사진 카드, 여러 개)
+ *  2단계: 사는 곳
+ */
+export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) {
   const { options, error: loadError } = useSignupOptions()
+  const [step, setStep] = useState<1 | 2>(1)
   const [region, setRegion] = useState('')
   const [interests, setInterests] = useState<string[]>([])
   const [pending, setPending] = useState(false)
@@ -32,10 +44,21 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
     setInterests([...interests, v])
   }
 
+  function goBack() {
+    setError(null)
+    setStep(1)
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (step === 1) {
+      if (interests.length === 0) return setError('좋아하는 것을 하나 이상 골라 주세요.')
+      setError(null)
+      setStep(2)
+      window.scrollTo({ top: 0 })
+      return
+    }
     if (!region) return setError('사는 곳을 골라 주세요.')
-    if (interests.length === 0) return setError('좋아하는 것을 하나 이상 골라 주세요.')
     setPending(true)
     setError(null)
     try {
@@ -48,39 +71,85 @@ export function SignupProfileForm({ signupToken, name, onDone }: Props) {
     }
   }
 
-  if (loadError) return <Alert>{loadError}</Alert>
-  if (!options) return <p role="status">불러오는 중…</p>
+  const topBar = <TopBar backTo={backTo} onBack={step === 2 ? goBack : undefined} />
+  if (loadError)
+    return (
+      <>
+        {topBar}
+        <Alert>{loadError}</Alert>
+      </>
+    )
+  if (!options)
+    return (
+      <>
+        {topBar}
+        <p role="status">불러오는 중…</p>
+      </>
+    )
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <div>
-        <h1 className={styles.title}>{name}님, 반가워요</h1>
+    <>
+      {topBar}
+      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <StepProgress step={step} />
+
+        {step === 1 ? (
+          <>
+            <h1 className={styles.title}>
+              {name}님,
+              <br />
+              어떤 활동을 좋아하시나요?
+            </h1>
+            <ImageOptionGrid
+              legend="좋아하는 것"
+              legendHidden
+              multiple
+              options={toInterestOptions(options.interests)}
+              selected={interests}
+              onToggle={toggleInterest}
+            />
+          </>
+        ) : (
+          <>
+            <h1 className={styles.title}>어디에 사세요?</h1>
+            <OptionGrid
+              legend="사는 곳"
+              legendHidden
+              options={options.regions.map((o) => ({ value: o.code, label: o.label }))}
+              selected={region ? [region] : []}
+              onToggle={(v) => {
+                setRegion(v)
+                setError(null)
+              }}
+            />
+          </>
+        )}
+
+        {/* 목록이 길어도 '다음'이 늘 손 닿는 곳에 — 안내 문구도 버튼 바로 위에 */}
+        <div className={styles.stickyActions}>
+          {error && <Alert>{error}</Alert>}
+          <Button type="submit" block large disabled={pending}>
+            {step === 1 ? '다음' : pending ? '가입하는 중…' : '가입 완료'}
+          </Button>
+        </div>
+      </form>
+    </>
+  )
+}
+
+/** 몇 번째 단계인지 — 막대 + 숫자 (색만으로 전달하지 않는다) */
+function StepProgress({ step }: { step: number }) {
+  return (
+    <div className={styles.progress}>
+      <div className={styles.progressBar} aria-hidden="true">
+        {Array.from({ length: STEPS }, (_, i) => (
+          <span key={i} className={styles.progressSeg} data-done={i < step} />
+        ))}
       </div>
-
-      <OptionGrid
-        legend="사는 곳"
-        options={options.regions.map((o) => ({ value: o.code, label: o.label }))}
-        selected={region ? [region] : []}
-        onToggle={(v) => {
-          setRegion(v)
-          setError(null)
-        }}
-      />
-
-      <OptionGrid
-        legend="좋아하는 것"
-        hint={`${interests.length} / ${max}개`}
-        multiple
-        options={options.interests.map((o) => ({ value: o.code, label: o.label }))}
-        selected={interests}
-        onToggle={toggleInterest}
-      />
-
-      {error && <Alert>{error}</Alert>}
-
-      <Button type="submit" block disabled={pending}>
-        {pending ? '가입하는 중…' : '가입 완료'}
-      </Button>
-    </form>
+      <span className={styles.progressText}>
+        <span className="sr-only">가입 단계 </span>
+        {step} / {STEPS}
+      </span>
+    </div>
   )
 }
