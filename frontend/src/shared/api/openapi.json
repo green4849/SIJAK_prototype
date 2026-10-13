@@ -19,7 +19,8 @@
             "enum": [
               "culture",
               "health",
-              "learning"
+              "learning",
+              "volunteer"
             ],
             "title": "Category",
             "type": "string"
@@ -58,6 +59,11 @@
             "title": "Place",
             "type": "string"
           },
+          "reward_points": {
+            "description": "참여하면 받는 포인트 (봉사). 없으면 0",
+            "title": "Reward Points",
+            "type": "integer"
+          },
           "schedule_text": {
             "title": "Schedule Text",
             "type": "string"
@@ -92,7 +98,8 @@
           "applied",
           "liked",
           "description",
-          "image_kind"
+          "image_kind",
+          "reward_points"
         ],
         "title": "ActivityOut",
         "type": "object"
@@ -242,6 +249,23 @@
             "title": "Intro",
             "type": "string"
           },
+          "my_rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "like",
+                  "neutral",
+                  "dislike"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "내가 남긴 추천 평가. 상대에게는 보이지 않는다",
+            "title": "My Rating"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -289,7 +313,8 @@
           "common_interests",
           "distance_km",
           "relation",
-          "request_id"
+          "request_id",
+          "my_rating"
         ],
         "title": "FriendCard",
         "type": "object"
@@ -447,6 +472,55 @@
         "title": "MessageOut",
         "type": "object"
       },
+      "MissionOut": {
+        "properties": {
+          "claimed": {
+            "title": "Claimed",
+            "type": "boolean"
+          },
+          "code": {
+            "const": "first_friends",
+            "title": "Code",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "goal": {
+            "title": "Goal",
+            "type": "integer"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "integer"
+          },
+          "reward": {
+            "title": "Reward",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "description",
+          "progress",
+          "goal",
+          "reward",
+          "done",
+          "claimed"
+        ],
+        "title": "MissionOut",
+        "type": "object"
+      },
       "MyActivityCounts": {
         "properties": {
           "applied": {
@@ -463,6 +537,78 @@
           "liked"
         ],
         "title": "MyActivityCounts",
+        "type": "object"
+      },
+      "NotificationPrefsOut": {
+        "properties": {
+          "max_per_day": {
+            "title": "Max Per Day",
+            "type": "integer"
+          },
+          "quiet_hours": {
+            "description": "알림을 보내지 않는 시간 안내 문구",
+            "title": "Quiet Hours",
+            "type": "string"
+          },
+          "recommend_enabled": {
+            "title": "Recommend Enabled",
+            "type": "boolean"
+          },
+          "recommend_times": {
+            "items": {
+              "enum": [
+                "morning",
+                "noon",
+                "evening"
+              ],
+              "type": "string"
+            },
+            "title": "Recommend Times",
+            "type": "array"
+          },
+          "time_options": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSlotOption"
+            },
+            "title": "Time Options",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recommend_enabled",
+          "recommend_times",
+          "max_per_day",
+          "time_options",
+          "quiet_hours"
+        ],
+        "title": "NotificationPrefsOut",
+        "type": "object"
+      },
+      "NotificationPrefsUpdate": {
+        "properties": {
+          "recommend_enabled": {
+            "title": "Recommend Enabled",
+            "type": "boolean"
+          },
+          "recommend_times": {
+            "items": {
+              "enum": [
+                "morning",
+                "noon",
+                "evening"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Recommend Times",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recommend_enabled",
+          "recommend_times"
+        ],
+        "title": "NotificationPrefsUpdate",
         "type": "object"
       },
       "Option": {
@@ -565,6 +711,106 @@
         "title": "PassVerifyRequest",
         "type": "object"
       },
+      "PointEntryOut": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "welcome",
+              "rating",
+              "volunteer",
+              "mission_first_friends",
+              "friend_request"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "amount",
+          "reason",
+          "label",
+          "created_at"
+        ],
+        "title": "PointEntryOut",
+        "type": "object"
+      },
+      "PointSummaryOut": {
+        "description": "내 포인트와 지금 적용되는 규칙 — 화면 안내 문구는 이 값으로 만든다",
+        "properties": {
+          "balance": {
+            "title": "Balance",
+            "type": "integer"
+          },
+          "first_friends_reward": {
+            "title": "First Friends Reward",
+            "type": "integer"
+          },
+          "free_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "체험 기간 마지막 날(한국 날짜). 없으면 null",
+            "title": "Free Until"
+          },
+          "friend_request_cost": {
+            "title": "Friend Request Cost",
+            "type": "integer"
+          },
+          "next_request_free": {
+            "description": "다음 친구 신청이 무료인지 (첫 신청·무료 기간)",
+            "title": "Next Request Free",
+            "type": "boolean"
+          },
+          "rating_reward": {
+            "title": "Rating Reward",
+            "type": "integer"
+          },
+          "ratings_left_today": {
+            "title": "Ratings Left Today",
+            "type": "integer"
+          },
+          "volunteer_reward": {
+            "title": "Volunteer Reward",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "balance",
+          "friend_request_cost",
+          "next_request_free",
+          "free_until",
+          "rating_reward",
+          "ratings_left_today",
+          "volunteer_reward",
+          "first_friends_reward"
+        ],
+        "title": "PointSummaryOut",
+        "type": "object"
+      },
       "ProfileUpdate": {
         "description": "PATCH /me — 보낸 항목만 바뀐다",
         "properties": {
@@ -608,6 +854,53 @@
           }
         },
         "title": "ProfileUpdate",
+        "type": "object"
+      },
+      "RatingCreate": {
+        "properties": {
+          "rating": {
+            "enum": [
+              "like",
+              "neutral",
+              "dislike"
+            ],
+            "title": "Rating",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "RatingCreate",
+        "type": "object"
+      },
+      "RatingOut": {
+        "properties": {
+          "points_earned": {
+            "description": "이번 평가로 받은 포인트 (못 받으면 0)",
+            "title": "Points Earned",
+            "type": "integer"
+          },
+          "rating": {
+            "enum": [
+              "like",
+              "neutral",
+              "dislike"
+            ],
+            "title": "Rating",
+            "type": "string"
+          },
+          "ratings_left_today": {
+            "title": "Ratings Left Today",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rating",
+          "points_earned",
+          "ratings_left_today"
+        ],
+        "title": "RatingOut",
         "type": "object"
       },
       "ReasonOption": {
@@ -865,6 +1158,29 @@
         "title": "TextMessageCreate",
         "type": "object"
       },
+      "TimeSlotOption": {
+        "properties": {
+          "code": {
+            "enum": [
+              "morning",
+              "noon",
+              "evening"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label"
+        ],
+        "title": "TimeSlotOption",
+        "type": "object"
+      },
       "TokenResponse": {
         "properties": {
           "access_token": {
@@ -882,6 +1198,31 @@
           "access_token"
         ],
         "title": "TokenResponse",
+        "type": "object"
+      },
+      "TopicOut": {
+        "description": "대화 주제 추천 — 누르면 입력칸에 들어간다 (자동으로 보내지 않음)",
+        "properties": {
+          "common": {
+            "description": "두 사람 공통 관심사에서 나온 문구인지",
+            "title": "Common",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "text",
+          "common"
+        ],
+        "title": "TopicOut",
         "type": "object"
       },
       "UserOut": {
@@ -1963,6 +2304,58 @@
         ]
       }
     },
+    "/api/v1/chats/{room_id}/topics": {
+      "get": {
+        "operationId": "topics_api_v1_chats__room_id__topics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "room_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Room Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TopicOut"
+                  },
+                  "title": "Response Topics Api V1 Chats  Room Id  Topics Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Topics",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/api/v1/chats/{room_id}/voice": {
       "post": {
         "operationId": "send_voice_api_v1_chats__room_id__voice_post",
@@ -2102,6 +2495,64 @@
           }
         ],
         "summary": "Recommendations",
+        "tags": [
+          "friend"
+        ]
+      }
+    },
+    "/api/v1/friends/recommendations/{user_id}/rating": {
+      "put": {
+        "operationId": "rate_api_v1_friends_recommendations__user_id__rating_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rate",
         "tags": [
           "friend"
         ]
@@ -2401,6 +2852,210 @@
         "summary": "Update Location",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/missions": {
+      "get": {
+        "operationId": "missions_api_v1_missions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MissionOut"
+                  },
+                  "title": "Response Missions Api V1 Missions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Missions",
+        "tags": [
+          "mission"
+        ]
+      }
+    },
+    "/api/v1/missions/{code}/claim": {
+      "post": {
+        "operationId": "claim_api_v1_missions__code__claim_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "const": "first_friends",
+              "title": "Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Claim",
+        "tags": [
+          "mission"
+        ]
+      }
+    },
+    "/api/v1/notifications/settings": {
+      "get": {
+        "operationId": "get_settings_api_v1_notifications_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPrefsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Settings",
+        "tags": [
+          "notification"
+        ]
+      },
+      "put": {
+        "operationId": "update_settings_api_v1_notifications_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPrefsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPrefsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Settings",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/points": {
+      "get": {
+        "operationId": "summary_api_v1_points_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointSummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Summary",
+        "tags": [
+          "point"
+        ]
+      }
+    },
+    "/api/v1/points/history": {
+      "get": {
+        "operationId": "history_api_v1_points_history_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PointEntryOut"
+                  },
+                  "title": "Response History Api V1 Points History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "History",
+        "tags": [
+          "point"
         ]
       }
     },
