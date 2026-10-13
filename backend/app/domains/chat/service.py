@@ -11,6 +11,7 @@ from app.core.storage import LocalMediaStorage
 from app.domains.auth.service import AuthService
 from app.domains.chat.models import ChatMessage, ChatRoom
 from app.domains.chat.repository import ChatRepository
+from app.domains.chat.topics import Topic, suggest
 from app.domains.friend.service import FriendService
 from app.domains.risk.service import RiskService
 
@@ -145,6 +146,21 @@ class ChatService:
             raise NotFoundError("음성을 찾을 수 없어요.")
         await self._member_room(me, msg.room_id)
         return self.storage.path(msg.audio_key)
+
+    # ---------- 대화 주제 (C12) ----------
+
+    async def topics(self, me: "User", room_id: uuid.UUID) -> list[Topic]:
+        room = await self._member_room(me, room_id)
+        other = (await self.auth.get_users({room.other(me.id)}))[room.other(me.id)]
+        return suggest([i.category for i in me.interests], [i.category for i in other.interests])
+
+    # ---------- 다른 도메인용 공개 메서드 ----------
+
+    async def talked_friend_ids(self, me: "User") -> set[uuid.UUID]:
+        """서로 한 번 이상 말을 주고받은 친구 (차단한 사람 제외)"""
+        others = {r.other(me.id) for r in await self.repo.rooms_with_reply(me.id)}
+        others -= await self.risk.related_block_ids(me.id)
+        return {o for o in others if await self.friends.are_friends(me.id, o)}
 
     # ---------- 내부 ----------
 

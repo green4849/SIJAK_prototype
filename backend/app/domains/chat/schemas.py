@@ -8,6 +8,7 @@ from app.domains.auth.constants import REGIONS
 from app.domains.auth.service import age_on
 from app.domains.chat.models import ChatMessage
 from app.domains.chat.service import TEXT_MAX, RoomSummary
+from app.domains.chat.topics import Topic
 
 
 class ChatPeer(BaseModel):
@@ -83,3 +84,15 @@ class RoomOut(BaseModel):
 
 class TextMessageCreate(BaseModel):
     text: str = Field(min_length=1, max_length=TEXT_MAX)
+
+
+class TopicOut(BaseModel):
+    """대화 주제 추천 — 누르면 입력칸에 들어간다 (자동으로 보내지 않음)"""
+
+    label: str
+    text: str
+    common: bool = Field(description="두 사람 공통 관심사에서 나온 문구인지")
+
+    @classmethod
+    def of(cls, t: Topic) -> "TopicOut":
+        return cls(label=t.label, text=t.text, common=t.common)

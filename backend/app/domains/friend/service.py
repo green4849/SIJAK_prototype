@@ -9,6 +9,7 @@ from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
 from app.domains.friend.nearby import find_nearby
 from app.domains.friend.repository import FriendRepository
+from app.domains.point.service import PointService
 from app.domains.risk.service import RiskService
 
 if TYPE_CHECKING:
@@ -16,7 +17,13 @@ if TYPE_CHECKING:
 
 Relation = Literal["none", "sent", "received", "friends"]
 Tab = Literal["recommended", "nearby"]
+Rating = Literal["like", "neutral", "dislike"]
 MAX_RESULTS = 30
+# 평가 반영 (C12): 추천 탭에서 '만나보고 싶어요' 먼저, 평가 안 한 사람, '그저 그래요' 순.
+# '잘 안 맞아요'는 추천 탭에서 다시 보이지 않는다 (같은 동네 탭은 거리 목록이라 그대로)
+_RATING_ORDER = {"like": 0, None: 1, "neutral": 2}
+# '만나보고 싶어요'를 받은 사람들의 관심사를 가진 사람은 조금 더 앞으로
+_LIKED_INTEREST_WEIGHT = 0.5
 
 
 @dataclass(frozen=True)
@@ -26,6 +33,14 @@ class Candidate:
     request_id: uuid.UUID | None
     common_interests: list[str]
     distance_km: float | None = None
+    my_rating: Rating | None = None
+
+
+@dataclass(frozen=True)
+class RatingResult:
+    rating: Rating
+    points_earned: int
+    ratings_left_today: int
 
 
 class CannotRequestSelfError(DomainError):
@@ -33,10 +48,13 @@ class CannotRequestSelfError(DomainError):
 
 
 class FriendService:
-    def __init__(self, repo: FriendRepository, auth: AuthService, risk: RiskService) -> None:
+    def __init__(
+        self, repo: FriendRepository, auth: AuthService, risk: RiskService, points: PointService
+    ) -> None:
         self.repo = repo
         self.auth = auth
         self.risk = risk
+        self.points = points
 
     # ---------- 추천 ----------
 
@@ -46,6 +64,7 @@ class FriendService:
         exclude = {me.id} | {uid for uid, (rel, _) in relations.items() if rel == "friends"}
         exclude |= await self._blocked_ids(me.id)
         my_interests = {i.category for i in me.interests}
+        ratings = await self.repo.ratings_by(me.id)
 
         if tab == "nearby":
             pool = await self.auth.list_active_users(exclude_ids=exclude)
@@ -54,20 +73,51 @@ class FriendService:
             # 거리가 있으면 가까운 순, 없으면 최근 접속 순(조회 순서 유지)
             pairs.sort(key=lambda p: (p[1] is None, p[1] or 0))
         else:
-            pool = await self.auth.list_active_users(exclude_ids=exclude)
+            disliked = {uid for uid, r in ratings.items() if r == "dislike"}
+            pool = await self.auth.list_active_users(exclude_ids=exclude | disliked)
+            liked_interests = {
+                i.category for u in pool if ratings.get(u.id) == "like" for i in u.interests
+            }
+
+            def score(u: "User") -> float:
+                theirs = {i.category for i in u.interests}
+                return len(my_interests & theirs) + _LIKED_INTEREST_WEIGHT * len(
+                    liked_interests & theirs
+                )
+
             pairs = [(u, None) for u in pool]
-            # 관심사 많이 겹치는 순, 같은 지역 우선
+            # 평가 → 관심사 점수 높은 순 → 같은 지역 우선
             pairs.sort(
                 key=lambda p: (
-                    -len(my_interests & {i.category for i in p[0].interests}),
+                    _RATING_ORDER[ratings.get(p[0].id)],
+                    -score(p[0]),
                     p[0].region_code != me.region_code,
                 )
             )
 
         return [
-            self._candidate(u, my_interests, relations, distance)
+            self._candidate(u, my_interests, relations, distance, ratings.get(u.id))
             for u, distance in pairs[:MAX_RESULTS]
         ]
+
+    # ---------- 평가 (C12) ----------
+
+    async def rate(self, me: "User", target_id: uuid.UUID, rating: Rating) -> RatingResult:
+        """추천 친구 평가.
+
+        처음 평가하는 사람이면 포인트(하루 상한까지). 평가를 바꿔도 포인트는 한 번만.
+        """
+        if target_id == me.id:
+            raise CannotRequestSelfError("나는 평가할 수 없어요.")
+        target = await self.auth.get_active_user(target_id)
+        await self.repo.set_rating(me.id, target_id, rating)
+        earned = await self.points.earn_rating(me.id, target_id, f"{target.name}님 평가")
+        await self.repo.commit()
+        return RatingResult(
+            rating=rating,
+            points_earned=earned.amount,
+            ratings_left_today=await self.points.ratings_left_today(me.id),
+        )
 
     # ---------- 신청 ----------
 
@@ -89,6 +139,8 @@ class FriendService:
                 return await self._candidate_for(me, target)
             if req.status == "pending" and req.from_user_id == me.id:
                 return await self._candidate_for(me, target)  # 중복 신청은 무시
+        # 새 신청 — 포인트 (C12). 모자라면 여기서 멈추고 아무것도 저장하지 않는다
+        await self.points.charge_friend_request(me.id, to_id, f"{target.name}님께 친구 신청")
         # 거절됐던 내 신청이 있으면 다시 대기로
         mine = next((r for r in existing if r.from_user_id == me.id), None)
         if mine:
@@ -158,6 +210,7 @@ class FriendService:
         my_interests: set[str],
         relations: dict[uuid.UUID, tuple[Relation, uuid.UUID]],
         distance_km: float | None = None,
+        my_rating: str | None = None,
     ) -> Candidate:
         rel, req_id = relations.get(u.id, ("none", None))
         theirs = [i.category for i in u.interests]
@@ -167,4 +220,5 @@ class FriendService:
             request_id=req_id,
             common_interests=[c for c in theirs if c in my_interests],
             distance_km=distance_km,
+            my_rating=my_rating,  # type: ignore[arg-type]
         )

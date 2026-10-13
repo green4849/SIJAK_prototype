@@ -237,20 +237,50 @@ DEMO_ACTIVITIES = [
         "book",
         "손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.",
     ),
+    # 봉사 (C12) — 참여하면 포인트
+    (
+        "어르신 도시락 나눔",
+        "복지관과 함께 이웃에게 도시락을 전해요",
+        "volunteer",
+        "41",
+        "○○노인복지관 1층 식당",
+        "토요일 오전 10시",
+        4,
+        10,
+        120,
+        15,
+        "meal",
+        "복지관에서 만든 도시락을 포장해 홀로 사시는 이웃께 전해 드려요. "
+        "무거운 짐은 복지관 선생님이 맡아요. 앞치마는 복지관에서 드려요.",
+    ),
+    (
+        "공원 걷기 + 쓰레기 줍기",
+        "걸으면서 우리 동네도 깨끗하게",
+        "volunteer",
+        "41",
+        "○○근린공원 입구",
+        "수요일 오후 3시",
+        8,
+        15,
+        60,
+        20,
+        "cleanup",
+        "천천히 공원을 걸으며 쓰레기를 주워요. 집게와 장갑은 복지관에서 준비해요.",
+    ),
 ]
 
 
 async def seed_activities() -> None:
     from datetime import UTC, datetime, timedelta
 
-    from sqlalchemy import func, select
+    from sqlalchemy import select
 
     from app.domains.activity.models import Activity
 
     async with SessionLocal() as session:
-        if await session.scalar(select(func.count()).select_from(Activity)):
-            print("activities: 이미 있음 — 건너뜀")
-            return
+        # 제목이 이미 있는 활동은 건너뛴다 → 새로 추가한 시드(예: C12 봉사)만 기존 DB에 들어간다
+        existing = set(await session.scalars(select(Activity.title)))
+        added = 0
         today = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
         for (
             title,
@@ -266,6 +296,9 @@ async def seed_activities() -> None:
             icon,
             desc,
         ) in DEMO_ACTIVITIES:
+            if title in existing:
+                continue
+            added += 1
             # 한국 시각 hour시 → UTC
             start = today + timedelta(days=days, hours=hour - 9)
             # 목록 문구는 실제 날짜로 만든다 (고정 문구는 날짜와 어긋남)
@@ -291,7 +324,7 @@ async def seed_activities() -> None:
                 )
             )
         await session.commit()
-        print(f"activities: +{len(DEMO_ACTIVITIES)}")
+        print(f"activities: +{added}" if added else "activities: 이미 있음 — 건너뜀")
 
 
 async def main() -> None:

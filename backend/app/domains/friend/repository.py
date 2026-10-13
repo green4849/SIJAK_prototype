@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domains.friend.models import FriendRequest
+from app.domains.friend.models import FriendRequest, RecommendationRating
 
 
 class FriendRepository:
@@ -43,6 +43,25 @@ class FriendRepository:
         req.status = status
         req.responded_at = datetime.now(UTC)
         await self.session.flush()
+
+    # ---- 추천 평가 (C12) ----
+
+    async def ratings_by(self, user_id: uuid.UUID) -> dict[uuid.UUID, str]:
+        q = select(RecommendationRating.target_id, RecommendationRating.rating).where(
+            RecommendationRating.user_id == user_id
+        )
+        return {t: r for t, r in (await self.session.execute(q)).all()}
+
+    async def set_rating(self, user_id: uuid.UUID, target_id: uuid.UUID, rating: str) -> None:
+        stmt = insert(RecommendationRating).values(
+            user_id=user_id, target_id=target_id, rating=rating
+        )
+        await self.session.execute(
+            stmt.on_conflict_do_update(
+                index_elements=["user_id", "target_id"],
+                set_={"rating": stmt.excluded.rating, "updated_at": datetime.now(UTC)},
+            )
+        )
 
     async def commit(self) -> None:
         await self.session.commit()

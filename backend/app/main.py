@@ -9,6 +9,9 @@ from app.domains.activity.router import router as activity_router
 from app.domains.auth.router import router as auth_router
 from app.domains.chat.router import router as chat_router
 from app.domains.friend.router import router as friend_router
+from app.domains.mission.router import router as mission_router
+from app.domains.notification.router import router as notification_router
+from app.domains.point.router import router as point_router
 from app.domains.risk.router import router as risk_router
 
 
@@ -37,6 +40,9 @@ def create_app() -> FastAPI:
     api.include_router(chat_router)  # Stage 4
     api.include_router(risk_router)  # Stage 5
     api.include_router(activity_router)  # Stage 6
+    api.include_router(point_router)  # C12 포인트
+    api.include_router(mission_router)  # C12 미션
+    api.include_router(notification_router)  # C12 알림 설정
 
     app.include_router(api)
     return app
