@@ -7,6 +7,7 @@ import {
   HeartPulse,
   Phone,
   LogOut,
+  MapPin,
   NotebookPen,
   Settings,
   Smartphone,
@@ -15,7 +16,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '@/features/auth'
+import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
 import { useIsolationIndex, weatherLabel } from '@/features/wellbeing'
@@ -36,6 +37,7 @@ export function MyPage() {
   const points = usePointSummary()
   const mood = useIsolationIndex()
   const { installed } = useInstallState()
+  const location = useLocationRecheck()
   if (!user) return null
 
   return (
@@ -68,6 +70,13 @@ export function MyPage() {
       <CardGrid gap="section">
         <MenuList label="내 활동">
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
+          {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 */}
+          <MenuItem
+            icon={MapPin}
+            label={location.pending ? '위치 확인 중…' : '위치 다시 확인'}
+            value={location.pending ? undefined : user.region_name}
+            onClick={location.recheck}
+          />
           <MenuItem
             icon={HeartPulse}
             label="마음 건강"

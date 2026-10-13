@@ -15,11 +15,10 @@ interface Props {
   onSaved: (user: User) => void
 }
 
-/** ⑨ → 내 프로필 관리: 한 줄 소개 · 사는 곳 · 좋아하는 것 */
+/** ⑨ → 내 프로필 관리: 한 줄 소개 · 좋아하는 것 (사는 곳은 위치 동의로 정해져 마이페이지에 표시) */
 export function ProfileEditForm({ user, onSaved }: Props) {
   const { options, error: loadError } = useSignupOptions()
   const [intro, setIntro] = useState(user.intro)
-  const [region, setRegion] = useState(user.region_code)
   const [interests, setInterests] = useState<string[]>(user.interests)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +39,7 @@ export function ProfileEditForm({ user, onSaved }: Props) {
     setPending(true)
     setError(null)
     try {
-      onSaved(await authApi.updateMe({ intro, region_code: region, interests }))
+      onSaved(await authApi.updateMe({ intro, interests }))
     } catch (err) {
       setError(errorMessage(err))
     } finally {
@@ -59,13 +58,6 @@ export function ProfileEditForm({ user, onSaved }: Props) {
         maxLength={INTRO_MAX}
         value={intro}
         onChange={(e) => setIntro(e.target.value)}
-      />
-
-      <OptionGrid
-        legend="사는 곳"
-        options={options.regions.map((o) => ({ value: o.code, label: o.label }))}
-        selected={[region]}
-        onToggle={setRegion}
       />
 
       <OptionGrid

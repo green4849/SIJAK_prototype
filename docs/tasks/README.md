@@ -1,6 +1,6 @@
 # 작업 목록
 
-로드맵(`docs/roadmap.md`) 항목별 작업 파일. **GitHub 이슈 대신 이 폴더로 관리**한다.
+로드맵(`docs/roadmap.md`) 항목별 작업 파일. 화면·기능 변화만 모은 기록은 `docs/ux-changes.md` (보고서용). **GitHub 이슈 대신 이 폴더로 관리**한다.
 
 - 시작할 때: 파일의 상태를 🔨 진행 중으로, 표의 브랜치 이름으로 브랜치 생성
 - 끝날 때: 완료 기준 체크, 진행 기록에 커밋·결정 사항 한 줄씩, 상태 ✅, 아래 표 갱신
@@ -27,8 +27,10 @@
 | [A15](A15-screen-layout.md) | 화면별 세부 배치 (디자인 리뷰 4) | M | P1 | ✅ |
 | [A16](A16-remove-demo-banner.md) | 데모 안내 띠 제거 → 링크로 둘러보기 | S | P1 | ✅ |
 | [A17](A17-responsive.md) | 기기 크기에 맞는 화면 (휴대폰·태블릿·PC) | M | P1 | ✅ |
-| [A18](A18-less-text.md) | 화면 글씨 줄이기 — 설명은 시연 대본으로 | S | P1 | 🔨 |
-| [A19](A19-friendly-illustrations.md) | 친근한 일러스트 되살리기 (처음 시안의 약 40%) | M | P1 | 🔨 |
+| [A18](A18-less-text.md) | 화면 글씨 줄이기 — 설명은 시연 대본으로 | S | P1 | ✅ |
+| [A19](A19-friendly-illustrations.md) | 친근한 일러스트 되살리기 (처음 시안의 약 40%) | M | P1 | ✅ |
+| [A20](A20-activity-photos.md) | 지역생활 활동에 실제 사진 | S | P1 | ✅ |
+| [A21](A21-location-consent-region.md) | 사는 곳 = 위치 정보 수집 동의 (+ 위치 다시 확인) | S | P1 | 🔨 |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
 | [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ⬜ |

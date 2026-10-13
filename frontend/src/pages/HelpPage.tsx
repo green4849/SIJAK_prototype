@@ -42,7 +42,7 @@ export function HelpPage() {
         </details>
 
         <details className={styles.item}>
-          <summary>사는 곳이나 소개를 바꾸고 싶어요</summary>
+          <summary>소개나 좋아하는 것을 바꾸고 싶어요</summary>
           <p>
             마이페이지의 <Link to="/me/profile">내 프로필 관리</Link>에서 언제든 바꿀 수 있어요.
           </p>
