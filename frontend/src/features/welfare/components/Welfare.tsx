@@ -1,14 +1,15 @@
-import { Building2, ChevronRight, Clock, MapPin, Phone, Users } from 'lucide-react'
+import { ChevronRight, Clock, MapPin, Phone, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert } from '@/shared/ui/Alert'
 import { CardGrid } from '@/shared/ui/CardGrid'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
+import { FacilityArt } from '@/shared/ui/illustrations/FacilityArt'
 import type { WelfareCenter, WelfareKind } from '../api/welfareApi'
 import { useCenter, useNearbyCenters } from '../hooks/useWelfare'
+import { distanceText, openState, walkText } from '../lib/visit'
 import styles from './Welfare.module.css'
 
-const km = (n: number) => (n < 1 ? `${n * 1000}m` : `${n}km`)
 const telOf = (phone: string) => `tel:${phone.replace(/\D/g, '')}`
 const prettyPhone = (p: string) => {
   const d = p.replace(/\D/g, '')
@@ -28,20 +29,31 @@ export function WelfareList({ kind, detailHref }: { kind: WelfareKind | 'all'; d
         <li key={c.id}>
           <Link to={detailHref(c.id)} className={styles.item}>
             <span className={styles.thumb} data-kind={c.kind} aria-hidden="true">
-              <Building2 size={ICON.md} strokeWidth={ICON_STROKE} />
+              <FacilityArt kind={c.kind} />
             </span>
             <span className={styles.main}>
               <span className={styles.title}>{c.name}</span>
               <span className={styles.meta}>
-                {c.kind_label} · {km(c.distance_km)}
+                {c.kind_label} · {walkText(c.distance_km)}
               </span>
-              {c.programs.length > 0 && <span className={styles.meta}>프로그램 {c.programs.length}개</span>}
+              <OpenBadge hours={c.open_hours} />
             </span>
             <ChevronRight aria-hidden="true" className={styles.chevron} size={ICON.sm} strokeWidth={ICON_STROKE} />
           </Link>
         </li>
       ))}
     </CardGrid>
+  )
+}
+
+/** 지금 열려 있는지 — 열려 있으면 초록, 아니면 언제 여는지 (여는 시간을 못 읽으면 안 보임) */
+function OpenBadge({ hours }: { hours: string }) {
+  const state = openState(hours)
+  if (!state) return null
+  return (
+    <span className={styles.openState} data-open={state.open}>
+      {state.text}
+    </span>
   )
 }
 
@@ -82,10 +94,16 @@ function Detail({ c, header }: { c: WelfareCenter; header: ReactNode }) {
 
       <dl className={styles.info}>
         <Row icon={<MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="주소">
-          {c.address} <span className={styles.muted}>· {km(c.distance_km)}</span>
+          {c.address}
+          <span className={styles.muted}>
+            {' '}
+            · {walkText(c.distance_km)}
+            {c.distance_km <= 1.5 && ` (${distanceText(c.distance_km)})`}
+          </span>
         </Row>
         <Row icon={<Clock aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="여는 시간">
           {c.open_hours}
+          <OpenBadge hours={c.open_hours} />
         </Row>
         <Row icon={<Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="전화">
           {prettyPhone(c.phone)}
