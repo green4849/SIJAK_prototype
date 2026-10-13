@@ -7,6 +7,7 @@ import { FriendCard } from './FriendCard'
 import { RecommendRating } from './RecommendRating'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
+import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
 
 interface Props extends PointHooks {
   tab: FriendTab
@@ -32,10 +33,12 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }:
       {actionError && <Alert>{actionError}</Alert>}
       {loading && !data && <p role="status">이웃을 찾고 있어요…</p>}
       {data && data.length === 0 && (
-        <p className={styles.empty}>
-          {tab === 'nearby' ? '아직 가까운 이웃이 없어요.' : '추천할 이웃이 아직 없어요.'}
-          <br />곧 새로운 이웃이 찾아올 거예요.
-        </p>
+        <div>
+          <CoupleScene size="small" />
+          <p className={styles.empty}>
+            {tab === 'nearby' ? '아직 가까운 이웃이 없어요.' : '추천할 이웃이 아직 없어요.'}
+          </p>
+        </div>
       )}
       {data && data.length > 0 && (
         <CardGrid>

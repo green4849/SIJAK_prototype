@@ -21,7 +21,10 @@ const other = (r: DRoom, me: string) => (r.a === me ? r.b : r.a)
 
 /** 응답 모양은 백엔드 계약과 같아야 한다 — 어긋나면 타입 오류 (D3) */
 function peer(u: DUser): Schema<'ChatPeer'> {
-  return { user_id: u.id, name: u.name, age: ageOf(u.birth_date), region_name: REGIONS[u.region_code] ?? u.region_code }
+  return {
+    user_id: u.id, name: u.name, age: ageOf(u.birth_date), gender: u.gender,
+    region_name: REGIONS[u.region_code] ?? u.region_code,
+  }
 }
 
 function roomOut(r: DRoom, me: string): Schema<'RoomOut'> {

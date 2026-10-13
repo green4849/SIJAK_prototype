@@ -45,7 +45,7 @@ export function MyPage() {
       />
 
       <div className={styles.profile}>
-        <Avatar name={user.name} seed={user.id} size="profile" />
+        <Avatar name={user.name} seed={user.id} gender={user.gender} size="profile" />
         <div className={styles.who}>
           <p className={styles.name}>
             {user.name}님 <span className={styles.age}>{user.age}세</span>

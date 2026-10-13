@@ -15,6 +15,7 @@ class ChatPeer(BaseModel):
     user_id: uuid.UUID
     name: str
     age: int
+    gender: Literal["M", "F"]  # 아바타 그림(할머니·할아버지) 구분용 — A19
     region_name: str
 
 
@@ -73,6 +74,7 @@ class RoomOut(BaseModel):
                 user_id=u.id,
                 name=u.name,
                 age=age_on(u.birth_date, datetime.now(UTC).date()),
+                gender=u.gender,  # type: ignore[arg-type]
                 region_name=REGIONS.get(u.region_code, u.region_code),
             ),
             last_message=preview,

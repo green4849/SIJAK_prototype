@@ -723,6 +723,11 @@ export interface components {
         };
         /** BlockedUser */
         BlockedUser: {
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "M" | "F";
             /** Name */
             name: string;
             /**
@@ -752,6 +757,11 @@ export interface components {
         ChatPeer: {
             /** Age */
             age: number;
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "M" | "F";
             /** Name */
             name: string;
             /** Region Name */

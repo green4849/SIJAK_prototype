@@ -33,7 +33,10 @@ export const safetyRoutes: Route[] = [
     return json(
       db()
         .blocks.filter((b) => b.blocker === me.id)
-        .map((b) => ({ user_id: b.blocked, name: userById(b.blocked)?.name ?? '알 수 없음' })),
+        .map((b): Schema<'BlockedUser'> => {
+          const u = userById(b.blocked)
+          return { user_id: b.blocked, name: u?.name ?? '알 수 없음', gender: u?.gender ?? 'F' }
+        }),
     )
   }],
 

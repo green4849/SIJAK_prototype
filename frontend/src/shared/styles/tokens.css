@@ -125,6 +125,26 @@
   --color-icon-yellow: #8a5a00;
   --color-icon-sky: #1f4e79;
   --color-icon-beige: #5a4632;
+
+  /*
+   * 일러스트 (A19) — 인물·풍경 전용 (디자인 리뷰 공통 15). 조작 요소에는 쓰지 않는다.
+   * 처음 시안의 따뜻한 그림체: 갈색 선 + 연한 면
+   */
+  --illust-line: #5a4632;
+  --illust-skin: #f8dcc4;
+  --illust-blush: #f2a7a0;
+  --illust-hair: #e4e1da;
+  --illust-hair-shade: #c9c4ba;
+  --illust-cloth-pink: #f0b7b0;
+  --illust-cloth-yellow: #f3d77e;
+  --illust-cloth-green: #9cbf7a;
+  --illust-cloth-sky: #a9c8e6;
+  --illust-hill: #cfe2b8;
+  --illust-hill-far: #e3eed5;
+  --illust-sky: #fdf6e3;
+  --illust-sun: #f8d57e;
+  --illust-heart: #e98a86;
+  --illust-tree: #8fb36a;
 }
 
 :root[data-font-scale='2'] { --font-scale: 1.17; } /* 휴대폰 21px */
@@ -159,4 +179,9 @@
   --color-icon-yellow: #ffd400;
   --color-icon-sky: #ffd400;
   --color-icon-beige: #ffd400;
+  /* 일러스트: 인물은 밝은 면(피부·머리·옷)이라 검은 바탕에서도 형태가 보인다 → 갈색 선 그대로(눈·입이 보이게).
+     풍경 면만 어둡게 */
+  --illust-sky: #000000;
+  --illust-hill: #1a1a1a;
+  --illust-hill-far: #0d0d0d;
 }

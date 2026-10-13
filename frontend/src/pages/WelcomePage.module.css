@@ -13,18 +13,12 @@
   gap: var(--space-1);
 }
 
-/* 시안의 언덕 풍경 — 낮은 강조: 옅은 한 가지 색, 낮은 높이, 버튼과는 떨어뜨림 */
+/* 시안의 언덕 풍경 + 작은 노부부 (A19) — 낮은 강조: 옅은 색, 낮은 높이, 버튼과는 떨어뜨림 */
 .hills {
   flex: 1;
-  min-height: 64px;
-  max-height: 160px;
-  margin-top: auto;
-  background: radial-gradient(130% 100% at 50% 100%, var(--color-primary-soft) 55%, transparent 56%);
-  opacity: 0.7;
-}
-
-:root[data-contrast='high'] .hills {
-  visibility: hidden;
+  min-height: 96px;
+  max-height: 170px;
+  margin: auto calc(var(--gutter) * -1) 0; /* 화면 끝까지 */
 }
 
 /* 시작 버튼 주변은 단색 여백 */
