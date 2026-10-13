@@ -57,3 +57,5 @@ AI 말동무, 음성 통화(⑤ 📞), 고립 지수·자가평가, 긴급 SOS, 
 | 기능 | 화면 | 데모 API | 꽂는 곳 (백엔드) |
 |---|---|---|---|
 | C8 AI 말동무 | `/companion` (홈 카드) | `GET /companion` · `GET·POST /companion/messages` | `domains/companion` + `integrations/llm`·`stt`·`tts`. 답은 지금 `demo/companion.ts` 키워드 규칙(위기 → 의료 → 나머지 순서는 실제 가드레일과 같게). 말하기는 녹음 없이 시연 문장으로 받아쓴 척 → C2에서 녹음 파일 업로드로. 듣기는 브라우저 음성 합성(`shared/a11y/speak.ts`) |
+| C11 고립 지수·자가평가 | `/me/wellbeing` (마이페이지), `/me/wellbeing/check/:kind` | `GET /me/isolation-index` · `GET /me/self-assessment(/:kind)` · `POST /me/self-assessment` | `domains/wellbeing`. 지수는 지금 `demo/wellbeing.ts` 가 보고서 4.5.3 공식 그대로 데모 활동으로 계산(답장 요인은 고정 70, 지난 3주는 시드). 정서 요인은 말동무 대화 정서 라벨. 긴급 단계 → 보호자·복지사 알림은 C4 푸시와 함께 |
+| C10 긴급 도움·보호자 | `/sos` (홈 오른쪽 위 '긴급'), `/me/guardians` | `POST /emergency/sos` · `GET·POST /me/guardians` · `DELETE /me/guardians/:id` | `domains/emergency`. 알림 발송(문자·푸시)·복지사 연계는 비어 있음 — 데모는 기록만. 보호자 전화번호는 실서비스에서 users 처럼 암호화 저장 |

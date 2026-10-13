@@ -1,4 +1,5 @@
 import { CompanionAvatar, CompanionChat } from '@/features/companion'
+import { NotifyGuardianButton } from '@/features/emergency'
 import { TopBar } from '@/shared/ui/TopBar'
 import { activityDetail } from './routes'
 import styles from './ChatRoomPage.module.css'
@@ -15,7 +16,7 @@ export function CompanionPage() {
           <p className={styles.meta}>AI 친구</p>
         </div>
       </header>
-      <CompanionChat activityHref={activityDetail} />
+      <CompanionChat activityHref={activityDetail} crisisExtra={<NotifyGuardianButton />} />
     </section>
   )
 }

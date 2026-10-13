@@ -91,6 +91,24 @@ export interface DCompanionMsg {
   emotion: 'joy' | 'neutral' | 'sadness' | 'anxiety' | null
 }
 
+/** 보호자 (C10, 백엔드 없음) */
+export interface DGuardian {
+  id: string
+  uid: string
+  name: string
+  relation: string
+  phone: string
+}
+
+/** 자가평가 결과 (C11, 백엔드 없음) */
+export interface DAssessment {
+  id: number
+  uid: string
+  kind: 'phq9' | 'gad7'
+  answers: number[]
+  at: string
+}
+
 export interface DemoState {
   version: number
   me: string | null // 로그인한 사용자 id
@@ -111,11 +129,17 @@ export interface DemoState {
   companion: DCompanionMsg[]
   /** 말로 하기(받아쓰기 흉내) 다음 순서 */
   companionVoiceTurn: number
+  // C10·C11 — 화면·데모만
+  guardians: DGuardian[]
+  assessments: DAssessment[]
+  sos: { id: string; uid: string; at: string }[]
+  /** 지난 3주 고립 지수 (이번 주는 활동으로 계산) */
+  isolationHistory: Record<string, number[]>
   seq: number
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 5 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무
+const VERSION = 6 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -270,6 +294,12 @@ function seed(): DemoState {
     cm('assistant', '좋은 아침이에요! 오늘은 무엇을 하실 계획이에요?', iso(0, 8, 30)),
   ]
 
+  // 마음 건강 (C11): 2주 전 기분 점검, 지난주 걱정 점검
+  const assessments: DAssessment[] = [
+    { id: ++seq, uid: DEMO_ME_ID, kind: 'phq9', answers: [1, 1, 1, 1, 0, 1, 0, 0, 0], at: iso(-14, 10) },
+    { id: ++seq, uid: DEMO_ME_ID, kind: 'gad7', answers: [1, 0, 1, 0, 0, 1, 0], at: iso(-7, 10) },
+  ]
+
   return {
     version: VERSION,
     me: null,
@@ -287,6 +317,14 @@ function seed(): DemoState {
     notif: {},
     companion,
     companionVoiceTurn: 0,
+    guardians: [
+      { id: uid(), uid: DEMO_ME_ID, name: '김민수', relation: '아들', phone: '01098765432' },
+      { id: uid(), uid: DEMO_ME_ID, name: '박선희', relation: '담당 복지사', phone: '0312345678' },
+    ],
+    assessments,
+    sos: [],
+    // 친구가 생기면서 조금씩 나아지는 흐름 (3주 전 → 지난주)
+    isolationHistory: { [DEMO_ME_ID]: [58, 51, 44] },
     seq,
   }
 }

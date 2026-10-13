@@ -7,3 +7,5 @@ export const chatRoom = (roomId: string) => `/chats/${roomId}`
 export const activityDetail = (activityId: string) => `/activities/${activityId}`
 /** 지역생활 목록을 특정 분류로 열기 (예: 내 포인트 → 봉사모임) */
 export const activitiesOf = (category: string) => `/activities?category=${category}`
+/** 마음 건강 → 자가평가 (C11) */
+export const assessment = (kind: string) => `/me/wellbeing/check/${kind}`

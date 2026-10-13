@@ -1,10 +1,10 @@
-import { MapPin, MessageCircleMore, Sprout, Users } from 'lucide-react'
+import { MapPin, MessageCircleMore, Siren, Sprout, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
 import { MissionCards, PointChip } from '@/features/points'
 import { ActionCard } from '@/shared/ui/ActionCard'
-import { Avatar } from '@/shared/ui/Avatar'
+import { IconAction } from '@/shared/ui/IconAction'
 import { Badge } from '@/shared/ui/Badge'
 import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
@@ -27,7 +27,8 @@ export function HomePage() {
         </div>
         <div className={styles.side}>
           <PointChip to="/me/points" />
-          <Avatar name={user.name} seed={user.id} gender={user.gender} size="list" />
+          {/* 긴급 도움은 홈 맨 위에 늘 (C10, 보고서 4.4.1). 내 얼굴은 마이페이지에 */}
+          <IconAction icon={Siren} label="긴급" tone="danger" to="/sos" />
         </div>
       </header>
 
