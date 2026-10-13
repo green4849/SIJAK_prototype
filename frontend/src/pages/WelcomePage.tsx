@@ -1,3 +1,6 @@
+import type { MouseEvent } from 'react'
+import { flushSync } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import { FontScaleToggle } from '@/shared/a11y/FontScaleToggle'
 import { Brand, LeafLogo } from '@/shared/ui/Brand'
 import { ButtonLink } from '@/shared/ui/Button'
@@ -10,6 +13,16 @@ import styles from './WelcomePage.module.css'
  * 열 때마다 등장 연출 ('움직임 줄이기' 기기는 제외).
  */
 export function WelcomePage() {
+  const navigate = useNavigate()
+
+  /** 새싹이 다음 화면 로고 자리로 날아가는 전환 (A25). 지원 안 하는 브라우저·움직임 줄이기는 그냥 이동 */
+  function goNext(e: MouseEvent<HTMLAnchorElement>) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!document.startViewTransition || reduce || e.metaKey || e.ctrlKey || e.shiftKey) return
+    e.preventDefault()
+    document.startViewTransition(() => flushSync(() => navigate('/login')))
+  }
+
   return (
     <section className={styles.page}>
       <FontScaleToggle className={styles.fontToggle} />
@@ -27,7 +40,7 @@ export function WelcomePage() {
             </>
           }
         />
-        <ButtonLink to="/login" className={styles.cta}>
+        <ButtonLink to="/login" onClick={goNext} className={styles.cta}>
           시작하기
         </ButtonLink>
       </div>

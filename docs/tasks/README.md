@@ -34,6 +34,7 @@
 | [A22](A22-welcome-screen.md) | 시작 화면 다듬기 — 등장 연출·글씨 크게·슬로건·배치 | S | P1 | ✅ |
 | [A23](A23-activity-card-align.md) | 지역생활 카드 정렬 — 같은 줄 카드 높이 맞춤 | S | P1 | ✅ |
 | [A24](A24-interest-select.md) | 가입 — 좋아하는 활동을 둥근 그림으로, 한 화면에 질문 하나 | S | P1 | ✅ |
+| [A25](A25-login-continuity.md) | 시작 → 본인 확인, 이어지는 화면 (새싹 전환·② 머리) | S | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
 | [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | 🎭 |
