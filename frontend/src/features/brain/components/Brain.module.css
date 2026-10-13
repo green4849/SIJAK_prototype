@@ -1,0 +1,251 @@
+/* 두뇌 운동 (인지 훈련) — 토큰만 사용 */
+
+/* ---- 홈 카드 ---- */
+.today {
+  min-height: calc(var(--touch-min) * 1.4);
+  padding: var(--space-1) var(--card-pad);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+:root[data-contrast='high'] .today {
+  border: 2px solid var(--color-border);
+}
+
+.todayIcon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-card-pink);
+  color: var(--color-icon-pink);
+}
+
+.todayText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.todayTitle {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.todayMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* ---- 이번 주 ---- */
+.card {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+.cardTitle {
+  font-size: var(--text-card-title);
+}
+
+.week {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 2em;
+  height: 2em;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px dashed var(--color-divider);
+  font-weight: var(--weight-bold);
+}
+
+.day[data-done='true'] .dot {
+  border: 0;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* ---- 게임 공통 ---- */
+.game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.status {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+}
+
+/* 짝 맞추기: 2열 큰 카드 (넓으면 4열) */
+.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1);
+}
+
+@container page (min-width: 34rem) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tile {
+  width: 100%;
+  min-height: calc(var(--touch-min) * 1.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-card);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.tile[data-shown='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.tile[data-found='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.tile[data-shown='true'] svg {
+  color: var(--color-icon-pink);
+}
+
+.back {
+  font-size: var(--text-title);
+}
+
+/* 셈하기 */
+.problem {
+  margin: var(--space-2) 0;
+  text-align: center;
+  font-size: var(--text-hero);
+  font-weight: var(--weight-semibold);
+  line-height: 1.1;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1);
+}
+
+.answer {
+  min-height: calc(var(--touch-min) * 1.4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.answer:disabled {
+  cursor: default;
+}
+
+.answer[data-state='right'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.answer[data-state='wrong'] {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  text-decoration: line-through;
+}
+
+.feedback {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  color: var(--color-danger);
+}
+
+.feedback[data-correct='true'] {
+  color: var(--color-primary);
+}
+
+/* 결과 */
+.result {
+  padding: var(--space-3) var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-card-mint);
+  text-align: center;
+}
+
+:root[data-contrast='high'] .result {
+  border: 2px solid var(--color-border);
+}
+
+.resultTitle {
+  font-size: var(--text-title);
+  color: var(--color-primary);
+}
+
+.resultDetail {
+  margin: 0;
+  font-size: var(--text-card-title);
+}
+
+.resultActions {
+  margin-top: var(--space-1);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}

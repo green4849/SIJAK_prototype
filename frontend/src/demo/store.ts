@@ -135,11 +135,13 @@ export interface DemoState {
   sos: { id: string; uid: string; at: string }[]
   /** 지난 3주 고립 지수 (이번 주는 활동으로 계산) */
   isolationHistory: Record<string, number[]>
+  // 인지 훈련 — 화면·데모만
+  brain: { uid: string; game: 'match' | 'calc'; score: number; total: number; at: string }[]
   seq: number
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 6 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11
+const VERSION = 7 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -325,6 +327,12 @@ function seed(): DemoState {
     sos: [],
     // 친구가 생기면서 조금씩 나아지는 흐름 (3주 전 → 지난주)
     isolationHistory: { [DEMO_ME_ID]: [58, 51, 44] },
+    // 두뇌 운동: 어제까지 사흘 연속 (오늘은 아직 — '오늘 하기' 시연)
+    brain: [
+      { uid: DEMO_ME_ID, game: 'calc', score: 4, total: 5, at: iso(-3, 9) },
+      { uid: DEMO_ME_ID, game: 'match', score: 14, total: 4, at: iso(-2, 9) },
+      { uid: DEMO_ME_ID, game: 'calc', score: 5, total: 5, at: iso(-1, 9) },
+    ],
     seq,
   }
 }

@@ -7,6 +7,7 @@ import { companionRoutes } from './handlers/companion'
 import { friendRoutes } from './handlers/friend'
 import { pointRoutes } from './handlers/points'
 import { safetyRoutes } from './handlers/safety'
+import { welfareRoutes } from './handlers/welfare'
 import { wellbeingRoutes } from './handlers/wellbeing'
 import { DemoError, errorResponse, json, match, noContent, type Route } from './http'
 import { reset } from './store'
@@ -29,6 +30,7 @@ const routes: Route[] = [
   // 화면·데모만 (백엔드 없음 — shared/api/draft.ts)
   ...companionRoutes,
   ...wellbeingRoutes,
+  ...welfareRoutes,
 ]
 
 function parseBody(init: RequestInit): unknown {
