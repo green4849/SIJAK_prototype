@@ -71,7 +71,11 @@ const out = (c: Seed): WelfareCenterOut => ({ ...c, kind_label: KIND_LABEL[c.kin
 // ---------- 두뇌 운동 ----------
 
 const DAY = 86400_000
-const dayKey = (t: number) => new Date(t + 9 * 3600_000).toISOString().slice(0, 10) // 한국 날짜
+/** 브라우저 기준 날짜 (시드의 iso(-1, …) 도 브라우저 날짜 기준이라 맞춰 둔다) */
+const dayKey = (t: number) => {
+  const d = new Date(t)
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+}
 
 function brainStats(uid: string): BrainStatsOut {
   const log = db().brain.filter((b) => b.uid === uid)
@@ -82,8 +86,7 @@ function brainStats(uid: string): BrainStatsOut {
   let streak = 0
   for (let t = days.has(today) ? now : now - DAY; days.has(dayKey(t)); t -= DAY) streak++
   // 이번 주 월요일부터
-  const kst = new Date(now + 9 * 3600_000)
-  const mondayOffset = (kst.getUTCDay() + 6) % 7
+  const mondayOffset = (new Date(now).getDay() + 6) % 7
   const week = Array.from({ length: 7 }, (_, i) => days.has(dayKey(now - (mondayOffset - i) * DAY)))
   const match = log.filter((b) => b.game === 'match').map((b) => b.score)
   const calc = log.filter((b) => b.game === 'calc')
