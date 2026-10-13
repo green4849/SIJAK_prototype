@@ -1,4 +1,5 @@
 import uuid
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -21,6 +22,7 @@ class BlockCreate(BaseModel):
 class BlockedUser(BaseModel):
     user_id: uuid.UUID
     name: str
+    gender: Literal["M", "F"]  # 아바타 그림 구분용 — A19
 
 
 class ReasonOption(BaseModel):

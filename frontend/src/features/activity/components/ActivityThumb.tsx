@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react'
 import {
   BookOpen,
   Clapperboard,
@@ -13,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useState } from 'react'
+import { CleanupScene, MealScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './ActivityThumb.module.css'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { activityPhotoUrl } from './activityPhotos'
@@ -33,17 +35,21 @@ const KINDS: Record<string, { icon: LucideIcon; tone: string }> = {
   cleanup: { icon: Recycle, tone: 'mint' },
 }
 
+/** 사진을 못 불러올 때 상세 상단에서 아이콘 대신 쓰는 인물 장면 (봉사 — A19) */
+const HERO_SCENES: Record<string, ComponentType> = { meal: MealScene, cleanup: CleanupScene }
+
 /**
- * 활동 사진 — 실사 사진을 보여 주고, 불러오는 동안·실패하면 종류별 아이콘 + 색으로 대신한다.
+ * 활동 사진 — 실사 사진을 보여 주고, 불러오는 동안·실패하면 종류별 아이콘(봉사 상세는 인물 장면)으로 대신한다.
  * 사진은 꾸밈용이라 화면 읽기 프로그램에는 읽히지 않게 둔다 (제목이 바로 옆에 있음).
  */
 export function ActivityThumb({ kind, size = 'md' }: { kind: string; size?: 'md' | 'hero' }) {
   const { icon: Icon, tone } = KINDS[kind] ?? KINDS.walk
+  const Scene = size === 'hero' ? HERO_SCENES[kind] : undefined
   const src = activityPhotoUrl(kind, size)
   const [failed, setFailed] = useState(false)
   return (
     <span className={styles.thumb} data-tone={tone} data-size={size} aria-hidden="true">
-      <Icon size={size === 'hero' ? ICON.lg : ICON.md + 4} strokeWidth={ICON_STROKE} />
+      {Scene ? <Scene /> : <Icon size={size === 'hero' ? ICON.lg : ICON.md + 4} strokeWidth={ICON_STROKE} />}
       {src && !failed && (
         <img
           className={styles.photo}

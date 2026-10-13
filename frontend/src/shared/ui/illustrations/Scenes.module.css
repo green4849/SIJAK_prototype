@@ -1,0 +1,56 @@
+/*
+ * 장면 일러스트 크기 — 역할별로 고정 (디자인 리뷰 공통 16).
+ * 글자 크기 설정과 무관: 그림이 커지는 대신 글자가 공간을 갖는다 (공통 3).
+ */
+
+/* 홈 인사 아래 풍경 띠 */
+.banner {
+  display: block;
+  width: 100%;
+  height: clamp(104px, 30vw, 140px);
+  border-radius: var(--radius-card);
+}
+
+/* 안내 화면·시트 위 노부부 */
+.spot {
+  display: block;
+  width: min(100%, 220px);
+  height: 120px;
+  margin: 0 auto;
+}
+
+/* 빈 목록 안내 위 */
+.small {
+  display: block;
+  width: min(100%, 160px);
+  height: 88px;
+  margin: 0 auto;
+}
+
+/* 시작 화면 아래 언덕 — 버튼과 떨어진 낮은 배경 */
+.hills {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 선명한 화면: 장식 풍경은 숨기고 인물(아바타)만 남긴다 */
+:root[data-contrast='high'] .banner,
+:root[data-contrast='high'] .hills {
+  display: none;
+}
+
+/* 상세 상단 썸네일 칸을 가득 (봉사 장면) — 칸 크기는 ActivityThumb 가 정한다 */
+.fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 카드 옆 작은 그림 (내 포인트 잔액) */
+.side {
+  display: block;
+  flex: none;
+  width: 124px;
+  height: 104px;
+}

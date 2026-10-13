@@ -120,6 +120,14 @@
       },
       "BlockedUser": {
         "properties": {
+          "gender": {
+            "enum": [
+              "M",
+              "F"
+            ],
+            "title": "Gender",
+            "type": "string"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -132,7 +140,8 @@
         },
         "required": [
           "user_id",
-          "name"
+          "name",
+          "gender"
         ],
         "title": "BlockedUser",
         "type": "object"
@@ -181,6 +190,14 @@
             "title": "Age",
             "type": "integer"
           },
+          "gender": {
+            "enum": [
+              "M",
+              "F"
+            ],
+            "title": "Gender",
+            "type": "string"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -199,6 +216,7 @@
           "user_id",
           "name",
           "age",
+          "gender",
           "region_name"
         ],
         "title": "ChatPeer",

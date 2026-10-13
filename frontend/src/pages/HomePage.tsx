@@ -6,6 +6,7 @@ import { MissionCards, PointChip } from '@/features/points'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { Avatar } from '@/shared/ui/Avatar'
 import { Badge } from '@/shared/ui/Badge'
+import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
 
 /** ③ 홈 — 큰 카드 세 개로 핵심 기능에 바로 (3-tap rule) */
@@ -26,9 +27,11 @@ export function HomePage() {
         </div>
         <div className={styles.side}>
           <PointChip to="/me/points" />
-          <Avatar name={user.name} seed={user.id} size="list" />
+          <Avatar name={user.name} seed={user.id} gender={user.gender} size="list" />
         </div>
       </header>
+
+      <NeighborsScene />
 
       <nav aria-label="바로 가기" className={styles.cards}>
         <ActionCard

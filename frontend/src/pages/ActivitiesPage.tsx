@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { ActivityList, useActivityList, type Category } from '@/features/activity'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
 import { TopBar } from '@/shared/ui/TopBar'
+import { VolunteerBanner } from '@/shared/ui/illustrations/Scenes'
 import { activityDetail } from './routes'
 import styles from './TabPage.module.css'
 
@@ -26,6 +27,7 @@ export function ActivitiesPage() {
     <section className={styles.page}>
       <TopBar title="지역생활" back={false} />
       <SegmentTabs label="활동 종류" tabs={TABS} value={category} onChange={setCategory} />
+      {category === 'volunteer' && <VolunteerBanner />}
       <ActivityList
         items={data}
         loading={loading}
