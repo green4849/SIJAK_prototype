@@ -1,0 +1,129 @@
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+/* 휴대폰 3열 — 넓은 본문(태블릿·PC)에서 4열. 창이 아니라 본문 폭 기준 (AppLayout @container page) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2) 10px;
+}
+
+/* 글자를 키우면('가가'·화면 설정 어느 단계든) 휴대폰 2열 — 3열이면 이름이 '바둑·/장기'처럼 잘게 끊긴다 */
+:root[data-font-scale='2'] .grid,
+:root[data-font-scale='3'] .grid,
+:root[data-font-scale='4'] .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@container page (min-width: 520px) {
+  .grid,
+  :root[data-font-scale='2'] .grid,
+  :root[data-font-scale='3'] .grid,
+  :root[data-font-scale='4'] .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* 사진 + 이름 전체가 누르는 곳 */
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-min);
+  padding: var(--gap-tight) 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.choice:active {
+  filter: var(--pressed-filter);
+}
+
+/* 사진 둘레 — 선택하면 바탕색 틈 + 녹색 고리. 고리 자리를 늘 비워 두어 크기가 흔들리지 않는다 */
+.ring {
+  position: relative;
+  width: 100%;
+  max-width: 104px;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border: 4px solid transparent;
+  border-radius: var(--radius-pill);
+  transition: border-color 0.12s ease;
+}
+
+.choice[aria-pressed='true'] .ring {
+  border-color: var(--color-primary);
+}
+
+/* 사진 자리 — 불러오는 동안·실패하면 연한 바탕 한 가지만 (그림 대신 조용한 빈칸) */
+.photo {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-card-beige);
+}
+
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.check {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 0 0 3px var(--color-bg);
+}
+
+.label {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
+  word-break: keep-all;
+}
+
+.choice[aria-pressed='true'] .label {
+  color: var(--color-primary);
+}
+
+
+/* 선명한 화면: 사진 둘레에 흰 테두리, 선택은 노란 고리 */
+:root[data-contrast='high'] .photo {
+  border: 2px solid var(--color-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    transition: none;
+  }
+}
