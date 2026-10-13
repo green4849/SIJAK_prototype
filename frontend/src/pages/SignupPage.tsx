@@ -1,6 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { SignupProfileForm, useAuth } from '@/features/auth'
-import { TopBar } from '@/shared/ui/TopBar'
 
 interface SignupState {
   signupToken: string
@@ -16,14 +15,12 @@ export function SignupPage() {
   if (!state?.signupToken) return <Navigate to="/login" replace />
 
   return (
-    <>
-      <TopBar backTo="/login" />
-      <SignupProfileForm
-        signupToken={state.signupToken}
-        name={state.name}
-        // 가입 직후 한 번: ⑧ 보안 안내 (이동은 RequireGuest가 처리)
-        onDone={(token, user) => signIn(token, user, { to: '/safety', state: { afterSignup: true } })}
-      />
-    </>
+    <SignupProfileForm
+      signupToken={state.signupToken}
+      name={state.name}
+      backTo="/login"
+      // 가입 직후 한 번: ⑧ 보안 안내 (이동은 RequireGuest가 처리)
+      onDone={(token, user) => signIn(token, user, { to: '/safety', state: { afterSignup: true } })}
+    />
   )
 }
