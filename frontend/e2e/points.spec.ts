@@ -73,6 +73,8 @@ test('C12 봉사모임: 봉사 탭 → 참여 포인트 → 신청하면 적립,
   await expect(item).toContainText('참여하면 +100P')
   await item.click()
 
+  // 상세 화면이 뜬 뒤에 확인 (목록에도 같은 문구가 있어서)
+  await expect(page.getByRole('heading', { level: 1, name: '어르신 도시락 나눔' })).toBeVisible()
   await expect(page.getByText(/참여하면 \+100P/)).toBeVisible()
   await page.getByRole('button', { name: '신청하기' }).click()
   await expect(page.getByRole('status').filter({ hasText: '+100P' })).toBeVisible()
