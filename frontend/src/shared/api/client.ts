@@ -119,6 +119,8 @@ export const api = {
 
 /** 사용자에게 보여줄 문구로 변환 */
 export function errorMessage(e: unknown): string {
+  // 서버에 아직 없는 API (화면·데모만 먼저 만든 기능 — shared/api/draft.ts). 백엔드 오류 형식이 아니면 code가 비어 있다
+  if (e instanceof ApiError && e.status === 404 && e.code === 'unknown_error') return '아직 준비 중인 기능이에요.'
   if (e instanceof ApiError) return e.message
   return '연결이 원활하지 않아요. 잠시 후 다시 시도해 주세요.'
 }

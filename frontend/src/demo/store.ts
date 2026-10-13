@@ -77,6 +77,20 @@ export interface DPointEntry {
   at: string
 }
 
+/** 말동무 대화 (C8, 백엔드 없음 — shared/api/draft.ts) */
+export interface DCompanionMsg {
+  id: number
+  uid: string
+  role: 'user' | 'assistant'
+  text: string
+  input_type: 'text' | 'voice'
+  at: string
+  suggestion: { activity_id: string; title: string; schedule_text: string } | null
+  safety: 'medical' | 'crisis' | null
+  /** 정서 분석 결과 (보고서 4.5.2 — 화면에는 안 보이고 마음 건강 화면이 쓴다) */
+  emotion: 'joy' | 'neutral' | 'sadness' | 'anxiety' | null
+}
+
 export interface DemoState {
   version: number
   me: string | null // 로그인한 사용자 id
@@ -93,11 +107,15 @@ export interface DemoState {
   points: DPointEntry[]
   ratings: { uid: string; target: string; rating: 'like' | 'neutral' | 'dislike' }[]
   notif: Record<string, { enabled: boolean; times: ('morning' | 'noon' | 'evening')[] }>
+  // C8 — 화면·데모만 (백엔드 없음)
+  companion: DCompanionMsg[]
+  /** 말로 하기(받아쓰기 흉내) 다음 순서 */
+  companionVoiceTurn: number
   seq: number
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 4 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사
+const VERSION = 5 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -235,6 +253,23 @@ function seed(): DemoState {
     pt(10, 'rating', 'rating:u-gicheol', '윤기철님 평가', iso(-1, 19, 5)),
   ]
 
+  // 말동무 (C8): 어제 저녁 이야기 + 오늘 아침 먼저 건넨 인사
+  const cm = (
+    role: DCompanionMsg['role'], text: string, at: string,
+    extra: Partial<Pick<DCompanionMsg, 'input_type' | 'emotion'>> = {},
+  ): DCompanionMsg => ({
+    id: ++seq, uid: DEMO_ME_ID, role, text, at, input_type: extra.input_type ?? 'text',
+    suggestion: null, safety: null, emotion: extra.emotion ?? null,
+  })
+  const companion: DCompanionMsg[] = [
+    cm('assistant', '김시작님, 저녁은 드셨어요?', iso(-1, 19, 2)),
+    cm('user', '응 된장찌개 먹었어', iso(-1, 19, 4), { input_type: 'voice', emotion: 'neutral' }),
+    cm('assistant', '된장찌개 좋네요! 텃밭에서 키운 채소도 넣으셨어요?', iso(-1, 19, 4)),
+    cm('user', '그럼 상추도 땄지. 올해는 잘 자랐어', iso(-1, 19, 6), { emotion: 'joy' }),
+    cm('assistant', '와, 정성껏 가꾸신 보람이 있네요. 내일도 텃밭 이야기 들려주세요.', iso(-1, 19, 6)),
+    cm('assistant', '좋은 아침이에요! 오늘은 무엇을 하실 계획이에요?', iso(0, 8, 30)),
+  ]
+
   return {
     version: VERSION,
     me: null,
@@ -250,6 +285,8 @@ function seed(): DemoState {
     points,
     ratings: [{ uid: DEMO_ME_ID, target: 'u-gicheol', rating: 'neutral' }],
     notif: {},
+    companion,
+    companionVoiceTurn: 0,
     seq,
   }
 }

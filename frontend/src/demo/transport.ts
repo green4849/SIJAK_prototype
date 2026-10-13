@@ -3,6 +3,7 @@ import type { Transport } from '@/shared/api/client'
 import { activityRoutes } from './handlers/activity'
 import { authRoutes } from './handlers/auth'
 import { chatRoutes } from './handlers/chat'
+import { companionRoutes } from './handlers/companion'
 import { friendRoutes } from './handlers/friend'
 import { pointRoutes } from './handlers/points'
 import { safetyRoutes } from './handlers/safety'
@@ -24,6 +25,8 @@ const routes: Route[] = [
   ...safetyRoutes,
   ...activityRoutes,
   ...pointRoutes,
+  // 화면·데모만 (백엔드 없음 — shared/api/draft.ts)
+  ...companionRoutes,
 ]
 
 function parseBody(init: RequestInit): unknown {

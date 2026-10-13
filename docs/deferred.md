@@ -46,3 +46,14 @@ AI 말동무, 음성 통화(⑤ 📞), 고립 지수·자가평가, 긴급 SOS, 
 | 대화 주제 추천 | 관심사별 문구 규칙 (`chat/topics.py`) | `suggest()` 안을 `integrations/llm` 호출로 — 최근 대화 몇 개 + 두 사람 관심사를 넣고 질문형 문구 3~4개 |
 | 추천 알림 발송 | 설정 저장만 (`notification` 도메인) | C4 푸시 알림 발송기가 `NotificationService.get()` 을 읽어 고른 시각에만, 밤 9시~아침 8시 제외 |
 | 체험단 무료 기간 | `.env` `POINT_FREE_UNTIL=2026-11-30` 처럼 날짜 하나 | 기간을 여러 개·사용자별로 두려면 point 도메인에 프로모션 테이블 |
+
+## 7. 화면·시연 데이터만 있는 기능 (백엔드 없음)
+
+보고서 기능 중 아직 백엔드가 없는 것은 **화면 + 데모 가짜 서버의 시연 데이터**를 먼저 만들었다.
+- API 계약: `frontend/src/shared/api/draft.ts` (손으로 적은 임시 타입 — 원래 규칙은 OpenAPI 생성, dev-order §3-6)
+- 응답: `frontend/src/demo/handlers/*` 만. 실제 서버로 띄우면 해당 화면은 「아직 준비 중인 기능이에요」로 표시된다
+- 백엔드를 붙일 때: draft.ts 의 모양대로 backend 스키마 → `gen:api` → feature api 파일의 import 를 `Schema<'…'>` 로 → draft.ts 에서 삭제
+
+| 기능 | 화면 | 데모 API | 꽂는 곳 (백엔드) |
+|---|---|---|---|
+| C8 AI 말동무 | `/companion` (홈 카드) | `GET /companion` · `GET·POST /companion/messages` | `domains/companion` + `integrations/llm`·`stt`·`tts`. 답은 지금 `demo/companion.ts` 키워드 규칙(위기 → 의료 → 나머지 순서는 실제 가드레일과 같게). 말하기는 녹음 없이 시연 문장으로 받아쓴 척 → C2에서 녹음 파일 업로드로. 듣기는 브라우저 음성 합성(`shared/a11y/speak.ts`) |
