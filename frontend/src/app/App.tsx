@@ -12,6 +12,10 @@ import { AssessmentPage } from '@/pages/AssessmentPage'
 import { GuardiansPage } from '@/pages/GuardiansPage'
 import { SosPage } from '@/pages/SosPage'
 import { WellbeingPage } from '@/pages/WellbeingPage'
+import { WelfarePage } from '@/pages/WelfarePage'
+import { WelfareDetailPage } from '@/pages/WelfareDetailPage'
+import { BrainPage } from '@/pages/BrainPage'
+import { BrainGamePage } from '@/pages/BrainGamePage'
 import { FriendListPage } from '@/pages/FriendListPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { HelpPage } from '@/pages/HelpPage'
@@ -41,7 +45,7 @@ import { RequireAuth, RequireGuest } from './guards'
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
  *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
  *   C12: /me/points /me/notifications
- *   화면·데모만(백엔드 없음, docs/deferred.md §7): C8 /companion · C11 /me/wellbeing · C10 /sos /me/guardians
+ *   화면·데모만(백엔드 없음, docs/deferred.md §7): C8 /companion · C11 /me/wellbeing · C10 /sos /me/guardians · C7 /welfare · 두뇌 운동 /brain
  */
 export function App() {
   return (
@@ -90,6 +94,10 @@ export function App() {
               <Route path="me/wellbeing/check/:kind" element={<AssessmentPage />} />
               <Route path="sos" element={<SosPage />} />
               <Route path="me/guardians" element={<GuardiansPage />} />
+              <Route path="welfare" element={<WelfarePage />} />
+              <Route path="welfare/:centerId" element={<WelfareDetailPage />} />
+              <Route path="brain" element={<BrainPage />} />
+              <Route path="brain/:game" element={<BrainGamePage />} />
             </Route>
           </Route>
 

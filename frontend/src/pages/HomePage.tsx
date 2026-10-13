@@ -1,5 +1,6 @@
 import { MapPin, MessageCircleMore, Siren, Sprout, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth'
+import { BrainTodayCard } from '@/features/brain'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
 import { MissionCards, PointChip } from '@/features/points'
@@ -60,6 +61,9 @@ export function HomePage() {
 
       {/* 첫 친구 3명 사귀기 (C12) — 받고 나면 홈에서는 사라진다 */}
       <MissionCards hideClaimed />
+
+      {/* 인지 훈련 — 매일 조금씩 (연속 일수) */}
+      <BrainTodayCard to="/brain" />
     </section>
   )
 }

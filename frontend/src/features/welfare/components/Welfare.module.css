@@ -1,0 +1,229 @@
+/* 가까운 복지시설 (C7) — 지역생활 ⑥⑦과 같은 카드·정보 규칙, 토큰만 사용 */
+
+.empty {
+  margin: var(--space-3) 0;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* ---- 목록 ---- */
+.item {
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+:root[data-contrast='high'] .item {
+  border: 2px solid var(--color-border);
+}
+
+.thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: var(--color-card-mint);
+  color: var(--color-icon-mint);
+}
+
+.thumb[data-kind='kyungrodang'] {
+  background: var(--color-card-yellow);
+  color: var(--color-icon-yellow);
+}
+
+.thumb[data-kind='senior_center'] {
+  background: var(--color-card-sky);
+  color: var(--color-icon-sky);
+}
+
+:root[data-contrast='high'] .thumb {
+  border: 2px solid var(--color-border);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
+}
+
+.meta,
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+.chevron {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+/* ---- 상세 ---- */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  padding-bottom: calc(var(--touch-min) * 2.2);
+}
+
+.kind {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.name {
+  font-size: var(--text-title);
+}
+
+.info {
+  margin: 0;
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .info {
+  border: 2px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.value {
+  margin: 0 0 0 calc(26px + var(--space-1));
+  color: var(--color-text-muted);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sectionTitle {
+  font-size: var(--text-card-title);
+}
+
+.rows {
+  margin: 0;
+  padding: 0 var(--card-pad);
+  list-style: none;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+}
+
+:root[data-contrast='high'] .rows {
+  border: 2px solid var(--color-border);
+}
+
+.program {
+  min-height: var(--touch-min);
+  padding: var(--space-1) 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-divider);
+}
+
+.program:first-child {
+  border-top: 0;
+}
+
+.programMain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.programTitle {
+  font-weight: var(--weight-semibold);
+}
+
+.seats {
+  flex: none;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.seats[data-full='true'] {
+  background: var(--color-card-beige);
+  color: var(--color-text-muted);
+}
+
+:root[data-contrast='high'] .seats {
+  border: 1px solid var(--color-border);
+}
+
+.capacity {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* 아래 고정 — 활동 상세의 '신청하기'와 같은 자리 */
+.actionBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-1) var(--gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+}
+
+.actionBar > * {
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+}
+
+.call {
+  min-height: calc(var(--touch-min) + 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}

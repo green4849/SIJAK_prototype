@@ -9,3 +9,7 @@ export const activityDetail = (activityId: string) => `/activities/${activityId}
 export const activitiesOf = (category: string) => `/activities?category=${category}`
 /** 마음 건강 → 자가평가 (C11) */
 export const assessment = (kind: string) => `/me/wellbeing/check/${kind}`
+/** 가까운 복지시설 상세 (C7) */
+export const welfareDetail = (id: string) => `/welfare/${id}`
+/** 두뇌 운동 게임 */
+export const brainGame = (game: string) => `/brain/${game}`
