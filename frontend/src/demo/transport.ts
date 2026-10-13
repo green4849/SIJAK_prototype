@@ -5,6 +5,7 @@ import { authRoutes } from './handlers/auth'
 import { chatRoutes } from './handlers/chat'
 import { companionRoutes } from './handlers/companion'
 import { friendRoutes } from './handlers/friend'
+import { inboxRoutes } from './handlers/inbox'
 import { pointRoutes } from './handlers/points'
 import { safetyRoutes } from './handlers/safety'
 import { welfareRoutes } from './handlers/welfare'
@@ -31,6 +32,7 @@ const routes: Route[] = [
   ...companionRoutes,
   ...wellbeingRoutes,
   ...welfareRoutes,
+  ...inboxRoutes,
 ]
 
 function parseBody(init: RequestInit): unknown {

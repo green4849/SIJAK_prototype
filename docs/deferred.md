@@ -61,3 +61,6 @@ AI 말동무, 음성 통화(⑤ 📞), 고립 지수·자가평가, 긴급 SOS, 
 | C10 긴급 도움·보호자 | `/sos` (홈 오른쪽 위 '긴급'), `/me/guardians` | `POST /emergency/sos` · `GET·POST /me/guardians` · `DELETE /me/guardians/:id` | `domains/emergency`. 알림 발송(문자·푸시)·복지사 연계는 비어 있음 — 데모는 기록만. 보호자 전화번호는 실서비스에서 users 처럼 암호화 저장 |
 | C7 가까운 복지시설 | `/welfare` (지역생활 맨 위 카드), `/welfare/:id` | `GET /welfare/nearby?kind=` · `GET /welfare/:id` | `integrations/public_data` (공공데이터포털 노인복지시설) + PostGIS `ST_DWithin` 반경 검색(§1과 같은 자리). 시설·프로그램·공간은 `demo/handlers/welfare.ts` 가상 데이터, 거리는 고정값. 신청은 전화로만 |
 | 두뇌 운동 (인지 훈련) | `/brain` (홈 아래 카드), `/brain/match` `/brain/calc` | `GET /brain/stats` · `POST /brain/results` | 새 도메인 필요(예: `domains/brain`). 게임은 화면에서만 돌고 서버는 기록(연속 일수·이번 주·최고 기록)만 |
+| 알림함 (C4 일부) | `/notifications` (마이페이지 '알림함') | `GET /notifications` · `POST /notifications/:id/read` · `POST /notifications/read-all` | `domains/notification` 에 알림 목록 테이블. 소식은 지금 시드 6개뿐 — 실제로는 신청·위험 감지·활동 하루 전 등에서 생성 |
+| B3 회원 탈퇴 | `/me/leave` (마이페이지 맨 아래) | `POST /me/withdraw` | auth 서비스 + 30일 뒤 삭제·음성 90일 정리 작업 |
+| B7 운영자 화면 | `/admin` (주소로 직접) | `GET /admin/cases` · `POST /admin/cases/:id/action` · `GET /admin/watch` | 운영자 역할·권한 필수(데모는 로그인만 확인). 사건 = risk 이벤트 + 신고, 돌봄 목록 = wellbeing 고립 지수 |

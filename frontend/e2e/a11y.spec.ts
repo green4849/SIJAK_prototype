@@ -14,6 +14,7 @@ const STATIC_ROUTES = [
   '/me/points', '/me/notifications', '/activities?category=volunteer', // C12
   '/companion', '/me/wellbeing', '/me/wellbeing/check/phq9', '/sos', '/me/guardians', // C8·C10·C11 (화면·데모)
   '/welfare', '/welfare/w-1', '/brain', '/brain/match', '/brain/calc', // C7·두뇌 운동 (화면·데모)
+  '/notifications', '/me/leave', '/admin', // 알림함·B3·B7 (화면·데모)
 ]
 
 async function dynamicRoutes(page: Page) {

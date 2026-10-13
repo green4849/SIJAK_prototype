@@ -34,11 +34,11 @@
 | [A22](A22-welcome-screen.md) | 시작 화면 다듬기 — 등장 연출·글씨 크게·슬로건·배치 | S | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
-| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ⬜ |
+| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | 🎭 |
 | [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | ⬜ |
 | [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |
 | [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | ⬜ |
-| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | ⬜ |
+| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | 🎭 |
 | [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ⬜ |
 | [B9](B9-external-session.md) | 인증 세션 외부 저장 (Redis) | S | P1 | ⬜ |
 | [B10](B10-deployment.md) | 배포 구성 | M | P0 | ✅ 구성 |
@@ -47,7 +47,7 @@
 | [C1](C1-realtime-chat.md) | 실시간 대화 (WebSocket) | M | P1 | ⬜ |
 | [C2](C2-stt-tts.md) | STT/TTS 연동 | L | P1 | ⏸ |
 | [C3](C3-nearby-radius.md) | 같은 동네 반경 검색 | S | P1 | ✅ |
-| [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | ⬜ |
+| [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | 🎭 알림함 |
 | [C5](C5-pwa.md) | PWA — 홈 화면에 추가 | S | P1 | ✅ |
 | [C6](C6-risk-ml.md) | 위험 탐지 2·3단계 | L | P2 | ⬜ |
 | [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | 🎭 |
