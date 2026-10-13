@@ -343,7 +343,7 @@ function seed(): DemoState {
     note('friend', '새 친구 신청', '박정호님이 친구 신청을 보냈어요', new Date(now - 3600_000).toISOString(), false, '/friends'),
     note('activity', '신청한 활동', `건강 걷기 모임 · ${activities[0].schedule_text}`, iso(0, 8, 0), false, `/activities/${activities[0].id}`),
     note('wellbeing', '이번 주 마음 날씨', '지난주보다 좋아졌어요', iso(-1, 9, 0), true, '/me/wellbeing'),
-    note('welfare', '○○노인종합복지관', '노래 교실 자리가 3개 남았어요', iso(-2, 14, 0), true, '/welfare/w-1'),
+    note('welfare', '세마e편한세상 경로당', '노래 교실 자리가 3개 남았어요', iso(-2, 14, 0), true, '/welfare/w-1'),
     note('points', '포인트 +10P', '윤기철님 평가', iso(-1, 19, 5), true, '/me/points'),
   ]
 
