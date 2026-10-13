@@ -1,6 +1,7 @@
 import { CreditCard, Gift, Sprout } from 'lucide-react'
 import { toast } from '@/shared/lib/toast'
 import { ActionCard } from '@/shared/ui/ActionCard'
+import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
 import { Sheet } from '@/shared/ui/Sheet'
 import { usePointSummary } from '../hooks/usePoints'
 import styles from './Points.module.css'
@@ -23,6 +24,7 @@ export function InsufficientPointsSheet({ open, onClose, earnHref }: Props) {
 
   return (
     <Sheet open={open} title="포인트가 조금 부족해요" onClose={onClose}>
+      <CoupleScene size="small" hearts={false} />
       {s && (
         <dl className={styles.compare}>
           <div>
