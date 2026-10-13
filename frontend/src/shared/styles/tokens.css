@@ -96,6 +96,7 @@
   --color-surface: #ffffff;
   --color-text: #1f1f1f; /* on bg 15.4:1 */
   --color-text-muted: #3d3d3d; /* on bg 10.0, on 파스텔 카드 8.2↑ */
+  --color-tagline: #55554d; /* 시작 화면 슬로건 전용 — 로고보다 한 발 물러난 회갈색, on bg 7.0:1 */
   --color-primary: #2e5a1c; /* on bg 7.6:1, 흰 글씨 8.1:1 */
   --color-on-primary: #ffffff;
   --color-primary-soft: #e1edd3;
@@ -157,6 +158,7 @@
   --color-surface: #000000;
   --color-text: #ffffff;
   --color-text-muted: #e6e6e6;
+  --color-tagline: #e6e6e6;
   --color-primary: #ffd400;
   --color-on-primary: #000000;
   --color-primary-soft: #1a1a1a;
