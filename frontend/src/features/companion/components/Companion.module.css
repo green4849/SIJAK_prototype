@@ -1,0 +1,369 @@
+/* AI 말동무 (C8) — 대화 화면은 chat ⑤와 같은 규칙(말풍선·간격·아래 고정 입력줄), 토큰만 사용 */
+
+/* ---- 얼굴 ---- */
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-card-sky);
+  color: var(--color-icon-sky);
+}
+
+.avatar[data-size='bubble'] { width: 40px; height: 40px; }
+.avatar[data-size='header'] { width: 48px; height: 48px; }
+
+:root[data-contrast='high'] .avatar {
+  border: 2px solid var(--color-border);
+}
+
+/* ---- 화면 틀 ---- */
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: calc(var(--bar-h, calc(var(--touch-min) * 2)) + var(--space-1));
+}
+
+/* ---- 말풍선 ---- */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.day {
+  text-align: center;
+}
+
+.day span {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-card-beige);
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+:root[data-contrast='high'] .day span {
+  border: 1px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.row[data-mine='true'] {
+  justify-content: flex-end;
+}
+
+.stack {
+  max-width: min(82%, 32rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+}
+
+.row[data-mine='true'] .stack {
+  align-items: flex-end;
+}
+
+.bubble {
+  padding: calc(var(--space-1) * 1.5) var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.row[data-mine='true'] .bubble {
+  background: var(--color-card-mint);
+}
+
+:root[data-contrast='high'] .bubble {
+  border: 2px solid var(--color-border);
+}
+
+.voiceMark {
+  margin-right: 6px;
+  vertical-align: -0.12em;
+  color: var(--color-primary);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* 듣기 — 말풍선 아래 작은 알약 버튼 (터치 48px) */
+.listen {
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.listen[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+/* 답하는 중 … */
+.typing {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.typing span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing span,
+  .pulse {
+    animation: none;
+  }
+}
+
+/* ---- 활동 추천 (말풍선 아래) ---- */
+.suggestion {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.suggestion svg {
+  flex: none;
+  color: var(--color-icon-yellow);
+}
+
+:root[data-contrast='high'] .suggestion {
+  border: 2px solid var(--color-border);
+}
+
+.suggestionText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.suggestionTitle {
+  font-weight: var(--weight-semibold);
+}
+
+.suggestionMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* ---- 위기 안내 ---- */
+.crisis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.call {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  font-size: var(--text-button);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+/* ---- 이렇게 말해 보세요 ---- */
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-left: calc(40px + var(--space-1)); /* 말동무 말풍선과 같은 선 */
+}
+
+.starter {
+  min-height: 48px;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-control); /* 큰 글씨에서 두 줄이 되어도 모양이 무너지지 않게 */
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  cursor: pointer;
+}
+
+.starter:active {
+  filter: var(--pressed-filter);
+}
+
+/* ---- 아래 고정 입력줄 ---- */
+.bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-1) var(--gutter) calc(var(--space-1) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+}
+
+.bar > * {
+  width: 100%;
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+}
+
+.composer {
+  display: flex;
+  gap: var(--space-1);
+  align-items: stretch;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body);
+}
+
+.input::placeholder {
+  color: var(--color-placeholder);
+}
+
+.iconBtn {
+  flex: none;
+  min-width: calc(var(--touch-min) + 16px);
+  min-height: var(--touch-min);
+  padding: 4px var(--space-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  cursor: pointer;
+}
+
+.iconBtn:active:not(:disabled) {
+  filter: var(--pressed-filter);
+}
+
+.iconBtn:disabled {
+  cursor: not-allowed;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+}
+
+.iconText {
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
+}
+
+/* 듣고 있어요 */
+.listening {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-card-sky);
+}
+
+:root[data-contrast='high'] .listening {
+  border: 2px solid var(--color-border);
+}
+
+.listeningLabel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.pulse {
+  flex: none;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  animation: pulse 1.4s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgb(46 90 28 / 0.45); }
+  70% { box-shadow: 0 0 0 14px rgb(46 90 28 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(46 90 28 / 0); }
+}
+
+.listeningActions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-1);
+}

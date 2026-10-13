@@ -33,10 +33,16 @@
   gap: var(--card-gap);
 }
 
-/* 태블릿 가로·PC처럼 넓으면 메뉴 세 개를 한 줄에 (A17) — 2+1로 어색하게 나뉘지 않도록 3칸이 들어갈 때만 */
-@container page (min-width: 44rem) {
+/* 넓으면 메뉴 네 개를 2×2 → 아주 넓으면 한 줄 (A17) — 3+1로 어색하게 나뉘지 않게 */
+@container page (min-width: 34rem) {
   .cards {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container page (min-width: 56rem) {
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
