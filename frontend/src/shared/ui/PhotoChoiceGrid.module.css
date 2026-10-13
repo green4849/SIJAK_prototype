@@ -19,7 +19,8 @@
   gap: var(--space-2) 10px;
 }
 
-/* 글자 '크게'·'아주 크게'에서는 휴대폰 2열 — 3열이면 이름이 '바둑·/장기'처럼 잘게 끊긴다 */
+/* 글자를 키우면('가가'·화면 설정 어느 단계든) 휴대폰 2열 — 3열이면 이름이 '바둑·/장기'처럼 잘게 끊긴다 */
+:root[data-font-scale='2'] .grid,
 :root[data-font-scale='3'] .grid,
 :root[data-font-scale='4'] .grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -27,6 +28,7 @@
 
 @container page (min-width: 520px) {
   .grid,
+  :root[data-font-scale='2'] .grid,
   :root[data-font-scale='3'] .grid,
   :root[data-font-scale='4'] .grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
