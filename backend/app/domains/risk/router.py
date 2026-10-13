@@ -38,7 +38,11 @@ async def report(body: ReportCreate, me: CurrentUser, risk: RiskServiceDep) -> R
 async def blocked(me: CurrentUser, risk: RiskServiceDep, auth: AuthServiceDep) -> list[BlockedUser]:
     ids = await risk.blocked_by_me(me.id)
     users = await auth.get_users(set(ids))
-    return [BlockedUser(user_id=i, name=users[i].name) for i in ids if i in users]
+    return [
+        BlockedUser(user_id=i, name=users[i].name, gender=users[i].gender)
+        for i in ids
+        if i in users
+    ]
 
 
 @router.post("/blocks", status_code=204)
