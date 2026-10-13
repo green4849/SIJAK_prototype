@@ -5,6 +5,11 @@
   flex-direction: column;
 }
 
+/* 새싹 — 시작하기를 누르면 다음 화면(②) 위쪽 작은 로고 자리로 날아간다 (A25) */
+.hero > svg:first-child {
+  view-transition-name: sijak-leaf;
+}
+
 /* 오른쪽 위 '가가' — 가입 전에도 글씨부터 키울 수 있게 (A22) */
 .fontToggle {
   position: absolute;

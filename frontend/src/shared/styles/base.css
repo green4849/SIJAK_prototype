@@ -91,9 +91,29 @@ textarea {
   border: 0;
 }
 
+/*
+ * 화면 사이 이어지는 전환 (A25) — 지원하는 브라우저에서만, 아니면 그냥 넘어간다.
+ * 시작 → 본인 확인: 새싹(sijak-leaf)이 작아지며 다음 화면 로고 자리로, 나머지는 짧게 엇갈려 바뀐다.
+ */
+::view-transition-group(sijak-leaf) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.15, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
     transition: none !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

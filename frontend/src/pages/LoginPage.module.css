@@ -5,12 +5,39 @@
   gap: var(--section-gap);
 }
 
-.title {
-  font-size: var(--text-title);
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
 }
 
-.accent {
+/* 작은 새싹 + '시작' — 시작 화면의 새싹이 날아와 붙는 자리 (A25) */
+.brand {
+  margin: 0 0 var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-brand);
+  font-size: 30px; /* 로고 글자는 그림처럼 고정 */
+  line-height: 1;
   color: var(--color-primary);
+}
+
+.brand svg {
+  view-transition-name: sijak-leaf;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-body);
 }
 
 .options {
