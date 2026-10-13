@@ -18,7 +18,6 @@ export function AssistPage() {
       <TopBar backTo="/login" />
       <Headset aria-hidden="true" size={ICON.lg} strokeWidth={ICON_STROKE} className={styles.icon} />
       <h1 className={styles.title}>함께 해요</h1>
-      <p className={styles.body}>혼자 하기 어려우시면 가까운 분께 부탁해 보세요.</p>
       <ol className={styles.steps}>
         {STEPS.map((s) => (
           <li key={s}>{s}</li>

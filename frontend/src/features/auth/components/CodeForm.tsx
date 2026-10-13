@@ -26,7 +26,6 @@ export function CodeForm({ devCode, pending, error, onSubmit, onResend, onBack }
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div>
         <h1 className={styles.title}>인증번호 입력</h1>
-        <p className={styles.lead}>문자로 받은 숫자 6개를 적어 주세요.</p>
       </div>
 
       {devCode && (

@@ -38,12 +38,6 @@
   border: 2px solid var(--color-border);
 }
 
-.hint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--text-meta);
-}
-
 /* 문구 버튼: 왼쪽 정렬된 말풍선 모양 — 누르면 입력칸으로 */
 .topic {
   min-height: var(--touch-min);

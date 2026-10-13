@@ -56,7 +56,6 @@ export function ActivityDetail({ id, header, onPointsChanged }: Props) {
       <div>
         <p className={styles.category}>{a.category_label}</p>
         <h1 className={styles.title}>{a.title}</h1>
-        {a.subtitle && <p className={styles.subtitle}>{a.subtitle}</p>}
       </div>
 
       <dl className={styles.info}>
@@ -70,12 +69,11 @@ export function ActivityDetail({ id, header, onPointsChanged }: Props) {
         </Row>
         <Row icon={<Users aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="참여 인원">
           <strong className={styles.count}>{a.applied_count}명</strong> 신청{' '}
-          <span className={styles.capacity}>· 정원 {a.capacity}명 (선착순)</span>
+          <span className={styles.capacity}>· 정원 {a.capacity}명</span>
         </Row>
         {a.reward_points > 0 && (
           <Row icon={<Coins aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="포인트">
             참여하면 <strong className={styles.count}>+{a.reward_points}P</strong>
-            <span className={styles.capacity}> · 신청을 취소하면 돌려드려요</span>
           </Row>
         )}
         {a.description && (

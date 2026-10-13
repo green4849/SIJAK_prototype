@@ -31,7 +31,6 @@ export function SettingsPage() {
 
       <OptionGrid
         legend="글자 크기"
-        hint="누르는 즉시 바뀌어요"
         options={SCALES}
         selected={[String(prefs.fontScale)]}
         onToggle={(v) => update({ fontScale: Number(v) as FontScale })}
@@ -39,7 +38,6 @@ export function SettingsPage() {
 
       <OptionGrid
         legend="화면 대비"
-        hint="'선명한 화면'은 검은 바탕에 밝은 글씨예요"
         options={CONTRASTS}
         selected={[prefs.contrast]}
         onToggle={(v) => update({ contrast: v as Contrast })}
@@ -47,7 +45,6 @@ export function SettingsPage() {
 
       <OptionGrid
         legend="진동"
-        hint="저장·신청 같은 일을 마치면 짧게 진동해요 (지원하는 휴대폰만)"
         options={VIBRATION}
         selected={[prefs.vibration ? 'on' : 'off']}
         onToggle={(v) => update({ vibration: v === 'on' })}
@@ -58,7 +55,6 @@ export function SettingsPage() {
         <p>이웃과 함께하는 따뜻한 하루, 시작이 함께합니다.</p>
       </div>
 
-      <p className={styles.note}>이 설정은 지금 쓰시는 휴대폰에만 저장돼요.</p>
     </section>
   )
 }

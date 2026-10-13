@@ -11,11 +11,7 @@ export function IdCardPage() {
       <TopBar backTo="/login" />
       <IdCard aria-hidden="true" size={ICON.lg} strokeWidth={ICON_STROKE} className={styles.icon} />
       <h1 className={styles.title}>신분증 인증은 준비 중이에요</h1>
-      <p className={styles.body}>
-        지금은 휴대폰으로 인증할 수 있어요.
-        <br />
-        휴대폰이 본인 명의가 아니라면 &lsquo;도움받기&rsquo;를 눌러 주세요.
-      </p>
+      <p className={styles.body}>지금은 휴대폰으로 인증해 주세요.</p>
       <div className={styles.actions}>
         <ButtonLink to="/login/phone" block large>
           휴대폰으로 인증하기

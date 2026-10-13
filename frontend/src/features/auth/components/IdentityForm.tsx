@@ -73,10 +73,7 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <div>
-        <h1 className={styles.title}>휴대폰 인증</h1>
-        <p className={styles.lead}>처음 한 번만 확인하면 다음부터는 자동으로 들어가요.</p>
-      </div>
+      <h1 className={styles.title}>휴대폰 인증</h1>
 
       <TextField
         label="이름"
@@ -90,7 +87,7 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
         <div className={styles.row}>
           <TextField
             label="년"
-            hint="예: 1955"
+            placeholder="1955"
             inputMode="numeric"
             value={year}
             onChange={(e) => edit(setYear)(digitsOnly(e.target.value, 4))}
@@ -112,7 +109,6 @@ export function IdentityForm({ pending, error, onSubmit }: Props) {
 
       <TextField
         label="휴대전화 번호"
-        hint="숫자만 적으면 돼요"
         type="tel"
         inputMode="numeric"
         autoComplete="tel"

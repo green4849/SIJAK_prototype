@@ -25,7 +25,6 @@ export function TopicSuggestions({ topics, onPick, defaultOpen }: Props) {
 
   const pages = Math.ceil(topics.length / PER_PAGE)
   const shown = topics.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE)
-  const common = shown.find((t) => t.common)
 
   return (
     <div className={styles.box}>
@@ -37,7 +36,7 @@ export function TopicSuggestions({ topics, onPick, defaultOpen }: Props) {
         onClick={() => setOpen((v) => !v)}
       >
         <Lightbulb aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
-        <span className={styles.toggleText}>무슨 말을 할지 고민되세요?</span>
+        <span className={styles.toggleText}>대화 주제 추천</span>
         {open ? (
           <ChevronUp aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />
         ) : (
@@ -46,9 +45,6 @@ export function TopicSuggestions({ topics, onPick, defaultOpen }: Props) {
       </button>
       {open && (
         <div id="topic-list" className={styles.list}>
-          <p className={styles.hint}>
-            {common ? `두 분이 함께 좋아하는 '${common.label}' 이야기예요. ` : ''}누르면 입력칸에 들어가요.
-          </p>
           {shown.map((t) => (
             <button
               key={t.text}

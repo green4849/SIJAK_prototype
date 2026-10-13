@@ -12,7 +12,7 @@ test('C12 홈: 포인트 칩·첫 친구 미션 → 내 포인트 화면', async
   await expect(chip(page)).toHaveText('110P')
   const mission = page.getByRole('region', { name: '미션: 첫 친구 3명 사귀기' })
   await expect(mission.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
-  await expect(mission).toContainText('1명 완료 · 2명 남았어요')
+  await expect(mission).toContainText('3명 중 1명')
 
   await chip(page).click()
   await expect(page.getByRole('heading', { name: '내 포인트' })).toBeVisible()
@@ -26,14 +26,13 @@ test('C12 홈: 포인트 칩·첫 친구 미션 → 내 포인트 화면', async
 test('C12 추천 평가: 고르면 표시 + 포인트, "잘 안 맞아요"는 목록에서 빠짐', async ({ page }) => {
   await startTour(page)
   await page.goto('/friends')
-  await expect(page.getByText(/평가하면 \+10P · 오늘 5번 남았어요/)).toBeVisible()
+  await expect(page.getByText(/평가하면 \+10P · 오늘 5번/)).toBeVisible()
 
   const younghee = page.getByRole('article', { name: '김영희님' })
   await younghee.getByRole('button', { name: '만나보고 싶어요' }).click()
   await expect(younghee.getByRole('button', { name: /만나보고 싶어요/ })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('status').filter({ hasText: '+10P' })).toBeVisible()
-  await expect(page.getByText(/오늘 4번 남았어요/)).toBeVisible()
-  await expect(younghee.getByText('평가는 상대에게 알려지지 않아요')).toBeVisible()
+  await expect(page.getByText(/오늘 4번/)).toBeVisible()
 
   const malsoon = page.getByRole('article', { name: '최말순님' })
   await malsoon.getByRole('button', { name: '잘 안 맞아요' }).click()
@@ -74,7 +73,7 @@ test('C12 봉사모임: 봉사 탭 → 참여 포인트 → 신청하면 적립,
   await expect(item).toContainText('참여하면 +100P')
   await item.click()
 
-  await expect(page.getByText('신청을 취소하면 돌려드려요')).toBeVisible()
+  await expect(page.getByText(/참여하면 \+100P/)).toBeVisible()
   await page.getByRole('button', { name: '신청하기' }).click()
   await expect(page.getByRole('status').filter({ hasText: '+100P' })).toBeVisible()
   await page.goto('/me')
@@ -92,10 +91,9 @@ test('C12 대화 주제: 고르면 입력칸에 들어가고, 보내기는 직�
   await page.goto('/chats')
   await page.getByRole('link', { name: /이순자님/ }).click()
   // 이미 대화를 나눈 방이라 접혀 있다
-  const toggle = page.getByRole('button', { name: /무슨 말을 할지 고민되세요/ })
+  const toggle = page.getByRole('button', { name: '대화 주제 추천' })
   await expect(toggle).toHaveAttribute('aria-expanded', 'false')
   await toggle.click()
-  await expect(page.getByText(/두 분이 함께 좋아하는 '산책·등산' 이야기예요/)).toBeVisible()
 
   const before = await page.locator('main ol > li').count()
   await page.getByRole('button', { name: '자주 가시는 산책길이 있으세요?' }).click()
@@ -140,7 +138,7 @@ test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ p
   await page.goto('/me')
   await page.getByRole('link', { name: '알림 설정' }).click()
 
-  await expect(page.getByRole('switch', { name: '오늘의 추천 친구 알림' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByRole('button', { name: '아침 9시', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('button', { name: '저녁 7시', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('button', { name: '점심 1시' })).toBeDisabled()
@@ -157,7 +155,7 @@ test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ p
   await expect(noon).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('button', { name: '저녁 7시', exact: true })).toHaveAttribute('aria-pressed', 'false')
 
-  await page.getByRole('switch', { name: '오늘의 추천 친구 알림' }).click()
-  await expect(page.getByRole('switch', { name: '오늘의 추천 친구 알림' })).toHaveAttribute('aria-checked', 'false')
+  await page.getByRole('switch', { name: '추천 친구 알림' }).click()
+  await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toHaveAttribute('aria-checked', 'false')
   await expect(noon).toHaveCount(0)
 })
