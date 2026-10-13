@@ -1,0 +1,221 @@
+/* 긴급 도움·보호자 (C10) — 빨강은 '주의가 필요한 것'에만 (토큰 색 역할 규칙) */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+/* ---- 큰 도움 요청 버튼 ---- */
+.sos {
+  align-self: center;
+  width: min(15rem, 72vw);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border: 6px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  box-shadow: 0 0 0 6px var(--color-danger), var(--shadow-card);
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.sos:active {
+  filter: var(--pressed-filter);
+}
+
+:root[data-contrast='high'] .sos {
+  border-color: var(--color-bg);
+}
+
+.done {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-card-mint);
+  color: var(--color-primary);
+  text-align: center;
+}
+
+:root[data-contrast='high'] .done {
+  border: 2px solid var(--color-border);
+}
+
+.doneTitle {
+  font-size: var(--text-title);
+}
+
+.notified {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-medium);
+}
+
+.sentNote {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+}
+
+/* ---- 바로 전화하기 ---- */
+.calls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.callsTitle {
+  font-size: var(--text-card-title);
+}
+
+.callRow {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--card-pad);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.callRow > svg:first-child {
+  flex: none;
+  color: var(--color-primary);
+}
+
+.callRow[data-tone='danger'] > svg:first-child {
+  color: var(--color-danger);
+}
+
+:root[data-contrast='high'] .callRow {
+  border: 2px solid var(--color-border);
+}
+
+.callName {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.callMeta {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
+}
+
+.addLink {
+  min-height: var(--touch-min);
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+}
+
+/* ---- 보호자 관리 ---- */
+.empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.guardians {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+}
+
+.guardian {
+  padding: var(--card-pad);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+:root[data-contrast='high'] .guardian {
+  border: 2px solid var(--color-border);
+}
+
+.guardianIcon {
+  flex: none;
+  color: var(--color-primary);
+}
+
+.guardianText {
+  flex: 1;
+  min-width: 8em;
+}
+
+.guardianText p {
+  margin: 0;
+}
+
+.guardianName {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.guardianActions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.smallBtn {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.form {
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+:root[data-contrast='high'] .form {
+  border: 2px solid var(--color-border);
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-1);
+}
