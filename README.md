@@ -11,9 +11,11 @@ AI 말동무, 사기 대화 탐지, 음성 매칭 통화, 지역 복지시설 �
 |---|---|
 | https://green4849.github.io/SIJAK_prototype/ | 실제 사용자처럼 시작 화면부터 — 직접 가입 (인증번호는 화면에 표시) |
 | https://green4849.github.io/SIJAK_prototype/?tour | **둘러보기** — 김시작님으로 로그인된 상태, 친구·대화·위험 경고·지역 활동이 채워져 있음 |
+| https://green4849.github.io/SIJAK_prototype/admin?tour | **운영자 화면** — 신고·위험 대화 처리, 돌봄이 필요한 이웃 (어르신 화면에는 들어가는 길이 없음) |
 | https://green4849.github.io/SIJAK_prototype/?reset | 이 탭의 데모 데이터를 처음 상태로 (새 탭으로 열어도 늘 처음 상태) |
 
 > 데모는 실제 서버 대신 **브라우저 안 가짜 서버**(`frontend/src/demo`)로 동작합니다.
+> 말동무·마음 건강·긴급 도움·복지시설·두뇌 운동·알림함·탈퇴·운영자 화면은 **아직 백엔드 없이 화면과 시연 데이터만** 있어요 ([`docs/deferred.md`](docs/deferred.md) §7).
 > 입력한 내용은 그 탭에만 남고 다른 사람과 공유되지 않아요. 이웃 답장·친구 수락은 시연용 자동 응답입니다.
 
 > **배포:** [`docs/deploy.md`](docs/deploy.md) — 서버 1대에 Docker로 (HTTPS 자동)
