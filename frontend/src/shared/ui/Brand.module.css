@@ -13,12 +13,19 @@
 }
 
 .brand[data-size='md'] .word { font-size: var(--text-title); }
-.brand[data-size='hero'] .word { font-size: min(var(--text-hero), 64px); } /* 로고 글자는 큰 글씨 설정에서도 상한 */
+.brand[data-size='hero'] .word { font-size: 76px; } /* 로고 글자는 그림처럼 고정 — 글자 크기 설정과 무관 (A22) */
+.brand[data-size='hero'] .tagline { font-size: calc(var(--text-body) * 1.11); } /* 시작 화면 슬로건 20 (설정 따라 커짐) */
 
 .tagline {
   margin: var(--space-1) 0 0;
-  color: var(--color-text);
+  color: var(--color-tagline);
   font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+}
+
+/* 슬로건 안의 앞글자(시·작) — 로고와 같은 색으로 이름과 이어 준다 */
+.tagline b {
+  color: var(--color-primary);
   font-weight: var(--weight-medium);
 }
 

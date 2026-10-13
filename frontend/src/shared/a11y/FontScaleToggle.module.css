@@ -1,0 +1,39 @@
+/* '가가' — 글자 크기와 무관하게 같은 크기 (아이콘 역할, 공통 16) */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: var(--touch-min);
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.toggle[aria-pressed='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.small,
+.big {
+  display: block;
+  line-height: 1;
+}
+
+.small { font-size: 14px; padding-top: 6px; } /* 두 글자의 아랫선을 맞춘다 */
+.big { font-size: 22px; }

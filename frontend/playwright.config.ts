@@ -22,6 +22,8 @@ export default defineConfig({
       : undefined,
     // 서비스 워커의 저장본이 테스트끼리 섞이지 않게 — PWA 테스트(e2e/pwa.spec.ts)만 켠다
     serviceWorkers: 'block',
+    // 시작 화면 등장 연출 등은 '움직임 줄이기' 기준으로 — 캡처·클릭이 연출 타이밍에 흔들리지 않게
+    reducedMotion: 'reduce',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

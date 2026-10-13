@@ -31,6 +31,7 @@
 | [A19](A19-friendly-illustrations.md) | 친근한 일러스트 되살리기 (처음 시안의 약 40%) | M | P1 | ✅ |
 | [A20](A20-activity-photos.md) | 지역생활 활동에 실제 사진 | S | P1 | ✅ |
 | [A21](A21-location-consent-region.md) | 사는 곳 = 위치 정보 수집 동의 (+ 위치 다시 확인) | S | P1 | 🔨 |
+| [A22](A22-welcome-screen.md) | 시작 화면 다듬기 — 등장 연출·글씨 크게·슬로건·배치 | S | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
 | [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ⬜ |

@@ -1,19 +1,23 @@
+import type { ReactNode } from 'react'
 import styles from './Brand.module.css'
 
 /** 새싹 로고 (원본 일러스트 아님 — 자체 제작 도형) */
 export function LeafLogo({ size = '1em' }: { size?: string }) {
   return (
     <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true" className={styles.leaf}>
-      <path d="M32 56V30" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-      <path d="M32 33c-2-11-11-18-22-17 0 11 9 19 22 17z" className={styles.leafLight} />
-      <path d="M32 31c1-12 10-20 23-20 1 12-9 21-23 20z" fill="currentColor" />
+      <path d="M32 56V30" stroke="currentColor" strokeWidth="5" strokeLinecap="round" data-part="stem" />
+      <g data-part="leaves">
+        <path d="M32 33c-2-11-11-18-22-17 0 11 9 19 22 17z" className={styles.leafLight} data-part="leaf-left" />
+        <path d="M32 31c1-12 10-20 23-20 1 12-9 21-23 20z" fill="currentColor" data-part="leaf-right" />
+      </g>
     </svg>
   )
 }
 
 interface Props {
   size?: 'md' | 'hero'
-  tagline?: string
+  /** 강조할 글자는 <b>로 감싼다 (시작 화면: '시'니어의 '작'지만) */
+  tagline?: ReactNode
   /** 큰 로고가 따로 있는 화면에서는 끈다 */
   leaf?: boolean
 }

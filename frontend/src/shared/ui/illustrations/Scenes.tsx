@@ -98,20 +98,31 @@ export function CoupleScene({ size = 'spot', hearts = true }: { size?: 'spot' | 
 }
 
 /** 시작 화면 — 낮은 언덕 위 작은 노부부 (로고가 중심, 풍경은 받침) */
+/** 시작 언덕 — 각 부분의 data-part 는 시작 화면 등장 연출(WelcomePage.module.css)이 쓴다 */
 export function WelcomeHills() {
   return (
     <svg viewBox="0 0 360 150" preserveAspectRatio="xMidYMax slice" className={styles.hills} aria-hidden="true">
-      <path d="M0 90 Q100 52 200 80 Q290 56 360 76 V150 H0Z" fill="var(--illust-hill-far)" />
-      <Tree x={52} y={80} s={1} />
-      <Tree x={312} y={74} s={1.15} />
-      <g transform={at(134, 58, 0.95)}>
-        <SeniorFigure look={GRANDMA} wave />
+      <path d="M0 90 Q100 52 200 80 Q290 56 360 76 V150 H0Z" fill="var(--illust-hill-far)" data-part="hill-far" />
+      <g data-part="tree-left">
+        <Tree x={52} y={80} s={1} />
       </g>
-      <g transform={at(178, 56, 1)}>
-        <SeniorFigure look={GRANDPA} wave />
+      <g data-part="tree-right">
+        <Tree x={312} y={74} s={1.15} />
       </g>
-      <Heart x={176} y={50} s={1} />
-      <path d="M0 122 Q120 102 230 116 Q310 106 360 114 V150 H0Z" fill="var(--illust-hill)" />
+      <g data-part="grandma">
+        <g transform={at(134, 58, 0.95)}>
+          <SeniorFigure look={GRANDMA} wave />
+        </g>
+      </g>
+      <g data-part="grandpa">
+        <g transform={at(178, 56, 1)}>
+          <SeniorFigure look={GRANDPA} wave />
+        </g>
+      </g>
+      <g data-part="heart">
+        <Heart x={176} y={50} s={1} />
+      </g>
+      <path d="M0 122 Q120 102 230 116 Q310 106 360 114 V150 H0Z" fill="var(--illust-hill)" data-part="hill-near" />
     </svg>
   )
 }
