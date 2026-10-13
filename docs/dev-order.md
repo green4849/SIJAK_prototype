@@ -88,6 +88,7 @@ app (라우터·프로바이더·가드) ──► pages, features/*
 4. feature 밖(pages·app)에서는 **`features/<f>/index.ts` 공개 API로만** 접근한다. (lint로 강제)
 5. 시니어 접근성 기준(글자 18px↑, 터치 56px↑, 대비 7:1↑)은 `shared/styles` 토큰으로만 적용. 컴포넌트에 매직 넘버 금지.
 6. **API 타입은 손으로 쓰지 않는다.** 백엔드 OpenAPI에서 생성한 `shared/api/schema.d.ts` 를 `Schema<'이름'>` 으로 꺼내 쓴다 (`shared/api/types.ts`). 데모 가짜 서버의 응답도 같은 타입으로 검사된다.
+   - 예외: 백엔드 없이 **화면·시연 데이터만 먼저 만든 기능**은 `shared/api/draft.ts` 에 임시 계약을 둔다 (목록: `docs/deferred.md` §7). 백엔드가 생기면 옮기고 지운다.
 
 ### API 계약을 바꿀 때 (D3)
 
