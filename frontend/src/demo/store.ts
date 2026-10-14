@@ -8,6 +8,11 @@ import type { Schema } from '@/shared/api/types'
 
 type ActivityCategory = Schema<'ActivityOut'>['category']
 
+/** 화면에 보일 사는 곳 — 동네 이름이 있으면 '오산시 세마동', 없으면 시·도 (데모 전용: 실서버는 시·도) */
+export function regionLabel(u: { region_code: string; area?: string }, regions: Record<string, string>): string {
+  return u.area ?? regions[u.region_code] ?? u.region_code
+}
+
 export interface DUser {
   id: string
   name: string
@@ -15,6 +20,8 @@ export interface DUser {
   gender: 'M' | 'F'
   phone: string
   region_code: string
+  /** 동네 이름 (예: '오산시 세마동') — 위치 동의로 정한 동네. 없으면 시·도만 보인다 */
+  area?: string
   interests: string[]
   intro: string
   /** 동의한 경우만, 백엔드처럼 소수점 2자리(≈1km)로 뭉갠 좌표 [위도, 경도] */
@@ -173,7 +180,7 @@ export interface DemoState {
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 8 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자
+const VERSION = 9 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자, 9: 오산시 양산동 기준 동네·장소
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -200,25 +207,25 @@ function scheduleText(isoStr: string) {
 function seed(): DemoState {
   const user = (
     id: string, name: string, birth: string, gender: 'M' | 'F', phone: string, region: string,
-    interests: string[], intro: string, geo: [number, number] | null,
+    interests: string[], intro: string, geo: [number, number] | null, area?: string,
   ): DUser => ({
-    id, name, birth_date: birth, gender, phone, region_code: region, interests, intro,
+    id, name, birth_date: birth, gender, phone, region_code: region, area, interests, intro,
     geo, last_login: Date.now() - Math.random() * 86400_000,
   })
 
   const users: DUser[] = [
     user(DEMO_ME_ID, '김시작', '1956-04-12', 'M', '01055551234', '41',
-      ['walking', 'health', 'gardening'], '좋은 벗들과 함께하는 행복한 일상!', null),
+      ['walking', 'health', 'gardening'], '좋은 벗들과 함께하는 행복한 일상!', null, '오산시 세마동'),
     user('u-sunja', '이순자', '1958-05-02', 'F', '01020000001', '41',
-      ['walking', 'tv', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!', [37.27, 127.01]),
+      ['walking', 'tv', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!', [37.193, 127.024], '오산시 세마동'),
     user('u-jungho', '박정호', '1954-11-20', 'M', '01020000002', '41',
-      ['walking', 'health', 'baduk'], '매일 아침 한강 걷기를 해요. 좋은 친구를 만나고 싶어요.', [37.28, 127.02]),
+      ['walking', 'health', 'baduk'], '매일 아침 오산천 걷기를 해요. 좋은 친구를 만나고 싶어요.', [37.203, 127.034], '오산시 세마동'),
     user('u-younghee', '김영희', '1956-02-14', 'F', '01020000003', '41',
-      ['cooking', 'gardening'], '요리와 텃밭 가꾸기를 좋아해요.', [37.26, 127.0]),
+      ['cooking', 'gardening'], '요리와 텃밭 가꾸기를 좋아해요.', [37.183, 127.014], '오산시 세마동'),
     user('u-malsoon', '최말순', '1952-08-08', 'F', '01020000004', '41',
-      ['music', 'crafts', 'memories'], '옛날 노래 들으며 뜨개질해요.', null),
+      ['music', 'crafts', 'memories'], '옛날 노래 들으며 뜨개질해요.', null, '오산시 세마동'),
     user('u-deoksu', '정덕수', '1950-03-30', 'M', '01020000005', '41',
-      ['baduk', 'reading', 'health'], '바둑 두실 분 찾아요.', [37.29, 127.03]),
+      ['baduk', 'reading', 'health'], '바둑 두실 분 찾아요.', [37.213, 127.044], '화성시 병점동'),
     user('u-okja', '한옥자', '1957-12-01', 'F', '01020000006', '11',
       ['music', 'health'], '복지관 노래교실 다녀요.', [37.57, 126.98]),
     user('u-gicheol', '윤기철', '1953-06-17', 'M', '01020000007', '11',
@@ -271,32 +278,32 @@ function seed(): DemoState {
   }
   const activities = [
     act('건강 걷기 모임', '함께 걸으며 건강도 챙기고 좋은 이웃도 만나요!', 'health', '41',
-      '○○근린공원 (시작 광장)', 3, 10, 90, 20, 'walk',
+      '오산천 산책로 입구', 3, 10, 90, 20, 'walk',
       '우리 동네를 함께 걸으며 건강도 챙기고 이웃과 이야기 나누는 시간입니다. 편한 운동화와 물을 챙겨 오세요.', 12),
     // 긴 제목·장소 — 화면이 긴 내용에도 정렬을 유지하는지 확인용 (A15)
     act('스마트폰 활용 교육 (사진 보내기·영상통화 기초반)', '사진 보내기부터 영상통화까지 차근차근', 'learning', '41',
-      '○○주민센터 2층 정보화 교육실 (엘리베이터 이용 가능)', 5, 14, 120, 12, 'phone',
+      '세마동 행정복지센터 2층 프로그램실 (엘리베이터 이용 가능)', 5, 14, 120, 12, 'phone',
       '카카오톡 사진 보내기, 영상통화, 버스 도착 시간 보기를 배워요. 휴대폰을 꼭 챙겨 오세요.', 9),
     act('동네 영화 상영회', '추억의 명작 영화를 함께 봐요', 'culture', '41',
-      '○○문화회관 소극장', 8, 15, 150, 40, 'movie',
+      '오산문화예술회관 소공연장', 8, 15, 150, 40, 'movie',
       '옛날 명작 영화를 큰 화면으로 함께 봐요. 상영 후 차 한 잔 하며 이야기 나눠요.', 21),
     act('전통 차 모임', '향긋한 차와 함께하는 담소', 'culture', '41',
-      '○○복지관 1층 사랑방', 11, 10, 90, 15, 'tea',
+      '오산노인종합복지관 1층 사랑방', 11, 10, 90, 15, 'tea',
       '제철 전통차를 우려 마시며 이웃과 이야기 나누는 시간이에요.', 6),
     act('노래 교실', '흘러간 옛 노래 함께 불러요', 'culture', '41',
-      '○○복지관 강당', 2, 14, 90, 30, 'music', '트로트와 가곡을 함께 불러요. 목 풀기 체조로 시작해요.', 30),
+      '오산노인종합복지관 강당', 2, 14, 90, 30, 'music', '트로트와 가곡을 함께 불러요. 목 풀기 체조로 시작해요.', 30),
     act('의자 요가', '앉아서 하는 쉬운 스트레칭', 'health', '41',
-      '○○경로당', 4, 11, 60, 12, 'exercise', '무릎이 불편하셔도 괜찮아요. 의자에 앉아서 천천히 몸을 풀어요.', 4),
+      '세마e편한세상 경로당', 4, 11, 60, 12, 'exercise', '무릎이 불편하셔도 괜찮아요. 의자에 앉아서 천천히 몸을 풀어요.', 4),
     act('텃밭 가꾸기', '상자 텃밭에 상추를 심어요', 'learning', '11',
       '○○구민 공동텃밭', 6, 9, 120, 15, 'garden', '흙을 만지며 상추와 깻잎을 심어요. 장갑은 준비해 드려요.', 7),
     act('그림책 읽기 모임', '손주에게 읽어 줄 그림책을 함께', 'learning', '11',
       '○○구립도서관', 9, 14, 90, 10, 'book', '손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.', 3),
     // 봉사 (C12) — backend/scripts/seed.py 와 같은 내용
     act('어르신 도시락 나눔', '복지관과 함께 이웃에게 도시락을 전해요', 'volunteer', '41',
-      '○○노인복지관 1층 식당', 4, 10, 120, 15, 'meal',
+      '오산노인종합복지관 1층 식당', 4, 10, 120, 15, 'meal',
       '복지관에서 만든 도시락을 포장해 홀로 사시는 이웃께 전해 드려요. 무거운 짐은 복지관 선생님이 맡아요. 앞치마는 복지관에서 드려요.', 11),
     act('공원 걷기 + 쓰레기 줍기', '걸으면서 우리 동네도 깨끗하게', 'volunteer', '41',
-      '○○근린공원 입구', 8, 15, 60, 20, 'cleanup',
+      '오산천 산책로 입구', 8, 15, 60, 20, 'cleanup',
       '천천히 공원을 걸으며 쓰레기를 주워요. 집게와 장갑은 복지관에서 준비해요.', 6),
   ]
 

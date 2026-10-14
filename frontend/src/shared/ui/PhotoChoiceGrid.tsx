@@ -15,6 +15,8 @@ interface Props {
   /** 묶음 이름 — 화면 제목이 같은 질문을 하고 있으면 숨겨서 화면 읽기용으로만 */
   legend: string
   legendHidden?: boolean
+  /** 묶음 이름 아래 한 줄 (예: '3 / 5개') */
+  hint?: string
   options: PhotoChoice[]
   selected: string[]
   onToggle: (value: string) => void
@@ -26,10 +28,11 @@ interface Props {
  * 사진은 꾸밈이라 읽지 않고, 버튼 이름은 아래 글자 그대로다.
  * 사진을 못 불러오면 대신 그림을 넣지 않고 연한 바탕만 둔다 — 어설픈 아이콘보다 조용한 빈칸이 낫다 (A24).
  */
-export function PhotoChoiceGrid({ legend, legendHidden = false, options, selected, onToggle }: Props) {
+export function PhotoChoiceGrid({ legend, legendHidden = false, hint, options, selected, onToggle }: Props) {
   return (
     <fieldset className={styles.fieldset}>
       <legend className={legendHidden ? 'sr-only' : styles.legend}>{legend}</legend>
+      {hint && <p className={styles.hint}>{hint}</p>}
       <div className={styles.grid} role="group">
         {options.map((o) => {
           const on = selected.includes(o.value)

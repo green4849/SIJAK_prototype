@@ -2,7 +2,7 @@
 import { INTERESTS, REGIONS, TEXT_MAX } from '../constants'
 import { fail, json, type Route } from '../http'
 import { assessText, suggestTopics } from '../rules'
-import { ageOf, db, newId, relatedBlocks, save, userById, voiceBlobs, type DMessage, type DRoom, type DUser } from '../store'
+import { ageOf, db, newId, relatedBlocks, save, userById, voiceBlobs, type DMessage, type DRoom, type DUser, regionLabel } from '../store'
 import { requireUser } from './auth'
 import { areFriends } from './friend'
 import type { Schema } from '@/shared/api/types'
@@ -23,7 +23,7 @@ const other = (r: DRoom, me: string) => (r.a === me ? r.b : r.a)
 function peer(u: DUser): Schema<'ChatPeer'> {
   return {
     user_id: u.id, name: u.name, age: ageOf(u.birth_date), gender: u.gender,
-    region_name: REGIONS[u.region_code] ?? u.region_code,
+    region_name: regionLabel(u, REGIONS),
   }
 }
 

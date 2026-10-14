@@ -11,7 +11,7 @@ test('위치 다시 확인 → 지금 위치의 시·도로 사는 곳이 바뀐
   await startTour(page)
   await page.goto('/me')
   const item = page.getByRole('button', { name: /위치 다시 확인/ })
-  await expect(item).toContainText('경기도')
+  await expect(item).toContainText('오산시 세마동')
   await item.click()
   await expect(page.getByRole('status').filter({ hasText: '사는 곳을 부산광역시로 바꿨어요' })).toBeVisible()
   await expect(page.getByRole('button', { name: /위치 다시 확인/ })).toContainText('부산광역시')

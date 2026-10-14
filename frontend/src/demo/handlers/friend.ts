@@ -1,7 +1,7 @@
 /** backend/app/domains/friend 와 같은 계약 */
 import { INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
-import { ageOf, db, newId, relatedBlocks, save, type DUser } from '../store'
+import { ageOf, db, newId, relatedBlocks, save, type DUser, regionLabel } from '../store'
 import { findNearby } from '../rules'
 import { chargeFriendRequest, earnRating, ratingsLeftToday } from '../points'
 import { requireUser } from './auth'
@@ -46,7 +46,7 @@ function card(
     age: ageOf(u.birth_date),
     gender: u.gender,
     intro: u.intro,
-    region_name: REGIONS[u.region_code] ?? u.region_code,
+    region_name: regionLabel(u, REGIONS),
     interests: u.interests.map((i) => INTERESTS[i] ?? i),
     common_interests: u.interests.filter((i) => me.interests.includes(i)).map((i) => INTERESTS[i] ?? i),
     distance_km: distance,
