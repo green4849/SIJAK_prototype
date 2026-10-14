@@ -75,5 +75,5 @@ export const REPORT_REASONS: Record<string, string> = {
   other: '기타',
 }
 
-/** 데모에서 '내 위치 사용하기'를 누르면 놓이는 자리 — 시드 이웃들이 사는 시연 동네 한가운데 */
-export const DEMO_HOME: [number, number] = [37.27, 127.01]
+/** 데모에서 '내 위치 사용하기'를 누르면 놓이는 자리 — 시드 이웃들이 사는 시연 동네(오산시 양산동, 한신대 앞) 한가운데 */
+export const DEMO_HOME: [number, number] = [37.193, 127.024]

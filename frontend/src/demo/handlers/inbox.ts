@@ -1,7 +1,7 @@
 /** 알림함 · 회원 탈퇴(B3) · 운영자 화면(B7) — 백엔드 없음. 계약: shared/api/draft.ts */
 import { REPORT_REASONS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
-import { ageOf, db, save, userById, type DAdminCase } from '../store'
+import { ageOf, db, save, userById, type DAdminCase, regionLabel } from '../store'
 import { requireUser } from './auth'
 import type { AdminCaseOut, AdminWatchOut, CaseAction, NotificationItemOut, WithdrawIn, WithdrawOut } from '@/shared/api/draft'
 
@@ -48,7 +48,7 @@ function watchList(): AdminWatchOut[] {
     const u = userById(id)
     if (!u) return null
     return {
-      user_id: id, name: u.name, age: ageOf(u.birth_date), region_name: REGIONS[u.region_code] ?? '',
+      user_id: id, name: u.name, age: ageOf(u.birth_date), region_name: regionLabel(u, REGIONS),
       isolation_score: score, last_seen_text: last, signal, guardian_notified: notified,
     }
   }

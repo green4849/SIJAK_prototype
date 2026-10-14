@@ -7,9 +7,16 @@
 
 .legend {
   padding: 0;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--gap-tight);
   font-size: var(--text-card-title);
   font-weight: var(--weight-semibold);
+}
+
+/* 묶음 이름 아래 한 줄 (예: 고른 개수) */
+.hint {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
 }
 
 /* 휴대폰 3열 — 넓은 본문(태블릿·PC)에서 4열. 창이 아니라 본문 폭 기준 (AppLayout @container page) */

@@ -1,7 +1,7 @@
 /** backend/app/domains/auth 와 같은 계약 */
 import { DEMO_HOME, INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type DemoRequest, type Route } from '../http'
-import { ageOf, db, DEMO_ME_ID, newId, save, type DUser } from '../store'
+import { ageOf, db, DEMO_ME_ID, newId, save, type DUser, regionLabel } from '../store'
 import type { Schema } from '@/shared/api/types'
 
 const verifySessions = new Map<string, { name: string; birth_date: string; phone: string; gender: 'M' | 'F'; code: string }>()
@@ -28,7 +28,7 @@ export function userOut(u: DUser): Schema<'UserOut'> {
     age: ageOf(u.birth_date),
     gender: u.gender,
     region_code: u.region_code,
-    region_name: REGIONS[u.region_code] ?? u.region_code,
+    region_name: regionLabel(u, REGIONS),
     interests: u.interests,
     intro: u.intro,
     has_location: u.geo !== null,
@@ -139,7 +139,10 @@ export const authRoutes: Route[] = [
       if (b.intro.length > INTRO_MAX_LEN) fail(422, 'validation_error', `소개는 ${INTRO_MAX_LEN}자까지 쓸 수 있어요.`)
       u.intro = b.intro.split(/\s+/).filter(Boolean).join(' ')
     }
-    if (b.region_code !== undefined) u.region_code = b.region_code
+    if (b.region_code !== undefined && b.region_code !== u.region_code) {
+      u.region_code = b.region_code
+      u.area = undefined // 이사 — 예전 동네 이름은 지운다
+    }
     if (b.interests !== undefined) u.interests = [...new Set(b.interests)]
     save()
     return json(userOut(u))

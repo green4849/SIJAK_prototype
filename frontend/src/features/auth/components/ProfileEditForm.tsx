@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
-import { OptionGrid } from '@/shared/ui/OptionGrid'
+import { PhotoChoiceGrid } from '@/shared/ui/PhotoChoiceGrid'
 import { TextArea } from '@/shared/ui/TextArea'
 import { authApi, type User } from '../api/authApi'
 import { useSignupOptions } from '../hooks/useSignupOptions'
+import { toInterestChoices } from './interestChoices'
 import styles from './form.module.css'
 
 const INTRO_MAX = 60 // backend INTRO_MAX_LEN
@@ -15,7 +16,7 @@ interface Props {
   onSaved: (user: User) => void
 }
 
-/** ⑨ → 내 프로필 관리: 한 줄 소개 · 좋아하는 것 (사는 곳은 위치 동의로 정해져 마이페이지에 표시) */
+/** ⑨ → 내 프로필 관리: 한 줄 소개 · 좋아하는 것(가입과 같은 그림 선택) — 사는 곳은 위치 동의로 정해져 마이페이지에 표시 */
 export function ProfileEditForm({ user, onSaved }: Props) {
   const { options, error: loadError } = useSignupOptions()
   const [intro, setIntro] = useState(user.intro)
@@ -60,20 +61,22 @@ export function ProfileEditForm({ user, onSaved }: Props) {
         onChange={(e) => setIntro(e.target.value)}
       />
 
-      <OptionGrid
+      {/* 가입 때와 같은 그림 선택 (A24) */}
+      <PhotoChoiceGrid
         legend="좋아하는 것"
         hint={`${interests.length} / ${max}개`}
-        multiple
-        options={options.interests.map((o) => ({ value: o.code, label: o.label }))}
+        options={toInterestChoices(options.interests)}
         selected={interests}
         onToggle={toggleInterest}
       />
 
-      {error && <Alert>{error}</Alert>}
-
-      <Button type="submit" block large disabled={pending}>
-        {pending ? '저장하는 중…' : '저장하기'}
-      </Button>
+      {/* 그림이 많아 길어도 저장 버튼은 늘 아래에 */}
+      <div className={styles.stickyActions}>
+        {error && <Alert>{error}</Alert>}
+        <Button type="submit" block large disabled={pending}>
+          {pending ? '저장하는 중…' : '저장하기'}
+        </Button>
+      </div>
     </form>
   )
 }
