@@ -22,7 +22,7 @@ import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends } from '@/features/friend'
 import { useUnreadNotifications } from '@/features/inbox'
-import { useIsolationIndex, weatherLabel } from '@/features/wellbeing'
+import { useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
@@ -38,7 +38,7 @@ export function MyPage() {
   const friends = useMyFriends()
   const counts = useActivityCounts()
   const points = usePointSummary()
-  const mood = useIsolationIndex()
+  const mood = useRelationIndex()
   const unreadNotes = useUnreadNotifications()
   const { installed } = useInstallState()
   const location = useLocationRecheck()

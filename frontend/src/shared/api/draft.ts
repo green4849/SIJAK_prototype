@@ -48,23 +48,23 @@ export interface CompanionInfoOut {
   starters: string[]
 }
 
-// ---------- C11 마음 건강 — /me/isolation-index, /me/self-assessment ----------
+// ---------- C11 마음 건강 — /me/relation-index, /me/self-assessment ----------
 
-/** 고립 지수 단계 (보고서 4.5.3: 0~30 정상 · 30~60 주의 · 60~80 위험 · 80~ 긴급) */
-export type IsolationLevel = 'normal' | 'caution' | 'risk' | 'urgent'
+/** 사회적 관계 지수 단계 — 보고서 4.5.3 고립 지수 단계를 뒤집음: 70~100 정상 · 40~70 주의 · 20~40 위험 · 0~20 긴급 */
+export type RelationLevel = 'normal' | 'caution' | 'risk' | 'urgent'
 
-export interface IsolationFactor {
+export interface RelationFactor {
   code: 'activity' | 'communication' | 'emotion' | 'social' | 'responsiveness'
   label: string
   /** 0~100, 높을수록 좋음 */
   score: number
 }
 
-export interface IsolationIndexOut {
-  /** 0~100, 높을수록 고립 위험 */
+export interface RelationIndexOut {
+  /** 사회적 관계 지수 0~100, 높을수록 좋음 (= 100 − 보고서 고립 지수 II) */
   score: number
-  level: IsolationLevel
-  factors: IsolationFactor[]
+  level: RelationLevel
+  factors: RelationFactor[]
   /** 지난 주들 → 이번 주 (마지막이 지금) */
   weekly: { label: string; score: number }[]
   updated_at: string
@@ -235,7 +235,8 @@ export interface AdminWatchOut {
   name: string
   age: number
   region_name: string
-  isolation_score: number
+  /** 사회적 관계 지수 0~100 — 낮을수록 돌봄이 필요 */
+  relation_score: number
   /** 마지막 접속 '3일 전' */
   last_seen_text: string
   /** 최근 신호 (예: 말동무 대화에서 외로움 표현 늘어남) */

@@ -41,7 +41,7 @@ test('운영자 화면: 신고 처리 → 이웃이 한 신고도 바로 들어�
 
   await page.getByRole('tab', { name: '돌봄이 필요한 이웃' }).click()
   await expect(page.getByText('최말순님')).toBeVisible()
-  await expect(page.getByText('고립 지수 82')).toBeVisible()
+  await expect(page.getByText('사회적 관계 지수 18')).toBeVisible()
 })
 
 test('운영자 화면 바로가기 링크(/admin?tour)', async ({ page }) => {

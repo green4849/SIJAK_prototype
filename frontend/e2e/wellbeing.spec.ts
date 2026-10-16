@@ -8,7 +8,7 @@ test('마이페이지 → 마음 건강: 마음 날씨·요인·4주 변화, 기
   await page.getByRole('link', { name: /마음 건강/ }).click()
   await expect(page.getByText('이번 주 마음 날씨')).toBeVisible()
   await expect(page.getByRole('heading', { name: '요즘 나는' })).toBeVisible()
-  await expect(page.getByText(/3주 전 58 → 이번 주/)).toBeVisible()
+  await expect(page.getByText(/3주 전 42 → 이번 주/)).toBeVisible()
 
   await page.getByRole('link', { name: /기분 점검/ }).click()
   for (let i = 1; i <= 9; i++) {
@@ -23,10 +23,10 @@ test('마이페이지 → 마음 건강: 마음 날씨·요인·4주 변화, 기
   await expect(page.getByText(/지난번: 조금 지쳐 있어요/).first()).toBeVisible()
 })
 
-test('외롭다는 이야기가 많아지면 마음 날씨가 나빠진다 (말동무 정서 → 고립 지수)', async ({ page }) => {
+test('외롭다는 이야기가 많아지면 마음 날씨가 나빠진다 (말동무 정서 → 사회적 관계 지수가 내려감)', async ({ page }) => {
   await startTour(page)
   await page.goto('/me/wellbeing')
-  const before = Number((await page.getByText(/^고립 지수 \d+$/).textContent())!.match(/\d+/)![0])
+  const before = Number((await page.getByText(/^사회적 관계 지수 \d+$/).textContent())!.match(/\d+/)![0])
   await page.goto('/companion')
   for (const t of ['너무 외로워요', '요즘 우울해요', '혼자라 쓸쓸해요']) {
     await page.getByLabel('말동무에게 할 말').fill(t)
@@ -34,8 +34,8 @@ test('외롭다는 이야기가 많아지면 마음 날씨가 나빠진다 (말�
     await expect(page.getByRole('list', { name: '말동무와 나눈 이야기' })).toContainText(t)
   }
   await page.goto('/me/wellbeing')
-  const after = Number((await page.getByText(/^고립 지수 \d+$/).textContent())!.match(/\d+/)![0])
-  expect(after).toBeGreaterThan(before)
+  const after = Number((await page.getByText(/^사회적 관계 지수 \d+$/).textContent())!.match(/\d+/)![0])
+  expect(after).toBeLessThan(before)
 })
 
 test('홈 긴급 → 도움 요청 → 확인 → 보호자에게 알림', async ({ page }) => {

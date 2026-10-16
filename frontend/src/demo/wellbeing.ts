@@ -1,18 +1,19 @@
 /**
  * 마음 건강 계산 — 데모용 (C11).
- *  - 고립 지수: 보고서 4.5.3 공식 II = 100 − (0.25A + 0.30C + 0.20E + 0.15S + 0.10R) 을 그대로,
+ *  - 사회적 관계 지수: 보고서 4.5.3 고립 지수 II = 100 − (0.25A + 0.30C + 0.20E + 0.15S + 0.10R) 를 뒤집은 값
+ *    = 0.25A + 0.30C + 0.20E + 0.15S + 0.10R (높을수록 좋음). 단계 경계도 그대로 뒤집었다.
  *    각 요인은 데모 저장소의 실제 활동(접속·대화·말동무 정서·친구·활동 신청)으로 어림한다
  *  - 자가평가: PHQ-9 · GAD-7 (쉬운 말로 다듬은 문항), 점수 구간은 표준 기준
  */
 import { db, type DAssessment, type DUser } from './store'
-import type { AssessmentFormOut, AssessmentResultOut, IsolationFactor, IsolationIndexOut, IsolationLevel } from '@/shared/api/draft'
+import type { AssessmentFormOut, AssessmentResultOut, RelationFactor, RelationIndexOut, RelationLevel } from '@/shared/api/draft'
 
 const DAY = 86400_000
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
 
 export const WEIGHTS = { activity: 0.25, communication: 0.3, emotion: 0.2, social: 0.15, responsiveness: 0.1 }
 
-const FACTOR_LABELS: Record<IsolationFactor['code'], string> = {
+const FACTOR_LABELS: Record<RelationFactor['code'], string> = {
   activity: '앱 활동',
   communication: '대화',
   emotion: '마음',
@@ -20,14 +21,15 @@ const FACTOR_LABELS: Record<IsolationFactor['code'], string> = {
   responsiveness: '답장',
 }
 
-export function levelOf(score: number): IsolationLevel {
-  if (score < 30) return 'normal'
-  if (score < 60) return 'caution'
-  if (score < 80) return 'risk'
+/** 보고서 고립 지수 단계(0~30 정상 · 30~60 주의 · 60~80 위험 · 80~ 긴급)를 뒤집은 경계 */
+export function levelOf(score: number): RelationLevel {
+  if (score > 70) return 'normal'
+  if (score > 40) return 'caution'
+  if (score > 20) return 'risk'
   return 'urgent'
 }
 
-function factors(me: DUser): Record<IsolationFactor['code'], number> {
+function factors(me: DUser): Record<RelationFactor['code'], number> {
   const s = db()
   const now = Date.now()
   const since = (iso: string, days: number) => now - new Date(iso).getTime() < days * DAY
@@ -58,16 +60,16 @@ function factors(me: DUser): Record<IsolationFactor['code'], number> {
   return { activity, communication, emotion, social, responsiveness }
 }
 
-export function isolationIndex(me: DUser): IsolationIndexOut {
+export function relationIndex(me: DUser): RelationIndexOut {
   const f = factors(me)
   const raw = (Object.keys(WEIGHTS) as (keyof typeof WEIGHTS)[]).reduce((sum, k) => sum + WEIGHTS[k] * f[k], 0)
-  const score = clamp(100 - raw)
-  const past = db().isolationHistory[me.id] ?? []
+  const score = clamp(raw)
+  const past = db().relationHistory[me.id] ?? []
   const weeks = [...past, score]
   return {
     score,
     level: levelOf(score),
-    factors: (Object.keys(FACTOR_LABELS) as IsolationFactor['code'][]).map((code) => ({
+    factors: (Object.keys(FACTOR_LABELS) as RelationFactor['code'][]).map((code) => ({
       code,
       label: FACTOR_LABELS[code],
       score: f[code],
