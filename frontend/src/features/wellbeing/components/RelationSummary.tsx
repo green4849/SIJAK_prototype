@@ -1,13 +1,13 @@
 import { Alert } from '@/shared/ui/Alert'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
-import type { IsolationIndex } from '../api/wellbeingApi'
-import { useIsolationIndex } from '../hooks/useWellbeing'
+import type { RelationIndex } from '../api/wellbeingApi'
+import { useRelationIndex } from '../hooks/useWellbeing'
 import { WEATHER } from './weather'
 import styles from './Wellbeing.module.css'
 
 /** 마음 날씨 + 요인 다섯 개 + 4주 변화 */
-export function IsolationSummary() {
-  const { data, error, loading } = useIsolationIndex()
+export function RelationSummary() {
+  const { data, error, loading } = useRelationIndex()
   if (error) return <Alert>{error}</Alert>
   if (loading || !data) return <p role="status">불러오는 중…</p>
   return (
@@ -19,7 +19,7 @@ export function IsolationSummary() {
   )
 }
 
-function Weather({ data }: { data: IsolationIndex }) {
+function Weather({ data }: { data: RelationIndex }) {
   const w = WEATHER[data.level]
   const Icon = w.icon
   return (
@@ -30,14 +30,14 @@ function Weather({ data }: { data: IsolationIndex }) {
         <h2 id="weather-title" className={styles.weatherLabel}>
           {w.label}
         </h2>
-        <p className={styles.weatherScore}>고립 지수 {data.score}</p>
+        <p className={styles.weatherScore}>사회적 관계 지수 {data.score}</p>
       </div>
     </section>
   )
 }
 
 /** 요인 다섯 개 — 높을수록 좋음. 막대는 장식, 숫자는 글자로 */
-function Factors({ data }: { data: IsolationIndex }) {
+function Factors({ data }: { data: RelationIndex }) {
   return (
     <section className={styles.card} aria-labelledby="factors-title">
       <h2 id="factors-title" className={styles.cardTitle}>
@@ -58,11 +58,11 @@ function Factors({ data }: { data: IsolationIndex }) {
   )
 }
 
-/** 4주 변화 — 고립 지수(낮을수록 좋음) 세로 막대, 이번 주만 진하게 */
-function Weekly({ data }: { data: IsolationIndex }) {
+/** 4주 변화 — 사회적 관계 지수(높을수록 좋음) 세로 막대, 이번 주만 진하게 */
+function Weekly({ data }: { data: RelationIndex }) {
   const first = data.weekly[0]
   const last = data.weekly.at(-1)
-  const better = first && last && last.score < first.score
+  const better = first && last && last.score > first.score
   return (
     <section className={styles.card} aria-labelledby="weekly-title">
       <h2 id="weekly-title" className={styles.cardTitle}>

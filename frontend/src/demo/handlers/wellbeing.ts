@@ -1,7 +1,7 @@
 /** 마음 건강 (C11) · 긴급 도움·보호자 (C10) — 백엔드 없음. 계약: shared/api/draft.ts */
 import { fail, json, noContent, type Route } from '../http'
 import { db, newId, save, type DGuardian } from '../store'
-import { FORMS, isolationIndex, resultOf } from '../wellbeing'
+import { FORMS, relationIndex, resultOf } from '../wellbeing'
 import { requireUser } from './auth'
 import type { AssessmentIn, GuardianIn, GuardianOut, SosOut } from '@/shared/api/draft'
 
@@ -20,7 +20,7 @@ function guardianOut(g: DGuardian): GuardianOut {
 }
 
 export const wellbeingRoutes: Route[] = [
-  ['GET', '/me/isolation-index', (req) => json(isolationIndex(requireUser(req)))],
+  ['GET', '/me/relation-index', (req) => json(relationIndex(requireUser(req)))],
 
   ['GET', '/me/self-assessment', (req) => {
     const me = requireUser(req)
