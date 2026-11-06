@@ -59,6 +59,44 @@ test('말로 하기 → 알아들은 말이 화면에 보이고, 그 말로 답�
   await expect(talk).toContainText('그런 날이 있지요')
 })
 
+test('말로 하기 — 안드로이드처럼 앞말을 누적해 보내도, 중간에 끊겼다 이어져도 한 문장으로', async ({ page }) => {
+  await page.addInitScript(() => {
+    // 1회차: 조각마다 앞말을 누적 (안드로이드 크롬) → 스스로 끝남 / 2회차: 이어서 말함
+    const rounds = [
+      [['오늘은'], ['오늘은', '오늘은 날씨가'], ['오늘은', '오늘은 날씨가', '오늘은 날씨가 좋네요']],
+      [['산책 가고 싶어요']],
+    ]
+    let round = 0
+    class FakeRecognition {
+      onresult: ((e: unknown) => void) | null = null
+      onerror: ((e: unknown) => void) | null = null
+      onend: (() => void) | null = null
+      start() {
+        const steps = rounds[round++] ?? []
+        steps.forEach((parts, i) =>
+          setTimeout(() => {
+            const results: Record<number, unknown> & { length: number } = { length: parts.length }
+            parts.forEach((t, j) => (results[j] = { 0: { transcript: t } }))
+            this.onresult?.({ results })
+          }, 150 * (i + 1)),
+        )
+        if (steps.length) setTimeout(() => this.onend?.(), 150 * (steps.length + 1))
+      }
+      stop() {}
+      abort() {}
+    }
+    const w = window as unknown as Record<string, unknown>
+    w.SpeechRecognition = FakeRecognition
+    w.webkitSpeechRecognition = FakeRecognition
+  })
+  await startTour(page)
+  await page.goto('/companion')
+  await page.getByRole('button', { name: '말로 하기' }).click()
+  await expect(page.getByText('오늘은 날씨가 좋네요 산책 가고 싶어요', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '다 말했어요' }).click()
+  await expect(page.getByRole('list', { name: '말동무와 나눈 이야기' })).toContainText('오늘은 날씨가 좋네요 산책 가고 싶어요')
+})
+
 test('말로 하기 — 아무 말도 못 알아들으면 다시 말해 달라고 한다', async ({ page }) => {
   await page.addInitScript(fakeRecognition, [])
   await startTour(page)
