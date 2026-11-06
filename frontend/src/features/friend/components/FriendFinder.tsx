@@ -41,7 +41,7 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }:
         </div>
       )}
       {data && data.length > 0 && (
-        <CardGrid>
+        <CardGrid stretch>
           {data.map((card) => (
             <FriendCard
               key={card.user_id}

@@ -78,10 +78,12 @@
   color: var(--color-text-muted);
 }
 
+/* 버튼·평가는 카드 아래쪽에 붙인다 — 2~3열에서 소개 글 길이가 달라도 같은 줄 카드끼리 버튼 높이가 맞도록 */
 .actions {
   display: flex;
   gap: var(--space-1);
-  margin-top: var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-1);
 }
 
 /* 버튼 두 개(수락/다음에)는 반씩 */

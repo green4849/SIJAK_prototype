@@ -21,7 +21,7 @@ export function MyFriendList({ chatHref }: { chatHref: (userId: string) => strin
         </p>
       )}
       {data && data.length > 0 && (
-        <CardGrid>
+        <CardGrid stretch>
           {data.map((card) => (
             <FriendCard
               key={card.user_id}
