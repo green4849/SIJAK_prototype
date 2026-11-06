@@ -14,7 +14,7 @@ export function ReceivedRequests({ onChanged }: { onChanged?: () => void }) {
       <h2 id="received-title" className={styles.heading}>
         나에게 온 친구 신청 <span className={styles.count}>{data.length}</span>
       </h2>
-      <CardGrid>
+      <CardGrid stretch>
         {data.map((card) => (
           <FriendCard
             key={card.user_id}
