@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiError, errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
 import { toast } from '@/shared/lib/toast'
@@ -23,6 +23,32 @@ const RATING_TOAST: Record<Rating, string> = {
 export function useRecommendations(tab: FriendTab, points: PointHooks = {}) {
   const state = useAsync(() => friendApi.recommendations(tab), [tab])
   const [actionError, setActionError] = useState<string | null>(null)
+
+  // 신청해 둔 이웃이 받아 주면 카드를 바로 '대화하기'로 — 보낸 신청이 있는 동안만 살핀다
+  const sentIds = state.data?.filter((c) => c.relation === 'sent').map((c) => c.user_id).join() ?? ''
+  useEffect(() => {
+    if (!sentIds) return
+    const waitingFor = new Set(sentIds.split(','))
+    const timer = setInterval(async () => {
+      try {
+        const accepted = (await friendApi.friends()).filter((f) => waitingFor.has(f.user_id))
+        if (!accepted.length) return
+        const byId = new Map(accepted.map((f) => [f.user_id, f]))
+        state.setData(
+          (cur) =>
+            cur?.map((c) => {
+              const f = byId.get(c.user_id)
+              return f && c.relation === 'sent' ? { ...c, relation: 'friends', request_id: f.request_id } : c
+            }) ?? null,
+        )
+        toast(`${accepted.map((f) => `${f.name}님`).join(', ')}이 친구 신청을 받아 주셨어요`)
+      } catch {
+        /* 다음 차례에 다시 */
+      }
+    }, 3000)
+    return () => clearInterval(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setData 는 바뀌지 않는다
+  }, [sentIds])
 
   async function request(userId: string) {
     setActionError(null)

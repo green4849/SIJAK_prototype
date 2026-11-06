@@ -16,7 +16,29 @@ const ratingsBy = (meId: string) =>
 // 평가 반영 순서 — backend friend/service.py _RATING_ORDER
 const RATING_ORDER = (r: Rating | undefined) => (r === 'like' ? 0 : r === 'neutral' ? 2 : 1)
 
+/** 데모: 내가 보낸 신청은 이웃이 잠시 뒤 받아 준다 (새로고침해도 이어지도록 시각으로 판단) */
+const DEMO_ACCEPT_MS = 3000
+
+function settleDemoAccepts(meId: string) {
+  const s = db()
+  const due = s.requests.filter(
+    (r) => r.from === meId && r.status === 'pending' && Date.now() - r.at >= DEMO_ACCEPT_MS,
+  )
+  if (!due.length) return
+  for (const r of due) {
+    r.status = 'accepted'
+    const name = s.users.find((u) => u.id === r.to)?.name ?? '이웃'
+    s.notifications.push({
+      id: newId(), uid: meId, kind: 'friend', title: '친구가 됐어요',
+      body: `${name}님이 친구 신청을 받아 주셨어요`, at: new Date().toISOString(), read: false,
+      link: `/chats/with/${r.to}`,
+    })
+  }
+  save()
+}
+
 function relations(meId: string): Map<string, [Relation, string]> {
+  settleDemoAccepts(meId)
   const out = new Map<string, [Relation, string]>()
   for (const r of db().requests) {
     if (r.from !== meId && r.to !== meId) continue
@@ -69,9 +91,11 @@ export const friendRoutes: Route[] = [
     const me = requireUser(req)
     const rel = relations(me.id)
     const blocked = relatedBlocks(me.id)
-    const pool = db().users.filter(
-      (u) => u.id !== me.id && rel.get(u.id)?.[0] !== 'friends' && !blocked.has(u.id),
-    )
+    // 이미 친구이거나, 나에게 신청을 보낸 분(위 '나에게 온 친구 신청'에 따로 나온다)은 뺀다
+    const pool = db().users.filter((u) => {
+      const r = rel.get(u.id)?.[0]
+      return u.id !== me.id && r !== 'friends' && r !== 'received' && !blocked.has(u.id)
+    })
     if (req.query.get('tab') === 'nearby') {
       const near = findNearby(me, pool).slice(0, 30)
       return json(near.map(([u, km]) => card(u, me, rel, km)))
@@ -130,16 +154,8 @@ export const friendRoutes: Route[] = [
       // 새 신청 — 포인트 (C12). 모자라면 402로 끝나고 아무것도 저장되지 않는다
       chargeFriendRequest(me.id, to, `${target.name}님께 친구 신청`)
       const mine = between.find((r) => r.from === me.id)
-      if (mine) mine.status = 'pending'
+      if (mine) Object.assign(mine, { status: 'pending', at: Date.now() })
       else s.requests.push({ id: newId(), from: me.id, to, status: 'pending', at: Date.now() })
-      // 데모: 이웃이 잠시 뒤 수락해 준다
-      setTimeout(() => {
-        const r = db().requests.find((x) => x.from === me.id && x.to === to && x.status === 'pending')
-        if (r) {
-          r.status = 'accepted'
-          save()
-        }
-      }, 8000)
     }
     save()
     return json(card(target, me, relations(me.id)), 201)
