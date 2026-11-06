@@ -1,6 +1,7 @@
 import { MapPin, Mic, Phone, Send, Square, Volume2 } from 'lucide-react'
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { canListen, listen } from '@/shared/a11y/listen'
 import { canSpeak, speak, stopSpeaking } from '@/shared/a11y/speak'
 import { formatDate, formatTime, isSameDay } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
@@ -23,6 +24,52 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
   const { info, messages, loading, error, pending, sendText, sendVoice } = useCompanion()
   const [text, setText] = useState('')
   const [listening, setListening] = useState(false)
+  // 말로 하기 — 알아들은 글(실시간), 다시 듣기 횟수, 마이크 문제 안내
+  const [heard, setHeard] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const [hint, setHint] = useState<string | null>(null)
+  const [micError, setMicError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!listening || !canListen()) return
+    return listen({
+      onText: (t) => {
+        setHeard(t)
+        setHint(null)
+      },
+      onError: (message) => {
+        setListening(false)
+        setMicError(message)
+        inputRef.current?.focus()
+      },
+    })
+  }, [listening, attempt])
+
+  function startListening() {
+    stopSpeaking()
+    setHeard('')
+    setHint(null)
+    setMicError(null)
+    setListening(true)
+  }
+
+  function finishListening() {
+    // 음성 인식을 못 쓰는 기기(데모) — 서버가 받아쓰는 자리라 글 없이 보낸다
+    if (!canListen()) {
+      setListening(false)
+      void sendVoice()
+      return
+    }
+    const said = heard.trim()
+    if (!said) {
+      setHint('잘 못 들었어요. 한 번 더 말씀해 주세요.')
+      setAttempt((n) => n + 1) // 다시 듣기
+      return
+    }
+    setListening(false)
+    void sendVoice(said)
+  }
   const [speakingId, setSpeakingId] = useState<number | null>(null)
 
   // 입력줄은 화면 아래 고정 — 실제 높이만큼 목록 아래를 비운다 (chat 과 같은 방식)
@@ -151,7 +198,7 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
       </div>
 
       <div ref={barRef} className={styles.bar} data-bottom-bar>
-        {error && <Alert>{error}</Alert>}
+        {(micError ?? error) && <Alert>{micError ?? error}</Alert>}
         {listening ? (
           <div className={styles.listening} role="status">
             <p className={styles.listeningLabel}>
@@ -160,12 +207,15 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
               </span>
               듣고 있어요
             </p>
+            {heard && (
+              <p className={styles.heard} aria-live="polite">
+                {heard}
+              </p>
+            )}
+            {hint && <p className={styles.listeningHint}>{hint}</p>}
             <div className={styles.listeningActions}>
               <Button
-                onClick={() => {
-                  setListening(false)
-                  void sendVoice()
-                }}
+                onClick={finishListening}
               >
                 다 말했어요
               </Button>
@@ -181,6 +231,7 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
             </label>
             <input
               id="companion-input"
+              ref={inputRef}
               className={styles.input}
               placeholder="글로 써도 돼요"
               value={text}
@@ -198,10 +249,7 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
               <button
                 type="button"
                 className={styles.iconBtn}
-                onClick={() => {
-                  stopSpeaking()
-                  setListening(true)
-                }}
+                onClick={startListening}
                 disabled={loading || Boolean(pending)}
                 aria-label="말로 하기"
               >

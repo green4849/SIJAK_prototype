@@ -18,6 +18,10 @@ export const companionApi = {
   messages: () => api.get<CompanionMessage[]>('/companion/messages'),
   sendText: (text: string) =>
     api.post<CompanionReplyOut>('/companion/messages', { input_type: 'text', text } satisfies CompanionSendIn),
-  /** 말로 하기 — 실제로는 녹음 파일을 보내고 서버가 받아쓴다 (C2 STT). 데모 서버는 시연 문장으로 받아쓴 척 */
-  sendVoice: () => api.post<CompanionReplyOut>('/companion/messages', { input_type: 'voice' } satisfies CompanionSendIn),
+  /**
+   * 말로 하기 — 기기(브라우저 음성 인식)가 받아쓴 글을 함께 보낸다.
+   * 글이 없으면(인식을 못 쓰는 기기) 나중엔 서버가 받아쓰고(C2 STT), 데모 서버는 시연 문장으로 대신한다.
+   */
+  sendVoice: (text?: string) =>
+    api.post<CompanionReplyOut>('/companion/messages', { input_type: 'voice', text } satisfies CompanionSendIn),
 }

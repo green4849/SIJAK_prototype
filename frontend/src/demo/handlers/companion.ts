@@ -32,8 +32,12 @@ export const companionRoutes: Route[] = [
     const s = db()
     const body = (req.body ?? {}) as CompanionSendIn
     let text: string
-    if (body.input_type === 'voice') {
-      // 녹음 → 받아쓰기(STT) 자리. 데모는 미리 정한 문장을 차례로
+    const spoken = (body.text ?? '').trim()
+    if (body.input_type === 'voice' && spoken) {
+      // 브라우저 음성 인식이 받아쓴 글
+      text = spoken.slice(0, TEXT_MAX)
+    } else if (body.input_type === 'voice') {
+      // 음성 인식을 못 쓰는 기기 → 서버 받아쓰기(STT) 자리. 데모는 미리 정한 문장을 차례로
       text = VOICE_SAMPLES[s.companionVoiceTurn % VOICE_SAMPLES.length]
       s.companionVoiceTurn++
     } else {
