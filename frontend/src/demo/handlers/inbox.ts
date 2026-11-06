@@ -42,20 +42,20 @@ function allCases(): AdminCaseOut[] {
   )
 }
 
-/** 복지기관이 살피는 '돌봄이 필요한 이웃' — 시연용 고정 목록 (고립 지수 높은 순) */
+/** 복지기관이 살피는 '돌봄이 필요한 이웃' — 시연용 고정 목록 (사회적 관계 지수 낮은 순) */
 function watchList(): AdminWatchOut[] {
   const row = (id: string, score: number, last: string, signal: string, notified: boolean): AdminWatchOut | null => {
     const u = userById(id)
     if (!u) return null
     return {
       user_id: id, name: u.name, age: ageOf(u.birth_date), region_name: regionLabel(u, REGIONS),
-      isolation_score: score, last_seen_text: last, signal, guardian_notified: notified,
+      relation_score: score, last_seen_text: last, signal, guardian_notified: notified,
     }
   }
   return [
-    row('u-malsoon', 82, '7일 전', '일주일째 접속이 없어요', true),
-    row('u-okja', 64, '오늘', '말동무 대화에 쓸쓸하다는 말이 늘었어요', false),
-    row('u-gicheol', 48, '어제', '이번 주 대화가 줄었어요', false),
+    row('u-malsoon', 18, '7일 전', '일주일째 접속이 없어요', true),
+    row('u-okja', 36, '오늘', '말동무 대화에 쓸쓸하다는 말이 늘었어요', false),
+    row('u-gicheol', 52, '어제', '이번 주 대화가 줄었어요', false),
   ].filter((x): x is AdminWatchOut => x !== null)
 }
 

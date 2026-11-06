@@ -64,7 +64,7 @@
 | C8 | **AI 말동무** (보고서 핵심, 시안에 진입점 없음 — 위치 결정 필요) | `domains/companion` + `integrations/llm` | L | P2 |
 | C9 | **음성 통화** (시안 ⑤ 📞) | `domains/call` + WebRTC | L | P2 |
 | C10 | **긴급 도움(SOS)·보호자 연결** | `domains/emergency` | M | P2 |
-| C11 | **고립 지수·자가평가** | `domains/wellbeing` (3~6 활동 데이터 사용) | M | P2 |
+| C11 | **사회적 관계 지수·자가평가** | `domains/wellbeing` (3~6 활동 데이터 사용) | M | P2 |
 | C12 | **포인트·추천 평가·대화 주제·봉사모임** — 친구 신청에 포인트, 평가·봉사·첫 친구 미션으로 적립, 알림 설정 | `domains/point`·`mission`·`notification`, friend·chat·activity | L | P1 |
 | C13 | **두뇌 운동 (인지 훈련)** — 보고서 3.1 인지 강화 기능 | `domains/brain` (새로) | M | P2 |
 

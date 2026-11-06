@@ -75,7 +75,7 @@ function CaseCard({ c, busy, onAct }: { c: AdminCase; busy: boolean; onAct: (a: 
   )
 }
 
-/** 돌봄이 필요한 이웃 — 고립 지수 높은 순 (복지기관 담당자용, 보고서 4.5.3 '긴급' 단계 모니터링) */
+/** 돌봄이 필요한 이웃 — 사회적 관계 지수 낮은 순 (복지기관 담당자용, 보고서 4.5.3 '긴급' 단계 모니터링) */
 export function WatchList() {
   const { data, error, loading } = useWatchList()
   if (error) return <Alert>{error}</Alert>
@@ -86,8 +86,8 @@ export function WatchList() {
       {data.map((w) => (
         <li key={w.user_id} className={styles.card} data-open="true">
           <div className={styles.head}>
-            <span className={styles.level} data-level={w.isolation_score >= 80 ? 3 : w.isolation_score >= 60 ? 2 : 1}>
-              고립 지수 {w.isolation_score}
+            <span className={styles.level} data-level={w.relation_score <= 20 ? 3 : w.relation_score <= 40 ? 2 : 1}>
+              사회적 관계 지수 {w.relation_score}
             </span>
             {w.guardian_notified && <span className={styles.status}>보호자에게 알림</span>}
           </div>

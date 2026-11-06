@@ -3,8 +3,8 @@ import { errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
 import { wellbeingApi, type AssessmentKind, type AssessmentResult } from '../api/wellbeingApi'
 
-export function useIsolationIndex() {
-  return useAsync(() => wellbeingApi.isolationIndex(), [])
+export function useRelationIndex() {
+  return useAsync(() => wellbeingApi.relationIndex(), [])
 }
 
 export function useAssessmentHistory() {
