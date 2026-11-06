@@ -33,7 +33,7 @@ export interface CompanionMessage {
 
 export interface CompanionSendIn {
   input_type: 'text' | 'voice'
-  /** 글로 보낼 때만. 말로 할 때는 녹음 파일(데모는 생략) → 서버가 받아쓴다 */
+  /** 글로 보낼 때는 필수. 말로 할 때는 기기가 받아쓴 글 — 없으면 서버가 받아쓴다(데모는 시연 문장) */
   text?: string
 }
 

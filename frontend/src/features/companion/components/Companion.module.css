@@ -367,3 +367,16 @@
   grid-template-columns: 2fr 1fr;
   gap: var(--space-1);
 }
+
+/* 말로 하기 — 알아들은 글을 크게 (보내기 전에 눈으로 확인) */
+.heard {
+  margin: 0;
+  font-size: var(--text-card-title);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.listeningHint {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}

@@ -41,6 +41,6 @@ export function useCompanion() {
     error: error ?? history.error,
     pending,
     sendText: (text: string) => run('text', () => companionApi.sendText(text)),
-    sendVoice: () => run('voice', () => companionApi.sendVoice()),
+    sendVoice: (text?: string) => run('voice', () => companionApi.sendVoice(text)),
   }
 }

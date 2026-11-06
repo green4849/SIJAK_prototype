@@ -25,3 +25,9 @@ docs/deferred.md §3
   - 음성 메시지: `backend/app/domains/chat/service.py` `send_voice()` 에서 변환 텍스트로 자막·`assess_message()` 호출
   - 받아쓰기 버튼(A5): 입력칸 옆
   - 앱이 알 인터페이스는 `integrations/stt` 하나(오디오 → 텍스트+신뢰도)
+- 2026-11-06 말동무 '말하기'에 **브라우저 음성 인식(Web Speech API)** 연결 — 서버 STT 전 임시 단계
+  - `shared/a11y/listen.ts` (speak.ts 와 짝): ko-KR, 말하는 중 글을 실시간 표시 → '다 말했어요'에 그 글을 보냄
+  - 못 알아들으면 "한 번 더 말씀해 주세요" 후 다시 듣기 / 마이크 거절·인터넷 끊김은 안내 후 글 입력칸으로
+  - 음성 인식이 없는 브라우저(파이어폭스 등)는 기존처럼 시연 문장으로 대신 (데모 서버)
+  - 계약: `POST /companion/messages` `{input_type:'voice', text}` — text 가 있으면 기기 받아쓰기, 없으면 서버 STT 자리
+  - 크롬은 음성을 구글 서버로 보내 변환 → 인터넷 필요, 보고서·동의 문구에 반영할 것
