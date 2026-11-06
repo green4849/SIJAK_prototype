@@ -21,6 +21,37 @@ test('④ 추천 친구에게 신청 → 버튼이 "신청했어요"로', async 
   await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
 })
 
+test('④ 이웃이 신청을 받아 주면 카드가 "대화하기"로 → 대화방으로 이어진다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/friends')
+  // 박정호님은 위 '나에게 온 친구 신청'에만 (추천 목록에 두 번 나오지 않음)
+  await expect(page.getByRole('article', { name: '박정호님' })).toHaveCount(1)
+
+  const card = page.getByRole('region', { name: '추천 친구 목록' }).getByRole('article', { name: '김영희님' })
+  await card.getByRole('button', { name: /친구 신청/ }).click()
+  await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
+  await expect(card.getByRole('link', { name: '대화하기' })).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByRole('status').filter({ hasText: '김영희님이 친구 신청을 받아 주셨어요' })).toBeVisible()
+
+  await card.getByRole('link', { name: '대화하기' }).click()
+  await expect(page).toHaveURL(/\/chats\/(?!with)/)
+  await expect(page.getByText('김영희님께 먼저 인사를 건네 보세요.')).toBeVisible()
+})
+
+test('④ 신청 직후 새로고침해도 수락은 이어지고, 알림함에 소식이 온다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/friends')
+  const card = page.getByRole('article', { name: '김영희님' })
+  await card.getByRole('button', { name: /친구 신청/ }).click()
+  await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
+  await page.reload()
+  await page.waitForTimeout(3500)
+  await page.goto('/me/friends')
+  await expect(page.getByRole('article', { name: '김영희님' })).toBeVisible()
+  await page.goto('/notifications')
+  await expect(page.getByText('김영희님이 친구 신청을 받아 주셨어요')).toBeVisible()
+})
+
 test('⑤ 대화: 보내면 이웃 답장이 폴링으로 도착', async ({ page }) => {
   await startTour(page)
   await page.goto('/chats')
