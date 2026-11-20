@@ -1,5 +1,6 @@
 /**
- * 시작이 앱 가이드 (C14) — 화면 흐름.
+ * 시작이 앱 가이드 (C14) — 화면 흐름. 시작이가 직접 나와서 안내한다 (구석 → 말풍선 위 → 짚을 버튼 옆).
+ * 그림이 실시간 3D인지 정지 그림인지는 기기에 따라 달라서 여기서는 보지 않는다 (둘 다 같은 자리·몸짓).
  * 답 고르기 자체는 guide-engine.spec.ts 가 브라우저 없이 본다. 여기서는
  *  · 지금 화면을 기준으로 답하는지 · 버튼을 짚어 주되 대신 누르지 않는지
  *  · 입력칸·중요한 버튼을 가리지 않는지 · 위급이 먼저인지 · 큰 글씨·좁은 화면에서도 쓸 수 있는지
@@ -8,13 +9,25 @@ import { expect, test, type Page } from '@playwright/test'
 import { mainNav, startTour } from './helpers'
 
 const launcher = (page: Page) => page.getByRole('button', { name: '시작이에게 앱 사용법 물어보기' })
-const panel = (page: Page) => page.getByRole('dialog', { name: '시작이에게 물어보기' })
+const panel = (page: Page) => page.getByRole('dialog', { name: '시작이 안내' })
 const log = (page: Page) => panel(page).getByRole('log')
-const callout = (page: Page) => page.getByRole('group', { name: '시작이 안내' })
+const callout = (page: Page) => page.getByRole('group', { name: '시작이 길 안내' })
+/** 화면 위의 시작이 (몸짓·표정은 data-pose / data-face 로 드러난다) */
+const sijagi = (page: Page) => page.locator('[data-guide-ui][data-pose]')
+
+/** 그 질문의 답이 말풍선에 올라올 때까지 (화면이 불러오는 중이면 시작이가 잠깐 기다린다) */
+const answered = (page: Page, question: string) =>
+  expect(log(page).locator('p', { hasText: '내가 물은 말' }).filter({ hasText: question })).toBeVisible()
 
 async function ask(page: Page, question: string) {
-  await panel(page).getByLabel('시작이에게 물어볼 말').fill(question)
+  // 말로 하기가 되는 기기에서는 '글로 쓰기'를 눌러야 입력칸이 나온다
+  const write = panel(page).getByRole('button', { name: '글로 쓰기' })
+  const input = panel(page).getByLabel('시작이에게 물어볼 말')
+  await expect(write.or(input).first()).toBeVisible() // 말풍선이 뜬 뒤에 어느 쪽인지 본다
+  if (await write.isVisible()) await write.click()
+  await input.fill(question)
   await panel(page).getByRole('button', { name: '물어보기', exact: true }).click()
+  await answered(page, question)
 }
 
 const box = async (page: Page, selector: string) => (await page.locator(selector).first().boundingBox())!
@@ -25,8 +38,9 @@ test('지금 보고 있는 화면을 기준으로 답한다', async ({ page }) =
   await startTour(page)
   await launcher(page).click()
   await expect(log(page)).toContainText('지금은 ‘홈’ 화면이에요')
-  // 미리 준비한 답이라는 점을 늘 밝힌다
-  await expect(panel(page)).toContainText('미리 준비한 답이에요')
+  // 제목 달린 창이 아니라 시작이가 하는 말 — 그래도 미리 준비한 안내라는 점은 늘 밝힌다
+  await expect(panel(page).getByRole('heading')).toHaveCount(0)
+  await expect(panel(page)).toContainText('미리 준비한 안내를 알려 드려요')
   await panel(page).getByRole('button', { name: '이 화면에서 뭘 해야 해요?' }).click()
   await expect(log(page)).toContainText('큰 카드 네 개')
 
@@ -57,6 +71,13 @@ test('같이 가 보기 — 버튼을 짚어 주고, 누르는 것은 사용자�
   // 사용자가 직접 누르면 다음 화면에서 다음 걸음을 짚는다
   await mainNav(page).getByRole('link', { name: /친구/ }).click()
   await expect(callout(page)).toContainText('여기 ‘친구 신청’이에요')
+  // 시작이가 그 버튼 옆으로 가서 가리키고, 누를 때까지 그 자리에 있다
+  await expect(sijagi(page)).toHaveAttribute('data-pose', /^point[LR]$/)
+  await page.waitForTimeout(1000)
+  await expect(sijagi(page)).toHaveAttribute('data-pose', /^point[LR]$/)
+  const beside = (await sijagi(page).boundingBox())!
+  const pointed = (await page.getByRole('button', { name: /^친구 신청/ }).first().boundingBox())!
+  expect(Math.abs(beside.y + beside.height / 2 - (pointed.y + pointed.height / 2))).toBeLessThan(90)
 
   // 짚은 것은 누름을 막지 않고, 말풍선이 그 버튼을 가리지 않는다
   const target = page.getByRole('button', { name: /^친구 신청/ }).first()
@@ -167,6 +188,8 @@ test('가입 전에도 지금 단계에 맞춰 돕는다', async ({ page }) => {
   await expect(log(page)).toContainText('본인 확인을 마치고 들어가면')
   await expect(log(page).getByRole('button', { name: '같이 가 보기' })).toHaveCount(0)
 
+  // 앞의 말로 돌아가 그 답의 버튼을 누를 수 있다
+  await panel(page).getByRole('button', { name: '앞의 말' }).click()
   await panel(page).getByRole('button', { name: '‘인증번호 받기’ 어디 있어요?' }).click()
   await expect(callout(page)).toContainText('‘인증번호 받기’를 누르세요')
 })
@@ -174,7 +197,7 @@ test('가입 전에도 지금 단계에 맞춰 돕는다', async ({ page }) => {
 test('쉽게 열고 닫는다 — 닫기·Esc, 초점이 돌아온다', async ({ page }) => {
   await startTour(page)
   await launcher(page).click()
-  await expect(panel(page).getByRole('heading', { name: '시작이에게 물어보기' })).toBeFocused()
+  await expect(panel(page)).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(panel(page)).toBeHidden()
   await expect(launcher(page)).toBeFocused()
@@ -206,11 +229,14 @@ test('입력칸·중요한 버튼을 가리지 않는다', async ({ page }) => {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
     await expect(launcher(page), path).toBeVisible()
-    const me = (await launcher(page).boundingBox())!
-    for (const bar of await page.locator('[data-bottom-bar]').all()) {
-      const b = await bar.boundingBox()
-      if (b) expect(overlaps(me, b), `${path}: 아래 고정 막대와 겹침`).toBe(false)
-    }
+    // 막대가 그려지면 곧바로 그 위로 올라선다
+    await expect
+      .poll(async () => {
+        const me = (await launcher(page).boundingBox())!
+        const bars = await Promise.all((await page.locator('[data-bottom-bar]').all()).map((bar) => bar.boundingBox()))
+        return bars.some((b) => b && overlaps(me, b))
+      }, { message: `${path}: 아래 고정 막대와 겹침` })
+      .toBe(false)
     // 끝까지 내리면 본문의 마지막 누르는 것이 시작이 밑에 깔리지 않는다
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     const again = (await launcher(page).boundingBox())!
@@ -250,12 +276,14 @@ test('아주 큰 글씨 + 선명한 화면 + 좁은 화면에서도 창을 쓸 �
         .map((el) => ({ el, h: el.getBoundingClientRect().height }))
         .filter(({ h }) => h > 0 && h < 44)
         .map(({ el, h }) => `${(el.innerText || el.tagName).trim().slice(0, 12)} ${Math.round(h)}px`),
-      // 닫기와 입력칸은 창이 길어져도 늘 화면 안에 있다
-      closeTop: ui.querySelector('header button')!.getBoundingClientRect().top,
+      // 닫기와 입력칸은 말풍선이 길어져도 늘 화면 안에 있고, 위로는 시작이가 설 자리가 남는다
+      closeTop: ui.querySelector('button')!.getBoundingClientRect().top,
+      cardTop: ui.getBoundingClientRect().top,
       inputBottom: ui.querySelector('input')!.getBoundingClientRect().bottom,
       height: innerHeight,
     }
   })
+  expect(r.cardTop).toBeGreaterThanOrEqual(100)
   expect(r.overflow).toBe(false)
   expect(r.small).toEqual([])
   expect(r.closeTop).toBeGreaterThanOrEqual(0)
@@ -264,9 +292,13 @@ test('아주 큰 글씨 + 선명한 화면 + 좁은 화면에서도 창을 쓸 �
   // 짚어 줄 때도 넘치지 않고, 말풍선이 그 버튼을 가리지 않는다
   await log(page).getByRole('button', { name: '‘친구 신청’ 어디 있어요?' }).click()
   await expect(callout(page)).toBeVisible()
-  await page.waitForTimeout(300)
+  await page.waitForTimeout(400)
   const target = (await page.getByRole('button', { name: /^친구 신청/ }).first().boundingBox())!
-  expect(overlaps(target, (await callout(page).boundingBox())!)).toBe(false)
+  const said = (await callout(page).boundingBox())!
+  expect(overlaps(target, said)).toBe(false)
+  // 말풍선은 화면 안에 다 들어온다
+  expect(said.y).toBeGreaterThanOrEqual(0)
+  expect(said.y + said.height).toBeLessThanOrEqual(720)
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
 })
 
@@ -278,8 +310,44 @@ test('안내에 적어 둔 버튼이 시연 화면에 실제로 있다', async (
     await page.waitForLoadState('networkidle')
     await launcher(page).click()
     await panel(page).getByRole('button', { name: '이 화면에서 뭘 해야 해요?' }).click()
-    await log(page).getByRole('button', { name: /어디|어디서/ }).first().click()
+    await expect(log(page).getByText('내가 물은 말')).toBeAttached()
+    await log(page).getByRole('button', { name: /어디/ }).first().click()
     await expect(callout(page), path).toBeVisible()
     await callout(page).getByRole('button', { name: '알겠어요' }).click()
   }
+})
+
+test('처음 온 화면에서는 시작이가 먼저 한마디 건넨다 — 잠깐만, 화면마다 한 번만', async ({ page }) => {
+  await startTour(page)
+  const hint = page.getByText('안녕하세요! 막히면 저를 눌러 주세요.')
+  await expect(hint).toBeVisible()
+  await expect(sijagi(page)).toHaveAttribute('data-pose', 'wave')
+  // 눌리지 않는 말풍선 — 뒤 화면을 막지 않고, 화면을 만지면 바로 접힌다
+  await page.getByRole('heading', { name: '김시작님' }).click()
+  await expect(hint).toBeHidden()
+  await expect(sijagi(page)).toHaveAttribute('data-pose', 'rest')
+  // 같은 화면에 다시 와도 또 말을 걸지 않는다
+  await mainNav(page).getByRole('link', { name: /친구/ }).click()
+  await expect(page.getByText('친구를 찾는 곳이에요. 도와드릴까요?')).toBeVisible()
+  await mainNav(page).getByRole('link', { name: /홈/ }).click()
+  await page.waitForTimeout(2000)
+  await expect(hint).toBeHidden()
+})
+
+test('한 번에 한 말씩 — 앞의 말은 다시 볼 수 있다', async ({ page }) => {
+  await startTour(page)
+  await launcher(page).click()
+  await ask(page, '글씨를 키우고 싶어')
+  await expect(log(page)).toContainText('아래에서 크기를 눌러 보세요')
+  // 앞의 인사는 지금 보이지 않는다 (쌓이는 대화 기록이 아니다)
+  await expect(log(page)).not.toContainText('뭘 도와드릴까요?')
+  await panel(page).getByRole('button', { name: '앞의 말' }).click()
+  await expect(log(page)).toContainText('뭘 도와드릴까요?')
+  await panel(page).getByRole('button', { name: '다음 말' }).click()
+  await expect(log(page)).toContainText('아래에서 크기를 눌러 보세요')
+  // 답의 성격에 따라 표정이 바뀐다
+  await ask(page, '오늘 날씨가 어떨까?')
+  await expect(sijagi(page)).toHaveAttribute('data-face', 'think')
+  await ask(page, '가슴이 너무 아파')
+  await expect(sijagi(page)).toHaveAttribute('data-face', 'worry')
 })

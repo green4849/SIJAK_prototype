@@ -31,6 +31,8 @@ interface ScreenDef {
   help: (variant: string, ctx: GuideContext) => ScreenHelp
   /** 이 화면에서 먼저 권할 질문 (주제 id) */
   suggest: string[]
+  /** 이 화면에 처음 들어왔을 때 시작이가 먼저 건네는 한마디 (없으면 건네지 않는다) */
+  hint?: string
 }
 
 const DEMO_INFO = '시연 화면의 정보는 예시예요. 가시기 전에 꼭 전화로 확인하세요.'
@@ -50,6 +52,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   welcome: {
     name: '시작',
     match: /^\/welcome$/,
+    hint: '처음 오셨군요! 막히면 저를 눌러 주세요.',
     guest: true,
     help: () => ({
       text: '‘시작’의 첫 화면이에요. 가운데 ‘시작하기’를 누르면 본인 확인으로 넘어가요.',
@@ -60,6 +63,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   phone: {
     name: '휴대폰 인증',
     match: /^\/login\/phone$/,
+    hint: '적기 어려우면 저를 눌러 주세요.',
     guest: true,
     variant: (p) => (p.has('h1', '인증번호 입력') ? 'code' : 'identity'),
     help: (v) =>
@@ -99,6 +103,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   login: {
     name: '본인 확인',
     match: /^\/login$/,
+    hint: '본인 확인을 하는 곳이에요. 도와드릴까요?',
     guest: true,
     help: () => ({
       text: '본인 확인 방법을 고르는 화면이에요. ‘휴대폰 인증’을 누르면 돼요. 혼자 하기 어려우면 ‘도움받기’를 눌러 보세요.',
@@ -121,6 +126,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   chat: {
     name: '대화',
     match: /^\/chats\/.+/,
+    hint: '말 걸기가 어려우면 저를 눌러 주세요.',
     variant: (p) =>
       p.has('[role="status"]', /차단된 대화/) ? 'blocked' : p.has('[aria-label="위험 경고"]') ? 'warning' : 'open',
     help: (v) =>
@@ -137,6 +143,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   chats: {
     name: '대화하기',
     match: /^\/chats$/,
+    hint: '이웃과 나눈 대화가 모인 곳이에요.',
     variant: (p) => (p.has('p', '아직 대화가 없어요.') ? 'empty' : 'list'),
     help: (v) =>
       v === 'empty'
@@ -150,6 +157,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   activity: {
     name: '활동 자세히 보기',
     match: /^\/activities\/.+/,
+    hint: '신청 방법이 궁금하면 저를 눌러 주세요.',
     variant: (p) => (p.has('button', '신청 취소하기') ? 'applied' : p.has('button', '자리가 다 찼어요') ? 'full' : 'open'),
     help: (v) =>
       v === 'applied'
@@ -165,6 +173,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   activities: {
     name: '지역생활',
     match: /^\/activities$/,
+    hint: '동네 모임을 보는 곳이에요. 도와드릴까요?',
     help: () => ({
       text: '동네 모임과 활동을 보는 화면이에요. 마음에 드는 활동을 누르면 날짜와 장소가 나와요. 위쪽 ‘전체 · 문화·여가 · 건강 …’을 누르면 종류별로 볼 수 있어요.',
       actions: [{ kind: 'show', label: '어디를 눌러요?', target: 'activity-item', say: '궁금한 활동을 누르면 자세한 내용이 나와요.' }],
@@ -174,6 +183,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   friends: {
     name: '동네 친구 찾기',
     match: /^\/friends$/,
+    hint: '친구를 찾는 곳이에요. 도와드릴까요?',
     variant: (p) => (p.has('#received-title') ? 'received' : 'list'),
     help: (v) =>
       v === 'received'
@@ -282,6 +292,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   me: {
     name: '마이페이지',
     match: /^\/me$/,
+    hint: '내 정보와 설정이 있는 곳이에요.',
     help: () => ({ text: '내 정보와 설정을 모아 둔 화면이에요. ‘내 활동’에는 프로필·포인트·친구 목록이, ‘도움’에는 글자 크기·보호자 연결·도움말이 있어요.' }),
     suggest: ['font', 'profile', 'guardians'],
   },
@@ -300,6 +311,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   companion: {
     name: '말동무',
     match: /^\/companion$/,
+    hint: '사용법이 궁금하면 저를 눌러 주세요.',
     help: () => ({
       text: '말동무와 이야기하는 화면이에요. 아래 ‘말하기’를 누르고 말하거나, 입력칸에 글로 써도 돼요. 저는 앱 사용법을 알려 드리고, 일상 이야기는 말동무가 들어 드려요.',
       actions: [{ kind: 'show', label: '‘말하기’ 어디 있어요?', target: 'companion-mic', say: '여기 ‘말하기’를 누르고 편하게 말씀하세요.' }],
@@ -342,6 +354,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
   home: {
     name: '홈',
     match: /^\/$/,
+    hint: '안녕하세요! 막히면 저를 눌러 주세요.',
     help: () => ({
       text: '홈 화면이에요. 가운데 큰 카드 네 개 — 친구 찾기, 대화하기, 지역생활, 말동무 — 중에 하고 싶은 것을 누르세요. 급할 때는 오른쪽 위 ‘긴급’을 누르세요.',
     }),

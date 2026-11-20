@@ -15,21 +15,27 @@ export function onOpenRequest(listener: () => void) {
   }
 }
 
-const SEEN_KEY = 'wipi.guide.seen'
+const HINT_KEY = 'wipi.guide.hints'
 
-/** 한 번이라도 열어 봤는지 — 처음 보는 사람에게만 말풍선으로 알려 준다 */
-export function hasMetGuide(): boolean {
+function seenHints(): string[] {
   try {
-    return localStorage.getItem(SEEN_KEY) === '1'
+    const list = JSON.parse(localStorage.getItem(HINT_KEY) ?? '[]') as unknown
+    return Array.isArray(list) ? list.filter((v): v is string => typeof v === 'string') : []
   } catch {
-    return true // 저장소를 못 쓰면 매번 띄우지 않는다
+    return ['*'] // 저장소를 못 쓰면 매번 말을 걸지 않는다
   }
 }
 
-export function rememberGuide() {
+/** 이 화면에서 시작이가 먼저 한마디 건넨 적이 있는지 — 화면마다 처음 한 번만 말을 건다 */
+export const hasGreeted = (screen: string) => {
+  const seen = seenHints()
+  return seen.includes('*') || seen.includes(screen)
+}
+
+export function rememberGreeted(screen: string) {
   try {
-    localStorage.setItem(SEEN_KEY, '1')
+    localStorage.setItem(HINT_KEY, JSON.stringify([...new Set([...seenHints(), screen])]))
   } catch {
-    // 저장 못 해도 이번에는 닫힌다
+    // 저장 못 해도 이번 화면에서는 다시 뜨지 않는다 (화면을 옮길 때까지)
   }
 }
