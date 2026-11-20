@@ -25,9 +25,8 @@ export function urgentReply(q: string, ctx: GuideContext): GuideReply | null {
       id: 'crisis',
       kind: 'safety',
       mood: 'care',
-      text: '많이 힘드시군요. 혼자 견디지 않으셔도 돼요. 지금 바로 이야기를 들어 줄 분과 통화할 수 있어요.',
+      text: '많이 힘드셨군요. 혼자 견디지 않으셔도 돼요. 지금 전화하면 이야기를 들어 줄 분이 있어요.',
       actions: [call('109', '109 상담 전화하기 (24시간)'), call('119', '다쳤거나 위급하면 119')],
-      note: '저는 앱 사용법만 안내할 수 있어요. 이럴 때는 사람과 통화하는 것이 먼저예요.',
     }
 
   if (CRIME.test(q) || EMERGENCY.test(q)) {
@@ -39,9 +38,9 @@ export function urgentReply(q: string, ctx: GuideContext): GuideReply | null {
       id: 'emergency',
       kind: 'safety',
       mood: 'care',
-      text: '지금 위급하시면 앱보다 전화가 먼저예요. 아래를 눌러 바로 전화하세요. 가까이 계신 분께도 큰 소리로 알리세요.',
+      text: '급하면 앱보다 전화가 먼저예요. 아래를 눌러 바로 전화하세요. 옆에 누가 있으면 크게 부르세요.',
       actions: ctx.signedIn ? [...calls, { kind: 'go', label: '보호자에게 알리는 ‘긴급 도움’ 화면', to: '/sos' }] : calls,
-      note: ctx.demo && ctx.signedIn ? '시연 화면의 ‘도움 요청’은 실제로 알림이 가지 않아요. 급하면 꼭 전화하세요.' : undefined,
+      note: ctx.demo && ctx.signedIn ? '시연의 ‘도움 요청’은 실제로 알림이 가지 않아요. 급하면 꼭 전화하세요.' : undefined,
     }
   }
 
@@ -50,20 +49,19 @@ export function urgentReply(q: string, ctx: GuideContext): GuideReply | null {
       id: 'scam',
       kind: 'safety',
       mood: 'care',
-      text: '돈·계좌번호·비밀번호·인증번호는 누구에게도 알려 주지 마세요. 시작에서는 누구도 돈을 요구하지 않아요.',
+      text: '돈이나 계좌번호, 비밀번호는 누구에게도 알려 주지 마세요. ‘시작’은 돈을 달라고 하지 않아요.',
       steps: [
-        '이미 돈을 보냈거나 번호를 알려 줬다면 바로 112에 전화하세요.',
+        '이미 보냈거나 알려 줬다면 바로 112에 전화하세요.',
         ctx.signedIn
-          ? '그분과의 대화 화면 오른쪽 위 ‘더보기’에서 ‘신고하기’를 누르면 신고와 차단이 함께 돼요.'
-          : '가족이나 복지관 직원에게도 바로 알리세요.',
+          ? '그분과의 대화에서 오른쪽 위 ‘더보기’를 누르면 ‘신고하기’가 있어요.'
+          : '가족에게도 바로 알리세요.',
       ],
       actions: [
         call('112', '112 경찰에 전화하기'),
         ...(ctx.screen === 'chat'
-          ? [{ kind: 'show', label: '‘더보기’ 어디 있어요?', target: 'chat-more', say: '여기 ‘더보기’를 누르면 ‘신고하기’가 나와요. 신고는 직접 눌러 주세요.' } satisfies GuideAction]
+          ? [{ kind: 'show', label: '‘더보기’ 어디 있어요?', target: 'chat-more', say: '여기 ‘더보기’를 누르면 ‘신고하기’가 나와요.' } satisfies GuideAction]
           : []),
       ],
-      note: '신고는 제가 대신 하지 않아요. 직접 눌러 주세요.',
     }
 
   return null
@@ -76,7 +74,7 @@ export function medicalReply(q: string): GuideReply | null {
     id: 'medical',
     kind: 'boundary',
     mood: 'care',
-    text: '몸 상태나 약에 대해서는 제가 알려 드릴 수 없어요. 의사나 약사와 상의해 주세요. 갑자기 심하게 아프면 바로 119에 전화하세요.',
+    text: '몸이나 약에 대한 것은 의사나 약사에게 물어보세요. 많이 아프면 바로 119에 전화하세요.',
     actions: [call('119', '119에 전화하기')],
   }
 }

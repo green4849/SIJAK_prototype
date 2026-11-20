@@ -37,12 +37,14 @@ const overlaps = (a: { x: number; y: number; width: number; height: number }, b:
 test('지금 보고 있는 화면을 기준으로 답한다', async ({ page }) => {
   await startTour(page)
   await launcher(page).click()
-  await expect(log(page)).toContainText('지금은 ‘홈’ 화면이에요')
+  await expect(log(page)).toContainText('뭐가 궁금하세요?')
+  // 화면에 맞는 질문을 먼저 권한다
+  await expect(log(page).getByRole('button', { name: '친구 신청은 어떻게 해요?' })).toBeVisible()
   // 제목 달린 창이 아니라 시작이가 하는 말 — 그래도 미리 준비한 안내라는 점은 늘 밝힌다
   await expect(panel(page).getByRole('heading')).toHaveCount(0)
-  await expect(panel(page)).toContainText('미리 준비한 안내를 알려 드려요')
+  await expect(panel(page)).toContainText('준비해 둔 안내예요')
   await panel(page).getByRole('button', { name: '이 화면에서 뭘 해야 해요?' }).click()
-  await expect(log(page)).toContainText('큰 카드 네 개')
+  await expect(log(page)).toContainText('하고 싶은 것을 하나 눌러 보세요')
 
   // 화면을 덮지 않는다 — 뒤 화면을 그대로 누를 수 있고, 옮기면 창은 접힌다
   await mainNav(page).getByRole('link', { name: /친구/ }).click()
@@ -51,9 +53,9 @@ test('지금 보고 있는 화면을 기준으로 답한다', async ({ page }) =
 
   // 같은 질문, 다른 화면 → 다른 답 (받은 친구 신청이 있는 화면)
   await launcher(page).click()
-  await expect(log(page)).toContainText('지금은 ‘동네 친구 찾기’ 화면이에요')
+  await expect(log(page).getByRole('button', { name: '받은 친구 신청은 어디서 봐요?' })).toBeVisible()
   await ask(page, '여기서 뭐 해야 해?')
-  await expect(log(page)).toContainText('나에게 온 친구 신청')
+  await expect(log(page)).toContainText('친구 신청이 와 있어요')
 })
 
 test('같이 가 보기 — 버튼을 짚어 주고, 누르는 것은 사용자가 한다', async ({ page }) => {
@@ -112,7 +114,7 @@ test('지금 화면에 없는 버튼은 가리키지 않고 그대로 말한다'
   await page.getByLabel('보낼 메시지').blur()
   await launcher(page).click()
   await panel(page).getByRole('button', { name: '‘말하기’ 어디 있어요?' }).click()
-  await expect(log(page)).toContainText('지금 화면에서는 보이지 않아요')
+  await expect(log(page)).toContainText('지금은 안 보여요')
   // 메시지는 보내지 않았다
   await expect(page.getByLabel('보낼 메시지')).toHaveValue('안녕하세요')
 })
@@ -121,7 +123,7 @@ test('모르는 질문은 지어내지 않고, 확인할 수 있는 것을 알�
   await startTour(page)
   await launcher(page).click()
   await ask(page, '오늘 날씨가 어떨까?')
-  await expect(log(page)).toContainText('제가 준비한 안내에 없어요')
+  await expect(log(page)).toContainText('그건 제가 몰라요')
   await expect(log(page).getByRole('button', { name: '이 화면에서 뭘 해야 해요?' })).toBeVisible()
   await log(page).getByRole('button', { name: '도움말 보기' }).click()
   await expect(page).toHaveURL(/\/me\/help$/)
@@ -152,10 +154,10 @@ test('말동무와 역할이 다르다 — 이야기는 말동무로, 사용법�
   await startTour(page)
   await launcher(page).click()
   await ask(page, '심심하고 외로워')
-  await expect(log(page)).toContainText('일상 이야기는 말동무가 들어 드려요')
-  await expect(log(page)).toContainText('시연 화면의 말동무는 실제 AI가 아니에요')
+  await expect(log(page)).toContainText('이야기는 ‘말동무’가 들어 드려요')
+  await expect(log(page)).toContainText('시연의 말동무는 진짜 AI가 아니에요')
   await ask(page, '너는 사람이야?')
-  await expect(log(page)).toContainText('사람이 아니고')
+  await expect(log(page)).toContainText('사람은 아니고')
 
   // 말동무 화면에서도 사용법은 물을 수 있다 — 입력줄을 가리지 않는다
   await page.goto('/companion')
@@ -178,14 +180,14 @@ test('글씨 키우기 — 안내 창에서 바로 고르고, 설정 화면과 �
 test('가입 전에도 지금 단계에 맞춰 돕는다', async ({ page }) => {
   await page.goto('/login/phone')
   await launcher(page).click()
-  await expect(log(page)).toContainText('지금은 ‘휴대폰 인증’ 화면이에요')
+  await expect(log(page)).toContainText('뭐가 궁금하세요?')
   await ask(page, '뭘 해야 해?')
   await expect(log(page)).toContainText('‘인증번호 받기’를 누르세요')
   // 시연이라 실제 문자가 가지 않는다는 점을 숨기지 않는다
-  await expect(log(page)).toContainText('시연 화면이라 실제 문자는 가지 않아요')
+  await expect(log(page)).toContainText('시연이라 문자는 안 가요')
   // 들어가야 쓸 수 있는 기능의 길은 안내하지 않는다
   await ask(page, '친구 신청은 어떻게 해?')
-  await expect(log(page)).toContainText('본인 확인을 마치고 들어가면')
+  await expect(log(page)).toContainText('가입하고 나면')
   await expect(log(page).getByRole('button', { name: '같이 가 보기' })).toHaveCount(0)
 
   // 앞의 말로 돌아가 그 답의 버튼을 누를 수 있다
@@ -214,7 +216,7 @@ test('버튼을 숨겨도 도움말에서 부를 수 있다', async ({ page }) =
   await page.goto('/me/help')
   await expect(launcher(page)).toHaveCount(0)
   await page.getByRole('button', { name: '시작이에게 물어보기' }).click()
-  await expect(log(page)).toContainText('지금은 ‘도움말’ 화면이에요')
+  await expect(log(page)).toContainText('뭐가 궁금하세요?')
 })
 
 test('입력칸·중요한 버튼을 가리지 않는다', async ({ page }) => {
@@ -319,7 +321,7 @@ test('안내에 적어 둔 버튼이 시연 화면에 실제로 있다', async (
 
 test('처음 온 화면에서는 시작이가 먼저 한마디 건넨다 — 잠깐만, 화면마다 한 번만', async ({ page }) => {
   await startTour(page)
-  const hint = page.getByText('안녕하세요! 막히면 저를 눌러 주세요.')
+  const hint = page.getByText('막히면 저를 눌러 주세요.')
   await expect(hint).toBeVisible()
   await expect(sijagi(page)).toHaveAttribute('data-pose', 'wave')
   // 눌리지 않는 말풍선 — 뒤 화면을 막지 않고, 화면을 만지면 바로 접힌다
@@ -328,7 +330,7 @@ test('처음 온 화면에서는 시작이가 먼저 한마디 건넨다 — 잠
   await expect(sijagi(page)).toHaveAttribute('data-pose', 'rest')
   // 같은 화면에 다시 와도 또 말을 걸지 않는다
   await mainNav(page).getByRole('link', { name: /친구/ }).click()
-  await expect(page.getByText('친구를 찾는 곳이에요. 도와드릴까요?')).toBeVisible()
+  await expect(page.getByText('친구 신청이 처음이면 저를 눌러 주세요.')).toBeVisible()
   await mainNav(page).getByRole('link', { name: /홈/ }).click()
   await page.waitForTimeout(2000)
   await expect(hint).toBeHidden()
@@ -338,13 +340,13 @@ test('한 번에 한 말씩 — 앞의 말은 다시 볼 수 있다', async ({ p
   await startTour(page)
   await launcher(page).click()
   await ask(page, '글씨를 키우고 싶어')
-  await expect(log(page)).toContainText('아래에서 크기를 눌러 보세요')
+  await expect(log(page)).toContainText('아래에서 골라 보세요')
   // 앞의 인사는 지금 보이지 않는다 (쌓이는 대화 기록이 아니다)
-  await expect(log(page)).not.toContainText('뭘 도와드릴까요?')
+  await expect(log(page)).not.toContainText('뭐가 궁금하세요?')
   await panel(page).getByRole('button', { name: '앞의 말' }).click()
-  await expect(log(page)).toContainText('뭘 도와드릴까요?')
+  await expect(log(page)).toContainText('뭐가 궁금하세요?')
   await panel(page).getByRole('button', { name: '다음 말' }).click()
-  await expect(log(page)).toContainText('아래에서 크기를 눌러 보세요')
+  await expect(log(page)).toContainText('아래에서 골라 보세요')
   // 답의 성격에 따라 표정이 바뀐다
   await ask(page, '오늘 날씨가 어떨까?')
   await expect(sijagi(page)).toHaveAttribute('data-face', 'think')

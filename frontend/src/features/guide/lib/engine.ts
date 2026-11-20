@@ -81,7 +81,7 @@ function topicReply(topic: Topic, ctx: GuideContext, q: string): GuideReply {
       id: topic.id,
       kind: 'boundary',
       mood: 'hello',
-      text: '그건 본인 확인을 마치고 들어가면 쓸 수 있어요. 들어가신 뒤에 다시 물어봐 주세요. 지금은 이 화면부터 같이 해 볼까요?',
+      text: '그건 가입하고 나면 쓸 수 있어요. 지금은 이 화면부터 해 볼까요?',
       actions: [{ kind: 'ask', label: '이 화면에서 뭘 해야 해요?', question: '이 화면에서 뭘 해야 해요?' }],
     }
   const kind = topic.id === 'companion' ? 'boundary' : 'answer'
@@ -97,13 +97,13 @@ function unknownReply(ctx: GuideContext): GuideReply {
     id: 'unknown',
     kind: 'unknown',
     mood: 'sorry',
-    text: '죄송해요, 그건 제가 준비한 안내에 없어요. 틀린 말을 지어내지 않으려고 모른다고 말씀드려요. 저는 ‘시작’ 앱 사용법만 알려 드릴 수 있어요.',
+    text: '죄송해요, 그건 제가 몰라요. 앱 쓰는 법이라면 이런 것을 알려 드릴 수 있어요.',
     actions: [
       { kind: 'ask', label: '이 화면에서 뭘 해야 해요?', question: '이 화면에서 뭘 해야 해요?' },
       ...suggestions.map(askAction),
       ctx.signedIn ? { kind: 'go', label: '도움말 보기', to: '/me/help' } : { kind: 'go', label: '함께 하는 방법 보기', to: '/login/help' },
     ],
-    note: '가족이나 복지관 직원에게 이 화면을 보여 주고 물어보셔도 좋아요.',
+    note: '가족이나 복지관 직원에게 이 화면을 보여 주셔도 좋아요.',
   }
 }
 
@@ -127,7 +127,7 @@ export function answer(question: string, ctx: GuideContext): GuideReply {
       id: 'clarify',
       kind: 'clarify',
       mood: 'think',
-      text: '어떤 것을 물으셨는지 골라 주시겠어요?',
+      text: '어떤 걸 물으셨어요?',
       actions: tied.slice(0, 3).map((s) => askAction(s.topic)),
     }
   }
@@ -141,7 +141,7 @@ export function answer(question: string, ctx: GuideContext): GuideReply {
       id: 'clarify',
       kind: 'clarify',
       mood: 'think',
-      text: '제가 잘 못 알아들었어요. 혹시 이 중에 있나요?',
+      text: '잘 못 알아들었어요. 혹시 이 중에 있어요?',
       actions: [
         ...scored.slice(0, 2).map((s) => askAction(s.topic)),
         { kind: 'ask', label: '이 화면에서 뭘 해야 해요?', question: '이 화면에서 뭘 해야 해요?' },
@@ -153,7 +153,7 @@ export function answer(question: string, ctx: GuideContext): GuideReply {
   if (last) {
     const runnable = last.actions?.find((a) => a.kind === 'show' || a.kind === 'walk' || a.kind === 'go')
     if (FOLLOW_UP.test(q) && runnable)
-      return { id: 'follow-up', kind: 'chat', mood: 'happy', text: '네, 어디 있는지 보여 드릴게요.', run: runnable }
+      return { id: 'follow-up', kind: 'chat', mood: 'happy', text: '네, 보여 드릴게요.', run: runnable }
     if (REPEAT.test(q)) return { ...last, run: undefined }
   }
 
@@ -163,9 +163,9 @@ export function answer(question: string, ctx: GuideContext): GuideReply {
       id: 'hello',
       kind: 'chat',
       mood: 'hello',
-      text: `안녕하세요! 저는 앱 사용법을 알려 드리는 시작이예요. 지금은 ‘${SCREENS[ctx.screen].name}’ 화면이에요. 무엇이 궁금하세요?`,
+      text: '안녕하세요! 뭐가 궁금하세요?',
     }
-  if (THANKS.test(q)) return { id: 'thanks', kind: 'chat', mood: 'happy', text: '천만에요! 또 막히면 언제든 불러 주세요.' }
+  if (THANKS.test(q)) return { id: 'thanks', kind: 'chat', mood: 'happy', text: '네, 또 막히면 불러 주세요.' }
 
   // ⑥ 몸 상태 → ⑦ 모르는 것은 모른다고
   return medicalReply(q) ?? unknownReply(ctx)

@@ -5,6 +5,7 @@ import { watchBottomBars } from '@/shared/lib/bottomBars'
 import { hasGreeted, onOpenRequest, rememberGreeted } from '../hooks/guideStore'
 import { probe, settled, waitForTarget } from '../lib/dom'
 import { localEngine } from '../lib/engine'
+import { iga } from '../lib/josa'
 import { SCREENS, TAB_SCREENS, screenOf } from '../lib/screens'
 import type { Face, Pose } from '../lib/sijagi3d'
 import { targetName, type TargetId } from '../lib/targets'
@@ -25,6 +26,8 @@ const engine: GuideEngine = localEngine
 const SCALE = { corner: 0.7, card: 0.86, spot: 0.8 }
 /** 본문 칸 폭 (tokens.css --page-max / --page-max-wide) — 넓은 화면에서는 그 바깥 빈 곳에 선다 */
 const PAGE = { narrow: 640, wide: 960 }
+/** 구석에 설 때 화면 끝·아래 고정 막대와 띄우는 거리(px) */
+const EDGE = { right: 12, bottom: 14, onBar: 6 }
 const FACE: Record<Mood, Face> = { hello: 'smile', happy: 'happy', think: 'think', sorry: 'think', care: 'worry' }
 
 interface Spot {
@@ -110,7 +113,7 @@ export function Guide() {
           id: 'greeting',
           kind: 'chat',
           mood: 'hello',
-          text: `안녕하세요! 지금은 ‘${SCREENS[screenOf(pathname)].name}’ 화면이에요. 뭘 도와드릴까요?`,
+          text: '네, 뭐가 궁금하세요?',
         },
       }
       const added: Entry[] = extra ? [{ id: nextId.current++, reply: extra }] : []
@@ -156,7 +159,7 @@ export function Guide() {
         id: 'missing',
         kind: 'unknown',
         mood: 'sorry',
-        text: `${targetName(target)} — 지금 화면에서는 보이지 않아요. 화면이 아직 바뀌는 중이거나, 지금은 쓸 수 없는 상태일 수 있어요.`,
+        text: `${iga(targetName(target))} 지금은 안 보여요. 잠시 뒤에 다시 물어봐 주세요.`,
         actions: [{ kind: 'ask', label: SCREEN_QUESTION, question: SCREEN_QUESTION }],
       }),
     [openPanel],
@@ -329,11 +332,19 @@ export function Guide() {
     }
   }, [])
 
-  // 화면 맨 끝에 시작이 키만큼 빈 줄을 둔다 — 끝까지 내리면 마지막 버튼·말풍선이 시작이 밑에 깔리지 않는다
-  const laneOn = enabled && prefs.guide
+  // ── 구석에 설 자리: 본문 기둥 옆에 빈 자리가 있으면(태블릿·PC) 그 옆, 없으면(휴대폰) 기둥 안 오른쪽 아래.
+  // 화면 끝에 바짝 붙이지 않는다 — 그림자가 잘리고, 휴대폰 브라우저의 아래 막대에 닿아 보인다
+  const wide = ACTOR_WIDE * SCALE.corner
+  const beside = (view.w - (TAB_SCREENS.includes(screen) ? PAGE.wide : PAGE.narrow)) / 2
+  const cornerRight = Math.max(EDGE.right, beside - (wide + 28))
+  const overContent = cornerRight + wide > beside
+
+  // 본문 위에 설 때만 화면 맨 끝을 시작이 키만큼 더 비운다 — 끝까지 내리면 마지막 버튼이 시작이 밑에 깔리지 않는다.
+  // 본문 기둥 옆에 설 때는 비우지 않는다. 아래 끝까지 그림이 닿는 화면(시작 화면)도 비우지 않고 그림 위에 선다
+  const laneOn = enabled && prefs.guide && overContent && !def.bleed
   useLayoutEffect(() => {
     const root = document.documentElement
-    if (laneOn) root.style.setProperty('--guide-lane', `${Math.round(ACTOR_TALL * SCALE.corner) + 16}px`)
+    if (laneOn) root.style.setProperty('--guide-lane', `${Math.round(ACTOR_TALL * SCALE.corner) + 6}px`)
     else root.style.removeProperty('--guide-lane')
   }, [laneOn])
 
@@ -341,8 +352,7 @@ export function Guide() {
 
   // ── 시작이가 설 자리
   const floor = view.h - bottom
-  const cornerRight = Math.max(4, (view.w - (TAB_SCREENS.includes(screen) ? PAGE.wide : PAGE.narrow)) / 2 - (ACTOR_WIDE * SCALE.corner + 28))
-  const corner = { x: view.w - cornerRight - (ACTOR_WIDE * SCALE.corner) / 2, y: floor - 6 }
+  const corner = { x: view.w - cornerRight - wide / 2, y: floor - (bottom > 0 ? EDGE.onBar : EDGE.bottom) }
   const current = log.entries[log.at]
   const actor =
     spot && place
@@ -378,7 +388,7 @@ export function Guide() {
           className={styles.hint}
           data-guide-ui
           aria-live="polite"
-          style={{ right: view.w - corner.x + (ACTOR_WIDE * SCALE.corner) / 2 + 6, bottom: view.h - corner.y + ACTOR_TALL * SCALE.corner * 0.36 } as CSSProperties}
+          style={{ right: view.w - corner.x + wide / 2 + 6, bottom: view.h - corner.y + ACTOR_TALL * SCALE.corner * 0.36 } as CSSProperties}
         >
           <span className="sr-only">시작이: </span>
           {hint}
