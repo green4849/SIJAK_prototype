@@ -16,12 +16,17 @@ const VIBRATION = [
   { value: 'off', label: '끄기' },
 ]
 
+const GUIDE = [
+  { value: 'on', label: '보이기' },
+  { value: 'off', label: '숨기기' },
+]
+
 const CONTRASTS = [
   { value: 'normal', label: '기본 화면' },
   { value: 'high', label: '선명한 화면' },
 ]
 
-/** ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 (바꾸는 즉시 적용) */
+/** ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 · 시작이 버튼 (바꾸는 즉시 적용) */
 export function SettingsPage() {
   const { prefs, update } = useA11yPrefs()
 
@@ -48,6 +53,15 @@ export function SettingsPage() {
         options={VIBRATION}
         selected={[prefs.vibration ? 'on' : 'off']}
         onToggle={(v) => update({ vibration: v === 'on' })}
+      />
+
+      {/* C14 — 구석의 '물어보기' 버튼이 거슬리면 숨긴다. 숨겨도 도움말에서 부를 수 있다 */}
+      <OptionGrid
+        legend="시작이 버튼"
+        hint="숨겨도 도움말에서 시작이에게 물어볼 수 있어요."
+        options={GUIDE}
+        selected={[prefs.guide ? 'on' : 'off']}
+        onToggle={(v) => update({ guide: v === 'on' })}
       />
 
       <div className={styles.preview} aria-hidden="true">

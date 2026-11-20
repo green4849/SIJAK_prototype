@@ -41,3 +41,15 @@
   padding: 10px 2px;
   font-weight: var(--weight-medium);
 }
+
+/* 목록에 없는 질문 → 시작이 (C14) */
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ask p {
+  margin: 0;
+  color: var(--color-text-muted);
+}

@@ -1,23 +1,11 @@
 import { CircleAlert, CircleCheck, Info } from 'lucide-react'
 import { type CSSProperties, useLayoutEffect, useState, useSyncExternalStore } from 'react'
+import { bottomBarsHeight } from '@/shared/lib/bottomBars'
 import { currentToast, dismissToast, subscribeToast } from '@/shared/lib/toast'
 import styles from './Toast.module.css'
 import { ICON, ICON_STROKE } from './icon'
 
 const ICONS = { success: CircleCheck, info: Info, error: CircleAlert }
-
-/**
- * 화면 아래에 고정된 막대들 중 가장 높이 올라온 지점까지의 거리.
- * 고정 막대는 `data-bottom-bar` 속성으로 표시한다 (하단 탭, 대화 입력줄, 활동 신청 버튼 등).
- */
-function bottomBarsHeight(): number {
-  let top = window.innerHeight
-  for (const el of document.querySelectorAll('[data-bottom-bar]')) {
-    const r = el.getBoundingClientRect()
-    if (r.height > 0) top = Math.min(top, r.top)
-  }
-  return Math.max(0, window.innerHeight - top)
-}
 
 /** 토스트 표시 영역 — 앱에 한 번만 둔다 (app/App.tsx). 띄우기는 shared/lib/toast 의 toast() */
 export function ToastHost() {

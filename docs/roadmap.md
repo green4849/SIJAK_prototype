@@ -67,6 +67,7 @@
 | C11 | **사회적 관계 지수·자가평가** | `domains/wellbeing` (3~6 활동 데이터 사용) | M | P2 |
 | C12 | **포인트·추천 평가·대화 주제·봉사모임** — 친구 신청에 포인트, 평가·봉사·첫 친구 미션으로 적립, 알림 설정 | `domains/point`·`mission`·`notification`, friend·chat·activity | L | P1 |
 | C13 | **두뇌 운동 (인지 훈련)** — 보고서 3.1 인지 강화 기능 | `domains/brain` (새로) | M | P2 |
+| C14 | **시작이 앱 가이드** — 막힌 화면에서 평소 말하듯 묻고, 버튼을 짚어 주면 직접 해 본다. 지금은 기기 안 규칙, 실제 AI는 같은 계약으로 | `features/guide` (+ 나중에 `domains/guide` + `integrations/llm`) | M | P1 |
 
 ## D. 개발 인프라 — 계속 다듬기 위한 바탕
 

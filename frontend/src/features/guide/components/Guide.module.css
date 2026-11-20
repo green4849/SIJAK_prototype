@@ -1,0 +1,509 @@
+/*
+ * 시작이 앱 가이드 (C14)
+ * 겹침 순서: 하단 탭 10 < 시작이 버튼 12 < 안내 창 20 < 짚어 주기 25 < 토스트 30
+ */
+
+/* ───────── 구석의 '물어보기' 버튼 ───────── */
+
+/*
+ * 화면 아래 고정 막대(탭·입력줄·신청 버튼) 바로 위, 오른쪽 구석.
+ * 넓은 화면에서는 본문 칸 바깥 빈 곳으로 나가 본문을 전혀 가리지 않는다.
+ */
+.dock {
+  --guide-page: var(--page-max);
+  position: fixed;
+  z-index: 12;
+  right: max(var(--space-1), calc((100vw - var(--guide-page)) / 2 - 6.5rem));
+  bottom: calc(max(var(--guide-bottom, 0px), env(safe-area-inset-bottom)) + var(--space-1));
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  pointer-events: none; /* 버튼 말고는 뒤 화면을 그대로 누를 수 있게 */
+}
+
+.dock[data-wide='true'] {
+  --guide-page: var(--page-max-wide);
+}
+
+.launcher {
+  pointer-events: auto;
+  min-width: calc(var(--touch-min) + 8px);
+  min-height: calc(var(--touch-min) + 8px);
+  padding: 4px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: 0 2px 10px rgb(60 50 20 / 0.2);
+  font-size: var(--text-nav);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.launcher:active {
+  filter: var(--pressed-filter);
+}
+
+/* 처음 보는 사람에게만 — 버튼이 무엇인지 한마디 */
+.hint {
+  margin: 0;
+  max-width: 9em;
+  padding: var(--space-1) 12px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-card) var(--radius-card) 4px var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 2px 10px rgb(60 50 20 / 0.2);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+}
+
+/* ───────── 안내 창 ───────── */
+
+/*
+ * 화면을 덮지 않는다 — 아래에 붙고, 뒤 화면은 어두워지지 않으며 그대로 보인다.
+ * 넓은 화면에서는 오른쪽 아래에 떠서 본문을 거의 가리지 않는다.
+ */
+.panel {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  /* 아래 고정 막대(하단 메뉴·입력줄·신청 버튼) 위에 앉는다 — 창이 열려 있어도 그 버튼들은 그대로 쓸 수 있다 */
+  bottom: var(--guide-bottom, 0px);
+  width: 100%;
+  max-width: var(--page-max);
+  /*
+   * 보통은 화면의 3/4까지 — 위로 묻고 있는 화면이 보인다.
+   * 글씨가 크면(rem 이 커지면) 읽을 자리가 모자라므로 더 높이 올라오되, 화면 맨 위 한 줄은 남긴다.
+   */
+  max-height: min(
+    calc(100dvh - var(--guide-bottom, 0px) - 2.5rem),
+    max(calc(76dvh - var(--guide-bottom, 0px)), 27rem)
+  );
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-top: 3px solid var(--color-primary);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 -8px 28px rgb(0 0 0 / 0.22);
+}
+
+@media (min-width: 1000px) {
+  .panel {
+    left: auto;
+    right: var(--space-2);
+    bottom: calc(var(--guide-bottom, 0px) + var(--space-2));
+    width: 26rem;
+    max-height: min(calc(100dvh - var(--guide-bottom, 0px) - 2.5rem), 46rem);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-card);
+  }
+}
+
+:root[data-contrast='high'] .panel {
+  border: 2px solid var(--color-border);
+  box-shadow: none;
+}
+
+.head {
+  flex: none;
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-1);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-card-title);
+}
+
+.title:focus-visible {
+  box-shadow: none; /* 열릴 때 읽어 주려고 옮긴 초점 — 누르는 것이 아니다 */
+  outline: 2px dashed var(--color-primary);
+  outline-offset: 2px;
+}
+
+.caption {
+  flex: 1 0 100%; /* 제목 줄 아래 한 줄 — 좁은 화면·큰 글씨에서도 제목을 밀어내지 않게 */
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  line-height: 1.35;
+}
+
+.close {
+  flex: none;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-1);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-nav);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.log {
+  flex: 1;
+  min-height: 5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.turns {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.row[data-role='user'] {
+  justify-content: flex-end;
+}
+
+.bubble {
+  min-width: 0;
+  margin: 0;
+  padding: 12px var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 4px var(--radius-card) var(--radius-card) var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-contrast='high'] .bubble {
+  border: 2px solid var(--color-border);
+}
+
+.row[data-role='guide'] .bubble {
+  flex: 1;
+}
+
+.row[data-role='user'] .bubble {
+  max-width: 85%;
+  border-radius: var(--radius-card) 4px var(--radius-card) var(--radius-card);
+  background: var(--color-primary-soft);
+  box-shadow: none;
+}
+
+/* 위기·위급 답은 한눈에 다르게 — 색만이 아니라 굵은 테두리로도 */
+.row[data-kind='safety'] .bubble {
+  border: 3px solid var(--color-danger);
+}
+
+.text {
+  margin: 0;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steps li::marker {
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+}
+
+.note {
+  margin: 0;
+  padding-top: var(--space-1);
+  border-top: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  line-height: 1.45;
+}
+
+.call {
+  min-height: calc(var(--touch-min) + 4px);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  font-size: var(--text-button);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
+  text-align: center;
+  text-decoration: none;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.chip {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chip:active,
+.close:active,
+.send:active:not(:disabled) {
+  filter: var(--pressed-filter);
+}
+
+.listen {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.listen[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.suggest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.suggestLabel {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-semibold);
+}
+
+.foot {
+  flex: none;
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-bg);
+}
+
+/* 입력칸이 열 글자쯤도 못 가지면(좁은 화면·큰 글씨) 버튼이 아랫줄로 내려간다 */
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.input {
+  flex: 1 1 10em;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.send {
+  flex: 1 0 auto;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.send:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.urgent {
+  align-self: center;
+  min-height: 48px;
+  padding: 0 var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-danger);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-semibold);
+}
+
+.listening {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-card-sky);
+}
+
+:root[data-contrast='high'] .listening {
+  border: 2px solid var(--color-border);
+}
+
+.listeningLabel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.heard,
+.micNote {
+  margin: 0;
+}
+
+.micNote {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+.listeningActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.listeningActions > * {
+  flex: 1;
+}
+
+
+/* ───────── 짚어 주기 ───────── */
+
+.ring {
+  position: fixed;
+  z-index: 25;
+  top: 0;
+  left: 0;
+  border: 4px solid #f2a900;
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 0 0 3px #1f1f1f,
+    0 0 0 9px rgb(242 169 0 / 0.35);
+  pointer-events: none; /* 테두리는 누름을 막지 않는다 — 그 밑의 버튼을 사용자가 직접 누른다 */
+  animation: beckon 1.4s ease-in-out infinite;
+}
+
+@keyframes beckon {
+  50% {
+    box-shadow:
+      0 0 0 3px #1f1f1f,
+      0 0 0 16px rgb(242 169 0 / 0.12);
+  }
+}
+
+.callout {
+  position: fixed;
+  z-index: 26;
+  left: 0;
+  right: 0;
+  width: calc(100% - var(--space-2) * 2);
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+  padding: 12px var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+}
+
+.callout[data-side='top'] {
+  top: calc(env(safe-area-inset-top) + var(--space-1));
+}
+
+.callout[data-side='bottom'] {
+  bottom: calc(max(var(--guide-bottom, 0px), env(safe-area-inset-bottom)) + var(--space-1));
+}
+
+.calloutSay {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.calloutSay p {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+
+.calloutActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.calloutActions > * {
+  flex: 1;
+  padding-inline: var(--space-1); /* 좁은 화면·큰 글씨에서도 두 버튼이 나란히 */
+}

@@ -60,6 +60,7 @@
 | [C11](C11-wellbeing.md) | 사회적 관계 지수·자가평가 | M | P2 | 🎭 |
 | [C12](C12-points-engagement.md) | 포인트·추천 평가·대화 주제·봉사모임 | L | P1 | 🔨 |
 | [C13](C13-brain-games.md) | 두뇌 운동 (인지 훈련) | M | P2 | 🎭 |
+| [C14](C14-sijagi-guide.md) | 시작이 앱 가이드 — 지금 화면을 보고 답하고 버튼을 짚어 주는 길잡이 | M | P1 | 🎭 기기 안 답변 |
 | [D3](D3-openapi-types.md) | API 타입 자동 생성 | M | P1 | ✅ |
 | [D4](D4-unit-tests.md) | 프론트 단위·컴포넌트 테스트 | M | P2 | ⬜ |
 | [D5](D5-visual-regression.md) | 시각 회귀 테스트 | S | P2 | ⬜ |
