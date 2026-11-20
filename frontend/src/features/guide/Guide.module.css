@@ -23,7 +23,6 @@
 }
 
 .launcher[data-bottom='nav'] { bottom: calc(var(--nav-height) + var(--space-2) + env(safe-area-inset-bottom)); }
-.launcher[data-bottom='composer'] { bottom: calc(var(--touch-min) * 2 + var(--space-3) + env(safe-area-inset-bottom)); }
 .launcher[data-bottom='action'] { bottom: calc(var(--touch-min) + var(--space-3) + env(safe-area-inset-bottom)); }
 .launcher img { width: 48px; height: 48px; object-fit: contain; flex: none; }
 .launcher:focus-visible, .suggestions button:focus-visible, .inputRow button:focus-visible, .result a:focus-visible { outline: none; box-shadow: var(--focus-ring); }

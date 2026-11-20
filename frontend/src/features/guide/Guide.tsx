@@ -14,8 +14,7 @@ export function Guide() {
   const guest = pathname.startsWith('/login') || pathname === '/signup' || pathname === '/welcome'
   const mascot = `${import.meta.env.BASE_URL}mascot/sijagi-guide.png`
   const bottom = ['/', '/friends', '/activities', '/me'].includes(pathname) ? 'nav'
-    : pathname.startsWith('/chats/') || pathname === '/companion' ? 'composer'
-      : pathname.startsWith('/activities/') ? 'action' : 'default'
+    : pathname.startsWith('/activities/') ? 'action' : 'default'
 
   useEffect(() => {
     setOpen(false)
@@ -24,7 +23,7 @@ export function Guide() {
     setQuestion('')
   }, [pathname])
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/sos')) return null
+  if (pathname.startsWith('/admin') || pathname.startsWith('/sos') || pathname === '/companion' || pathname.startsWith('/chats/')) return null
 
   const ask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
