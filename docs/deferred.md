@@ -64,3 +64,4 @@ AI 말동무, 음성 통화(⑤ 📞), 사회적 관계 지수·자가평가, �
 | 알림함 (C4 일부) | `/notifications` (마이페이지 '알림함') | `GET /notifications` · `POST /notifications/:id/read` · `POST /notifications/read-all` | `domains/notification` 에 알림 목록 테이블. 소식은 지금 시드 6개뿐 — 실제로는 신청·위험 감지·활동 하루 전 등에서 생성 |
 | B3 회원 탈퇴 | `/me/leave` (마이페이지 맨 아래) | `POST /me/withdraw` | auth 서비스 + 30일 뒤 삭제·음성 90일 정리 작업 |
 | B7 운영자 화면 | `/admin` (주소로 직접) | `GET /admin/cases` · `POST /admin/cases/:id/action` · `GET /admin/watch` | 운영자 역할·권한 필수(데모는 로그인만 확인). 사건 = risk 이벤트 + 신고, 돌봄 목록 = wellbeing 사회적 관계 지수 낮은 순 |
+| C14 시작이 앱 가이드 | 모든 화면 구석의 3D 시작이 (긴급·운영자 제외) | 없음 — 답은 기기 안에서 고른다(`features/guide/lib`). 서버를 부르지 않으므로 실제 서버로 띄워도 그대로 동작 | `domains/guide` + `integrations/llm`, 서버 STT/TTS(C2). `GuideEngine`(lib/types.ts) 하나만 서버 구현으로 바꾼다. 위기·위급 판단은 계속 기기에서 먼저. 되는 것/안 되는 것 표: `docs/tasks/C14-sijagi-guide.md` |

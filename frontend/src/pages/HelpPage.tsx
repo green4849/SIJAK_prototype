@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom'
+import { openGuide } from '@/features/guide'
+import { Button } from '@/shared/ui/Button'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './HelpPage.module.css'
 
-/** ⑨ → 도움말 — 자주 묻는 질문 (펼쳐 보기) */
+/**
+ * ⑨ → 도움말 — 자주 묻는 질문 (펼쳐 보기).
+ * 여기는 읽는 목록이고, 화면마다 막히는 것은 시작이(C14)가 그 화면을 보며 답한다.
+ */
 export function HelpPage() {
   return (
     <section className={styles.page}>
@@ -47,6 +52,13 @@ export function HelpPage() {
             마이페이지의 <Link to="/me/profile">내 프로필 관리</Link>에서 언제든 바꿀 수 있어요.
           </p>
         </details>
+      </div>
+
+      <div className={styles.ask}>
+        <p>여기에 없는 것은 시작이에게 물어보세요. 지금 보고 있는 화면에 맞춰 알려 드려요.</p>
+        <Button variant="secondary" block onClick={openGuide}>
+          시작이에게 물어보기
+        </Button>
       </div>
     </section>
   )

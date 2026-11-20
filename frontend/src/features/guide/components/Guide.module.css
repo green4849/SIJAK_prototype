@@ -1,0 +1,481 @@
+/*
+ * 시작이 앱 가이드 (C14) — 시작이가 직접 나와서 안내한다
+ * 겹침 순서: 하단 탭 10 < 말풍선(안내) 20 < 짚어 주기 테두리 25 · 말풍선 26 < 시작이 27 < 토스트 30
+ */
+
+/* ───────── 시작이 ───────── */
+
+/*
+ * 화면 좌표(발끝)로 옮겨 다닌다: 구석 → 말풍선 위 → 짚을 버튼 옆.
+ * 크기는 scale 로 바꾸고, 발끝을 축으로 삼아 커지고 작아져도 서 있는 자리가 흔들리지 않는다.
+ */
+.actor {
+  position: fixed;
+  z-index: 27;
+  left: 0;
+  top: 0;
+  width: 160px;
+  height: 160px;
+  transform-origin: 50% 86.5%;
+  transition: transform 0.5s cubic-bezier(0.3, 1.25, 0.5, 1);
+  pointer-events: none; /* 누를 수 있는 것은 안쪽의 버튼뿐 — 투명한 둘레가 뒤 화면을 막지 않는다 */
+}
+
+.actor[data-tracking='true'] {
+  transition: none;
+}
+
+.actor[data-hidden='true'] {
+  visibility: hidden;
+}
+
+.actorCanvas,
+.actorStill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* 크림색 몸이 크림색 화면에 묻히지 않게 얇은 그림자로 윤곽을 준다 */
+  filter: drop-shadow(0 3px 7px rgb(70 55 20 / 0.36));
+}
+
+.actorShade {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  top: 82%;
+  height: 9%;
+  border-radius: 50%;
+  background: rgb(70 60 30 / 0.3);
+  filter: blur(5px);
+}
+
+:root[data-contrast='high'] .actorShade {
+  display: none;
+}
+
+/* 구석에 서 있을 때는 시작이 자체가 버튼 (몸통 둘레만) */
+.actorButton {
+  position: absolute;
+  left: 19%;
+  right: 19%;
+  top: 12%;
+  bottom: 9%;
+  padding: 0;
+  border: 0;
+  border-radius: 38%;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* 처음 온 화면에서 먼저 건네는 한마디 — 눌리지 않는 말풍선 (뒤 화면을 막지 않는다) */
+.hint {
+  position: fixed;
+  z-index: 26;
+  margin: 0;
+  max-width: min(15em, 62vw);
+  padding: 12px var(--space-2);
+  border: 2px solid #cfd9bd;
+  border-radius: var(--radius-card) var(--radius-card) 6px var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 8px 24px rgb(60 50 20 / 0.24);
+  font-weight: var(--weight-medium);
+  line-height: 1.45;
+  pointer-events: none;
+}
+
+:root[data-contrast='high'] .hint,
+:root[data-contrast='high'] .card,
+:root[data-contrast='high'] .pointer,
+:root[data-contrast='high'] .close {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+/* ───────── 말풍선 (시작이가 하는 말) ───────── */
+
+/*
+ * 제목 달린 창이 아니라 말풍선이다. 화면을 덮지 않고 아래 고정 막대 위에 앉으며,
+ * 시작이가 왼쪽 위 모서리에 올라선다 — 그래서 위로 시작이 키만큼은 늘 비워 둔다.
+ * 넓은 화면에서는 오른쪽 아래에 뜬다.
+ */
+.card {
+  position: fixed;
+  z-index: 20;
+  left: var(--space-1);
+  right: var(--space-1);
+  bottom: calc(var(--guide-bottom, 0px) + var(--space-1));
+  max-width: calc(var(--page-max) - var(--space-2));
+  max-height: calc(100dvh - var(--guide-bottom, 0px) - var(--space-1) - 112px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #cfd9bd;
+  border-radius: 26px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 -8px 30px rgb(0 0 0 / 0.22);
+}
+
+.card:focus-visible {
+  box-shadow: 0 -8px 30px rgb(0 0 0 / 0.22); /* 열릴 때 읽어 주려고 옮긴 초점 — 누르는 것이 아니다 */
+}
+
+/* 위기·위급 답은 한눈에 다르게 — 색만이 아니라 굵은 테두리로도 */
+.card[data-kind='safety'] {
+  border: 3.5px solid var(--color-danger);
+}
+
+@media (min-width: 1000px) {
+  .card {
+    left: auto;
+    right: var(--space-2);
+    width: 26rem;
+    margin: 0;
+  }
+}
+
+.close {
+  position: absolute;
+  z-index: 1;
+  right: 14px;
+  top: -26px;
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid #cfd9bd;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 4px 12px rgb(60 50 20 / 0.16);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.body {
+  flex: 1;
+  min-height: 4.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 26px var(--space-2) var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.speech {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.asked {
+  align-self: flex-end;
+  max-width: 88%;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 16px 4px 16px 16px;
+  background: var(--color-primary-soft);
+  font-size: var(--text-meta);
+}
+
+:root[data-contrast='high'] .asked {
+  border: 2px solid var(--color-border);
+}
+
+.say {
+  margin: 0;
+  font-size: var(--text-button);
+  font-weight: var(--weight-semibold);
+  line-height: 1.5;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steps li::marker {
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+}
+
+.note {
+  margin: 0;
+  padding-top: var(--space-1);
+  border-top: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  line-height: 1.45;
+}
+
+.call {
+  min-height: calc(var(--touch-min) + 6px);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border: 2.5px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-danger);
+  font-size: var(--text-button);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-title);
+  text-align: center;
+  text-decoration: none;
+}
+
+.call[data-first='true'] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+.choice {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.waiting {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.card[aria-busy='true'] .choice {
+  opacity: 0.55;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.tool {
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.tool[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.choice:active,
+.tool:active,
+.close:active,
+.send:active:not(:disabled) {
+  filter: var(--pressed-filter);
+}
+
+.foot {
+  flex: none;
+  padding: var(--space-1) var(--space-2) 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--color-divider);
+}
+
+/* 버튼 두 개를 나란히 — 좁으면 위아래로 */
+.pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.pair > * {
+  flex: 1 1 7em;
+  padding-inline: var(--space-1);
+}
+
+/* 입력칸이 열 글자쯤도 못 가지면(좁은 화면·큰 글씨) 버튼이 아랫줄로 내려간다 */
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.input {
+  flex: 1 1 10em;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.send {
+  flex: 1 0 auto;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.send:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.fine {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.urgent {
+  min-height: 44px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-danger);
+  font-weight: var(--weight-semibold);
+}
+
+.listening {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-card-sky);
+}
+
+:root[data-contrast='high'] .listening {
+  border: 2px solid var(--color-border);
+}
+
+.listeningLabel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.heard,
+.micNote {
+  margin: 0;
+}
+
+.micNote {
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* ───────── 짚어 주기 ───────── */
+
+.ring {
+  position: fixed;
+  z-index: 25;
+  top: 0;
+  left: 0;
+  border: 4px solid #f2a900;
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 0 0 3px #1f1f1f,
+    0 0 0 9px rgb(242 169 0 / 0.35);
+  pointer-events: none; /* 테두리는 누름을 막지 않는다 — 그 밑의 버튼을 사용자가 직접 누른다 */
+  animation: beckon 1.4s ease-in-out infinite;
+}
+
+@keyframes beckon {
+  50% {
+    box-shadow:
+      0 0 0 3px #1f1f1f,
+      0 0 0 16px rgb(242 169 0 / 0.12);
+  }
+}
+
+/* 짚은 곳에서 시작이가 하는 말 */
+.pointer {
+  position: fixed;
+  z-index: 26;
+  left: 0;
+  right: 0;
+  width: calc(100% - var(--space-2) * 2);
+  max-width: calc(var(--page-max) - var(--space-4));
+  margin: 0 auto;
+  padding: 12px var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 2px solid #cfd9bd;
+  border-radius: 22px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 8px 24px rgb(60 50 20 / 0.24);
+}
+
+/* 말풍선 꼬리 — 시작이 쪽을 향한다 */
+.pointer::before {
+  content: '';
+  position: absolute;
+  left: var(--tail-x, 60%);
+  width: 16px;
+  height: 16px;
+  background: inherit;
+  border: 2px solid #cfd9bd;
+  border-width: 2px 0 0 2px;
+}
+
+.pointer[data-tail='top']::before {
+  top: -10px;
+  transform: rotate(45deg);
+}
+
+.pointer[data-tail='bottom']::before {
+  bottom: -10px;
+  transform: rotate(225deg);
+}
+
+:root[data-contrast='high'] .pointer::before {
+  border-color: var(--color-border);
+}
+
+.pointerSay {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
