@@ -38,6 +38,7 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { SignupPage } from '@/pages/SignupPage'
 import { WelcomePage } from '@/pages/WelcomePage'
 import { ToastHost } from '@/shared/ui/Toast'
+import { Guide } from '@/features/guide'
 import { PlainLayout, TabLayout } from './AppLayout'
 import { OfflineBanner } from './OfflineBanner'
 import { RequireAuth, RequireGuest } from './guards'
@@ -113,6 +114,7 @@ export function App() {
           </Route>
         </Routes>
         <ToastHost />
+        <Guide />
       </BrowserRouter>
     </AuthProvider>
   )
