@@ -33,11 +33,23 @@ function stillFor(pose: Pose, face: Face) {
   return face === 'happy' ? stillHappy : face === 'think' ? stillThink : face === 'worry' ? stillWorry : stillSmile
 }
 
-/** 이 기기가 3D를 그릴 수 있는지 — three.js 를 받기 전에 먼저 가볍게 물어본다 (못 그리면 받지도 않는다) */
+/** 화면이 뜬 뒤 이만큼 기다렸다가 3D를 준비한다 — 첫 화면의 내용이 먼저 그려지게 */
+const WARM_UP_MS = 1500
+/** 그래픽 칩 없이 CPU로 흉내 내는 그리기 — 3D를 준비하는 동안 화면이 몇 초씩 멈춘다 */
+const SOFTWARE_GL = /swiftshader|llvmpipe|softpipe|software|basic render/i
+
+/**
+ * 이 기기가 3D를 무리 없이 그릴 수 있는지 — three.js 를 받기 전에 먼저 가볍게 물어본다 (못 그리면 받지도 않는다).
+ * 그래픽 칩이 없는 기기는 그릴 수는 있어도 앱이 멈칫하므로 정지 그림으로 둔다.
+ */
 function canDraw3d() {
   try {
-    const probe = document.createElement('canvas')
-    return Boolean(probe.getContext('webgl2') ?? probe.getContext('webgl'))
+    const gl = document.createElement('canvas').getContext('webgl2')
+    if (!gl) return false
+    const info = gl.getExtension('WEBGL_debug_renderer_info')
+    const chip = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : ''
+    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    return !SOFTWARE_GL.test(chip)
   } catch {
     return false
   }
@@ -83,9 +95,10 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
     if (!el || !canDraw3d()) return
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     let cancelled = false
-    // 앱 화면이 먼저 — 한가해진 뒤에 3D를 받아 온다
+    let handle = 0
+    // 앱 화면이 먼저 — 첫 화면이 그려지고 한가해진 뒤에 3D를 받아 온다
     const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 600))
-    const handle = idle(() => {
+    const load = () => {
       import('../lib/sijagi3d')
         .then(({ createSijagi3d }) =>
           createSijagi3d(el, {
@@ -106,10 +119,14 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
         .catch(() => {
           // 받지 못했거나 그리지 못하면 정지 그림 그대로 둔다
         })
-    })
+    }
+    const timer = window.setTimeout(() => {
+      handle = idle(load)
+    }, WARM_UP_MS)
     return () => {
       cancelled = true
-      ;(window.cancelIdleCallback ?? window.clearTimeout)(handle)
+      window.clearTimeout(timer)
+      if (handle) (window.cancelIdleCallback ?? window.clearTimeout)(handle)
       three.current?.dispose()
       three.current = null
     }
