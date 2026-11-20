@@ -12,7 +12,7 @@
   container: page / inline-size; /* 화면 안 배치는 창 크기가 아니라 이 본문 폭 기준 (@container page) */
   display: flex;
   flex-direction: column;
-  /* 끝까지 내리면 마지막 버튼이 '물어보기' 버튼 밑에 깔리지 않게 그 높이만큼 더 비운다 (--guide-lane, C14) */
+  /* 시작이가 본문 위에 설 때는 끝까지 내려도 마지막 버튼이 그 밑에 깔리지 않게 조금 더 비운다 (--guide-lane, C14) */
   padding: var(--space-2) var(--gutter) calc(var(--space-4) + var(--guide-lane, 0px));
 }
 

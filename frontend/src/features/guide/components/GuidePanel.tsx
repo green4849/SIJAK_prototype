@@ -342,7 +342,7 @@ export function GuidePanel({ entry, busy, suggestions, onAsk, onAction, onClose,
         )}
         {/* 무엇이 답하는지, 그리고 급할 때 갈 곳은 늘 보이게 */}
         <p className={styles.fine}>
-          미리 준비한 안내를 알려 드려요 ·{' '}
+          준비해 둔 안내예요 ·{' '}
           <a href="tel:119" className={styles.urgent}>
             급할 땐 119 전화
           </a>

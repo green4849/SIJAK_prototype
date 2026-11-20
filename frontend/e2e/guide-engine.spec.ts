@@ -85,7 +85,7 @@ test('같은 말도 보고 있는 화면에 따라 답이 달라진다', () => {
   // 화면 상태도 본다
   expect(answer('이 화면에서 뭘 해야 해?', ctx('phone', { variant: 'code' })).text).toContain('여섯 자리')
   expect(answer('이 화면에서 뭘 해야 해?', ctx('phone', { variant: 'identity' })).text).toContain('인증번호 받기')
-  expect(answer('신청하고 싶어', ctx('activity', { variant: 'full' })).text).toContain('자리가 다 차서')
+  expect(answer('신청하고 싶어', ctx('activity', { variant: 'full' })).text).toContain('자리가 다 찼어요')
 })
 
 test('위기·위급은 앱 사용법보다 먼저, 전화가 맨 앞', () => {
@@ -115,7 +115,7 @@ test('대신 해 주는 동작은 없다 — 짚어 주기·이동·전화·화�
 test('모르는 질문은 지어내지 않고, 확인할 수 있는 것을 알려 준다', () => {
   const r = answer('내일 비 와?', ctx('friends'))
   expect(r.kind).toBe('unknown')
-  expect(r.text).toContain('준비한 안내에 없어요')
+  expect(r.text).toContain('제가 몰라요')
   expect(r.actions?.map((a) => a.kind)).toEqual(expect.arrayContaining(['ask', 'go']))
 })
 
@@ -130,7 +130,7 @@ test('가입 전에는 들어가야 쓸 수 있는 기능의 길을 안내하지
 test('시연에서만 하는 말은 시연 빌드에서만 붙는다', () => {
   expect(answer('친구 신청은 어떻게 해?', ctx('home')).note).toContain('시연')
   expect(answer('친구 신청은 어떻게 해?', ctx('home', { demo: false })).note).toBeUndefined()
-  expect(answer('너 사람이야?', ctx('home')).text).toContain('사람이 아니고')
+  expect(answer('너 사람이야?', ctx('home')).text).toContain('사람은 아니고')
 })
 
 test('되물음 — "어디 있어?"는 앞의 답을 이어 받는다', () => {
@@ -151,4 +151,62 @@ test('안내 자료가 서로 맞물린다 — 화면의 추천 질문·짚을 �
   // 대표 질문은 자기 주제로 돌아와야 한다 (제안 버튼을 눌렀는데 다른 답이 나오면 안 된다)
   for (const t of TOPICS) expect(idOf(t.ask, ctx(t.audience === 'any' ? 'welcome' : 'home', { signedIn: true })), t.ask).toBe(t.id)
   expect(Object.keys(TARGETS).length).toBeGreaterThan(40)
+})
+
+test('말은 짧게, 할 일부터 — 옆에서 봐 주는 사람처럼', () => {
+  // 화면 소개로 시작하기, 자기 설명, 기계가 쓴 티가 나는 표기
+  const BANNED: [RegExp, string][] = [
+    [/화면이에요|화면입니다/, '화면 소개로 시작하지 않는다 (보면 안다)'],
+    [/제가 대신|저는 대신|대신 하지 않|대신 눌러/, '시작이 자신에 대한 설명'],
+    [/준비한 안내에|지어내지/, '시작이 자신에 대한 설명'],
+    [/—|을\(를\)|이\(가\)|\(약 /, '줄표·조사 병기·괄호 설명'],
+    [/습니다|하십시오|드리겠/, '딱딱한 말투'],
+  ]
+  const sentences = (text: string) => text.split(/[.?!]\s*/).filter(Boolean).length
+  const seen = new Set<string>()
+  const check = (where: string, text: string, maxChars: number, maxSentences: number) => {
+    if (seen.has(text)) return
+    seen.add(text)
+    expect.soft(text.length, `${where}: "${text}"`).toBeLessThanOrEqual(maxChars)
+    expect.soft(sentences(text), `${where}: "${text}"`).toBeLessThanOrEqual(maxSentences)
+    for (const [pattern, why] of BANNED) expect.soft(pattern.test(text), `${where} — ${why}: "${text}"`).toBe(false)
+  }
+
+  const VARIANTS = ['', 'code', 'identity', 'region', 'interests', 'blocked', 'warning', 'open', 'empty', 'list', 'applied', 'full', 'received', 'afterSignup', 'info']
+  for (const [id, screen] of Object.entries(SCREENS) as [ScreenId, (typeof SCREENS)[ScreenId]][]) {
+    if (screen.hidden) continue
+    if (screen.hint) check(`${id} 첫마디`, screen.hint, 26, 2)
+    for (const variant of VARIANTS) {
+      const help = screen.help(variant, ctx(id, { variant }))
+      check(`${id}/${variant} 화면 안내`, help.text, 50, 2)
+      if (help.demoNote) check(`${id}/${variant} 시연 알림`, help.demoNote, 40, 2)
+    }
+  }
+
+  for (const topic of TOPICS) {
+    for (const screen of [...(topic.screens ?? []), 'home', 'welcome'] as ScreenId[]) {
+      for (const variant of VARIANTS) {
+        for (const signedIn of [true, false]) {
+          const body = topic.reply(ctx(screen, { variant, signedIn }), topic.ask)
+          check(`${topic.id}@${screen}/${variant}`, body.text, 62, 2)
+          for (const step of body.steps ?? []) check(`${topic.id} 차례`, step, 34, 1)
+          expect(body.steps?.length ?? 0, topic.id).toBeLessThanOrEqual(3)
+          if (body.demoNote) check(`${topic.id} 시연 알림`, body.demoNote, 40, 2)
+        }
+      }
+    }
+  }
+
+  // 길을 짚을 때 하는 말도 한두 마디
+  for (const q of CASES.map(([q]) => q)) {
+    for (const screen of ['home', 'friends', 'chat', 'me'] as ScreenId[]) {
+      const reply = answer(q, ctx(screen))
+      if (reply.kind === 'safety') continue
+      check(`"${q}"@${screen}`, reply.text, 62, 2)
+      for (const a of reply.actions ?? []) {
+        if (a.kind === 'show') check(`"${q}" 짚는 말`, a.say, 42, 2)
+        if (a.kind === 'walk') for (const step of a.steps) check(`"${q}" 길 안내`, step.say, 42, 2)
+      }
+    }
+  }
 })
