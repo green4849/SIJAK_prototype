@@ -38,6 +38,7 @@ INTERESTS: dict[str, str] = {
     "crafts": "뜨개질·만들기",
     "faith": "종교 활동",
     "memories": "옛날 이야기",
+    "fishing": "낚시",
 }
 
 MAX_INTERESTS = 5

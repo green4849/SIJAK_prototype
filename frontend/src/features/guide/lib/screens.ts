@@ -130,7 +130,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     help: (v) =>
       v === 'region'
         ? { text: '‘위치 정보 수집 동의’를 누른 다음, 아래 ‘가입 완료’를 누르세요.' }
-        : { text: '좋아하는 것을 골라 보세요. 하나만 골라도 돼요.' },
+        : { text: '좋아하는 것을 골라 보세요. 1개부터 5개까지 돼요.' },
     suggest: ['location', 'font', 'what-is-app'],
   },
 

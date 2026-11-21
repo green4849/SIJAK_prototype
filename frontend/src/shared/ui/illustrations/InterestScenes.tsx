@@ -1,5 +1,5 @@
 /**
- * 좋아하는 활동 일러스트 (A24) — 가입 '좋아하는 것' 둥근 칸에 들어가는 장면 12개.
+ * 좋아하는 활동 일러스트 (A24) — 가입 '좋아하는 것' 둥근 칸에 들어가는 장면 13개.
  * A19 그림체 그대로: 갈색 선 + 연한 면, 웃는 어르신(SeniorFigure)이 그 활동을 하고 있는 모습.
  * 100×100 좌표, 둥글게 잘려도 핵심이 가운데 지름 80 안에 오도록 그렸다.
  * 모두 장식이라 화면 낭독기에서는 건너뛴다 (이름은 버튼 글자로 읽힌다).
@@ -68,7 +68,7 @@ function Note({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   )
 }
 
-/* ---------------- 12개 장면 ---------------- */
+/* ---------------- 13개 장면 ---------------- */
 
 /** 산책·등산 — 산을 배경으로 지팡이 든 할아버지 */
 function Walking() {
@@ -347,6 +347,31 @@ function Memories() {
   )
 }
 
+/** 낚시 — 물가에서 낚싯대를 드리운 할아버지, 찌와 물고기 */
+function Fishing() {
+  const look = P('M', 1, false, 'green')
+  return (
+    <Frame bg="var(--color-card-sky)">
+      <Person look={look} x={-4} y={18} />
+      {/* 낚싯대와 줄 */}
+      <path d="M50 78 L88 22" stroke={LINE} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M88 22 V72" fill="none" {...thin} />
+      <Arm d="M38 86 Q44 82 50 78" cloth="green" hand={[51, 77]} />
+      {/* 물 */}
+      <path d="M0 80 Q12 75 25 80 T50 80 T75 80 T100 80 V100 H0Z" fill="var(--illust-cloth-sky)" {...line} />
+      <path d="M10 90 q5 -3 10 0 M44 93 q5 -3 10 0" fill="none" {...thin} opacity="0.55" />
+      {/* 찌 */}
+      <ellipse cx="88" cy="75" rx="3" ry="4.6" fill="var(--illust-heart)" {...thin} />
+      {/* 물고기 */}
+      <g transform={at(56, 91)}>
+        <path d="M-9 0 Q-2 -6.5 7 0 Q-2 6.5 -9 0Z" fill="var(--illust-cloth-yellow)" {...thin} />
+        <path d="M6.5 0 l6 -4.5 v9Z" fill="var(--illust-cloth-yellow)" {...thin} />
+        <circle cx="-4.6" cy="-1" r="0.9" fill={LINE} />
+      </g>
+    </Frame>
+  )
+}
+
 const SCENES: Record<string, () => ReactNode> = {
   walking: Walking,
   music: Music,
@@ -360,6 +385,7 @@ const SCENES: Record<string, () => ReactNode> = {
   crafts: Crafts,
   faith: Faith,
   memories: Memories,
+  fishing: Fishing,
 }
 
 /** 관심사 코드에 맞는 장면 — 모르는 코드면 아무것도 그리지 않는다 (칸의 연한 바탕만 보임) */

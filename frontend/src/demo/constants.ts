@@ -33,6 +33,7 @@ export const INTERESTS: Record<string, string> = {
   crafts: '뜨개질·만들기',
   faith: '종교 활동',
   memories: '옛날 이야기',
+  fishing: '낚시',
 }
 
 export const MAX_INTERESTS = 5
