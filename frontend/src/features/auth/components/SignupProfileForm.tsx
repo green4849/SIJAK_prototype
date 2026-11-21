@@ -101,6 +101,7 @@ export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) 
               <br />
               어떤 활동을 좋아하시나요?
             </h1>
+            <p className={styles.lead}>1개부터 {max}개까지 고를 수 있어요.</p>
             <PhotoChoiceGrid
               legend="좋아하는 것"
               legendHidden

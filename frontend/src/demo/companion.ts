@@ -32,6 +32,7 @@ const has = (text: string, re: RegExp) => re.test(text.replace(/\s+/g, ' '))
 const INTEREST_CATEGORY: Record<string, string> = {
   walking: 'health', health: 'health', music: 'culture', tv: 'culture', memories: 'culture',
   reading: 'learning', gardening: 'learning', cooking: 'learning', crafts: 'learning', travel: 'culture',
+  fishing: 'culture',
 }
 
 /** 사는 지역의 다가오는 활동 하나 — 관심사와 맞는 것 먼저 (보고서: RAG 지역 복지 정보) */

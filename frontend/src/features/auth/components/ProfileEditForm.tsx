@@ -64,7 +64,7 @@ export function ProfileEditForm({ user, onSaved }: Props) {
       {/* 가입 때와 같은 그림 선택 (A24) */}
       <PhotoChoiceGrid
         legend="좋아하는 것"
-        hint={`${interests.length} / ${max}개`}
+        hint={`1개부터 ${max}개까지 · 지금 ${interests.length}개`}
         options={toInterestChoices(options.interests)}
         selected={interests}
         onToggle={toggleInterest}
