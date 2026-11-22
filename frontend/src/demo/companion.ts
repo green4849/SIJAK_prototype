@@ -70,7 +70,7 @@ export function draftReply(me: DUser, text: string, turn: number): DraftReply {
     }
 
   // ③ 외로움·우울 — 공감 + 동네 활동 하나
-  if (has(text, /외로|쓸쓸|우울|슬프|가라앉|울적|혼자|적적/)) {
+  if (has(text, /외로|쓸쓸|우울|슬프|슬퍼|가라앉|울적|혼자|적적/)) {
     const suggestion = pickActivity(me)
     return {
       ...base,
