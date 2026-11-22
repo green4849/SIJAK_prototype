@@ -3,6 +3,7 @@ import { formatDate } from '@/shared/lib/datetime'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { Alert } from '@/shared/ui/Alert'
 import { Button, ButtonLink } from '@/shared/ui/Button'
+import { CallLink } from '@/shared/ui/CallLink'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import type { AssessmentKind } from '../api/wellbeingApi'
 import { useAssessment, useAssessmentHistory } from '../hooks/useWellbeing'
@@ -65,10 +66,10 @@ export function AssessmentFlow({ kind, doneHref }: FlowProps) {
         </section>
         <p className={styles.advice}>{r.advice}</p>
         {r.crisis && (
-          <a href="tel:109" className={styles.call}>
+          <CallLink number="109" className={styles.call}>
             <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
             109 상담 전화하기
-          </a>
+          </CallLink>
         )}
         <p className={styles.note}>진단이 아니라 스스로 살펴보는 점검이에요.</p>
         <ButtonLink to={doneHref} block large>

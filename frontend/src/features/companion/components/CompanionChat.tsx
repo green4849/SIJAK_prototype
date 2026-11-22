@@ -6,6 +6,7 @@ import { canSpeak, speak, stopSpeaking } from '@/shared/a11y/speak'
 import { formatDate, formatTime, isSameDay } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
+import { CallLink } from '@/shared/ui/CallLink'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import type { CompanionMessage } from '../api/companionApi'
 import { useCompanion } from '../hooks/useCompanion'
@@ -268,10 +269,10 @@ export function CompanionChat({ activityHref, crisisExtra }: Props) {
 function CrisisHelp({ extra }: { extra?: ReactNode }) {
   return (
     <div className={styles.crisis} role="note" aria-label="도움받을 곳">
-      <a href="tel:109" className={styles.call}>
+      <CallLink number="109" className={styles.call}>
         <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
         109 상담 전화하기
-      </a>
+      </CallLink>
       {extra}
     </div>
   )

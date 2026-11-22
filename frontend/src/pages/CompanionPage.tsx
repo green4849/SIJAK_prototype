@@ -1,5 +1,6 @@
 import { CompanionAvatar, CompanionChat } from '@/features/companion'
 import { NotifyGuardianButton } from '@/features/emergency'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { TopBar } from '@/shared/ui/TopBar'
 import { activityDetail } from './routes'
 import styles from './ChatRoomPage.module.css'
@@ -13,7 +14,7 @@ export function CompanionPage() {
         <CompanionAvatar size="header" />
         <div>
           <h1 className={styles.name}>말동무</h1>
-          <p className={styles.meta}>AI 친구</p>
+          <p className={styles.meta}>{IS_DEMO ? '시연 · 정해 둔 답을 해요' : 'AI 친구'}</p>
         </div>
       </header>
       <CompanionChat activityHref={activityDetail} crisisExtra={<NotifyGuardianButton />} />

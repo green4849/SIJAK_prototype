@@ -127,7 +127,7 @@ const LEVELS: { max: number; level: AssessmentResultOut['level']; label: string;
   { max: 4, level: 'minimal', label: '괜찮아요', advice: '마음이 편안한 편이에요. 지금처럼 이웃과 자주 이야기 나눠요.' },
   { max: 9, level: 'mild', label: '조금 지쳐 있어요', advice: '가벼운 산책이나 동네 모임이 도움이 돼요. 2주 뒤에 다시 점검해 봐요.' },
   { max: 14, level: 'moderate', label: '마음이 많이 힘들어요', advice: '혼자 견디지 마세요. 복지관 상담 선생님이나 가족과 이야기해 보세요.' },
-  { max: 99, level: 'severe', label: '도움이 꼭 필요해요', advice: '전문가와 꼭 이야기해 보세요. 보호자에게도 알려 드릴게요.' },
+  { max: 99, level: 'severe', label: '도움이 꼭 필요해요', advice: '전문가와 꼭 이야기해 보세요. 109에 전화하면 하루 종일 상담해 줘요.' },
 ]
 
 export function resultOf(a: DAssessment): AssessmentResultOut {

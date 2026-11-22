@@ -4,6 +4,7 @@ import { errorMessage } from '@/shared/api/client'
 import { toast } from '@/shared/lib/toast'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
+import { CallLink } from '@/shared/ui/CallLink'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { TextField } from '@/shared/ui/TextField'
@@ -36,10 +37,10 @@ export function GuardianManager() {
               <p className={styles.callMeta}>{g.phone_masked}</p>
             </div>
             <div className={styles.guardianActions}>
-              <a href={`tel:${g.phone}`} className={styles.smallBtn} aria-label={`${g.name}님께 전화`}>
+              <CallLink number={g.phone} className={styles.smallBtn} aria-label={`${g.name}님께 전화`}>
                 <Phone aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
                 전화
-              </a>
+              </CallLink>
               <button type="button" className={styles.smallBtn} onClick={() => void remove(g.id, g.name)} aria-label={`${g.name}님 빼기`}>
                 빼기
               </button>

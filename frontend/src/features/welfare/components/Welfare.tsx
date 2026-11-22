@@ -2,7 +2,9 @@ import { ChevronRight, Clock, MapPin, Phone, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert } from '@/shared/ui/Alert'
+import { CallLink } from '@/shared/ui/CallLink'
 import { CardGrid } from '@/shared/ui/CardGrid'
+import { DemoNote } from '@/shared/ui/DemoNote'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { FacilityArt } from '@/shared/ui/illustrations/FacilityArt'
 import type { WelfareCenter, WelfareKind } from '../api/welfareApi'
@@ -10,7 +12,6 @@ import { useCenter, useNearbyCenters } from '../hooks/useWelfare'
 import { distanceText, openState, walkText } from '../lib/visit'
 import styles from './Welfare.module.css'
 
-const telOf = (phone: string) => `tel:${phone.replace(/\D/g, '')}`
 const prettyPhone = (p: string) => {
   const d = p.replace(/\D/g, '')
   if (d.startsWith('02')) return d.replace(/^(02)(\d{3,4})(\d{4})$/, '$1-$2-$3')
@@ -91,6 +92,7 @@ function Detail({ c, header }: { c: WelfareCenter; header: ReactNode }) {
         <p className={styles.kind}>{c.kind_label}</p>
         <h1 className={styles.name}>{c.name}</h1>
       </div>
+      <DemoNote>시연용 정보예요. 시설 이름만 실제이고, 프로그램·여는 시간·전화번호는 지어낸 값이에요.</DemoNote>
 
       <dl className={styles.info}>
         <Row icon={<MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="주소">
@@ -157,10 +159,10 @@ function Detail({ c, header }: { c: WelfareCenter; header: ReactNode }) {
       )}
 
       <div className={styles.actionBar} data-bottom-bar>
-        <a href={telOf(c.phone)} className={styles.call}>
+        <CallLink number={c.phone} className={styles.call}>
           <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
           전화로 신청하기
-        </a>
+        </CallLink>
       </div>
     </article>
   )
