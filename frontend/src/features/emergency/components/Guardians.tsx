@@ -5,6 +5,7 @@ import { toast } from '@/shared/lib/toast'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { CallLink } from '@/shared/ui/CallLink'
+import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { TextField } from '@/shared/ui/TextField'
@@ -19,6 +20,7 @@ const MAX = 3
 export function GuardianManager() {
   const { data, error, loading, setData, remove } = useGuardians()
   const [adding, setAdding] = useState(false)
+  const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null)
 
   if (error) return <Alert>{error}</Alert>
   if (loading || !data) return <p role="status">불러오는 중…</p>
@@ -41,13 +43,27 @@ export function GuardianManager() {
                 <Phone aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
                 전화
               </CallLink>
-              <button type="button" className={styles.smallBtn} onClick={() => void remove(g.id, g.name)} aria-label={`${g.name}님 빼기`}>
+              <button type="button" className={styles.smallBtn} onClick={() => setRemoving({ id: g.id, name: g.name })} aria-label={`${g.name}님 빼기`}>
                 빼기
               </button>
             </div>
           </li>
         ))}
       </ul>
+
+      <ConfirmSheet
+        open={removing !== null}
+        title={`${removing?.name ?? ''}님을 보호자에서 뺄까요?`}
+        confirmLabel="빼기"
+        danger
+        onConfirm={() => {
+          if (removing) void remove(removing.id, removing.name)
+          setRemoving(null)
+        }}
+        onClose={() => setRemoving(null)}
+      >
+        <p>긴급 도움을 눌러도 이분께는 알리지 않아요.</p>
+      </ConfirmSheet>
 
       {adding ? (
         <GuardianForm

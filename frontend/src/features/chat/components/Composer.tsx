@@ -1,6 +1,7 @@
 import { Mic, Send } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api/client'
+import { toast } from '@/shared/lib/toast'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { useVoiceRecorder, MAX_RECORD_SEC } from '../hooks/useVoiceRecorder'
@@ -31,7 +32,14 @@ export function Composer({ onSendText, onSendVoice, disabled, prefill }: Props) 
   }, [prefill])
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const rec = useVoiceRecorder()
+  const rec = useVoiceRecorder({
+    // 최대 길이에 닿으면 저절로 보낸다 (예전에는 아무 말 없이 버려졌다)
+    onLimit: (r) =>
+      void run(async () => {
+        await onSendVoice(r.blob, r.seconds)
+        toast(`${MAX_RECORD_SEC}초가 되어 보냈어요`, 'info')
+      }),
+  })
 
   async function run(fn: () => Promise<void>) {
     setSending(true)
@@ -65,7 +73,11 @@ export function Composer({ onSendText, onSendVoice, disabled, prefill }: Props) 
       <div className={styles.recording} role="status">
         <p className={styles.recLabel}>
           <span className={styles.dot} aria-hidden="true" /> 녹음 중 {rec.seconds}초
-          <span className={styles.recHint}> (최대 {MAX_RECORD_SEC}초)</span>
+          <span className={styles.recHint}>
+            {rec.seconds >= MAX_RECORD_SEC - 10
+              ? ` (${MAX_RECORD_SEC - rec.seconds}초 뒤 저절로 보내요)`
+              : ` (최대 ${MAX_RECORD_SEC}초)`}
+          </span>
         </p>
         <div className={styles.recActions}>
           <Button onClick={finishRecording}>다 했어요, 보내기</Button>

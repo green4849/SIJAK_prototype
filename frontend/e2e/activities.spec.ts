@@ -23,5 +23,7 @@ test('⑥ 분류 탭 → ⑦ 상세 → 관심·신청 → ⑨ 개수 반영 →
   await page.getByRole('link', { name: /신청한 활동/ }).click()
   await page.getByRole('link', { name: /의자 요가/ }).click()
   await page.getByRole('button', { name: '신청 취소하기' }).click()
+  // 되돌리기 어려운 동작은 한 번 묻는다
+  await page.getByRole('dialog', { name: '신청을 취소할까요?' }).getByRole('button', { name: '신청 취소' }).click()
   await expect(page.getByRole('button', { name: /신청하기/ })).toBeVisible()
 })

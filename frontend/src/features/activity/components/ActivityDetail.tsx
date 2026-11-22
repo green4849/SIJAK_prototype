@@ -1,9 +1,10 @@
 import { CalendarDays, Coins, FileText, Heart, MapPin, Users } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { formatDate, formatTime } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
 import { IconAction } from '@/shared/ui/IconAction'
 import { Button } from '@/shared/ui/Button'
+import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import { useActivity } from '../hooks/useActivities'
 import { ActivityThumb } from './ActivityThumb'
 import styles from './ActivityDetail.module.css'
@@ -31,6 +32,7 @@ interface Props {
 
 export function ActivityDetail({ id, header, onPointsChanged }: Props) {
   const { data: a, error, pending, actionError, apply, cancel, toggleLike } = useActivity(id, onPointsChanged)
+  const [askCancel, setAskCancel] = useState(false)
 
   if (error) return <Alert>{error}</Alert>
   if (!a) return <p role="status">불러오는 중…</p>
@@ -91,7 +93,7 @@ export function ActivityDetail({ id, header, onPointsChanged }: Props) {
             <p className={styles.appliedText} role="status">
               ✓ 신청했어요. 그날 만나요!
             </p>
-            <Button variant="secondary" block onClick={cancel} disabled={pending}>
+            <Button variant="secondary" block onClick={() => setAskCancel(true)} disabled={pending}>
               신청 취소하기
             </Button>
           </div>
@@ -105,6 +107,21 @@ export function ActivityDetail({ id, header, onPointsChanged }: Props) {
           </Button>
         )}
       </div>
+
+      <ConfirmSheet
+        open={askCancel}
+        title="신청을 취소할까요?"
+        confirmLabel="신청 취소"
+        danger
+        pending={pending}
+        onConfirm={() => {
+          setAskCancel(false)
+          void cancel()
+        }}
+        onClose={() => setAskCancel(false)}
+      >
+        <p>{a.title}</p>
+      </ConfirmSheet>
     </article>
   )
 }

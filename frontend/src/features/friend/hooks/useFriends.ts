@@ -100,7 +100,7 @@ export function useReceivedRequests(onChanged?: () => void) {
     await (accept ? friendApi.accept(card.request_id) : friendApi.decline(card.request_id))
     state.setData((cur) => cur?.filter((c) => c.user_id !== card.user_id) ?? null)
     void refreshReceivedCount()
-    toast(accept ? `${card.name}님과 친구가 됐어요` : '신청을 넘겼어요', accept ? 'success' : 'info')
+    toast(accept ? `${card.name}님과 친구가 됐어요` : '신청을 거절했어요', accept ? 'success' : 'info')
     onChanged?.()
   }
 

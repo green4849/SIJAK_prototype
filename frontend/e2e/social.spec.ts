@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { mainNav, startTour } from './helpers'
+import { confirmRequest, mainNav, startTour } from './helpers'
 
 test('④ 받은 친구 신청 수락 → 친구 수 증가', async ({ page }) => {
   await startTour(page)
@@ -18,6 +18,7 @@ test('④ 추천 친구에게 신청 → 버튼이 "신청했어요"로', async 
   await page.goto('/friends')
   const card = page.getByRole('article', { name: '김영희님' })
   await card.getByRole('button', { name: '친구 신청' }).click()
+  await confirmRequest(page)
   await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
 })
 
@@ -29,6 +30,7 @@ test('④ 이웃이 신청을 받아 주면 카드가 "대화하기"로 → 대�
 
   const card = page.getByRole('region', { name: '추천 친구 목록' }).getByRole('article', { name: '김영희님' })
   await card.getByRole('button', { name: /친구 신청/ }).click()
+  await confirmRequest(page)
   await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
   await expect(card.getByRole('link', { name: '대화하기' })).toBeVisible({ timeout: 10_000 })
   await expect(page.getByRole('status').filter({ hasText: '김영희님이 친구 신청을 받아 주셨어요' })).toBeVisible()
@@ -43,6 +45,7 @@ test('④ 신청 직후 새로고침해도 수락은 이어지고, 알림함에 
   await page.goto('/friends')
   const card = page.getByRole('article', { name: '김영희님' })
   await card.getByRole('button', { name: /친구 신청/ }).click()
+  await confirmRequest(page)
   await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
   await page.reload()
   await page.waitForTimeout(3500)
@@ -84,4 +87,29 @@ test('안전: 위험 대화 경고 → 신고 → 차단되면 입력줄이 안�
   await page.goto('/me/blocks')
   await page.getByRole('button', { name: '차단 풀기' }).click()
   await expect(page.getByText('차단한 이웃이 없어요')).toBeVisible()
+})
+
+test('받은 신청 거절과 로그아웃은 한 번 묻는다 — 그만두면 그대로', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/friends')
+  const received = page.getByRole('region', { name: /나에게 온 친구 신청/ })
+  await received.getByRole('button', { name: '거절하기' }).click()
+  const ask = page.getByRole('dialog', { name: '박정호님의 신청을 거절할까요?' })
+  await expect(ask).toContainText('아직 모르겠으면 그냥 두셔도 돼요')
+  await ask.getByRole('button', { name: '닫기' }).click()
+  await expect(received.getByRole('article', { name: '박정호님' })).toBeVisible()
+
+  await received.getByRole('button', { name: '거절하기' }).click()
+  await page.getByRole('dialog', { name: /거절할까요/ }).getByRole('button', { name: '거절하기' }).click()
+  await expect(received).toHaveCount(0)
+
+  await page.goto('/me')
+  await page.getByRole('button', { name: '로그아웃' }).click()
+  const logout = page.getByRole('dialog', { name: '로그아웃할까요?' })
+  await expect(logout).toContainText('휴대폰 인증')
+  await logout.getByRole('button', { name: '닫기' }).click()
+  // 그만두면 그대로 마이페이지
+  await expect(logout).toHaveCount(0)
+  await expect(page).toHaveURL(/\/me$/)
+  await expect(page.getByRole('button', { name: '로그아웃' })).toBeVisible()
 })

@@ -197,7 +197,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     help: (v) =>
       v === 'received'
         ? {
-            text: '친구 신청이 와 있어요. 좋으면 ‘수락하기’, 아직 모르겠으면 ‘다음에’를 누르세요.',
+            text: '친구 신청이 와 있어요. 좋으면 ‘수락하기’, 아직 모르겠으면 그냥 두셔도 돼요.',
             actions: [{ kind: 'show', label: '‘수락하기’ 어디 있어요?', target: 'friend-accept', say: '좋으면 여기 ‘수락하기’를 누르세요.' }],
           }
         : {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button, ButtonLink } from '@/shared/ui/Button'
+import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import type { FriendCardData } from '../api/friendApi'
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 /** 관계에 따라 버튼이 바뀐다: 친구 신청 → 신청했어요 / 친구예요 → 대화하기 */
 export function FriendActionButton({ card, onRequest, chatHref, price }: Props) {
   const [pending, setPending] = useState(false)
+  const [ask, setAsk] = useState(false)
 
   if (card.relation === 'friends')
     return (
@@ -27,17 +29,31 @@ export function FriendActionButton({ card, onRequest, chatHref, price }: Props) 
         신청했어요 ✓
       </Button>
     )
+  async function send() {
+    setAsk(false)
+    setPending(true)
+    await onRequest(card.user_id)
+    setPending(false)
+  }
+  // 포인트가 드는 신청만 한 번 묻는다 (무료 첫 신청·받은 신청 수락은 바로)
+  const costs = card.relation !== 'received' && !!price && price !== '무료'
   return (
-    <Button
-      block
-      disabled={pending}
-      onClick={async () => {
-        setPending(true)
-        await onRequest(card.user_id)
-        setPending(false)
-      }}
-    >
-      {card.relation === 'received' ? '친구 수락' : price ? `친구 신청 · ${price}` : '친구 신청'}
-    </Button>
+    <>
+      <Button block disabled={pending} onClick={() => (costs ? setAsk(true) : void send())}>
+        {card.relation === 'received' ? '친구 수락' : price ? `친구 신청 · ${price}` : '친구 신청'}
+      </Button>
+      {costs && (
+        <ConfirmSheet
+          open={ask}
+          title={`${card.name}님께 친구 신청할까요?`}
+          confirmLabel={`친구 신청 · ${price}`}
+          pending={pending}
+          onConfirm={() => void send()}
+          onClose={() => setAsk(false)}
+        >
+          <p>신청하면 {price} 빠져요. 상대가 받지 않아도 돌려받지 못해요.</p>
+        </ConfirmSheet>
+      )}
+    </>
   )
 }

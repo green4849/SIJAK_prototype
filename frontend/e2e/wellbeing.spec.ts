@@ -68,6 +68,7 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 �
   // 3명이 되면 더 추가할 수 없다
   await expect(page.getByRole('button', { name: '보호자 추가' })).toHaveCount(0)
   await page.getByRole('button', { name: '김민지님 빼기' }).click()
+  await page.getByRole('dialog', { name: '김민지님을 보호자에서 뺄까요?' }).getByRole('button', { name: '빼기' }).click()
   await expect(page.getByText('010-****-2222')).toHaveCount(0)
 
   await page.goto('/companion')

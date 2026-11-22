@@ -3,7 +3,7 @@
  * 둘러보기 시드: 김시작 110P (가입 100 + 어제 평가 10, 이순자님께 첫 신청은 무료로 이미 사용)
  */
 import { expect, test, type Page } from '@playwright/test'
-import { startTour } from './helpers'
+import { confirmRequest, startTour } from './helpers'
 
 const chip = (page: Page) => page.getByRole('link', { name: /^내 포인트/ })
 
@@ -46,10 +46,15 @@ test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (�
   for (const name of ['김영희님', '최말순님', '한옥자님']) {
     const card = page.getByRole('article', { name })
     await card.getByRole('button', { name: '친구 신청 · 30P' }).click()
+    // 포인트가 드는 신청은 한 번 묻는다
+    const ask = page.getByRole('dialog', { name: `${name}께 친구 신청할까요?` })
+    await expect(ask).toContainText('신청하면 30P 빠져요')
+    await ask.getByRole('button', { name: '친구 신청 · 30P' }).click()
     await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
   }
   // 110 − 90 = 20P → 네 번째는 모자람
   await page.getByRole('article', { name: '윤기철님' }).getByRole('button', { name: /친구 신청/ }).click()
+  await confirmRequest(page)
   const sheet = page.getByRole('dialog', { name: '포인트가 조금 부족해요' })
   await expect(sheet).toBeVisible()
   await expect(sheet).toContainText('30P 필요')
@@ -81,6 +86,7 @@ test('C12 봉사모임: 봉사 탭 → 참여 포인트 → 신청하면 적립,
 
   await page.goBack()
   await page.getByRole('button', { name: '신청 취소하기' }).click()
+  await page.getByRole('dialog', { name: '신청을 취소할까요?' }).getByRole('button', { name: '신청 취소' }).click()
   await expect(page.getByRole('status').filter({ hasText: '포인트를 돌려드렸어요' })).toBeVisible()
   await page.goto('/me')
   await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('110P')
