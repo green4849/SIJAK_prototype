@@ -77,3 +77,34 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 �
   await page.getByRole('button', { name: '보호자에게 알리기' }).click()
   await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('시연이라 보내지 않았어요')).toBeVisible()
 })
+
+test('요즘 마음 — 말동무 대화 정서를 따로 보여 주고, 상태마다 할 일 하나로 이어 준다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/me/wellbeing')
+  const mood = page.getByRole('region', { name: /요즘 마음/ })
+  await expect(mood).toBeVisible()
+  // 가장 낮은 요인에 '이번 주 해 볼 일'이 붙는다
+  await expect(page.getByText(/이번 주 해 볼 일 · ‘.+’ 올리기/)).toBeVisible()
+
+  await page.goto('/companion')
+  for (const t of ['너무 외로워요', '요즘 우울해요', '혼자라 쓸쓸해요', '괜히 슬퍼요', '집이 적적해요']) {
+    await page.getByLabel('말동무에게 할 말').fill(t)
+    await page.getByRole('button', { name: '보내기' }).click()
+    await expect(page.getByRole('list', { name: '말동무와 나눈 이야기' })).toContainText(t)
+  }
+  await page.goto('/me/wellbeing')
+  await expect(mood.getByRole('heading', { name: '무거운 날이 많았어요' })).toBeVisible()
+  await expect(mood).toContainText(/최근 2주 \d+번 중 \d+번은 마음이 무거웠어요/)
+  await mood.getByRole('link', { name: '기분 점검 해 보기' }).click()
+  await expect(page).toHaveURL(/\/me\/wellbeing\/check\/phq9/)
+
+  // 위기 신호가 있었으면 다른 무엇보다 109
+  await page.goto('/companion')
+  await page.getByLabel('말동무에게 할 말').fill('살기 싫어요')
+  await page.getByRole('button', { name: '보내기' }).click()
+  await expect(page.getByRole('link', { name: '109 상담 전화하기' })).toBeVisible()
+  await page.goto('/me/wellbeing')
+  await expect(mood.getByRole('heading', { name: '많이 힘드셨어요' })).toBeVisible()
+  await mood.getByRole('link', { name: '109 상담 전화 보기' }).click()
+  await expect(page).toHaveURL(/\/sos$/)
+})

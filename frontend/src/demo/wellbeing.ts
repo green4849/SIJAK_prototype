@@ -6,7 +6,7 @@
  *  - 자가평가: PHQ-9 · GAD-7 (쉬운 말로 다듬은 문항), 점수 구간은 표준 기준
  */
 import { db, type DAssessment, type DUser } from './store'
-import type { AssessmentFormOut, AssessmentResultOut, RelationFactor, RelationIndexOut, RelationLevel } from '@/shared/api/draft'
+import type { AssessmentFormOut, AssessmentResultOut, MoodOut, RelationFactor, RelationIndexOut, RelationLevel } from '@/shared/api/draft'
 
 const DAY = 86400_000
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
@@ -37,11 +37,10 @@ function factors(me: DUser): Record<RelationFactor['code'], number> {
   // A: 최근 접속 — 오늘 들어왔으면 높게
   const activity = clamp(100 - ((now - me.last_login) / DAY) * 15)
 
-  // C: 최근 14일 내가 한 말 (이웃 대화 + 말동무)
+  // C: 최근 14일 이웃에게 한 말 — 말동무(AI)와 한 말은 사람과의 대화가 아니라 넣지 않는다.
+  //    (넣으면 말동무에게 외롭다고 할수록 '대화'가 올라 지수가 도로 좋아졌다)
   const myRooms = new Set(s.rooms.filter((r) => r.a === me.id || r.b === me.id).map((r) => r.id))
-  const said =
-    s.messages.filter((m) => myRooms.has(m.room) && m.sender === me.id && since(m.created_at, 14)).length +
-    s.companion.filter((m) => m.uid === me.id && m.role === 'user' && since(m.at, 14)).length
+  const said = s.messages.filter((m) => myRooms.has(m.room) && m.sender === me.id && since(m.created_at, 14)).length
   const communication = clamp(said * 12)
 
   // E: 말동무 대화의 정서 — 슬픔·불안 비율이 높을수록 낮게
@@ -60,6 +59,21 @@ function factors(me: DUser): Record<RelationFactor['code'], number> {
   return { activity, communication, emotion, social, responsiveness }
 }
 
+/** 요즘 마음 — 말동무 대화 정서를 지수와 따로 */
+export function moodOf(me: DUser): MoodOut {
+  const now = Date.now()
+  const recent = db().companion.filter((m) => m.uid === me.id && now - new Date(m.at).getTime() < 14 * DAY)
+  const felt = recent.filter((m) => m.role === 'user' && m.emotion)
+  const heavy = felt.filter((m) => m.emotion === 'sadness' || m.emotion === 'anxiety').length
+  const ratio = felt.length ? heavy / felt.length : 0
+  return {
+    level: !felt.length ? 'none' : ratio >= 2 / 3 ? 'heavy' : ratio >= 1 / 3 ? 'mixed' : 'calm',
+    talked: felt.length,
+    heavy,
+    crisis: recent.some((m) => m.safety === 'crisis'),
+  }
+}
+
 export function relationIndex(me: DUser): RelationIndexOut {
   const f = factors(me)
   const raw = (Object.keys(WEIGHTS) as (keyof typeof WEIGHTS)[]).reduce((sum, k) => sum + WEIGHTS[k] * f[k], 0)
@@ -75,6 +89,7 @@ export function relationIndex(me: DUser): RelationIndexOut {
       score: f[code],
     })),
     weekly: weeks.map((v, i) => ({ label: i === weeks.length - 1 ? '이번 주' : `${weeks.length - 1 - i}주 전`, score: v })),
+    mood: moodOf(me),
     updated_at: new Date().toISOString(),
   }
 }

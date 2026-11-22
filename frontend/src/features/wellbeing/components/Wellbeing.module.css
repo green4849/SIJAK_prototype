@@ -269,3 +269,13 @@
   font-weight: var(--weight-semibold);
   text-decoration: none;
 }
+
+/* 요즘 마음 — 단계 이름을 글자로 크게 (색만으로 전하지 않음) */
+.moodLabel {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.card[data-mood='crisis'] {
+  border: 2px solid var(--color-danger);
+}

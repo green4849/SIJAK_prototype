@@ -60,6 +60,23 @@ export interface RelationFactor {
   score: number
 }
 
+/**
+ * 요즘 마음 — 최근 14일 말동무 대화의 정서 (보고서 4.5.2).
+ * 사회적 관계 지수의 '마음' 요인과 같은 자료지만, 지수 안에 묻히지 않게 따로 보여 준다.
+ *  - calm: 무거운 말이 1/3 미만 · mixed: 1/3~2/3 · heavy: 2/3 이상 · none: 말동무와 나눈 이야기가 없음
+ */
+export type MoodLevel = 'calm' | 'mixed' | 'heavy' | 'none'
+
+export interface MoodOut {
+  level: MoodLevel
+  /** 최근 14일 말동무에게 한 말 수 (정서를 읽은 것만) */
+  talked: number
+  /** 그중 슬픔·불안이 읽힌 말 수 */
+  heavy: number
+  /** 최근 14일 안에 위기 신호(죽고 싶다 등)가 있었는지 — 있으면 다른 무엇보다 109 */
+  crisis: boolean
+}
+
 export interface RelationIndexOut {
   /** 사회적 관계 지수 0~100, 높을수록 좋음 (= 100 − 보고서 고립 지수 II) */
   score: number
@@ -67,6 +84,7 @@ export interface RelationIndexOut {
   factors: RelationFactor[]
   /** 지난 주들 → 이번 주 (마지막이 지금) */
   weekly: { label: string; score: number }[]
+  mood: MoodOut
   updated_at: string
 }
 

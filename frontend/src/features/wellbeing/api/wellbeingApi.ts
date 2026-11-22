@@ -10,7 +10,7 @@ import type {
   RelationIndexOut,
 } from '@/shared/api/draft'
 
-export type { AssessmentKind, RelationLevel } from '@/shared/api/draft'
+export type { AssessmentKind, MoodLevel, RelationFactor, RelationLevel } from '@/shared/api/draft'
 export type RelationIndex = RelationIndexOut
 export type AssessmentForm = AssessmentFormOut
 export type AssessmentResult = AssessmentResultOut
