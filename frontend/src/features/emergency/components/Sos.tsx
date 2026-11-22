@@ -1,9 +1,11 @@
 import { CircleCheck, HeartHandshake, Phone, Siren, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { toast } from '@/shared/lib/toast'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
+import { CallLink } from '@/shared/ui/CallLink'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { Sheet } from '@/shared/ui/Sheet'
 import { useGuardians, useSos } from '../hooks/useEmergency'
@@ -30,8 +32,9 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
         <section className={styles.done} role="status" aria-labelledby="sos-done">
           <CircleCheck aria-hidden="true" size={ICON.lg} strokeWidth={ICON_STROKE} />
           <h2 id="sos-done" className={styles.doneTitle}>
-            알렸어요
+            {IS_DEMO ? '시연이라 보내지 않았어요' : '알렸어요'}
           </h2>
+          {IS_DEMO && sos.result.notified.length > 0 && <p>실제 앱에서는 이분들께 알려요.</p>}
           {sos.result.notified.length > 0 && (
             <ul className={styles.notified}>
               {sos.result.notified.map((n) => (
@@ -54,28 +57,28 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
           바로 전화하기
         </h2>
         {list.map((g) => (
-          <a key={g.id} href={`tel:${g.phone}`} className={styles.callRow}>
+          <CallLink key={g.id} number={g.phone} className={styles.callRow}>
             <UserRound aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
             <span className={styles.callName}>
               {g.name} <span className={styles.callMeta}>{g.relation}</span>
             </span>
             <Phone aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />
-          </a>
+          </CallLink>
         ))}
-        <a href="tel:119" className={styles.callRow} data-tone="danger">
+        <CallLink number="119" className={styles.callRow} data-tone="danger">
           <Siren aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
           <span className={styles.callName}>
             119 <span className={styles.callMeta}>응급·구급</span>
           </span>
           <Phone aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />
-        </a>
-        <a href="tel:109" className={styles.callRow}>
+        </CallLink>
+        <CallLink number="109" className={styles.callRow}>
           <HeartHandshake aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
           <span className={styles.callName}>
             109 <span className={styles.callMeta}>마음 상담</span>
           </span>
           <Phone aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />
-        </a>
+        </CallLink>
         {guardians.data && list.length === 0 && (
           <Link to={guardiansHref} className={styles.addLink}>
             보호자 등록하기
@@ -110,13 +113,15 @@ export function NotifyGuardianButton() {
   async function send() {
     const r = await sos.send()
     if (!r) return toast('알리지 못했어요. 바로 전화해 주세요.', 'error')
+    if (IS_DEMO) return toast('시연이라 보내지 않았어요', 'info')
     const who = r.notified.map((n) => `${n.name}님`).join(', ')
     toast(who ? `${who}께 알렸어요` : '담당 복지관에 알렸어요')
   }
   if (sos.result)
     return (
       <p className={styles.sentNote} role="status">
-        <CircleCheck aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> 보호자에게 알렸어요
+        <CircleCheck aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />{' '}
+        {IS_DEMO ? '시연이라 보내지 않았어요' : '보호자에게 알렸어요'}
       </p>
     )
   return (

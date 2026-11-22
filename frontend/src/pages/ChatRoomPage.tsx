@@ -4,6 +4,7 @@ import { ChatRoomView, useChatRoom, type ChatMessageData } from '@/features/chat
 import { ReportSheet, RiskWarning, SafetyMenu } from '@/features/safety'
 import { Alert } from '@/shared/ui/Alert'
 import { Avatar } from '@/shared/ui/Avatar'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { TopBar } from '@/shared/ui/TopBar'
 import styles from './ChatRoomPage.module.css'
 
@@ -47,6 +48,7 @@ export function ChatRoomPage() {
           <p className={styles.meta}>
             {room.peer.age}세 · {room.peer.region_name}
           </p>
+          {IS_DEMO && <p className={styles.meta}>시연 · 미리 써 둔 답장</p>}
         </div>
       </header>
 

@@ -43,11 +43,17 @@ test('홈 긴급 → 도움 요청 → 확인 → 보호자에게 알림', async
   await page.getByRole('link', { name: '긴급' }).click()
   await expect(page.getByRole('heading', { name: '긴급 도움' })).toBeVisible()
   await expect(page.getByRole('link', { name: /119/ })).toHaveAttribute('href', 'tel:119')
+  // 시연에서는 전화가 실제로 걸리지 않는다
+  await page.getByRole('link', { name: /119/ }).click()
+  await expect(page.getByText('시연 화면이라 전화는 걸리지 않아요')).toBeVisible()
+  await expect(page).toHaveURL(/\/sos/)
   await page.getByRole('button', { name: '도움 요청' }).click()
   const sheet = page.getByRole('dialog', { name: '도움을 요청할까요?' })
   await expect(sheet).toContainText('김민수님 (아들)')
   await sheet.getByRole('button', { name: '알리기' }).click()
-  await expect(page.getByRole('heading', { name: '알렸어요' })).toBeVisible()
+  // 시연에서는 보내지 않았다고 밝힌다
+  await expect(page.getByRole('heading', { name: '시연이라 보내지 않았어요' })).toBeVisible()
+  await expect(page.getByText('실제 앱에서는 이분들께 알려요.')).toBeVisible()
 })
 
 test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 알리기', async ({ page }) => {
@@ -68,5 +74,5 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 �
   await page.getByLabel('말동무에게 할 말').fill('살기 싫어요')
   await page.getByRole('button', { name: '보내기' }).click()
   await page.getByRole('button', { name: '보호자에게 알리기' }).click()
-  await expect(page.getByText('보호자에게 알렸어요')).toBeVisible()
+  await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('시연이라 보내지 않았어요')).toBeVisible()
 })

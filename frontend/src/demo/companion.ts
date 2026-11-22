@@ -57,7 +57,7 @@ export function draftReply(me: DUser, text: string, turn: number): DraftReply {
       ...base,
       safety: 'crisis',
       emotion: 'sadness',
-      text: `${me.name}님, 많이 힘드셨군요. 말씀해 주셔서 고마워요. 혼자 견디지 않으셔도 돼요. 지금 바로 이야기 들어 줄 분과 연결해 드릴게요.`,
+      text: `${me.name}님, 많이 힘드셨군요. 말씀해 주셔서 고마워요. 혼자 견디지 않으셔도 돼요. 아래 109에 전화하면 하루 종일 이야기를 들어 줄 분이 있어요.`,
     }
 
   // ② 의료 — 진단·약 이야기는 하지 않는다

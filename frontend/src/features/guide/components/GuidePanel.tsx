@@ -5,6 +5,7 @@ import type { Contrast, FontScale } from '@/shared/a11y/preferences'
 import { canSpeak, speak, stopSpeaking } from '@/shared/a11y/speak'
 import { useA11yPrefs } from '@/shared/a11y/useA11yPrefs'
 import { Button } from '@/shared/ui/Button'
+import { CallLink } from '@/shared/ui/CallLink'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import type { GuideAction, GuideReply } from '../lib/types'
@@ -223,10 +224,10 @@ export function GuidePanel({ entry, busy, suggestions, onAsk, onAction, onClose,
 
           {/* 전화가 있으면 다른 무엇보다 먼저 */}
           {calls.map((a, i) => a.kind === 'call' && (
-            <a key={a.number} href={`tel:${a.number}`} className={styles.call} data-first={i === 0}>
+            <CallLink key={a.number} number={a.number} className={styles.call} data-first={i === 0}>
               <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
               {a.label}
-            </a>
+            </CallLink>
           ))}
 
           {settings.map((a) => a.kind === 'setting' && <SettingControl key={a.which} which={a.which} />)}
@@ -343,9 +344,9 @@ export function GuidePanel({ entry, busy, suggestions, onAsk, onAction, onClose,
         {/* 무엇이 답하는지, 그리고 급할 때 갈 곳은 늘 보이게 */}
         <p className={styles.fine}>
           준비해 둔 안내예요 ·{' '}
-          <a href="tel:119" className={styles.urgent}>
+          <CallLink number="119" className={styles.urgent}>
             급할 땐 119 전화
-          </a>
+          </CallLink>
         </p>
       </div>
     </section>
