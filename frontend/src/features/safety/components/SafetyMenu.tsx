@@ -4,6 +4,7 @@ import { errorMessage } from '@/shared/api/client'
 import { Alert } from '@/shared/ui/Alert'
 import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
+import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import { Sheet } from '@/shared/ui/Sheet'
 import { toast } from '@/shared/lib/toast'
 import { safetyApi } from '../api/safetyApi'
@@ -21,6 +22,7 @@ interface Props {
 export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
   const [menu, setMenu] = useState(false)
   const [report, setReport] = useState(false)
+  const [askBlock, setAskBlock] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function toggleBlock() {
@@ -29,6 +31,7 @@ export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
       await (blocked ? safetyApi.unblock(userId) : safetyApi.block(userId))
       toast(blocked ? `${name}님 차단을 풀었어요` : `${name}님을 차단했어요`)
       setMenu(false)
+      setAskBlock(false)
       onChanged()
     } catch (e) {
       setError(errorMessage(e))
@@ -52,11 +55,28 @@ export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
           <MenuItem
             icon={blocked ? ShieldCheck : Ban}
             label={blocked ? '차단 풀기' : '차단하기'}
-            onClick={toggleBlock}
+            onClick={() => {
+              // 차단 풀기는 바로, 차단은 한 번 묻는다
+              if (blocked) return void toggleBlock()
+              setMenu(false)
+              setAskBlock(true)
+            }}
           />
         </MenuList>
         {error && <Alert>{error}</Alert>}
       </Sheet>
+
+      <ConfirmSheet
+        open={askBlock}
+        title={`${name}님을 차단할까요?`}
+        confirmLabel="차단하기"
+        danger
+        onConfirm={() => void toggleBlock()}
+        onClose={() => setAskBlock(false)}
+      >
+        <p>서로 메시지를 보낼 수 없어요. 마이페이지 ‘차단한 이웃’에서 풀 수 있어요.</p>
+        {error && <Alert>{error}</Alert>}
+      </ConfirmSheet>
 
       <ReportSheet
         open={report}

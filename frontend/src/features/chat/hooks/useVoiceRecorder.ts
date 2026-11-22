@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 export const MAX_RECORD_SEC = 60
 
 type State = 'idle' | 'recording'
+export type Recording = { blob: Blob; seconds: number }
 
 function pickMimeType(): string | undefined {
   const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
@@ -12,8 +13,13 @@ function pickMimeType(): string | undefined {
 /**
  * 음성 메시지 녹음 — 누르고 있기(hold)가 아니라 '한 번 눌러 시작, 다시 눌러 끝'.
  * 손떨림이 있는 어르신도 쓰기 쉽게.
+ * 최대 길이에 닿으면 저절로 끝내고 onLimit 으로 넘긴다 — 말한 것을 버리지 않는다.
  */
-export function useVoiceRecorder() {
+export function useVoiceRecorder({ onLimit }: { onLimit?: (r: Recording) => void } = {}) {
+  const onLimitRef = useRef(onLimit)
+  useEffect(() => {
+    onLimitRef.current = onLimit
+  })
   const [state, setState] = useState<State>('idle')
   const [seconds, setSeconds] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +27,7 @@ export function useVoiceRecorder() {
   const chunks = useRef<Blob[]>([])
   const startedAt = useRef(0)
   const timer = useRef<number | null>(null)
-  const finish = useRef<((r: { blob: Blob; seconds: number } | null) => void) | null>(null)
+  const finish = useRef<((r: Recording | null) => void) | null>(null)
 
   function cleanup() {
     if (timer.current) window.clearInterval(timer.current)
@@ -48,7 +54,7 @@ export function useVoiceRecorder() {
       rec.ondataavailable = (e) => e.data.size && chunks.current.push(e.data)
       rec.onstop = () => {
         const blob = new Blob(chunks.current, { type: rec.mimeType || 'audio/webm' })
-        const secs = Math.max(1, Math.round((Date.now() - startedAt.current) / 1000))
+        const secs = Math.min(MAX_RECORD_SEC, Math.max(1, Math.round((Date.now() - startedAt.current) / 1000)))
         finish.current?.(blob.size ? { blob, seconds: secs } : null)
         finish.current = null
         cleanup()
@@ -60,7 +66,11 @@ export function useVoiceRecorder() {
       timer.current = window.setInterval(() => {
         const s = Math.round((Date.now() - startedAt.current) / 1000)
         setSeconds(s)
-        if (s >= MAX_RECORD_SEC) rec.stop() // 너무 길면 자동으로 끝
+        if (s >= MAX_RECORD_SEC && rec.state !== 'inactive') {
+          // 너무 길면 자동으로 끝 — 녹음한 것은 그대로 넘긴다
+          if (!finish.current) finish.current = (r) => r && onLimitRef.current?.(r)
+          rec.stop()
+        }
       }, 250)
     } catch {
       setError('마이크 사용을 허락해 주셔야 음성을 보낼 수 있어요.')
@@ -69,7 +79,7 @@ export function useVoiceRecorder() {
   }
 
   /** 녹음을 끝내고 결과를 돌려준다 */
-  function stop(): Promise<{ blob: Blob; seconds: number } | null> {
+  function stop(): Promise<Recording | null> {
     return new Promise((resolve) => {
       if (!recorder.current || recorder.current.state === 'inactive') return resolve(null)
       finish.current = resolve

@@ -1,6 +1,6 @@
 /** A4 — 동작 후 피드백: 토스트(화면 낭독 포함) + 진동(설정으로 끄기) */
 import { expect, test, type Page } from '@playwright/test'
-import { mainNav, startTour } from './helpers'
+import { confirmRequest, mainNav, startTour } from './helpers'
 
 const toastOf = (page: Page) => page.getByRole('status').getByRole('button', { name: /누르면 닫혀요/ })
 
@@ -28,6 +28,7 @@ test('A4: 친구 수락·활동 신청 후 토스트 + 진동, 쌓이지 않음'
 
   // 다음 동작의 토스트가 이전 것을 바꿔치기 (하나만)
   await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '친구 신청' }).click()
+  await confirmRequest(page)
   await expect(toastOf(page)).toHaveCount(1)
   await expect(toastOf(page)).toContainText('김영희님께 친구 신청을 보냈어요')
 
@@ -62,6 +63,7 @@ test('A4: 설정에서 진동을 끄면 토스트만', async ({ page }) => {
 
   await page.goto('/friends')
   await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '친구 신청' }).click()
+  await confirmRequest(page)
   await expect(toastOf(page)).toBeVisible()
   expect(await vibrations(page)).toBe(0)
 })

@@ -24,3 +24,10 @@ export async function verifyPhone(
   await page.getByLabel('인증번호').fill(banner!.match(/\d{6}/)![0])
   await page.getByRole('button', { name: '확인', exact: true }).click()
 }
+
+/** 포인트가 드는 친구 신청의 확인 창 — 무료 신청이면 창이 없어 그냥 지나간다 */
+export async function confirmRequest(page: Page) {
+  const ask = page.getByRole('dialog', { name: /친구 신청할까요/ })
+  const shown = await ask.waitFor({ timeout: 1500 }).then(() => true, () => false)
+  if (shown) await ask.getByRole('button', { name: /친구 신청/ }).click()
+}

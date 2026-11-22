@@ -656,7 +656,7 @@ export const TOPICS: Topic[] = [
     screens: ['me'],
     reply: () => ({
       text: '마이페이지 맨 아래에 있어요. 누르면 바로 나가지니 조심하세요.',
-      actions: [walk('/me', [nav('nav-me', '마이페이지'), { on: ['me'], target: 'me-logout', say: '여기 ‘로그아웃’이에요. 누르면 바로 로그아웃돼요.' }], '어디 있는지 보기')],
+      actions: [walk('/me', [nav('nav-me', '마이페이지'), { on: ['me'], target: 'me-logout', say: '여기 ‘로그아웃’이에요. 누르면 한 번 더 물어봐요.' }], '어디 있는지 보기')],
     }),
   },
   {

@@ -17,6 +17,7 @@ import {
   UserRound,
   Users,
 } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
@@ -26,6 +27,7 @@ import { useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
+import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
@@ -35,6 +37,7 @@ import { CardGrid } from '@/shared/ui/CardGrid'
 /** ⑨ 마이페이지 */
 export function MyPage() {
   const { user, signOut } = useAuth()
+  const [askLogout, setAskLogout] = useState(false)
   const friends = useMyFriends()
   const counts = useActivityCounts()
   const points = usePointSummary()
@@ -133,9 +136,19 @@ export function MyPage() {
       </CardGrid>
 
       <MenuList plain>
-        <MenuItem icon={LogOut} label="로그아웃" onClick={signOut} danger />
+        <MenuItem icon={LogOut} label="로그아웃" onClick={() => setAskLogout(true)} danger />
         <MenuItem icon={DoorOpen} label="회원 탈퇴" to="/me/leave" />
       </MenuList>
+
+      <ConfirmSheet
+        open={askLogout}
+        title="로그아웃할까요?"
+        confirmLabel="로그아웃"
+        onConfirm={signOut}
+        onClose={() => setAskLogout(false)}
+      >
+        <p>다시 들어오려면 휴대폰 인증을 해야 해요.</p>
+      </ConfirmSheet>
     </section>
   )
 }

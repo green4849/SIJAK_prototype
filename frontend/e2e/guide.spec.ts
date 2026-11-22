@@ -6,7 +6,7 @@
  *  · 입력칸·중요한 버튼을 가리지 않는지 · 위급이 먼저인지 · 큰 글씨·좁은 화면에서도 쓸 수 있는지
  */
 import { expect, test, type Page } from '@playwright/test'
-import { mainNav, startTour } from './helpers'
+import { mainNav, startTour, confirmRequest } from './helpers'
 
 const launcher = (page: Page) => page.getByRole('button', { name: '시작이에게 앱 사용법 물어보기' })
 const panel = (page: Page) => page.getByRole('dialog', { name: '시작이 안내' })
@@ -92,6 +92,7 @@ test('같이 가 보기 — 버튼을 짚어 주고, 누르는 것은 사용자�
 
   // 사용자가 직접 누르면 그때 신청된다
   await target.click()
+  await confirmRequest(page)
   await expect(page.getByRole('button', { name: /신청했어요/ })).toHaveCount(1)
   await expect(callout(page)).toBeHidden()
 })
