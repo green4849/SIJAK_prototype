@@ -710,6 +710,67 @@
         "title": "MyActivityCounts",
         "type": "object"
       },
+      "NotificationItemOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "friend",
+              "activity",
+              "safety",
+              "wellbeing",
+              "welfare",
+              "points"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "누르면 갈 앱 안 경로 (없으면 null)",
+            "title": "Link"
+          },
+          "read": {
+            "title": "Read",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "created_at",
+          "read",
+          "link"
+        ],
+        "title": "NotificationItemOut",
+        "type": "object"
+      },
       "NotificationPrefsOut": {
         "properties": {
           "max_per_day": {
@@ -3366,6 +3427,56 @@
         ]
       }
     },
+    "/api/v1/notifications": {
+      "get": {
+        "description": "최근 소식 (새것부터, 50개까지)",
+        "operationId": "inbox_api_v1_notifications_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationItemOut"
+                  },
+                  "title": "Response Inbox Api V1 Notifications Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "operationId": "read_all_api_v1_notifications_read_all_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read All",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
     "/api/v1/notifications/settings": {
       "get": {
         "operationId": "get_settings_api_v1_notifications_settings_get",
@@ -3431,6 +3542,47 @@
           }
         ],
         "summary": "Update Settings",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/{notification_id}/read": {
+      "post": {
+        "operationId": "read_api_v1_notifications__notification_id__read_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read",
         "tags": [
           "notification"
         ]

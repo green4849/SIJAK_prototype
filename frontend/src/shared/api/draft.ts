@@ -154,21 +154,6 @@ export interface WelfareCenterOut {
   rooms: WelfareRoomOut[]
 }
 
-// ---------- 알림함 (C4 푸시와 같은 소식을 앱 안에 모아 둠) — /notifications ----------
-
-export type NotificationKind = 'friend' | 'activity' | 'safety' | 'wellbeing' | 'welfare' | 'points'
-
-export interface NotificationItemOut {
-  id: string
-  kind: NotificationKind
-  title: string
-  body: string
-  created_at: string
-  read: boolean
-  /** 누르면 갈 앱 안 경로 (없으면 null) */
-  link: string | null
-}
-
 // ---------- B3 회원 탈퇴 — /me/withdraw ----------
 
 export interface WithdrawIn {

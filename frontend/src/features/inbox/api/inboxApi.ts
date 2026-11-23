@@ -1,11 +1,11 @@
 /**
  * inbox API (알림함) — 푸시(C4)로 보내는 소식을 앱 안에도 모아 둔다.
- * 백엔드가 아직 없어 계약은 shared/api/draft.ts (데모 서버만 응답).
+ * 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts).
  */
 import { api } from '@/shared/api/client'
-import type { NotificationItemOut } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
 
-export type NotificationItem = NotificationItemOut
+export type NotificationItem = Schema<'NotificationItemOut'>
 
 export const inboxApi = {
   list: () => api.get<NotificationItem[]>('/notifications'),

@@ -13,12 +13,15 @@ from app.domains.chat.models import ChatMessage, ChatRoom
 from app.domains.chat.repository import ChatRepository
 from app.domains.chat.topics import Topic, suggest
 from app.domains.friend.service import FriendService
+from app.domains.notification.service import NotificationService
 from app.domains.risk.service import RiskService
 
 if TYPE_CHECKING:
     from app.domains.auth.models import User
 
 TEXT_MAX = 500
+# 이 위험도(2 경고)부터 받는 사람 알림함에도 남긴다 — 1(주의: 서두르기·외부 링크)은 대화 화면 표시만
+NOTIFY_RISK_LEVEL = 2
 VOICE_TYPES = {"audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3"}
 
 
@@ -44,12 +47,14 @@ class ChatService:
         friends: FriendService,
         risk: RiskService,
         storage: LocalMediaStorage,
+        notifications: NotificationService,
     ) -> None:
         self.repo = repo
         self.auth = auth
         self.friends = friends
         self.risk = risk
         self.storage = storage
+        self.notifications = notifications
 
     # ---------- 방 ----------
 
@@ -115,6 +120,10 @@ class ChatService:
         result = self.risk.assess_message(me.id, msg.id, body)
         msg.risk_level = result.level
         msg.risk_labels = ",".join(result.labels)
+        if result.level >= NOTIFY_RISK_LEVEL:
+            await self.notifications.on_risky_message(
+                room.other(me.id), me.name, result.labels, room.id, msg.id
+            )
         return await self._save(room, msg)
 
     async def send_voice(

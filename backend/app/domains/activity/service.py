@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Literal
 from app.core.errors import ConflictError, DomainError, NotFoundError
 from app.domains.activity.models import CATEGORIES, REWARD_CATEGORIES, Activity
 from app.domains.activity.repository import ActivityRepository
+from app.domains.notification.service import NotificationService
 from app.domains.point.service import VOLUNTEER_REWARD, PointService
 
 if TYPE_CHECKING:
@@ -37,9 +38,12 @@ class ActivityView:
 
 
 class ActivityService:
-    def __init__(self, repo: ActivityRepository, points: PointService) -> None:
+    def __init__(
+        self, repo: ActivityRepository, points: PointService, notifications: NotificationService
+    ) -> None:
         self.repo = repo
         self.points = points
+        self.notifications = notifications
 
     async def browse(self, me: "User", category: str | None = None) -> list[ActivityView]:
         """내 지역 활동. 내 지역에 하나도 없으면 전체를 보여 준다 (빈 화면 방지)."""
@@ -87,6 +91,7 @@ class ActivityService:
         if a.category in REWARD_CATEGORIES:
             # 봉사 참여 포인트 (C12). 원래는 복지관 참석 확인 후 지급 — docs/deferred.md §6
             await self.points.earn_volunteer(me.id, a.id, a.title)
+        await self.notifications.on_activity_applied(me.id, a.id, a.title, a.schedule_text)
         await self.repo.commit()
         return await self.detail(me, activity_id)
 
