@@ -27,3 +27,10 @@ test('A16: ?reset 으로 이 탭 데이터 처음 상태로', async ({ page }) =
   await page.goto('/friends')
   await expect(page.getByRole('region', { name: /나에게 온 친구 신청/ })).toBeVisible()
 })
+
+test('시작 화면의 ‘인증 넘어가기’ — 본인 확인·가입 없이 시연 계정으로 홈', async ({ page }) => {
+  await page.goto('/welcome')
+  await page.getByRole('link', { name: '인증 넘어가기' }).click()
+  await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
+  await expect.poll(() => new URL(page.url()).search).toBe('')
+})

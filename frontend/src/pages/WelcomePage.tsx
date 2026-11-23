@@ -1,9 +1,12 @@
+import { ChevronRight } from 'lucide-react'
 import type { MouseEvent } from 'react'
 import { flushSync } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { FontScaleToggle } from '@/shared/a11y/FontScaleToggle'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { Brand, LeafLogo } from '@/shared/ui/Brand'
 import { ButtonLink } from '@/shared/ui/Button'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { WelcomeHills } from '@/shared/ui/illustrations/Scenes'
 import styles from './WelcomePage.module.css'
 
@@ -43,6 +46,14 @@ export function WelcomePage() {
         <ButtonLink to="/login" onClick={goNext} className={styles.cta}>
           시작하기
         </ButtonLink>
+        {/* 시연 빌드에서만 — 본인 확인·가입을 건너뛰고 시연 계정(김시작님)으로 홈에 들어간다.
+            '?tour'는 앱이 뜨기 전에 처리되므로(demo/index.ts) 라우터 이동이 아니라 새로 연다 */}
+        {IS_DEMO && (
+          <a href={`${import.meta.env.BASE_URL}?tour`} className={styles.skip}>
+            <ChevronRight aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />
+            인증 넘어가기
+          </a>
+        )}
       </div>
       <div className={styles.spaceBottom} />
 
