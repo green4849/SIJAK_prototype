@@ -9,6 +9,7 @@ from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
 from app.domains.friend.nearby import find_nearby
 from app.domains.friend.repository import FriendRepository
+from app.domains.notification.service import NotificationService
 from app.domains.point.service import PointService
 from app.domains.risk.service import RiskService
 
@@ -49,12 +50,18 @@ class CannotRequestSelfError(DomainError):
 
 class FriendService:
     def __init__(
-        self, repo: FriendRepository, auth: AuthService, risk: RiskService, points: PointService
+        self,
+        repo: FriendRepository,
+        auth: AuthService,
+        risk: RiskService,
+        points: PointService,
+        notifications: NotificationService,
     ) -> None:
         self.repo = repo
         self.auth = auth
         self.risk = risk
         self.points = points
+        self.notifications = notifications
 
     # ---------- 추천 ----------
 
@@ -135,6 +142,7 @@ class FriendService:
             if req.status == "pending" and req.to_user_id == me.id:
                 # 상대가 먼저 신청했으면 바로 친구가 된다
                 await self.repo.set_status(req, "accepted")
+                await self.notifications.on_became_friends(to_id, me.id, me.name)
                 await self.repo.commit()
                 return await self._candidate_for(me, target)
             if req.status == "pending" and req.from_user_id == me.id:
@@ -147,6 +155,7 @@ class FriendService:
             await self.repo.set_status(mine, "pending")
         else:
             await self.repo.add(me.id, to_id)
+        await self.notifications.on_friend_request(to_id, me.id, me.name)
         await self.repo.commit()
         return await self._candidate_for(me, target)
 
@@ -155,6 +164,8 @@ class FriendService:
         if req is None or req.to_user_id != me.id or req.status != "pending":
             raise NotFoundError("이미 처리됐거나 없는 신청이에요.")
         await self.repo.set_status(req, "accepted" if accept else "declined")
+        if accept:
+            await self.notifications.on_became_friends(req.from_user_id, me.id, me.name)
         await self.repo.commit()
         return req
 

@@ -9,6 +9,7 @@ from app.domains.auth.deps import AuthServiceDep
 from app.domains.chat.repository import ChatRepository
 from app.domains.chat.service import ChatService
 from app.domains.friend.deps import FriendServiceDep
+from app.domains.notification.deps import NotificationServiceDep
 from app.domains.risk.deps import RiskServiceDep
 
 
@@ -18,8 +19,9 @@ def get_chat_service(
     friends: FriendServiceDep,
     risk: RiskServiceDep,
     storage: MediaStorage,
+    notifications: NotificationServiceDep,
 ) -> ChatService:
-    return ChatService(ChatRepository(session), auth, friends, risk, storage)
+    return ChatService(ChatRepository(session), auth, friends, risk, storage, notifications)
 
 
 ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]

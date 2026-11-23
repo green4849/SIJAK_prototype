@@ -1,9 +1,12 @@
-/** 알림함 · 회원 탈퇴(B3) · 운영자 화면(B7) — 백엔드 없음. 계약: shared/api/draft.ts */
+/** 알림함 (백엔드 domains/notification) · 회원 탈퇴(B3) · 운영자 화면(B7) — 뒤 둘은 백엔드 없음, 계약: shared/api/draft.ts */
 import { REPORT_REASONS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, save, userById, type DAdminCase, regionLabel } from '../store'
 import { requireUser } from './auth'
-import type { AdminCaseOut, AdminWatchOut, CaseAction, NotificationItemOut, WithdrawIn, WithdrawOut } from '@/shared/api/draft'
+import type { AdminCaseOut, AdminWatchOut, CaseAction, WithdrawIn, WithdrawOut } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
+
+type NotificationItemOut = Schema<'NotificationItemOut'>
 
 const DAY = 86400_000
 

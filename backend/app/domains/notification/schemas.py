@@ -1,9 +1,11 @@
+import uuid
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from app.domains.notification.models import MAX_PER_DAY, TIME_SLOTS
-from app.domains.notification.service import Prefs
+from app.domains.notification.service import InboxItem, Prefs
 
 TimeSlot = Literal["morning", "noon", "evening"]  # models.TIME_SLOTS
 
@@ -34,3 +36,30 @@ class NotificationPrefsOut(BaseModel):
 class NotificationPrefsUpdate(BaseModel):
     recommend_enabled: bool
     recommend_times: list[TimeSlot] = Field(max_length=len(TIME_SLOTS))
+
+
+NotificationKind = Literal[
+    "friend", "activity", "safety", "wellbeing", "welfare", "points"
+]  # models.KINDS
+
+
+class NotificationItemOut(BaseModel):
+    id: uuid.UUID
+    kind: NotificationKind
+    title: str
+    body: str
+    created_at: datetime
+    read: bool
+    link: str | None = Field(description="누르면 갈 앱 안 경로 (없으면 null)")
+
+    @classmethod
+    def of(cls, n: InboxItem) -> "NotificationItemOut":
+        return cls(
+            id=n.id,
+            kind=n.kind,  # type: ignore[arg-type]
+            title=n.title,
+            body=n.body,
+            created_at=n.created_at,
+            read=n.read,
+            link=n.link,
+        )
