@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.domains.activity.router import router as activity_router
+from app.domains.admin.router import router as admin_router
 from app.domains.auth.router import router as auth_router
 from app.domains.brain.router import router as brain_router
 from app.domains.chat.router import router as chat_router
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     api.include_router(emergency_router)  # C10 보호자·긴급 도움
     api.include_router(brain_router)  # C13 두뇌 운동 기록
     api.include_router(wellbeing_router)  # C11 사회적 관계 지수·자가평가
+    api.include_router(admin_router)  # B7 운영자·복지기관 화면
 
     app.include_router(api)
     return app

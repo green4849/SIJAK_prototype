@@ -1,11 +1,13 @@
-/** 알림함 (백엔드 domains/notification) · 회원 탈퇴(B3, 백엔드 auth) · 운영자 화면(B7, 백엔드 없음 — 계약: shared/api/draft.ts) */
+/** 알림함 (백엔드 domains/notification) · 회원 탈퇴(B3, 백엔드 auth) · 운영자 화면(B7, 백엔드 domains/admin — 데모는 운영자 역할 대신 로그인만 확인) */
 import { REPORT_REASONS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, save, userById, type DAdminCase, regionLabel } from '../store'
 import { requireUser } from './auth'
-import type { AdminCaseOut, AdminWatchOut, CaseAction } from '@/shared/api/draft'
 import type { Schema } from '@/shared/api/types'
 
+type AdminCaseOut = Schema<'AdminCaseOut'>
+type AdminWatchOut = Schema<'AdminWatchOut'>
+type CaseAction = Schema<'CaseActionIn'>['action']
 type NotificationItemOut = Schema<'NotificationItemOut'>
 type WithdrawIn = Schema<'WithdrawIn'>
 type WithdrawOut = Schema<'WithdrawOut'>
@@ -119,10 +121,12 @@ export const inboxRoutes: Route[] = [
     if (id.startsWith('report-')) {
       const i = Number(id.slice(7))
       if (!s.reports[i]) return fail(404, 'not_found', '없는 신고예요.')
+      if ((s.reportStatus[i] ?? 'open') !== 'open') return fail(409, 'case_closed', '이미 처리한 신고예요.')
       s.reportStatus[i] = STATUS_OF[action]
     } else {
       const c = s.adminCases.find((x) => x.id === id)
       if (!c) return fail(404, 'not_found', '없는 신고예요.')
+      if (c.status !== 'open') return fail(409, 'case_closed', '이미 처리한 신고예요.')
       c.status = STATUS_OF[action]
     }
     save()

@@ -1,16 +1,18 @@
 /**
- * admin API (B7 운영자·복지기관 화면) — 백엔드가 아직 없어 계약은 shared/api/draft.ts (데모 서버만 응답).
- * 실서비스: 운영자 권한(역할) 확인 필수 — 데모는 로그인만 확인.
+ * admin API (B7 운영자·복지기관 화면) — 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts).
+ * 서버는 운영자 역할(users.role='operator')만 받는다 — 역할은 backend `scripts.set_role` 로. 데모는 로그인만 확인.
  */
 import { api } from '@/shared/api/client'
-import type { AdminCaseOut, AdminWatchOut, CaseAction } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
 
-export type { CaseAction, CaseStatus } from '@/shared/api/draft'
-export type AdminCase = AdminCaseOut
-export type AdminWatch = AdminWatchOut
+export type AdminCase = Schema<'AdminCaseOut'>
+export type AdminWatch = Schema<'AdminWatchOut'>
+export type CaseStatus = AdminCase['status']
+export type CaseAction = Schema<'CaseActionIn'>['action']
 
 export const adminApi = {
   cases: () => api.get<AdminCase[]>('/admin/cases'),
-  act: (id: string, action: CaseAction) => api.post<AdminCase>(`/admin/cases/${id}/action`, { action }),
+  act: (id: string, action: CaseAction) =>
+    api.post<AdminCase>(`/admin/cases/${id}/action`, { action } satisfies Schema<'CaseActionIn'>),
   watch: () => api.get<AdminWatch[]>('/admin/watch'),
 }

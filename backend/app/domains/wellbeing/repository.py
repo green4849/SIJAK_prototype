@@ -36,6 +36,11 @@ class WellbeingRepository:
         )
         return list(reversed(list(await self.session.scalars(q))))
 
+    async def weeks_since(self, since: date) -> list[RelationIndexWeek]:
+        """since(월요일) 이후 모든 사람의 주별 값 — 운영자 돌봄 목록 (B7)"""
+        q = select(RelationIndexWeek).where(RelationIndexWeek.week_start >= since)
+        return list(await self.session.scalars(q))
+
     # ---------- 자가평가 ----------
 
     async def add_assessment(

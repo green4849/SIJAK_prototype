@@ -187,6 +187,17 @@ class AssessmentResult:
     created_at: datetime
 
 
+@dataclass(frozen=True)
+class WatchRow:
+    """운영자 돌봄 목록 한 줄 (B7)"""
+
+    user_id: uuid.UUID
+    score: int
+    #: 그 전 주 값 (없으면 None)
+    previous: int | None
+    level: str
+
+
 class InvalidAssessmentError(DomainError):
     status_code = 422
     code = "validation_error"
@@ -263,6 +274,28 @@ class WellbeingService:
             "social": social,
             "responsiveness": RESPONSIVENESS_FIXED,
         }
+
+    async def lowest_recent(self, limit: int) -> list[WatchRow]:
+        """이번 주나 지난주 지수가 '정상' 아래인 사람 — 낮은 순 (운영자 돌봄 목록, B7).
+
+        지수는 본인이 화면을 볼 때 계산되므로, 2주 넘게 안 본 사람은 빠진다
+        (주간 일괄 계산 작업이 생기면 모두 들어온다 — docs/deferred.md §7).
+        """
+        today = datetime.now(KST).date()
+        this_week = today - timedelta(days=today.weekday())
+        by_user: dict[uuid.UUID, list[tuple[date, int]]] = {}
+        for w in await self.repo.weeks_since(this_week - timedelta(weeks=2)):
+            by_user.setdefault(w.user_id, []).append((w.week_start, w.score))
+        rows: list[WatchRow] = []
+        for user_id, weeks in by_user.items():
+            weeks.sort(reverse=True)
+            latest_week, score = weeks[0]
+            if latest_week < this_week - timedelta(weeks=1) or level_of(score) == "normal":
+                continue
+            previous = weeks[1][1] if len(weeks) > 1 else None
+            rows.append(WatchRow(user_id, score, previous, level_of(score)))
+        rows.sort(key=lambda r: r.score)
+        return rows[:limit]
 
     # ---------- 자가평가 ----------
 

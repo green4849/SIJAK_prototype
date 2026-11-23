@@ -171,6 +171,13 @@ class ChatService:
         rooms = await self.repo.list_rooms(me.id)
         return await self.repo.count_sent_since(me.id, [r.id for r in rooms], since)
 
+    async def message_texts(self, ids: set[int]) -> dict[int, str]:
+        """운영자 화면(B7)의 문제 메시지 일부.
+
+        방 참여 확인을 하지 않는다 — 운영자 권한은 admin router 가 확인.
+        """
+        return await self.repo.message_bodies(ids)
+
     async def talked_friend_ids(self, me: "User") -> set[uuid.UUID]:
         """서로 한 번 이상 말을 주고받은 친구 (차단한 사람 제외)"""
         others = {r.other(me.id) for r in await self.repo.rooms_with_reply(me.id)}

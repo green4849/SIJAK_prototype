@@ -125,6 +125,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cases
+         * @description 신고·위험 대화 — 처리 전이 위로, 위험도 높은 순
+         */
+        get: operations["cases_api_v1_admin_cases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/cases/{case_id}/action": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Act
+         * @description 경고 / 7일 정지 / 영구 제한 / 문제없음 — 처리 기록을 남기고 정지·제한은 계정에 바로 반영
+         */
+        post: operations["act_api_v1_admin_cases__case_id__action_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/watch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Watch
+         * @description 돌봄이 필요한 이웃 — 사회적 관계 지수 낮은 순
+         */
+        get: operations["watch_api_v1_admin_watch_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout": {
         parameters: {
             query?: never;
@@ -937,6 +997,85 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** AdminCaseOut */
+        AdminCaseOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Excerpt
+             * @description 문제 메시지 일부
+             */
+            excerpt: string | null;
+            /**
+             * Id
+             * @description auto-<위험 대화 기록 id> / report-<신고 id>
+             */
+            id: string;
+            /**
+             * Level
+             * @description 1 주의 · 2 경고 · 3 위험
+             */
+            level: number;
+            /** Reasons */
+            reasons: string[];
+            /** Reports Count */
+            reports_count: number;
+            /**
+             * Source
+             * @description report: 이웃 신고 / auto: 자동 감지
+             * @enum {string}
+             */
+            source: "report" | "auto";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "warned" | "suspended" | "banned" | "dismissed";
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /** Target Name */
+            target_name: string;
+        };
+        /** AdminWatchOut */
+        AdminWatchOut: {
+            /** Age */
+            age: number;
+            /**
+             * Guardian Notified
+             * @description 최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지
+             */
+            guardian_notified: boolean;
+            /**
+             * Last Seen Text
+             * @description 마지막 접속 '3일 전'
+             */
+            last_seen_text: string;
+            /** Name */
+            name: string;
+            /** Region Name */
+            region_name: string;
+            /**
+             * Relation Score
+             * @description 사회적 관계 지수 0~100 — 낮을수록 돌봄이 필요
+             */
+            relation_score: number;
+            /**
+             * Signal
+             * @description 최근 신호
+             */
+            signal: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
         /** AssessmentFormOut */
         AssessmentFormOut: {
             /**
@@ -1095,6 +1234,14 @@ export interface components {
              * @description 이번 주 한 날 — 길이 7, 월요일부터
              */
             week: boolean[];
+        };
+        /** CaseActionIn */
+        CaseActionIn: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "warn" | "suspend" | "ban" | "dismiss";
         };
         /** CategoryOption */
         CategoryOption: {
@@ -2030,6 +2177,81 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cases_api_v1_admin_cases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCaseOut"][];
+                };
+            };
+        };
+    };
+    act_api_v1_admin_cases__case_id__action_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseActionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    watch_api_v1_admin_watch_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminWatchOut"][];
                 };
             };
         };

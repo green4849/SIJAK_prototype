@@ -1,14 +1,8 @@
-from typing import Annotated
+from fastapi import APIRouter, status
 
-from fastapi import APIRouter, Depends, status
-
-from app.core.deps import DbSession
 from app.core.errors import NotFoundError
-from app.domains.activity.deps import ActivityServiceDep
 from app.domains.auth.deps import CurrentUser
-from app.domains.chat.deps import ChatServiceDep
-from app.domains.friend.deps import FriendServiceDep
-from app.domains.wellbeing.repository import WellbeingRepository
+from app.domains.wellbeing.deps import WellbeingServiceDep
 from app.domains.wellbeing.schemas import (
     AssessmentFormOut,
     AssessmentIn,
@@ -18,18 +12,6 @@ from app.domains.wellbeing.schemas import (
 from app.domains.wellbeing.service import FORMS, WellbeingService
 
 router = APIRouter(prefix="/me", tags=["wellbeing"])
-
-
-def get_wellbeing_service(
-    session: DbSession,
-    chat: ChatServiceDep,
-    friends: FriendServiceDep,
-    activities: ActivityServiceDep,
-) -> WellbeingService:
-    return WellbeingService(WellbeingRepository(session), chat, friends, activities)
-
-
-WellbeingServiceDep = Annotated[WellbeingService, Depends(get_wellbeing_service)]
 
 
 @router.get("/relation-index", response_model=RelationIndexOut)
