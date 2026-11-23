@@ -44,3 +44,8 @@ INTERESTS: dict[str, str] = {
 MAX_INTERESTS = 5
 
 INTRO_MAX_LEN = 60
+
+# 회원 탈퇴 (B3, 보고서 4.6.3) — 탈퇴하면 바로 로그인·노출을 멈추고,
+# 이 날수 뒤 개인정보를 완전히 지운다
+WITHDRAW_GRACE_DAYS = 30
+WITHDRAW_REASON_MAX_LEN = 30

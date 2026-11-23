@@ -594,6 +594,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Withdraw
+         * @description 회원 탈퇴 (B3) — 바로 로그아웃되고, delete_at 에 개인정보를 완전히 지운다
+         */
+        post: operations["withdraw_api_v1_me_withdraw_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/missions": {
         parameters: {
             query?: never;
@@ -1517,6 +1537,23 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** WithdrawIn */
+        WithdrawIn: {
+            /**
+             * Reason
+             * @description 고른 이유 (선택, 통계용)
+             */
+            reason?: string | null;
+        };
+        /** WithdrawOut */
+        WithdrawOut: {
+            /**
+             * Delete At
+             * Format: date
+             * @description 이 날 개인정보가 완전히 지워진다 (탈퇴 + 30일, 한국 날짜)
+             */
+            delete_at: string;
         };
     };
     responses: never;
@@ -2661,6 +2698,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    withdraw_api_v1_me_withdraw_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WithdrawIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WithdrawOut"];
                 };
             };
             /** @description Validation Error */

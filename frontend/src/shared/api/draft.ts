@@ -154,18 +154,6 @@ export interface WelfareCenterOut {
   rooms: WelfareRoomOut[]
 }
 
-// ---------- B3 회원 탈퇴 — /me/withdraw ----------
-
-export interface WithdrawIn {
-  /** 고른 이유 (선택) */
-  reason: string | null
-}
-
-export interface WithdrawOut {
-  /** 이 날 개인정보가 완전히 지워진다 (탈퇴 + 30일) */
-  delete_at: string
-}
-
 // ---------- B7 운영자(복지기관) 화면 — /admin ----------
 
 export type CaseStatus = 'open' | 'warned' | 'suspended' | 'banned' | 'dismissed'

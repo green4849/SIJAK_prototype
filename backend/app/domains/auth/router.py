@@ -28,6 +28,8 @@ from app.domains.auth.schemas import (
     SignupRequiredResult,
     TokenResponse,
     UserOut,
+    WithdrawIn,
+    WithdrawOut,
 )
 from app.domains.auth.service import LoggedIn, TokenPair
 from app.integrations.identity.base import IdentityRequest
@@ -150,3 +152,13 @@ async def update_location(
     body: LocationUpdate, user: CurrentUser, service: AuthServiceDep
 ) -> UserOut:
     return UserOut.from_user(await service.set_location(user, body.lat, body.lng))
+
+
+@router.post("/me/withdraw", response_model=WithdrawOut)
+async def withdraw(
+    body: WithdrawIn, user: CurrentUser, service: AuthServiceDep, response: Response
+) -> WithdrawOut:
+    """회원 탈퇴 (B3) — 바로 로그아웃되고, delete_at 에 개인정보를 완전히 지운다"""
+    delete_at = await service.withdraw(user, body.reason)
+    response.delete_cookie(settings.refresh_cookie_name, path=f"{settings.api_prefix}/auth")
+    return WithdrawOut(delete_at=delete_at)

@@ -1610,6 +1610,40 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "WithdrawIn": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "고른 이유 (선택, 통계용)",
+            "title": "Reason"
+          }
+        },
+        "title": "WithdrawIn",
+        "type": "object"
+      },
+      "WithdrawOut": {
+        "properties": {
+          "delete_at": {
+            "description": "이 날 개인정보가 완전히 지워진다 (탈퇴 + 30일, 한국 날짜)",
+            "format": "date",
+            "title": "Delete At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delete_at"
+        ],
+        "title": "WithdrawOut",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -3344,6 +3378,53 @@
           }
         ],
         "summary": "Update Location",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/me/withdraw": {
+      "post": {
+        "description": "회원 탈퇴 (B3) — 바로 로그아웃되고, delete_at 에 개인정보를 완전히 지운다",
+        "operationId": "withdraw_api_v1_me_withdraw_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw",
         "tags": [
           "auth"
         ]

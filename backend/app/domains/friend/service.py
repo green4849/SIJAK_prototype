@@ -208,7 +208,10 @@ class FriendService:
         ids -= await self._blocked_ids(me.id)
         users = await self.auth.get_users(ids)
         mine = {i.category for i in me.interests}
-        return [self._candidate(u, mine, relations) for u in users.values()]
+        # 탈퇴한 분은 친구·받은 신청 목록에서 바로 빠진다 (B3)
+        return [
+            self._candidate(u, mine, relations) for u in users.values() if u.status != "deleted"
+        ]
 
     async def _candidate_for(self, me: "User", other: "User") -> Candidate:
         return self._candidate(

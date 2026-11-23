@@ -21,7 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-from app.domains.auth.constants import INTRO_MAX_LEN
+from app.domains.auth.constants import INTRO_MAX_LEN, WITHDRAW_REASON_MAX_LEN
 
 USER_STATUSES = ("active", "suspended", "banned", "deleted")
 
@@ -50,6 +50,12 @@ class User(Base):
     geo_lat: Mapped[float | None]
     geo_lng: Mapped[float | None]
     geo_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # 회원 탈퇴 (B3) — status='deleted' 와 함께.
+    # delete_after(한국 날짜)가 지나면 정리 작업이 행째 지운다
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    delete_after: Mapped[date | None] = mapped_column(Date)
+    # 고른 이유 (통계용, 선택) — 정리 작업이 지우기 전에 집계한다
+    withdraw_reason: Mapped[str | None] = mapped_column(String(WITHDRAW_REASON_MAX_LEN))
 
     interests: Mapped[list["UserInterest"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"

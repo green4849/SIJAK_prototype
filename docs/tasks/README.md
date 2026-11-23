@@ -37,7 +37,7 @@
 | [A25](A25-login-continuity.md) | 시작 → 본인 확인, 이어지는 화면 (새싹 전환·② 머리) | S | P1 | ✅ |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
-| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | 🎭 |
+| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | 🔨 탈퇴 ✅ · 정리 작업 ⬜ |
 | [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | ⬜ |
 | [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |
 | [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | ⬜ |
