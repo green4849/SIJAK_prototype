@@ -83,38 +83,3 @@ export interface WelfareCenterOut {
   /** 모임 공간 대여 */
   rooms: WelfareRoomOut[]
 }
-
-// ---------- B7 운영자(복지기관) 화면 — /admin ----------
-
-export type CaseStatus = 'open' | 'warned' | 'suspended' | 'banned' | 'dismissed'
-export type CaseAction = 'warn' | 'suspend' | 'ban' | 'dismiss'
-
-export interface AdminCaseOut {
-  id: string
-  /** report: 이웃이 신고 / auto: 위험 대화 자동 감지 */
-  source: 'report' | 'auto'
-  target_id: string
-  target_name: string
-  reasons: string[]
-  /** 문제 메시지 일부 */
-  excerpt: string | null
-  /** 1 주의 · 2 경고 · 3 위험 */
-  level: number
-  reports_count: number
-  created_at: string
-  status: CaseStatus
-}
-
-export interface AdminWatchOut {
-  user_id: string
-  name: string
-  age: number
-  region_name: string
-  /** 사회적 관계 지수 0~100 — 낮을수록 돌봄이 필요 */
-  relation_score: number
-  /** 마지막 접속 '3일 전' */
-  last_seen_text: string
-  /** 최근 신호 (예: 말동무 대화에서 외로움 표현 늘어남) */
-  signal: string
-  guardian_notified: boolean
-}

@@ -41,7 +41,7 @@
 | [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | ⬜ |
 | [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |
 | [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | ⬜ |
-| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | 🎭 |
+| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | 🔨 처리·권한 ✅ · 대화 맥락 ⬜ |
 | [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ⬜ |
 | [B9](B9-external-session.md) | 인증 세션 외부 저장 (Redis) | S | P1 | ⬜ |
 | [B10](B10-deployment.md) | 배포 구성 | M | P0 | ✅ 구성 |

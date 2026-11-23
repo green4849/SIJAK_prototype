@@ -24,6 +24,8 @@ from app.core.database import Base
 from app.domains.auth.constants import INTRO_MAX_LEN, WITHDRAW_REASON_MAX_LEN
 
 USER_STATUSES = ("active", "suspended", "banned", "deleted")
+# operator: 운영자·복지기관 담당자 (B7 /admin). 역할은 scripts/set_role 로만 바꾼다
+USER_ROLES = ("member", "operator")
 
 
 class User(Base):
@@ -31,6 +33,7 @@ class User(Base):
     __table_args__ = (
         CheckConstraint("gender IN ('M','F')", name="gender"),
         CheckConstraint(f"status IN {USER_STATUSES}", name="status"),
+        CheckConstraint(f"role IN {USER_ROLES}", name="role"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -42,6 +45,9 @@ class User(Base):
     pass_ci: Mapped[str] = mapped_column(String(88), unique=True)
     region_code: Mapped[str] = mapped_column(String(10), index=True)
     status: Mapped[str] = mapped_column(String(20), default="active")
+    role: Mapped[str] = mapped_column(String(20), default="member", server_default="member")
+    # 운영자 '7일 정지'(B7) — 이 시각이 지나면 다음 접속 때 active 로 돌아온다
+    suspended_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # 한 줄 소개 — 친구 찾기(④)에 노출. 시안 예: "산책과 영화, 여행을 좋아해요"

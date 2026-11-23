@@ -12,7 +12,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.deps import DbSession
-from app.core.errors import UnauthorizedError
+from app.core.errors import ForbiddenError, UnauthorizedError
 from app.core.security import decode_token
 from app.domains.auth.models import User
 from app.domains.auth.repository import AuthRepository
@@ -40,3 +40,13 @@ async def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+async def get_current_operator(user: CurrentUser) -> User:
+    """운영자·복지기관 담당자만 (B7 /admin)"""
+    if not AuthService.is_operator(user):
+        raise ForbiddenError("운영자만 볼 수 있어요.", code="not_operator")
+    return user
+
+
+CurrentOperator = Annotated[User, Depends(get_current_operator)]

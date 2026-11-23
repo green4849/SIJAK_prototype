@@ -104,6 +104,144 @@
         "title": "ActivityOut",
         "type": "object"
       },
+      "AdminCaseOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "문제 메시지 일부",
+            "title": "Excerpt"
+          },
+          "id": {
+            "description": "auto-<위험 대화 기록 id> / report-<신고 id>",
+            "title": "Id",
+            "type": "string"
+          },
+          "level": {
+            "description": "1 주의 · 2 경고 · 3 위험",
+            "title": "Level",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "reports_count": {
+            "title": "Reports Count",
+            "type": "integer"
+          },
+          "source": {
+            "description": "report: 이웃 신고 / auto: 자동 감지",
+            "enum": [
+              "report",
+              "auto"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "warned",
+              "suspended",
+              "banned",
+              "dismissed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_name": {
+            "title": "Target Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "target_id",
+          "target_name",
+          "reasons",
+          "excerpt",
+          "level",
+          "reports_count",
+          "created_at",
+          "status"
+        ],
+        "title": "AdminCaseOut",
+        "type": "object"
+      },
+      "AdminWatchOut": {
+        "properties": {
+          "age": {
+            "title": "Age",
+            "type": "integer"
+          },
+          "guardian_notified": {
+            "description": "최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지",
+            "title": "Guardian Notified",
+            "type": "boolean"
+          },
+          "last_seen_text": {
+            "description": "마지막 접속 '3일 전'",
+            "title": "Last Seen Text",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "region_name": {
+            "title": "Region Name",
+            "type": "string"
+          },
+          "relation_score": {
+            "description": "사회적 관계 지수 0~100 — 낮을수록 돌봄이 필요",
+            "title": "Relation Score",
+            "type": "integer"
+          },
+          "signal": {
+            "description": "최근 신호",
+            "title": "Signal",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "name",
+          "age",
+          "region_name",
+          "relation_score",
+          "last_seen_text",
+          "signal",
+          "guardian_notified"
+        ],
+        "title": "AdminWatchOut",
+        "type": "object"
+      },
       "AssessmentFormOut": {
         "properties": {
           "kind": {
@@ -432,6 +570,25 @@
           "best"
         ],
         "title": "BrainStatsOut",
+        "type": "object"
+      },
+      "CaseActionIn": {
+        "properties": {
+          "action": {
+            "enum": [
+              "warn",
+              "suspend",
+              "ban",
+              "dismiss"
+            ],
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "CaseActionIn",
         "type": "object"
       },
       "CategoryOption": {
@@ -2373,6 +2530,126 @@
         "summary": "Like",
         "tags": [
           "activity"
+        ]
+      }
+    },
+    "/api/v1/admin/cases": {
+      "get": {
+        "description": "신고·위험 대화 — 처리 전이 위로, 위험도 높은 순",
+        "operationId": "cases_api_v1_admin_cases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminCaseOut"
+                  },
+                  "title": "Response Cases Api V1 Admin Cases Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cases",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/cases/{case_id}/action": {
+      "post": {
+        "description": "경고 / 7일 정지 / 영구 제한 / 문제없음 — 처리 기록을 남기고 정지·제한은 계정에 바로 반영",
+        "operationId": "act_api_v1_admin_cases__case_id__action_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCaseOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Act",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/watch": {
+      "get": {
+        "description": "돌봄이 필요한 이웃 — 사회적 관계 지수 낮은 순",
+        "operationId": "watch_api_v1_admin_watch_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminWatchOut"
+                  },
+                  "title": "Response Watch Api V1 Admin Watch Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Watch",
+        "tags": [
+          "admin"
         ]
       }
     },

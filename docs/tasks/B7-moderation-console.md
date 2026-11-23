@@ -2,7 +2,7 @@
 
 | 영역 | 크기 | 우선 | 상태 | 브랜치 |
 |---|---|---|---|---|
-| 실서비스 필수 | L | P0 | 🎭 화면·데모 완료 / 백엔드 대기 | `feat/B3-B7-notifications-leave-admin` |
+| 실서비스 필수 | L | P0 | 🔨 처리·권한 ✅ / 대화 맥락 대기 | `feat/B3-B7-notifications-leave-admin` → `feat/B7-admin` |
 
 ## 왜
 신고가 쌓이기만 한다.
@@ -11,13 +11,14 @@
 별도 admin 앱 또는 보호된 /admin
 
 ## 완료 기준
-- [ ] 신고 목록·대화 맥락 보기
-- [ ] 경고·정지·해제 처리 기록
-- [ ] 운영자 권한 분리
+- [x] 신고 목록 (문제 메시지 일부까지) — `GET /admin/cases`
+- [ ] 대화 맥락 보기 (앞뒤 메시지)
+- [x] 경고·정지·영구 제한·문제없음 처리 기록 `moderation_actions` (해제는 정지 기한이 지나면 자동, 수동 해제는 아직)
+- [x] 운영자 권한 분리 — `users.role`, `CurrentOperator`, `scripts/set_role.py`. 통합 테스트 `tests/integration/test_admin_flow.py`
 
 ## 진행 기록
 
--
+- 2026-11-23 백엔드: 사건은 따로 저장하지 않고 risk 의 `risk_events`·`reports` 를 그대로 사건으로(id `auto-<n>`·`report-<uuid>`), 처리만 `moderation_actions` 에 누가·언제·무엇을. 사건 상태 = 마지막 처리, 한 번 처리하면 409. 정지는 `users.suspended_until`(7일) — 기한이 지나면 다음 접속 때 auth 가 active 로 되돌림(예약 작업 없이). 영구 제한 뒤의 정지는 무시. 돌봄 목록은 `relation_index_weeks` 에서 이번·지난주 값이 정상(70) 이하인 사람, 신호는 7일 이상 미접속 → 지난주보다 하락 → 단계 순. 데모도 처리한 사건은 409
 
 ## 이번에 한 것 — 화면·시연 데이터 (백엔드 없음, docs/deferred.md §7)
 - `/admin` (어르신 화면에는 들어가는 길 없음 — 주소로 직접): 같은 앱 안 보호 라우트 방식

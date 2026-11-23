@@ -83,6 +83,7 @@ class AuthService:
 
         user = await self.repo.get_user_by_ci(ident.ci)
         if user is not None:
+            await self._lift_expired_suspension(user)
             self._ensure_can_login(user)
             return LoggedIn(user, await self._login(user))
 
@@ -208,10 +209,40 @@ class AuthService:
         user = await self.repo.get_user(user_id)
         if user is None:
             raise UnauthorizedError("다시 로그인해 주세요.", code="user_not_found")
+        await self._lift_expired_suspension(user)
         self._ensure_can_login(user)
         return user
 
+    async def sanction(
+        self, user_id: uuid.UUID, status: str, suspended_until: datetime | None
+    ) -> None:
+        """운영자 처리(B7) — 정지(suspended, 기한 있음)·영구 제한(banned). 모든 기기 로그아웃.
+
+        커밋은 부른 쪽(admin)의 처리 기록과 함께.
+        """
+        user = await self.repo.get_user(user_id)
+        if user is None or user.status == "deleted":
+            return
+        if user.status == "banned" and status == "suspended":
+            return  # 더 무거운 처리가 이미 있으면 그대로
+        await self.repo.set_status(user, status, suspended_until)
+        await self.repo.revoke_all_refresh_tokens(user.id)
+
+    @staticmethod
+    def is_operator(user: User) -> bool:
+        return user.role == "operator"
+
     # ---------- 내부 ----------
+
+    async def _lift_expired_suspension(self, user: User) -> None:
+        """기한이 지난 정지는 다음 접속 때 풀어 준다 (따로 예약 작업 없이)"""
+        if (
+            user.status == "suspended"
+            and user.suspended_until is not None
+            and user.suspended_until <= datetime.now(UTC)
+        ):
+            await self.repo.set_status(user, "active", None)
+            await self.repo.commit()
 
     async def _login(self, user: User) -> TokenPair:
         await self.repo.touch_last_login(user)
@@ -262,6 +293,9 @@ class AuthService:
             "deleted": "탈퇴한 계정이에요.",
         }
         message = messages.get(user.status, "이용할 수 없는 계정이에요.")
+        if user.status == "suspended" and user.suspended_until:
+            d = user.suspended_until.astimezone(_KST)
+            message += f" {d.month}월 {d.day}일 {d.hour}시부터 다시 쓸 수 있어요."
         if user.status == "deleted" and user.delete_after:
             d = user.delete_after
             message += f" {d.month}월 {d.day}일 뒤에 다시 가입할 수 있어요."

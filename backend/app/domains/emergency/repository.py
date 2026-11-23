@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,6 +39,10 @@ class EmergencyRepository:
         await self.session.flush()
         await self.session.refresh(event)
         return event
+
+    async def sos_user_ids_since(self, since: datetime) -> set[uuid.UUID]:
+        q = select(SosEvent.user_id).where(SosEvent.created_at >= since).distinct()
+        return set(await self.session.scalars(q))
 
     async def lock_user(self, user_id: uuid.UUID) -> None:
         """보호자 수 확인~추가 사이에 다른 요청이 끼지 않게 (트랜잭션 끝까지)"""

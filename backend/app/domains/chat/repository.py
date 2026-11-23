@@ -113,5 +113,11 @@ class ChatRepository:
         )
         return int(await self.session.scalar(q) or 0)
 
+    async def message_bodies(self, ids: set[int]) -> dict[int, str]:
+        if not ids:
+            return {}
+        q = select(ChatMessage.id, ChatMessage.body).where(ChatMessage.id.in_(ids))
+        return {i: b for i, b in await self.session.execute(q) if b}
+
     async def commit(self) -> None:
         await self.session.commit()

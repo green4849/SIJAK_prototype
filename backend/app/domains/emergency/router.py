@@ -1,22 +1,12 @@
 import uuid
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from app.core.deps import DbSession
 from app.domains.auth.deps import CurrentUser
-from app.domains.emergency.repository import EmergencyRepository
+from app.domains.emergency.deps import EmergencyServiceDep
 from app.domains.emergency.schemas import GuardianIn, GuardianOut, SosOut
-from app.domains.emergency.service import EmergencyService
 
 router = APIRouter(tags=["emergency"])
-
-
-def get_emergency_service(session: DbSession) -> EmergencyService:
-    return EmergencyService(EmergencyRepository(session))
-
-
-EmergencyServiceDep = Annotated[EmergencyService, Depends(get_emergency_service)]
 
 
 @router.get("/me/guardians", response_model=list[GuardianOut])

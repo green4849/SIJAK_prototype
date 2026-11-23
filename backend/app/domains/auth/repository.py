@@ -93,5 +93,12 @@ class AuthRepository:
         await self.revoke_all_refresh_tokens(user.id)
         await self.session.flush()
 
+    async def set_status(
+        self, user: User, status: str, suspended_until: datetime | None = None
+    ) -> None:
+        user.status = status
+        user.suspended_until = suspended_until
+        await self.session.flush()
+
     async def commit(self) -> None:
         await self.session.commit()

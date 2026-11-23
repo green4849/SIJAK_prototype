@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,6 +46,37 @@ class RiskRepository:
         for blocker, blocked in (await self.session.execute(q)).all():
             out.add(blocked if blocker == user_id else blocker)
         return out
+
+    # ---------- 운영자 화면 (B7) ----------
+
+    async def recent_events(self, limit: int) -> list[RiskEvent]:
+        q = select(RiskEvent).order_by(RiskEvent.id.desc()).limit(limit)
+        return list(await self.session.scalars(q))
+
+    async def recent_reports(self, limit: int) -> list[Report]:
+        q = select(Report).order_by(Report.created_at.desc()).limit(limit)
+        return list(await self.session.scalars(q))
+
+    async def get_event(self, event_id: int) -> RiskEvent | None:
+        return await self.session.get(RiskEvent, event_id)
+
+    async def get_report(self, report_id: uuid.UUID) -> Report | None:
+        return await self.session.get(Report, report_id)
+
+    async def report_counts(self, target_ids: set[uuid.UUID]) -> dict[uuid.UUID, int]:
+        if not target_ids:
+            return {}
+        q = (
+            select(Report.target_id, func.count())
+            .where(Report.target_id.in_(target_ids))
+            .group_by(Report.target_id)
+        )
+        return {t: int(n) for t, n in await self.session.execute(q)}
+
+    async def set_report_status(self, report_id: uuid.UUID, status: str) -> None:
+        await self.session.execute(
+            update(Report).where(Report.id == report_id).values(status=status)
+        )
 
     async def commit(self) -> None:
         await self.session.commit()

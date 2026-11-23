@@ -77,3 +77,7 @@ class EmergencyService:
         await self.repo.commit()
         # TODO(C4): 보호자 문자·푸시, 담당 복지사 알림 — 지금은 기록만
         return SosResult(id=ev.id, created_at=ev.created_at, notified=notified)
+
+    async def recent_sos_user_ids(self, since: datetime) -> set[uuid.UUID]:
+        """since 이후 긴급 도움을 누른 사람 — 운영자 돌봄 목록의 '보호자 알림' 표시 (B7)"""
+        return await self.repo.sos_user_ids_since(since)

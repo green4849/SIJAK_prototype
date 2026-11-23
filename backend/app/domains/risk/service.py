@@ -8,7 +8,7 @@ import uuid
 from app.core.errors import DomainError
 from app.domains.risk.models import REPORT_REASONS, Report, RiskEvent
 from app.domains.risk.repository import RiskRepository
-from app.domains.risk.rules import Assessment, assess_text
+from app.domains.risk.rules import RULES, Assessment, assess_text
 
 
 class InvalidReportError(DomainError):
@@ -75,3 +75,31 @@ class RiskService:
 
     async def is_blocked_between(self, a: uuid.UUID, b: uuid.UUID) -> bool:
         return b in await self.repo.related_block_ids(a)
+
+    # ---------- 운영자 화면 (B7) — admin 도메인이 쓴다 ----------
+
+    async def recent_events(self, limit: int) -> list[RiskEvent]:
+        return await self.repo.recent_events(limit)
+
+    async def recent_reports(self, limit: int) -> list[Report]:
+        return await self.repo.recent_reports(limit)
+
+    async def get_event(self, event_id: int) -> RiskEvent | None:
+        return await self.repo.get_event(event_id)
+
+    async def get_report(self, report_id: uuid.UUID) -> Report | None:
+        return await self.repo.get_report(report_id)
+
+    async def report_counts(self, target_ids: set[uuid.UUID]) -> dict[uuid.UUID, int]:
+        """대상별 받은 신고 수"""
+        return await self.repo.report_counts(target_ids)
+
+    async def mark_report_reviewed(self, report_id: uuid.UUID) -> None:
+        """커밋은 부른 쪽(admin)의 처리 기록과 함께"""
+        await self.repo.set_report_status(report_id, "reviewed")
+
+    @staticmethod
+    def labels_for(codes: list[str]) -> list[str]:
+        """위험 분류 코드 → 사람이 읽는 설명 (rules.RULES 순서)"""
+        names = {code: label for code, label, _, _ in RULES}
+        return [names.get(c, c) for c in codes]
