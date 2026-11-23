@@ -39,8 +39,10 @@ const INTEREST_CATEGORY: Record<string, string> = {
 function pickActivity(me: DUser): DCompanionMsg['suggestion'] {
   const now = Date.now()
   const prefer = new Set(me.interests.map((i) => INTEREST_CATEGORY[i]).filter(Boolean))
-  const list = db()
-    .activities.filter((a) => a.region_code === me.region_code && new Date(a.starts_at).getTime() > now)
+  const upcoming = db().activities.filter((a) => new Date(a.starts_at).getTime() > now)
+  // 시연 활동은 오산 기준 — 다른 지역에서 가입해도 권할 활동이 있게 (지역생활 목록과 같은 규칙)
+  const local = upcoming.filter((a) => a.region_code === me.region_code)
+  const list = (local.length ? local : upcoming)
     .sort((a, b) => Number(prefer.has(b.category)) - Number(prefer.has(a.category)) || a.starts_at.localeCompare(b.starts_at))
   const a = list[0]
   return a ? { activity_id: a.id, title: a.title, schedule_text: a.schedule_text } : null

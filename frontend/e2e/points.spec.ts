@@ -1,6 +1,6 @@
 /**
  * C12 — 포인트·추천 평가·대화 주제·봉사모임·첫 친구 미션·알림 설정
- * 둘러보기 시드: 김시작 110P (가입 100 + 어제 평가 10, 이순자님께 첫 신청은 무료로 이미 사용)
+ * 둘러보기 시드: 김시작 100P (가입 100, 이순자님께 첫 신청은 무료로 이미 사용)
  */
 import { expect, test, type Page } from '@playwright/test'
 import { confirmRequest, startTour } from './helpers'
@@ -9,14 +9,14 @@ const chip = (page: Page) => page.getByRole('link', { name: /^내 포인트/ })
 
 test('C12 홈: 포인트 칩·첫 친구 미션 → 내 포인트 화면', async ({ page }) => {
   await startTour(page)
-  await expect(chip(page)).toHaveText('110P')
+  await expect(chip(page)).toHaveText('100P')
   const mission = page.getByRole('region', { name: '미션: 첫 친구 3명 사귀기' })
   await expect(mission.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
   await expect(mission).toContainText('3명 중 1명')
 
   await chip(page).click()
   await expect(page.getByRole('heading', { name: '내 포인트' })).toBeVisible()
-  await expect(page.getByRole('region', { name: '지금 가진 포인트' })).toContainText('110P')
+  await expect(page.getByRole('region', { name: '지금 가진 포인트' })).toContainText('100P')
   const history = page.getByRole('region', { name: '최근 내역' })
   await expect(history).toContainText('이순자님께 친구 신청')
   await expect(history).toContainText('무료')
@@ -37,7 +37,7 @@ test('C12 추천 평가: 만나보고 싶어요를 누르면 표시 + 포인트'
   await expect(younghee.getByRole('button', { name: /그저 그래요|잘 안 맞아요/ })).toHaveCount(0)
 
   await page.goto('/me')
-  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('120P')
+  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('110P')
 })
 
 test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (무료로 모으기 먼저)', async ({ page }) => {
@@ -52,13 +52,13 @@ test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (�
     await ask.getByRole('button', { name: '친구 신청 · 30P' }).click()
     await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
   }
-  // 110 − 90 = 20P → 네 번째는 모자람
+  // 100 − 90 = 10P → 네 번째는 모자람
   await page.getByRole('article', { name: '윤기철님' }).getByRole('button', { name: /친구 신청/ }).click()
   await confirmRequest(page)
   const sheet = page.getByRole('dialog', { name: '포인트가 조금 부족해요' })
   await expect(sheet).toBeVisible()
   await expect(sheet).toContainText('30P 필요')
-  await expect(sheet).toContainText('20P')
+  await expect(sheet).toContainText('10P')
   await sheet.getByRole('button', { name: /구독하고 매달 받기/ }).click()
   await expect(page.getByRole('status').filter({ hasText: '준비 중' })).toBeVisible()
 
@@ -82,14 +82,14 @@ test('C12 봉사모임: 봉사 탭 → 참여 포인트 → 신청하면 적립,
   await page.getByRole('button', { name: '신청하기' }).click()
   await expect(page.getByRole('status').filter({ hasText: '+100P' })).toBeVisible()
   await page.goto('/me')
-  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('210P')
+  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('200P')
 
   await page.goBack()
   await page.getByRole('button', { name: '신청 취소하기' }).click()
   await page.getByRole('dialog', { name: '신청을 취소할까요?' }).getByRole('button', { name: '신청 취소' }).click()
   await expect(page.getByRole('status').filter({ hasText: '포인트를 돌려드렸어요' })).toBeVisible()
   await page.goto('/me')
-  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('110P')
+  await expect(page.getByRole('link', { name: /내 포인트/ })).toContainText('100P')
 })
 
 test('C12 대화 주제: 고르면 입력칸에 들어가고, 보내기는 직접', async ({ page }) => {
@@ -151,7 +151,7 @@ test('C12 첫 친구 미션: 서로 대화한 친구 3명 → 500P 받기', asyn
   await page.getByRole('button', { name: '500P 받기' }).click()
   await expect(page.getByRole('status').filter({ hasText: '500P를 받았어요' })).toBeVisible()
   await expect(page.getByRole('region', { name: /미션/ })).toHaveCount(0) // 받은 미션은 홈에서 사라짐
-  await expect(chip(page)).toHaveText('610P')
+  await expect(chip(page)).toHaveText('600P')
 })
 
 test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ page }) => {
@@ -179,4 +179,20 @@ test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ p
   await page.getByRole('switch', { name: '추천 친구 알림' }).click()
   await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toHaveAttribute('aria-checked', 'false')
   await expect(noon).toHaveCount(0)
+})
+
+test('시연 대본 순서 — 평가(+10P)를 먼저 해도 네 번째 신청에서 포인트 부족 안내가 나온다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/friends')
+  await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '만나보고 싶어요' }).click()
+  await expect(page.getByRole('status').filter({ hasText: '+10P' })).toBeVisible()
+  for (const name of ['김영희님', '최말순님', '한옥자님']) {
+    const card = page.getByRole('article', { name })
+    await card.getByRole('button', { name: '친구 신청 · 30P' }).click()
+    await confirmRequest(page)
+    await expect(card.getByRole('button', { name: /신청했어요/ })).toBeDisabled()
+  }
+  await page.getByRole('article', { name: '윤기철님' }).getByRole('button', { name: /친구 신청/ }).click()
+  await confirmRequest(page)
+  await expect(page.getByRole('dialog', { name: '포인트가 조금 부족해요' })).toContainText('20P')
 })
