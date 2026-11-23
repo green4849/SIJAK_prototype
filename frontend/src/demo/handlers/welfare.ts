@@ -1,11 +1,15 @@
 /**
- * 가까운 복지시설 (C7) · 두뇌 운동 — 백엔드 없음. 계약: shared/api/draft.ts
+ * 가까운 복지시설 (C7, 백엔드 없음 — 계약: shared/api/draft.ts) · 두뇌 운동 (C13, 백엔드 domains/brain)
  * 복지시설은 공공데이터포털 '노인복지시설' 형식을 본뜬 시연 데이터 — 오산시 양산동 기준 (아래 CENTERS 설명).
  */
 import { fail, json, type Route } from '../http'
 import { db, save } from '../store'
 import { requireUser } from './auth'
-import type { BrainResultIn, BrainStatsOut, WelfareCenterOut, WelfareKind } from '@/shared/api/draft'
+import type { WelfareCenterOut, WelfareKind } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
+
+type BrainStatsOut = Schema<'BrainStatsOut'>
+type BrainResultIn = Schema<'BrainResultIn'>
 
 const KIND_LABEL: Record<WelfareKind, string> = {
   welfare_center: '노인복지관',
@@ -122,6 +126,9 @@ export const welfareRoutes: Route[] = [
     const me = requireUser(req)
     const b = req.body as BrainResultIn
     if (b?.game !== 'match' && b?.game !== 'calc') return fail(422, 'validation_error', '없는 게임이에요.')
+    // 백엔드(domains/brain)와 같은 검사
+    if (b.game === 'calc' && b.score > b.total) return fail(422, 'validation_error', '맞힌 개수가 문제 수보다 많아요.')
+    if (b.game === 'match' && b.score < b.total) return fail(422, 'validation_error', '뒤집은 횟수를 다시 확인해 주세요.')
     db().brain.push({ uid: me.id, game: b.game, score: b.score, total: b.total, at: new Date().toISOString() })
     save()
     return json(brainStats(me.id), 201)

@@ -227,6 +227,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/brain/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record
+         * @description 끝난 판 하나 기록 → 갱신된 기록을 돌려준다
+         */
+        post: operations["record_api_v1_brain_results_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/brain/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stats */
+        get: operations["stats_api_v1_brain_stats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/chats": {
         parameters: {
             query?: never;
@@ -800,6 +837,51 @@ export interface components {
              * @default 0
              */
             duration_sec: number;
+        };
+        /** BrainBest */
+        BrainBest: {
+            /**
+             * Game
+             * @enum {string}
+             */
+            game: "match" | "calc";
+            /** Text */
+            text: string;
+        };
+        /** BrainResultIn */
+        BrainResultIn: {
+            /**
+             * Game
+             * @enum {string}
+             */
+            game: "match" | "calc";
+            /**
+             * Score
+             * @description match: 뒤집은 횟수(적을수록 좋음) / calc: 맞힌 개수
+             */
+            score: number;
+            /**
+             * Total
+             * @description match: 짝 수 / calc: 문제 수
+             */
+            total: number;
+        };
+        /** BrainStatsOut */
+        BrainStatsOut: {
+            /** Best */
+            best: components["schemas"]["BrainBest"][];
+            /**
+             * Streak Days
+             * @description 연속으로 한 날 (한국 날짜)
+             */
+            streak_days: number;
+            /** Today Done */
+            today_done: boolean;
+            /**
+             * Week
+             * @description 이번 주 한 날 — 길이 7, 월요일부터
+             */
+            week: boolean[];
         };
         /** CategoryOption */
         CategoryOption: {
@@ -1798,6 +1880,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_api_v1_brain_results_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BrainResultIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrainStatsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stats_api_v1_brain_stats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrainStatsOut"];
                 };
             };
         };

@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.domains.activity.router import router as activity_router
 from app.domains.auth.router import router as auth_router
+from app.domains.brain.router import router as brain_router
 from app.domains.chat.router import router as chat_router
 from app.domains.emergency.router import router as emergency_router
 from app.domains.friend.router import router as friend_router
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     api.include_router(mission_router)  # C12 미션
     api.include_router(notification_router)  # C12 알림 설정
     api.include_router(emergency_router)  # C10 보호자·긴급 도움
+    api.include_router(brain_router)  # C13 두뇌 운동 기록
 
     app.include_router(api)
     return app

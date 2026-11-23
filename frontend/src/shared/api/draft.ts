@@ -154,27 +154,6 @@ export interface WelfareCenterOut {
   rooms: WelfareRoomOut[]
 }
 
-// ---------- 인지 훈련 (보고서 3.1 '인지 강화 기능') — /brain ----------
-
-export type BrainGame = 'match' | 'calc'
-
-export interface BrainStatsOut {
-  /** 연속으로 한 날 */
-  streak_days: number
-  /** 오늘 했는지 */
-  today_done: boolean
-  /** 이번 주 (월~일) 한 날 — 길이 7, 월요일부터 */
-  week: boolean[]
-  best: { game: BrainGame; text: string }[]
-}
-
-export interface BrainResultIn {
-  game: BrainGame
-  /** match: 뒤집은 횟수(적을수록 좋음) / calc: 맞힌 개수 */
-  score: number
-  total: number
-}
-
 // ---------- 알림함 (C4 푸시와 같은 소식을 앱 안에 모아 둠) — /notifications ----------
 
 export type NotificationKind = 'friend' | 'activity' | 'safety' | 'wellbeing' | 'welfare' | 'points'
