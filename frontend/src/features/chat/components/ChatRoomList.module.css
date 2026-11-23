@@ -55,6 +55,7 @@
 .time {
   color: var(--color-text-muted);
   font-size: var(--text-meta);
+  white-space: nowrap; /* '오전 12:30'이 두 줄로 갈라지지 않게 */
 }
 
 .badge {
@@ -65,4 +66,31 @@
   color: var(--color-on-danger);
   font-weight: var(--weight-bold);
   text-align: center;
+}
+
+/*
+ * 큰 글씨(3·4단계)에서는 시간·안 읽은 수를 이름 아래 줄로 — 한 줄에 다 넣으면
+ * 이름이 한 글자씩 세로로 쌓이고 미리보기가 사라진다
+ */
+:root[data-font-scale='3'] .item,
+:root[data-font-scale='4'] .item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-2);
+  row-gap: 4px;
+}
+
+:root[data-font-scale='3'] .item > :first-child,
+:root[data-font-scale='4'] .item > :first-child {
+  grid-row: span 2;
+  align-self: center;
+}
+
+:root[data-font-scale='3'] .side,
+:root[data-font-scale='4'] .side {
+  grid-column: 2;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-1);
 }

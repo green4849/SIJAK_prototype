@@ -68,7 +68,7 @@
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr)); /* 아주 큰 글씨에서도 일곱 칸이 화면 안에 */
   gap: 4px;
   text-align: center;
   font-size: var(--text-meta);
@@ -83,8 +83,8 @@
 }
 
 .dot {
-  width: 2em;
-  height: 2em;
+  width: min(2em, 100%);
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
   border-radius: 50%;
