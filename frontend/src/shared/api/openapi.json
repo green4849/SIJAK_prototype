@@ -166,6 +166,97 @@
         "title": "Body_send_voice_api_v1_chats__room_id__voice_post",
         "type": "object"
       },
+      "BrainBest": {
+        "properties": {
+          "game": {
+            "enum": [
+              "match",
+              "calc"
+            ],
+            "title": "Game",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "text"
+        ],
+        "title": "BrainBest",
+        "type": "object"
+      },
+      "BrainResultIn": {
+        "properties": {
+          "game": {
+            "enum": [
+              "match",
+              "calc"
+            ],
+            "title": "Game",
+            "type": "string"
+          },
+          "score": {
+            "description": "match: 뒤집은 횟수(적을수록 좋음) / calc: 맞힌 개수",
+            "maximum": 999.0,
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "integer"
+          },
+          "total": {
+            "description": "match: 짝 수 / calc: 문제 수",
+            "maximum": 99.0,
+            "minimum": 1.0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "game",
+          "score",
+          "total"
+        ],
+        "title": "BrainResultIn",
+        "type": "object"
+      },
+      "BrainStatsOut": {
+        "properties": {
+          "best": {
+            "items": {
+              "$ref": "#/components/schemas/BrainBest"
+            },
+            "title": "Best",
+            "type": "array"
+          },
+          "streak_days": {
+            "description": "연속으로 한 날 (한국 날짜)",
+            "title": "Streak Days",
+            "type": "integer"
+          },
+          "today_done": {
+            "title": "Today Done",
+            "type": "boolean"
+          },
+          "week": {
+            "description": "이번 주 한 날 — 길이 7, 월요일부터",
+            "items": {
+              "type": "boolean"
+            },
+            "title": "Week",
+            "type": "array"
+          }
+        },
+        "required": [
+          "streak_days",
+          "today_done",
+          "week",
+          "best"
+        ],
+        "title": "BrainStatsOut",
+        "type": "object"
+      },
       "CategoryOption": {
         "properties": {
           "code": {
@@ -2138,6 +2229,79 @@
         "summary": "Signup",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/brain/results": {
+      "post": {
+        "description": "끝난 판 하나 기록 → 갱신된 기록을 돌려준다",
+        "operationId": "record_api_v1_brain_results_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrainResultIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrainStatsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record",
+        "tags": [
+          "brain"
+        ]
+      }
+    },
+    "/api/v1/brain/stats": {
+      "get": {
+        "operationId": "stats_api_v1_brain_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrainStatsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stats",
+        "tags": [
+          "brain"
         ]
       }
     },
