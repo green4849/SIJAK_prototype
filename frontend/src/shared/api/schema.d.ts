@@ -941,6 +941,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/welfare/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Nearby
+         * @description 가까운 복지시설 — 내 위치가 있으면 반경 5km 안 가까운 순, 없으면 같은 시·도
+         */
+        get: operations["nearby_api_v1_welfare_nearby_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/welfare/{center_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_welfare__center_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1897,6 +1934,80 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** WelfareCenterOut */
+        WelfareCenterOut: {
+            /** Address */
+            address: string;
+            /**
+             * Distance Km
+             * @description 0.5km 단위. 내 위치를 모르면 null
+             */
+            distance_km: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "welfare_center" | "senior_center" | "kyungrodang";
+            /** Kind Label */
+            kind_label: string;
+            /** Name */
+            name: string;
+            /** Open Hours */
+            open_hours: string;
+            /** Phone */
+            phone: string;
+            /** Programs */
+            programs: components["schemas"]["WelfareProgramOut"][];
+            /**
+             * Rooms
+             * @description 모임 공간 대여
+             */
+            rooms: components["schemas"]["WelfareRoomOut"][];
+            /**
+             * Sample Note
+             * @description 예시·시연 데이터면 화면에 붙일 안내 (실제 공공데이터면 null)
+             */
+            sample_note: string | null;
+        };
+        /** WelfareProgramOut */
+        WelfareProgramOut: {
+            /**
+             * Fee Text
+             * @description '무료' · '월 1만 원'
+             */
+            fee_text: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Schedule Text */
+            schedule_text: string;
+            /**
+             * Seats Left
+             * @description 남은 자리 (모르면 null)
+             */
+            seats_left: number | null;
+            /** Title */
+            title: string;
+        };
+        /** WelfareRoomOut */
+        WelfareRoomOut: {
+            /**
+             * Available Text
+             * @description '평일 오후 비어 있어요'
+             */
+            available_text: string;
+            /** Capacity */
+            capacity: number;
+            /** Name */
+            name: string;
         };
         /** WithdrawIn */
         WithdrawIn: {
@@ -3614,6 +3725,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    nearby_api_v1_welfare_nearby_get: {
+        parameters: {
+            query?: {
+                kind?: ("welfare_center" | "senior_center" | "kyungrodang") | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WelfareCenterOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_v1_welfare__center_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                center_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WelfareCenterOut"];
                 };
             };
             /** @description Validation Error */

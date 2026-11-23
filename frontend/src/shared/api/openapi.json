@@ -2084,6 +2084,165 @@
         "title": "ValidationError",
         "type": "object"
       },
+      "WelfareCenterOut": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "0.5km 단위. 내 위치를 모르면 null",
+            "title": "Distance Km"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "welfare_center",
+              "senior_center",
+              "kyungrodang"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "kind_label": {
+            "title": "Kind Label",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "open_hours": {
+            "title": "Open Hours",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/components/schemas/WelfareProgramOut"
+            },
+            "title": "Programs",
+            "type": "array"
+          },
+          "rooms": {
+            "description": "모임 공간 대여",
+            "items": {
+              "$ref": "#/components/schemas/WelfareRoomOut"
+            },
+            "title": "Rooms",
+            "type": "array"
+          },
+          "sample_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "예시·시연 데이터면 화면에 붙일 안내 (실제 공공데이터면 null)",
+            "title": "Sample Note"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "kind_label",
+          "address",
+          "phone",
+          "distance_km",
+          "open_hours",
+          "programs",
+          "rooms",
+          "sample_note"
+        ],
+        "title": "WelfareCenterOut",
+        "type": "object"
+      },
+      "WelfareProgramOut": {
+        "properties": {
+          "fee_text": {
+            "description": "'무료' · '월 1만 원'",
+            "title": "Fee Text",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "schedule_text": {
+            "title": "Schedule Text",
+            "type": "string"
+          },
+          "seats_left": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "남은 자리 (모르면 null)",
+            "title": "Seats Left"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "schedule_text",
+          "fee_text",
+          "seats_left"
+        ],
+        "title": "WelfareProgramOut",
+        "type": "object"
+      },
+      "WelfareRoomOut": {
+        "properties": {
+          "available_text": {
+            "description": "'평일 오후 비어 있어요'",
+            "title": "Available Text",
+            "type": "string"
+          },
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "capacity",
+          "available_text"
+        ],
+        "title": "WelfareRoomOut",
+        "type": "object"
+      },
       "WithdrawIn": {
         "properties": {
           "reason": {
@@ -4643,6 +4802,119 @@
         "summary": "Report",
         "tags": [
           "safety"
+        ]
+      }
+    },
+    "/api/v1/welfare/nearby": {
+      "get": {
+        "description": "가까운 복지시설 — 내 위치가 있으면 반경 5km 안 가까운 순, 없으면 같은 시·도",
+        "operationId": "nearby_api_v1_welfare_nearby_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "welfare_center",
+                    "senior_center",
+                    "kyungrodang"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ],
+              "default": "all",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WelfareCenterOut"
+                  },
+                  "title": "Response Nearby Api V1 Welfare Nearby Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Nearby",
+        "tags": [
+          "welfare"
+        ]
+      }
+    },
+    "/api/v1/welfare/{center_id}": {
+      "get": {
+        "operationId": "detail_api_v1_welfare__center_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "center_id",
+            "required": true,
+            "schema": {
+              "title": "Center Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WelfareCenterOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Detail",
+        "tags": [
+          "welfare"
         ]
       }
     }

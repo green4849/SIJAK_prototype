@@ -35,7 +35,8 @@ export function WelfareList({ kind, detailHref }: { kind: WelfareKind | 'all'; d
             <span className={styles.main}>
               <span className={styles.title}>{c.name}</span>
               <span className={styles.meta}>
-                {c.kind_label} · {walkText(c.distance_km)}
+                {c.kind_label}
+                {c.distance_km !== null && ` · ${walkText(c.distance_km)}`}
               </span>
               <OpenBadge hours={c.open_hours} />
             </span>
@@ -92,24 +93,28 @@ function Detail({ c, header }: { c: WelfareCenter; header: ReactNode }) {
         <p className={styles.kind}>{c.kind_label}</p>
         <h1 className={styles.name}>{c.name}</h1>
       </div>
-      <DemoNote>시연용 정보예요. 시설 이름만 실제이고, 프로그램·여는 시간·전화번호는 지어낸 값이에요.</DemoNote>
+      {c.sample_note && <DemoNote always>{c.sample_note}</DemoNote>}
 
       <dl className={styles.info}>
         <Row icon={<MapPin aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="주소">
           {c.address}
-          <span className={styles.muted}>
-            {' '}
-            · {walkText(c.distance_km)}
-            {c.distance_km <= 1.5 && ` (${distanceText(c.distance_km)})`}
-          </span>
+          {c.distance_km !== null && (
+            <span className={styles.muted}>
+              {' '}
+              · {walkText(c.distance_km)}
+              {c.distance_km <= 1.5 && ` (${distanceText(c.distance_km)})`}
+            </span>
+          )}
         </Row>
         <Row icon={<Clock aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="여는 시간">
           {c.open_hours}
           <OpenBadge hours={c.open_hours} />
         </Row>
-        <Row icon={<Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="전화">
-          {prettyPhone(c.phone)}
-        </Row>
+        {c.phone && (
+          <Row icon={<Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />} label="전화">
+            {prettyPhone(c.phone)}
+          </Row>
+        )}
       </dl>
 
       {c.programs.length > 0 && (
@@ -158,12 +163,15 @@ function Detail({ c, header }: { c: WelfareCenter; header: ReactNode }) {
         </section>
       )}
 
-      <div className={styles.actionBar} data-bottom-bar>
-        <CallLink number={c.phone} className={styles.call}>
-          <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
-          전화로 신청하기
-        </CallLink>
-      </div>
+      {/* 전화번호를 모르면(예시 시설) 신청 버튼을 숨긴다 — 지어낸 번호로 걸지 않게 */}
+      {c.phone && (
+        <div className={styles.actionBar} data-bottom-bar>
+          <CallLink number={c.phone} className={styles.call}>
+            <Phone aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
+            전화로 신청하기
+          </CallLink>
+        </div>
+      )}
     </article>
   )
 }

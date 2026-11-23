@@ -47,39 +47,3 @@ export interface CompanionInfoOut {
   /** 입력줄 위 '이런 말로 시작해 보세요' 버튼 */
   starters: string[]
 }
-
-// ---------- C7 가까운 복지시설 — /welfare (공공데이터포털 노인복지시설 연동 자리) ----------
-
-export type WelfareKind = 'welfare_center' | 'senior_center' | 'kyungrodang'
-
-export interface WelfareProgramOut {
-  id: string
-  title: string
-  schedule_text: string
-  /** '무료' · '월 1만 원' */
-  fee_text: string
-  /** 남은 자리 (모르면 null) */
-  seats_left: number | null
-}
-
-export interface WelfareRoomOut {
-  name: string
-  capacity: number
-  /** '평일 오후 비어 있어요' */
-  available_text: string
-}
-
-export interface WelfareCenterOut {
-  id: string
-  name: string
-  kind: WelfareKind
-  kind_label: string
-  address: string
-  phone: string
-  /** 0.5km 단위 */
-  distance_km: number
-  open_hours: string
-  programs: WelfareProgramOut[]
-  /** 모임 공간 대여 */
-  rooms: WelfareRoomOut[]
-}

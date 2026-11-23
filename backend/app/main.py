@@ -16,6 +16,7 @@ from app.domains.mission.router import router as mission_router
 from app.domains.notification.router import router as notification_router
 from app.domains.point.router import router as point_router
 from app.domains.risk.router import router as risk_router
+from app.domains.welfare.router import router as welfare_router
 from app.domains.wellbeing.router import router as wellbeing_router
 
 
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     api.include_router(brain_router)  # C13 두뇌 운동 기록
     api.include_router(wellbeing_router)  # C11 사회적 관계 지수·자가평가
     api.include_router(admin_router)  # B7 운영자·복지기관 화면
+    api.include_router(welfare_router)  # C7 가까운 복지시설
 
     app.include_router(api)
     return app

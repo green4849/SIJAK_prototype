@@ -1,12 +1,14 @@
 /**
- * 가까운 복지시설 (C7, 백엔드 없음 — 계약: shared/api/draft.ts) · 두뇌 운동 (C13, 백엔드 domains/brain)
+ * 가까운 복지시설 (C7, 백엔드 domains/welfare) · 두뇌 운동 (C13, 백엔드 domains/brain)
  * 복지시설은 공공데이터포털 '노인복지시설' 형식을 본뜬 시연 데이터 — 오산시 양산동 기준 (아래 CENTERS 설명).
  */
 import { fail, json, type Route } from '../http'
 import { db, save } from '../store'
 import { requireUser } from './auth'
-import type { WelfareCenterOut, WelfareKind } from '@/shared/api/draft'
 import type { Schema } from '@/shared/api/types'
+
+type WelfareCenterOut = Schema<'WelfareCenterOut'>
+type WelfareKind = WelfareCenterOut['kind']
 
 type BrainStatsOut = Schema<'BrainStatsOut'>
 type BrainResultIn = Schema<'BrainResultIn'>
@@ -17,7 +19,10 @@ const KIND_LABEL: Record<WelfareKind, string> = {
   kyungrodang: '경로당',
 }
 
-type Seed = Omit<WelfareCenterOut, 'kind_label'>
+type Seed = Omit<WelfareCenterOut, 'kind_label' | 'sample_note'>
+
+/** 시연 데이터 안내 — 백엔드의 sample_note 자리 (데모는 시설 이름만 실제) */
+const SAMPLE_NOTE = '시연용 정보예요. 시설 이름만 실제이고, 프로그램·여는 시간·전화번호는 지어낸 값이에요.'
 
 /*
  * 오산시 양산동(세마동 관할) 기준 — 실제 있는 단지·기관 이름을 빌려 '진짜 동네'처럼 보이게 한 시연 데이터.
@@ -77,7 +82,7 @@ const CENTERS: Seed[] = [
   },
 ]
 
-const out = (c: Seed): WelfareCenterOut => ({ ...c, kind_label: KIND_LABEL[c.kind] })
+const out = (c: Seed): WelfareCenterOut => ({ ...c, kind_label: KIND_LABEL[c.kind], sample_note: SAMPLE_NOTE })
 
 // ---------- 두뇌 운동 ----------
 
