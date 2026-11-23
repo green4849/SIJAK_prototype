@@ -108,7 +108,7 @@ async def test_validation_error_format(client: AsyncClient) -> None:
     assert r.status_code == 422
     assert r.json()["error"] == {
         "code": "validation_error",
-        "message": "휴대전화 번호를 다시 확인해 주세요.",
+        "message": "휴대폰 번호를 다시 확인해 주세요.",
         "fields": ["phone"],
     }
 

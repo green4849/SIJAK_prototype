@@ -1,3 +1,4 @@
+import { iga } from '@/shared/lib/josa'
 import { TriangleAlert } from 'lucide-react'
 import type { RiskWarningData } from '../api/safetyApi'
 import styles from './RiskWarning.module.css'
@@ -22,7 +23,7 @@ export function RiskWarning({ warning, onReport }: Props) {
         {strong ? '잠깐만요! 조심하세요' : '한 번 더 생각해 보세요'}
       </p>
       <p className={styles.text}>
-        {warning.reasons.join(', ')}이(가) 있어요.
+        {iga(warning.reasons.join(', '))} 있어요.
         {strong && ' 돈을 보내거나 번호를 알려 주지 마세요.'}
       </p>
       <button type="button" className={styles.report} onClick={onReport}>

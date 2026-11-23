@@ -18,7 +18,7 @@ export function SafetyPage() {
       <TopBar back={!afterSignup} backTo="/me" />
       <CoupleScene />
       <div>
-        <h1 className={styles.title}>안전한 시작을 약속합니다</h1>
+        <h1 className={styles.title}>시작은 이렇게 지켜 드려요</h1>
       </div>
 
       <div className={styles.list}>
@@ -32,12 +32,12 @@ export function SafetyPage() {
           accent="yellow"
           icon={ShieldEllipsis}
           title="위험한 대화 자동 감지"
-          description="돈·비밀번호 이야기는 바로 알려요"
+          description="돈·비밀번호 이야기가 나오면 바로 경고해 드려요"
         />
         <ActionCard
           accent="pink"
           icon={CircleAlert}
-          title="신고 및 차단"
+          title="신고·차단"
           description="불편하면 바로 막을 수 있어요"
         />
         <ActionCard

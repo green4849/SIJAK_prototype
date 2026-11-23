@@ -322,7 +322,7 @@ function Faith() {
   )
 }
 
-/** 옛날 이야기 — 오래된 흑백 사진을 들고 이야기하는 할아버지 */
+/** 옛날이야기 — 오래된 흑백 사진을 들고 이야기하는 할아버지 */
 function Memories() {
   const look = P('M', 1, true, 'yellow')
   return (

@@ -265,6 +265,6 @@ class AuthService:
             raise InvalidSignupInputError("좋아하는 것을 하나 이상 골라 주세요.")
         unknown = [i for i in interests if i not in INTERESTS]
         if unknown:
-            raise InvalidSignupInputError("고를 수 없는 관심사가 있어요.")
+            raise InvalidSignupInputError("고를 수 없는 것이 섞여 있어요. 다시 골라 주세요.")
         if len(set(interests)) > MAX_INTERESTS:
-            raise InvalidSignupInputError(f"관심사는 {MAX_INTERESTS}개까지 고를 수 있어요.")
+            raise InvalidSignupInputError(f"좋아하는 것은 {MAX_INTERESTS}개까지 고를 수 있어요.")

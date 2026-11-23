@@ -18,11 +18,11 @@ export function ChatOpenPage() {
         <>
           <Alert>{error}</Alert>
           <ButtonLink to="/friends" variant="secondary" block>
-            친구 찾기로
+            친구 찾으러 가기
           </ButtonLink>
         </>
       ) : (
-        <p role="status">대화방을 여는 중…</p>
+        <p role="status">대화를 여는 중…</p>
       )}
     </>
   )

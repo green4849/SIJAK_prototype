@@ -29,7 +29,7 @@ export function AssessmentCards({ hrefOf }: { hrefOf: (kind: AssessmentKind) => 
             key={kind}
             icon={ClipboardCheck}
             accent="mint"
-            title={`${title} (${count}문항)`}
+            title={`${title} · 질문 ${count}개`}
             description={last ? `지난번: ${last.level_label} · ${formatDate(last.created_at)}` : undefined}
             to={hrefOf(kind)}
           />
@@ -73,7 +73,7 @@ export function AssessmentFlow({ kind, doneHref }: FlowProps) {
         )}
         <p className={styles.note}>진단이 아니라 스스로 살펴보는 점검이에요.</p>
         <ButtonLink to={doneHref} block large>
-          확인
+          마음 건강으로 돌아가기
         </ButtonLink>
       </div>
     )
@@ -106,7 +106,7 @@ export function AssessmentFlow({ kind, doneHref }: FlowProps) {
       {a.error && <Alert>{a.error}</Alert>}
       {a.step > 0 && (
         <Button variant="secondary" onClick={a.back}>
-          이전 문항
+          앞 질문으로
         </Button>
       )}
     </div>

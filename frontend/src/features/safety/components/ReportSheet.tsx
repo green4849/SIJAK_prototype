@@ -31,7 +31,7 @@ export function ReportSheet({ open, targetUserId, targetName, messageId, onClose
     setError(null)
     try {
       await safetyApi.report(targetUserId, reason, messageId)
-      toast('신고했어요. 이제 이 분과는 대화할 수 없어요')
+      toast('신고했어요. 이제 이분과는 대화할 수 없어요')
       onDone()
     } catch (e) {
       setError(errorMessage(e))

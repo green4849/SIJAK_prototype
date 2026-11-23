@@ -3,6 +3,7 @@
  * 실제 서비스는 보고서 4.5 파이프라인(정서 분석 → 컨텍스트 → LLM → 가드레일)이 하는 일을
  * 키워드 몇 개로 흉내 낸다. 가드레일 순서(위기 → 의료 → 나머지)만은 실제와 같게 둔다.
  */
+import { eunneun, ieyo, iga } from '@/shared/lib/josa'
 import { INTERESTS } from './constants'
 import { db, type DCompanionMsg, type DUser } from './store'
 
@@ -24,7 +25,7 @@ export const VOICE_SAMPLES = [
   '요즘 좀 심심해요. 뭐 재미있는 거 없을까요',
 ]
 
-export const STARTERS = ['오늘 기분이 어떤지 말할래요', '옛날 이야기 하고 싶어요', '동네 모임 알려 줘요']
+export const STARTERS = ['오늘 기분이 어떤지 말할래요', '옛날이야기 하고 싶어요', '동네 모임 알려 줘요']
 
 const has = (text: string, re: RegExp) => re.test(text.replace(/\s+/g, ' '))
 
@@ -79,7 +80,7 @@ export function draftReply(me: DUser, text: string, turn: number): DraftReply {
       suggestion,
       emotion: 'sadness',
       text: suggestion
-        ? `그런 날이 있지요. 제가 곁에서 이야기 들을게요. 그리고 이번에 동네에서 '${suggestion.title}'이 있어요. 이웃들 얼굴 보면 기분이 좀 나아지실 거예요.`
+        ? `그런 날이 있지요. 제가 곁에서 이야기 들을게요. 그리고 이번에 동네에서 ${iga(`‘${suggestion.title}’`)} 있어요. 이웃들 얼굴 보면 기분이 좀 나아지실 거예요.`
         : '그런 날이 있지요. 제가 곁에서 이야기 들을게요. 오늘 가장 마음에 남은 일은 뭐였어요?',
     }
   }
@@ -92,12 +93,12 @@ export function draftReply(me: DUser, text: string, turn: number): DraftReply {
       suggestion,
       emotion: 'neutral',
       text: suggestion
-        ? `이런 건 어떠세요? 우리 동네 '${suggestion.title}' — ${suggestion.schedule_text}이에요.`
+        ? `이런 건 어떠세요? 우리 동네 ‘${suggestion.title}’ — ${ieyo(suggestion.schedule_text)}.`
         : '지역생활 탭에 동네 모임이 모여 있어요. 같이 한번 볼까요?',
     }
   }
 
-  // ⑤ 옛날 이야기
+  // ⑤ 옛날이야기
   if (has(text, /옛날|젊었|추억|고향|어릴|그때/))
     return {
       ...base,
@@ -145,7 +146,7 @@ export function draftReply(me: DUser, text: string, turn: number): DraftReply {
     emotion: 'neutral',
     text: pick(
       [
-        `그렇군요. 말씀 들으니 더 궁금해져요. 요즘 ${interest}은(는) 자주 하세요?`,
+        `그렇군요. 말씀 들으니 더 궁금해져요. 요즘 ${eunneun(interest)} 자주 하세요?`,
         '그러셨군요. 그때 기분은 어떠셨어요?',
         `${me.name}님 이야기는 늘 재미있어요. 조금 더 들려주세요.`,
       ],

@@ -43,7 +43,7 @@ export const TARGETS = {
   'welcome-start': target('‘시작하기’ 버튼', (f) => f.link('/login')),
   'welcome-font': target('맨 위 ‘가가’ 버튼', (f) => f.css('button[aria-label="글씨 크게"]')),
   'login-phone': target('‘휴대폰 인증’', (f) => f.link('/login/phone')),
-  'login-help': target('‘도움받기’', (f) => f.link('/login/help')),
+  'login-help': target('‘함께 인증하기’', (f) => f.link('/login/help')),
   'phone-submit': target('‘인증번호 받기’ 버튼', (f) => f.text('button', '인증번호 받기')),
   'code-input': target('‘인증번호’ 칸', (f) => f.css('input[autocomplete="one-time-code"]')),
   'code-resend': target('‘인증번호 다시 받기’ 버튼', (f) => f.text('button', '인증번호 다시 받기')),

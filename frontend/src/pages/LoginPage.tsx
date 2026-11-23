@@ -38,7 +38,7 @@ export function LoginPage() {
         <ActionCard
           variant="subtle"
           icon={Headset}
-          title="도움받기"
+          title="함께 인증하기"
           to="/login/help"
         />
       </div>

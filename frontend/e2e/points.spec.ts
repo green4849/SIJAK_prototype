@@ -1,5 +1,5 @@
 /**
- * C12 — 포인트·추천 평가·대화 주제·봉사모임·첫 친구 미션·알림 설정
+ * C12 — 포인트·추천 평가·대화 주제·봉사 활동·첫 친구 미션·알림 설정
  * 둘러보기 시드: 김시작 100P (가입 100, 이순자님께 첫 신청은 무료로 이미 사용)
  */
 import { expect, test, type Page } from '@playwright/test'
@@ -66,13 +66,13 @@ test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (�
 
   await sheet.getByRole('link', { name: /무료로 모으기/ }).click()
   await expect(page.getByRole('heading', { name: '내 포인트' })).toBeVisible()
-  await expect(page.getByRole('region', { name: '포인트 모으기' })).toContainText('봉사모임 참여하기')
+  await expect(page.getByRole('region', { name: '포인트 모으기' })).toContainText('봉사 활동 참여하기')
 })
 
-test('C12 봉사모임: 봉사 탭 → 참여 포인트 → 신청하면 적립, 취소하면 회수', async ({ page }) => {
+test('C12 봉사 활동: 봉사 탭 → 참여 포인트 → 신청하면 적립, 취소하면 회수', async ({ page }) => {
   await startTour(page)
   await page.goto('/me/points')
-  await page.getByRole('link', { name: /봉사모임 참여하기/ }).click()
+  await page.getByRole('link', { name: /봉사 활동 참여하기/ }).click()
   await expect(page.getByRole('tab', { name: '봉사' })).toHaveAttribute('aria-selected', 'true')
   const item = page.getByRole('link', { name: /어르신 도시락 나눔/ })
   await expect(item).toContainText('참여하면 +100P')

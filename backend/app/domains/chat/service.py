@@ -55,7 +55,7 @@ class ChatService:
 
     async def open_with(self, me: "User", other_id: uuid.UUID) -> ChatRoom:
         if await self.risk.is_blocked_between(me.id, other_id):
-            raise ForbiddenError("차단한(된) 분과는 대화할 수 없어요.", code="blocked")
+            raise ForbiddenError("차단 중인 분과는 대화할 수 없어요.", code="blocked")
         if not await self.friends.are_friends(me.id, other_id):
             raise ForbiddenError("친구가 된 분과만 대화할 수 있어요.", code="not_friends")
         room = await self.repo.get_or_create_room(me.id, other_id)
@@ -167,7 +167,7 @@ class ChatService:
     async def _sendable_room(self, me: "User", room_id: uuid.UUID) -> ChatRoom:
         room = await self._member_room(me, room_id)
         if await self.risk.is_blocked_between(me.id, room.other(me.id)):
-            raise ForbiddenError("차단한(된) 분께는 메시지를 보낼 수 없어요.", code="blocked")
+            raise ForbiddenError("차단 중인 분께는 메시지를 보낼 수 없어요.", code="blocked")
         return room
 
     async def _save(self, room: ChatRoom, msg: ChatMessage) -> ChatMessage:

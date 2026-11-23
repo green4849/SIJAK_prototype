@@ -11,7 +11,7 @@ const STEPS = [
   '한 번만 하면 다음부터는 자동으로 들어가요.',
 ]
 
-/** ② → 도움받기 — 가족·직원이 옆에서 함께 가입을 돕는 안내 */
+/** ② → 함께 인증하기 — 가족·직원이 옆에서 함께 가입을 돕는 안내 */
 export function AssistPage() {
   return (
     <section className={styles.page}>

@@ -188,7 +188,7 @@ export const TOPICS: Topic[] = [
             actions: [show('‘말하기’ 어디 있어요?', 'companion-mic', '여기 ‘말하기’를 누르고 편하게 말씀하세요.')],
           }
         : {
-            text: '입력칸 옆 ‘말하기’를 누르고 말씀하세요. 다 하면 ‘다 했어요, 보내기’를 누르세요.',
+            text: '입력칸 옆 ‘말하기’를 누르고 말씀하세요. 다 하면 ‘다 말했어요, 보내기’를 누르세요.',
             actions: ctx.screen === 'chat' ? [show('‘말하기’ 어디 있어요?', 'chat-mic', '여기 ‘말하기’예요. 누르면 녹음이 시작돼요.')] : undefined,
           },
   },
@@ -466,7 +466,7 @@ export const TOPICS: Topic[] = [
     ],
     screens: ['points', 'friends'],
     reply: (ctx) => ({
-      text: '친구 신청할 때 써요. 추천 친구를 평가하거나 봉사모임에 나가면 모여요.',
+      text: '친구 신청할 때 써요. 추천에 답하거나 봉사 활동에 나가면 모여요.',
       actions:
         ctx.screen === 'points'
           ? undefined
@@ -631,14 +631,14 @@ export const TOPICS: Topic[] = [
     id: 'login-assist',
     ask: '혼자 하기 어려워요',
     audience: 'any',
-    cues: [[/혼자(서)?(못|하기|는|안)|도와줄(사람|분)|가족(이|이랑|과)?(대신|같이|함께)|대신(해|가입|인증)|도움받기/, 5]],
+    cues: [[/혼자(서)?(못|하기|는|안)|도와줄(사람|분)|가족(이|이랑|과)?(대신|같이|함께)|대신(해|가입|인증)|도움받기|함께인증/, 5]],
     screens: ['login', 'phone', 'assist'],
     reply: (ctx) =>
       ctx.signedIn
         ? { text: '막히는 화면에서 저를 눌러 물어보세요. 가족에게 화면을 보여 주셔도 좋아요.' }
         : {
             text: '가족이나 복지관 직원과 같이 하셔도 돼요. 본인 휴대폰만 곁에 두세요.',
-            actions: ctx.screen === 'login' ? [show('‘도움받기’ 어디 있어요?', 'login-help', '여기 ‘도움받기’를 누르세요.')] : ctx.screen === 'assist' ? undefined : [{ kind: 'go', label: '‘도움받기’ 화면 보기', to: '/login/help' }],
+            actions: ctx.screen === 'login' ? [show('‘함께 인증하기’ 어디 있어요?', 'login-help', '여기 ‘함께 인증하기’를 누르세요.')] : ctx.screen === 'assist' ? undefined : [{ kind: 'go', label: '‘함께 인증하기’ 화면 보기', to: '/login/help' }],
           },
   },
   {

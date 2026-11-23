@@ -32,7 +32,7 @@ export const INTERESTS: Record<string, string> = {
   reading: '책·신문',
   crafts: '뜨개질·만들기',
   faith: '종교 활동',
-  memories: '옛날 이야기',
+  memories: '옛날이야기',
   fishing: '낚시',
 }
 
@@ -60,7 +60,7 @@ export const REWARD_CATEGORIES = new Set(['volunteer'])
 export const POINT_REASONS: Record<string, string> = {
   welcome: '가입 축하',
   rating: '추천에 답하기',
-  volunteer: '봉사모임 참여',
+  volunteer: '봉사 활동 참여',
   mission_first_friends: '첫 친구 3명 사귀기',
   friend_request: '친구 신청',
 }

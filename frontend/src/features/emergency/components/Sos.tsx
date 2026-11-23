@@ -96,12 +96,14 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
             ))}
           </ul>
         ) : (
-          <p>등록된 보호자가 없어요. 담당 복지관에 알려요.</p>
+          <p>보호자가 아직 없어요. 급하면 아래 119나 109로 바로 전화해 주세요.</p>
         )}
         {sos.error && <Alert>{sos.error}</Alert>}
-        <Button variant="danger" block large disabled={sos.pending} onClick={() => void send()}>
-          {sos.pending ? '알리는 중…' : '알리기'}
-        </Button>
+        {list.length > 0 && (
+          <Button variant="danger" block large disabled={sos.pending} onClick={() => void send()}>
+            {sos.pending ? '알리는 중…' : '보호자에게 알리기'}
+          </Button>
+        )}
       </Sheet>
     </div>
   )
@@ -115,7 +117,7 @@ export function NotifyGuardianButton() {
     if (!r) return toast('알리지 못했어요. 바로 전화해 주세요.', 'error')
     if (IS_DEMO) return toast('시연이라 보내지 않았어요', 'info')
     const who = r.notified.map((n) => `${n.name}님`).join(', ')
-    toast(who ? `${who}께 알렸어요` : '담당 복지관에 알렸어요')
+    toast(who ? `${who}께 알렸어요` : '알릴 보호자가 없어요. 바로 전화해 주세요.', who ? 'success' : 'error')
   }
   if (sos.result)
     return (
