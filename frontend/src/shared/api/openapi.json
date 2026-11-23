@@ -104,6 +104,183 @@
         "title": "ActivityOut",
         "type": "object"
       },
+      "AssessmentFormOut": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "phq9",
+              "gad7"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "lead": {
+            "description": "'지난 2주 동안 …'",
+            "title": "Lead",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentOption"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentQuestion"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "lead",
+          "questions",
+          "options"
+        ],
+        "title": "AssessmentFormOut",
+        "type": "object"
+      },
+      "AssessmentIn": {
+        "properties": {
+          "answers": {
+            "description": "문항 순서대로 0~3",
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 20,
+            "title": "Answers",
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "phq9",
+              "gad7"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "answers"
+        ],
+        "title": "AssessmentIn",
+        "type": "object"
+      },
+      "AssessmentOption": {
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
+        "title": "AssessmentOption",
+        "type": "object"
+      },
+      "AssessmentQuestion": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ],
+        "title": "AssessmentQuestion",
+        "type": "object"
+      },
+      "AssessmentResultOut": {
+        "properties": {
+          "advice": {
+            "title": "Advice",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "crisis": {
+            "description": "PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내",
+            "title": "Crisis",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "phq9",
+              "gad7"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "minimal",
+              "mild",
+              "moderate",
+              "severe"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "level_label": {
+            "title": "Level Label",
+            "type": "string"
+          },
+          "max_score": {
+            "title": "Max Score",
+            "type": "integer"
+          },
+          "score": {
+            "title": "Score",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "score",
+          "max_score",
+          "level",
+          "level_label",
+          "advice",
+          "crisis",
+          "created_at"
+        ],
+        "title": "AssessmentResultOut",
+        "type": "object"
+      },
       "BlockCreate": {
         "properties": {
           "user_id": {
@@ -692,6 +869,44 @@
         "title": "MissionOut",
         "type": "object"
       },
+      "MoodOut": {
+        "description": "요즘 마음 — 최근 14일 말동무 대화의 정서 (보고서 4.5.2). 말동무 백엔드(C8) 전에는 none",
+        "properties": {
+          "crisis": {
+            "description": "최근 14일 안에 위기 신호가 있었는지",
+            "title": "Crisis",
+            "type": "boolean"
+          },
+          "heavy": {
+            "description": "그중 슬픔·불안이 읽힌 말 수",
+            "title": "Heavy",
+            "type": "integer"
+          },
+          "level": {
+            "enum": [
+              "calm",
+              "mixed",
+              "heavy",
+              "none"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "talked": {
+            "description": "최근 14일 말동무에게 한 말 수 (정서를 읽은 것만)",
+            "title": "Talked",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "talked",
+          "heavy",
+          "crisis"
+        ],
+        "title": "MoodOut",
+        "type": "object"
+      },
       "MyActivityCounts": {
         "properties": {
           "applied": {
@@ -1169,6 +1384,107 @@
           }
         },
         "title": "RefreshRequest",
+        "type": "object"
+      },
+      "RelationFactor": {
+        "properties": {
+          "code": {
+            "enum": [
+              "activity",
+              "communication",
+              "emotion",
+              "social",
+              "responsiveness"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "score": {
+            "description": "0~100, 높을수록 좋음",
+            "title": "Score",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "score"
+        ],
+        "title": "RelationFactor",
+        "type": "object"
+      },
+      "RelationIndexOut": {
+        "properties": {
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/RelationFactor"
+            },
+            "title": "Factors",
+            "type": "array"
+          },
+          "level": {
+            "enum": [
+              "normal",
+              "caution",
+              "risk",
+              "urgent"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "mood": {
+            "$ref": "#/components/schemas/MoodOut"
+          },
+          "score": {
+            "description": "사회적 관계 지수 0~100, 높을수록 좋음 (= 100 − 고립 지수 II)",
+            "title": "Score",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "weekly": {
+            "description": "지난 주들 → 이번 주 (마지막이 지금)",
+            "items": {
+              "$ref": "#/components/schemas/RelationWeek"
+            },
+            "title": "Weekly",
+            "type": "array"
+          }
+        },
+        "required": [
+          "score",
+          "level",
+          "factors",
+          "weekly",
+          "mood",
+          "updated_at"
+        ],
+        "title": "RelationIndexOut",
+        "type": "object"
+      },
+      "RelationWeek": {
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "label",
+          "score"
+        ],
+        "title": "RelationWeek",
         "type": "object"
       },
       "ReportCreate": {
@@ -3380,6 +3696,155 @@
         "summary": "Update Location",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/me/relation-index": {
+      "get": {
+        "description": "사회적 관계 지수 — 볼 때마다 새로 계산하고 이번 주 값으로 남긴다",
+        "operationId": "relation_index_api_v1_me_relation_index_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationIndexOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Relation Index",
+        "tags": [
+          "wellbeing"
+        ]
+      }
+    },
+    "/api/v1/me/self-assessment": {
+      "get": {
+        "description": "지난 자가평가 결과 (새것부터)",
+        "operationId": "assessment_history_api_v1_me_self_assessment_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssessmentResultOut"
+                  },
+                  "title": "Response Assessment History Api V1 Me Self Assessment Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assessment History",
+        "tags": [
+          "wellbeing"
+        ]
+      },
+      "post": {
+        "operationId": "submit_assessment_api_v1_me_self_assessment_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Assessment",
+        "tags": [
+          "wellbeing"
+        ]
+      }
+    },
+    "/api/v1/me/self-assessment/{kind}": {
+      "get": {
+        "operationId": "assessment_form_api_v1_me_self_assessment__kind__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentFormOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assessment Form",
+        "tags": [
+          "wellbeing"
         ]
       }
     },
