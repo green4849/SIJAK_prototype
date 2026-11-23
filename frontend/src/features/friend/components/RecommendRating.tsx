@@ -10,8 +10,9 @@ interface Props {
 }
 
 /**
- * 추천 친구 3단계 평가 (C12). 별 5개 대신 말로 된 큰 버튼 세 개.
- * 고른 것은 색 + ✓ + aria-pressed. 상대에게는 알리지 않는다는 안내를 함께.
+ * 추천 친구 평가 (C12). 별 5개 대신 말로 된 큰 버튼 — 지금은 '만나보고 싶어요' 하나.
+ * ('그저 그래요'·'잘 안 맞아요'는 화면에서 뺐고, 서버·데모는 세 값을 그대로 받는다)
+ * 고른 것은 색 + ✓ + aria-pressed.
  */
 export function RecommendRating({ card, onRate, disabled }: Props) {
   return (

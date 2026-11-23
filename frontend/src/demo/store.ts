@@ -180,7 +180,7 @@ export interface DemoState {
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 10 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자, 9: 오산시 양산동 기준 동네·장소, 10: 고립 지수 → 사회적 관계 지수(뒤집음)
+const VERSION = 11 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자, 9: 오산시 양산동 기준 동네·장소, 10: 고립 지수 → 사회적 관계 지수(뒤집음), 11: 포인트 100P·서울 자리표시 활동을 오산으로
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -295,10 +295,10 @@ function seed(): DemoState {
       '오산노인종합복지관 강당', 2, 14, 90, 30, 'music', '트로트와 가곡을 함께 불러요. 목 풀기 체조로 시작해요.', 30),
     act('의자 요가', '앉아서 하는 쉬운 스트레칭', 'health', '41',
       '세마e편한세상 경로당', 4, 11, 60, 12, 'exercise', '무릎이 불편하셔도 괜찮아요. 의자에 앉아서 천천히 몸을 풀어요.', 4),
-    act('텃밭 가꾸기', '상자 텃밭에 상추를 심어요', 'learning', '11',
-      '○○구민 공동텃밭', 6, 9, 120, 15, 'garden', '흙을 만지며 상추와 깻잎을 심어요. 장갑은 준비해 드려요.', 7),
-    act('그림책 읽기 모임', '손주에게 읽어 줄 그림책을 함께', 'learning', '11',
-      '○○구립도서관', 9, 14, 90, 10, 'book', '손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.', 3),
+    act('텃밭 가꾸기', '상자 텃밭에 상추를 심어요', 'learning', '41',
+      '세마e편한세상 경로당 앞마당', 6, 9, 120, 15, 'garden', '흙을 만지며 상추와 깻잎을 심어요. 장갑은 준비해 드려요.', 7),
+    act('그림책 읽기 모임', '손주에게 읽어 줄 그림책을 함께', 'learning', '41',
+      '세마e편한세상 경로당 작은방', 9, 14, 90, 10, 'book', '손주에게 읽어 주기 좋은 그림책을 함께 읽고 이야기 나눠요.', 3),
     // 봉사 (C12) — backend/scripts/seed.py 와 같은 내용
     act('어르신 도시락 나눔', '복지관과 함께 이웃에게 도시락을 전해요', 'volunteer', '41',
       '오산노인종합복지관 1층 식당', 4, 10, 120, 15, 'meal',
@@ -308,15 +308,15 @@ function seed(): DemoState {
       '천천히 공원을 걸으며 쓰레기를 주워요. 집게와 장갑은 복지관에서 준비해요.', 6),
   ]
 
-  // 포인트 (C12): 가입 보너스 → 이순자님께 첫 신청(무료) → 어제 추천 평가 한 번 = 110P
-  // (유료 신청 세 번이면 20P 남음 → 네 번째에 '포인트가 조금 부족해요' 시연)
+  // 포인트 (C12): 가입 보너스 → 이순자님께 첫 신청(무료) = 100P
+  // 시연 대본대로 평가(+10P)를 먼저 해도 하지 않아도, 추천 카드 네 장 중 네 번째 신청에서 '포인트가 조금 부족해요'
+  // (110P로 시작하면 평가 뒤 120P = 30P × 4 라 네 장 모두 신청돼 안내 창이 나오지 않았다)
   const pt = (amount: number, reason: DPointEntry['reason'], ref: string, memo: string, at: string): DPointEntry => ({
     id: ++seq, uid: DEMO_ME_ID, amount, reason, ref, memo, at,
   })
   const points: DPointEntry[] = [
     pt(100, 'welcome', 'welcome', '', new Date(now - 4 * 86400_000).toISOString()),
     pt(0, 'friend_request', 'friend_request:u-sunja', '이순자님께 친구 신청', new Date(now - 3 * 86400_000).toISOString()),
-    pt(10, 'rating', 'rating:u-gicheol', '윤기철님 평가', iso(-1, 19, 5)),
   ]
 
   // 말동무 (C8): 어제 저녁 이야기 + 오늘 아침 먼저 건넨 인사
@@ -352,7 +352,6 @@ function seed(): DemoState {
     note('activity', '신청한 활동', `건강 걷기 모임 · ${activities[0].schedule_text}`, iso(0, 8, 0), false, `/activities/${activities[0].id}`),
     note('wellbeing', '이번 주 마음 날씨', '지난주보다 좋아졌어요', iso(-1, 9, 0), true, '/me/wellbeing'),
     note('welfare', '세마e편한세상 경로당', '노래 교실 자리가 3개 남았어요', iso(-2, 14, 0), true, '/welfare/w-1'),
-    note('points', '포인트 +10P', '윤기철님 평가', iso(-1, 19, 5), true, '/me/points'),
   ]
 
   // 운영자 화면: 자동 감지 1 + 신고 2 (그중 하나는 처리됨)
@@ -384,7 +383,7 @@ function seed(): DemoState {
     applications: [{ aid: activities[0].id, uid: DEMO_ME_ID }],
     likes: [activities[0].id, activities[2].id].map((aid) => ({ aid, uid: DEMO_ME_ID })),
     points,
-    ratings: [{ uid: DEMO_ME_ID, target: 'u-gicheol', rating: 'neutral' }],
+    ratings: [],
     notif: {},
     companion,
     companionVoiceTurn: 0,
