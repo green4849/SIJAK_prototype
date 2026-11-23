@@ -118,31 +118,6 @@ export interface AssessmentResultOut {
   created_at: string
 }
 
-// ---------- C10 긴급 도움·보호자 — /me/guardians, /emergency/sos ----------
-
-export interface GuardianOut {
-  id: string
-  name: string
-  relation: string
-  /** 010-****-5678 */
-  phone_masked: string
-  /** 전화 걸기용 (본인 화면에서만) */
-  phone: string
-}
-
-export interface GuardianIn {
-  name: string
-  relation: string
-  phone: string
-}
-
-export interface SosOut {
-  id: string
-  created_at: string
-  /** 알린 사람들 (보호자 + 담당 복지사) */
-  notified: { name: string; relation: string }[]
-}
-
 // ---------- C7 가까운 복지시설 — /welfare (공공데이터포털 노인복지시설 연동 자리) ----------
 
 export type WelfareKind = 'welfare_center' | 'senior_center' | 'kyungrodang'

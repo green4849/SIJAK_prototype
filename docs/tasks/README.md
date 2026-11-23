@@ -56,7 +56,7 @@
 | [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | 🎭 |
 | [C8](C8-ai-companion.md) | AI 말동무 | L | P2 | 🎭 |
 | [C9](C9-voice-call.md) | 음성 통화 (시안 ⑤ 📞) | L | P2 | ⬜ |
-| [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | 🎭 |
+| [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | ✅ (발송은 C4) |
 | [C11](C11-wellbeing.md) | 사회적 관계 지수·자가평가 | M | P2 | 🎭 |
 | [C12](C12-points-engagement.md) | 포인트·추천 평가·대화 주제·봉사모임 | L | P1 | 🔨 |
 | [C13](C13-brain-games.md) | 두뇌 운동 (인지 훈련) | M | P2 | 🎭 |
