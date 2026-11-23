@@ -1,3 +1,4 @@
+import { ieyo } from '@/shared/lib/josa'
 import { Apple, Fish, Flower2, Sun, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button, ButtonLink } from '@/shared/ui/Button'
@@ -213,7 +214,7 @@ export function CalcGame({ doneHref }: GameProps) {
       {picked !== null && (
         <>
           <p className={styles.feedback} data-correct={correct} role="status">
-            {correct ? '맞았어요!' : `아쉬워요. 답은 ${p.answer}이에요`}
+            {correct ? '맞았어요!' : `아쉬워요. 답은 ${ieyo(String(p.answer))}`}
           </p>
           <Button
             block

@@ -36,7 +36,7 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }:
         <div>
           <CoupleScene size="small" />
           <p className={styles.empty}>
-            {tab === 'nearby' ? '아직 가까운 이웃이 없어요.' : '추천할 이웃이 아직 없어요.'}
+            {tab === 'nearby' ? '아직 가까운 이웃이 없어요. ‘추천 친구’도 살펴보세요.' : '추천할 이웃이 아직 없어요. ‘같은 동네’도 살펴보세요.'}
           </p>
         </div>
       )}

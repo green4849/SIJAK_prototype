@@ -80,7 +80,7 @@ export function Composer({ onSendText, onSendVoice, disabled, prefill }: Props) 
           </span>
         </p>
         <div className={styles.recActions}>
-          <Button onClick={finishRecording}>다 했어요, 보내기</Button>
+          <Button onClick={finishRecording}>다 말했어요, 보내기</Button>
           <Button variant="secondary" onClick={rec.cancel}>
             취소
           </Button>
@@ -99,7 +99,7 @@ export function Composer({ onSendText, onSendVoice, disabled, prefill }: Props) 
           ref={inputRef}
           id="composer-input"
           className={styles.input}
-          placeholder="메시지를 입력하세요"
+          placeholder="글로 써 보세요"
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={disabled || sending}

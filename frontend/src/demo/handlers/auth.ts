@@ -47,9 +47,9 @@ function validateProfile(region?: string, interests?: string[]) {
   if (region !== undefined && !REGIONS[region]) fail(422, 'invalid_profile_input', '사는 곳을 다시 골라 주세요.')
   if (interests !== undefined) {
     if (interests.length === 0) fail(422, 'invalid_profile_input', '좋아하는 것을 하나 이상 골라 주세요.')
-    if (interests.some((i) => !INTERESTS[i])) fail(422, 'invalid_profile_input', '고를 수 없는 관심사가 있어요.')
+    if (interests.some((i) => !INTERESTS[i])) fail(422, 'invalid_profile_input', '고를 수 없는 것이 섞여 있어요. 다시 골라 주세요.')
     if (new Set(interests).size > MAX_INTERESTS)
-      fail(422, 'invalid_profile_input', `관심사는 ${MAX_INTERESTS}개까지 고를 수 있어요.`)
+      fail(422, 'invalid_profile_input', `좋아하는 것은 ${MAX_INTERESTS}개까지 고를 수 있어요.`)
   }
 }
 
@@ -67,7 +67,7 @@ export const authRoutes: Route[] = [
     const b = req.body as Body
     const phone = digits(String(b.phone ?? ''))
     if (!(phone.startsWith('01') && [10, 11].includes(phone.length)))
-      fail(422, 'validation_error', '휴대전화 번호를 다시 확인해 주세요.')
+      fail(422, 'validation_error', '휴대폰 번호를 다시 확인해 주세요.')
     const id = newId()
     const code = String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0')
     verifySessions.set(id, {

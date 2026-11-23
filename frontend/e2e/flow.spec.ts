@@ -26,7 +26,7 @@ test('인증번호 단계의 ‘뒤로’는 한 단계만 — 적어 둔 정보
   await page.getByLabel('년', { exact: true }).fill('1957')
   await page.getByLabel('월', { exact: true }).fill('7')
   await page.getByLabel('일', { exact: true }).fill('7')
-  await page.getByLabel('휴대전화 번호').fill('01077778888')
+  await page.getByLabel('휴대폰 번호').fill('01077778888')
   await page.getByRole('radio', { name: '여성' }).click()
   await page.getByRole('button', { name: '인증번호 받기' }).click()
   await expect(page.getByLabel('인증번호')).toBeVisible()

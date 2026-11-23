@@ -119,7 +119,7 @@ function GuardianForm({ onAdded, onCancel }: { onAdded: (g: Added) => void; onCa
         onToggle={setRelation}
       />
       <TextField
-        label="휴대전화 번호"
+        label="휴대폰 번호"
         hint="숫자만 적으면 돼요"
         inputMode="tel"
         value={phone}

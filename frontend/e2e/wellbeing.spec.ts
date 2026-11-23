@@ -19,7 +19,7 @@ test('마이페이지 → 마음 건강: 마음 날씨·요인·4주 변화, 기
   await expect(page.getByText('점수 9 / 27')).toBeVisible()
   // 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내
   await expect(page.getByRole('link', { name: '109 상담 전화하기' })).toBeVisible()
-  await page.getByRole('link', { name: '확인' }).click()
+  await page.getByRole('link', { name: '마음 건강으로 돌아가기' }).click()
   await expect(page.getByText(/지난번: 조금 지쳐 있어요/).first()).toBeVisible()
 })
 
@@ -50,7 +50,7 @@ test('홈 긴급 → 도움 요청 → 확인 → 보호자에게 알림', async
   await page.getByRole('button', { name: '도움 요청' }).click()
   const sheet = page.getByRole('dialog', { name: '도움을 요청할까요?' })
   await expect(sheet).toContainText('김민수님 (아들)')
-  await sheet.getByRole('button', { name: '알리기' }).click()
+  await sheet.getByRole('button', { name: '보호자에게 알리기' }).click()
   // 시연에서는 보내지 않았다고 밝힌다
   await expect(page.getByRole('heading', { name: '시연이라 보내지 않았어요' })).toBeVisible()
   await expect(page.getByText('실제 앱에서는 이분들께 알려요.')).toBeVisible()
@@ -62,7 +62,7 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 �
   await page.getByRole('button', { name: '보호자 추가' }).click()
   await page.getByLabel('이름').fill('김민지')
   await page.getByRole('radio', { name: '딸' }).click()
-  await page.getByLabel('휴대전화 번호').fill('01011112222')
+  await page.getByLabel('휴대폰 번호').fill('01011112222')
   await page.getByRole('button', { name: '등록하기' }).click()
   await expect(page.getByText('010-****-2222')).toBeVisible()
   // 3명이 되면 더 추가할 수 없다

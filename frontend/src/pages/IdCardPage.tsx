@@ -17,7 +17,7 @@ export function IdCardPage() {
           휴대폰으로 인증하기
         </ButtonLink>
         <ButtonLink to="/login/help" block variant="secondary">
-          도움받기
+          함께 인증하기
         </ButtonLink>
       </div>
     </section>

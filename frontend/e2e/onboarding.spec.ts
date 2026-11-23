@@ -43,7 +43,7 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
   await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '가입 완료' }).click()
 
-  await expect(page.getByRole('heading', { name: '안전한 시작을 약속합니다' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '시작은 이렇게 지켜 드려요' })).toBeVisible()
   await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0) // 가입 직후엔 뒤로 없음
   await page.getByRole('link', { name: '알겠어요, 시작할게요' }).click()
   await expect(page.getByRole('heading', { name: '홍길순님' })).toBeVisible()
@@ -83,7 +83,7 @@ test('관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ p
   await expect(page.getByRole('alert')).toContainText('5개까지 고를 수 있어요')
 })
 
-test('신분증·도움받기 안내 화면', async ({ page }) => {
+test('신분증·함께 인증하기 안내 화면', async ({ page }) => {
   await page.goto('/login')
   // 신분증 인증은 아직 없어 누를 수 없는 안내 카드
   await expect(page.getByText('곧 열려요 · 지금은 휴대폰 인증만 돼요')).toBeVisible()
@@ -91,6 +91,6 @@ test('신분증·도움받기 안내 화면', async ({ page }) => {
   // 주소로 바로 들어오면 안내 화면
   await page.goto('/login/id-card')
   await expect(page.getByRole('heading', { name: '신분증 인증은 준비 중이에요' })).toBeVisible()
-  await page.getByRole('link', { name: '도움받기' }).click()
+  await page.getByRole('link', { name: '함께 인증하기' }).click()
   await expect(page.getByRole('heading', { name: '함께 해요' })).toBeVisible()
 })

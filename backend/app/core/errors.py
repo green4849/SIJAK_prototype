@@ -67,8 +67,14 @@ def register_exception_handlers(app: FastAPI) -> None:
         # 첫 번째 오류 메시지를 사용자용 문구로, 전체는 fields로 전달.
         errors = exc.errors()
         first = errors[0] if errors else {}
-        msg = str(first.get("msg", "입력값을 다시 확인해 주세요."))
-        msg = msg.removeprefix("Value error, ")
+        # 우리가 쓴 한국어 문구(ValueError)만 그대로 보여 주고,
+        # 라이브러리의 영어 문구('Field required' 등)는 화면에 내보내지 않는다
+        raw = str(first.get("msg", ""))
+        msg = (
+            raw.removeprefix("Value error, ")
+            if raw.startswith("Value error, ")
+            else "입력한 내용을 다시 확인해 주세요."
+        )
         fields = [".".join(str(p) for p in e.get("loc", ())[1:]) for e in errors]
         return JSONResponse(
             status_code=422,

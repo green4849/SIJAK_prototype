@@ -37,7 +37,7 @@ INTERESTS: dict[str, str] = {
     "reading": "책·신문",
     "crafts": "뜨개질·만들기",
     "faith": "종교 활동",
-    "memories": "옛날 이야기",
+    "memories": "옛날이야기",
     "fishing": "낚시",
 }
 

@@ -31,7 +31,7 @@ class PassStartRequest(BaseModel):
     def _check_phone(cls, v: str) -> str:
         digits = normalize_phone(v)
         if not (digits.startswith("01") and len(digits) in (10, 11)):
-            raise ValueError("휴대전화 번호를 다시 확인해 주세요.")
+            raise ValueError("휴대폰 번호를 다시 확인해 주세요.")
         return digits
 
 

@@ -23,7 +23,7 @@ export function WelfareList({ kind, detailHref }: { kind: WelfareKind | 'all'; d
   const { data, error, loading } = useNearbyCenters(kind)
   if (error) return <Alert>{error}</Alert>
   if (loading && !data) return <p role="status">불러오는 중…</p>
-  if (!data?.length) return <p className={styles.empty}>가까운 곳에 이런 시설이 없어요.</p>
+  if (!data?.length) return <p className={styles.empty}>가까운 곳에 이런 시설이 없어요. ‘전체’를 눌러 보세요.</p>
   return (
     <CardGrid as="ul">
       {data.map((c) => (

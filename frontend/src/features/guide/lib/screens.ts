@@ -117,7 +117,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     hint: '혼자 하기 어려우면 저를 눌러 주세요.',
     guest: true,
     help: () => ({
-      text: '‘휴대폰 인증’을 누르시면 돼요. 혼자 어려우면 ‘도움받기’도 있어요.',
+      text: '‘휴대폰 인증’을 누르시면 돼요. 혼자 어려우면 ‘함께 인증하기’도 있어요.',
       actions: [{ kind: 'show', label: '‘휴대폰 인증’ 어디 있어요?', target: 'login-phone', say: '여기 ‘휴대폰 인증’을 누르세요.' }],
     }),
     suggest: ['login-how', 'login-assist', 'id-card'],

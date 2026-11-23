@@ -24,7 +24,7 @@ const OSAN_REGION = '41'
 
 /** ⑥ 지역생활 */
 export function ActivitiesPage() {
-  // ?category=volunteer 로 들어오면 그 분류부터 (내 포인트 → 봉사모임)
+  // ?category=volunteer 로 들어오면 그 분류부터 (내 포인트 → 봉사 활동)
   const [params] = useSearchParams()
   const initial = TABS.find((t) => t.value === params.get('category'))?.value ?? 'all'
   const [category, setCategory] = useState<Category>(initial)
@@ -46,7 +46,7 @@ export function ActivitiesPage() {
         loading={loading}
         error={error}
         detailHref={activityDetail}
-        emptyText="이 종류의 활동이 아직 없어요."
+        emptyText="이 종류의 활동이 아직 없어요. ‘전체’를 누르면 다른 활동도 보여요."
       />
     </section>
   )

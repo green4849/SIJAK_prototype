@@ -25,7 +25,7 @@ from app.core.database import Base
 REASONS = {
     "welcome": "가입 축하",
     "rating": "추천에 답하기",
-    "volunteer": "봉사모임 참여",
+    "volunteer": "봉사 활동 참여",
     "mission_first_friends": "첫 친구 3명 사귀기",
     "friend_request": "친구 신청",
 }

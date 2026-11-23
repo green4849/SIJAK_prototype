@@ -39,7 +39,7 @@ function toIsoDate(y: string, m: string, d: string): string | null {
   return `${y}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`
 }
 
-/** 본인인증 1단계 — 이름·생년월일·휴대전화·성별 */
+/** 본인인증 1단계 — 이름·생년월일·휴대폰 번호·성별 */
 export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
   const [y0 = '', m0 = '', d0 = ''] = initial?.birth_date.split('-') ?? []
   const [name, setName] = useState(initial?.name ?? '')
@@ -65,7 +65,7 @@ export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
     const birth = toIsoDate(year, month, day)
     if (!name.trim()) return setLocalError('이름을 적어 주세요.')
     if (!birth) return setLocalError('생년월일을 다시 확인해 주세요.')
-    if (digitsOnly(phone, 11).length < 10) return setLocalError('휴대전화 번호를 다시 확인해 주세요.')
+    if (digitsOnly(phone, 11).length < 10) return setLocalError('휴대폰 번호를 다시 확인해 주세요.')
     if (!gender) return setLocalError('성별을 골라 주세요.')
     setLocalError(null)
     setShowServerError(true)
@@ -111,7 +111,7 @@ export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
       </fieldset>
 
       <TextField
-        label="휴대전화 번호"
+        label="휴대폰 번호"
         type="tel"
         inputMode="numeric"
         autoComplete="tel"

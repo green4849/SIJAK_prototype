@@ -25,7 +25,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
       <p className={styles.empty}>
         {peer.name}님께 먼저 인사를 건네 보세요.
         <br />
-        글로 써도 되고, 🎤 버튼으로 말해도 돼요.
+        글로 써도 되고, ‘말하기’를 눌러 말로 보내도 돼요.
       </p>
     )
 

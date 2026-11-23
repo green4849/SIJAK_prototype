@@ -140,6 +140,6 @@ test('가드레일 — 아프다고 하면 의사 상담을, 위기 신호에는
 test('시작 버튼으로 바로 말 걸기', async ({ page }) => {
   await startTour(page)
   await page.goto('/companion')
-  await page.getByRole('group', { name: '이렇게 말해 보세요' }).getByRole('button', { name: '옛날 이야기 하고 싶어요' }).click()
+  await page.getByRole('group', { name: '이렇게 말해 보세요' }).getByRole('button', { name: '옛날이야기 하고 싶어요' }).click()
   await expect(page.getByRole('list', { name: '말동무와 나눈 이야기' })).toContainText('그 시절 이야기')
 })

@@ -66,7 +66,7 @@ export function SettingsPage() {
 
       <div className={styles.preview} aria-hidden="true">
         <p className={styles.previewTitle}>미리 보기</p>
-        <p>이웃과 함께하는 따뜻한 하루, 시작이 함께합니다.</p>
+        <p>이웃과 함께하는 따뜻한 하루, 시작과 함께해요.</p>
       </div>
 
     </section>

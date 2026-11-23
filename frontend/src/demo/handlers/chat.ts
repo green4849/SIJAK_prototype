@@ -65,7 +65,7 @@ function memberRoom(id: string, me: string) {
 function sendable(id: string, me: string) {
   const r = memberRoom(id, me)
   if (relatedBlocks(me).has(other(r, me)))
-    fail(403, 'blocked', '차단한(된) 분께는 메시지를 보낼 수 없어요.')
+    fail(403, 'blocked', '차단 중인 분께는 메시지를 보낼 수 없어요.')
   return r
 }
 
@@ -95,7 +95,7 @@ export const chatRoutes: Route[] = [
   ['POST', '/chats/with/:userId', (req) => {
     const me = requireUser(req)
     const to = req.params.userId
-    if (relatedBlocks(me.id).has(to)) return fail(403, 'blocked', '차단한(된) 분과는 대화할 수 없어요.')
+    if (relatedBlocks(me.id).has(to)) return fail(403, 'blocked', '차단 중인 분과는 대화할 수 없어요.')
     if (!areFriends(me.id, to)) return fail(403, 'not_friends', '친구가 된 분과만 대화할 수 있어요.')
     const s = db()
     let r = s.rooms.find((x) => (x.a === me.id && x.b === to) || (x.a === to && x.b === me.id))

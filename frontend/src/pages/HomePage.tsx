@@ -25,7 +25,7 @@ export function HomePage() {
         <div>
           <h1 className={styles.name}>{user.name}님</h1>
           <p className={styles.hello}>
-            좋은 하루 되세요! <span aria-hidden="true">☀️</span>
+            오늘도 좋은 하루 보내세요! <span aria-hidden="true">☀️</span>
           </p>
         </div>
         <div className={styles.side}>

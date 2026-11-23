@@ -57,7 +57,7 @@ export function PointGuide({ rateHref, volunteerHref }: GuideProps) {
           />
           <GuideRow
             to={volunteerHref}
-            title="봉사모임 참여하기"
+            title="봉사 활동 참여하기"
             amount={`+${won(s.volunteer_reward)}`}
           />
           <GuideRow

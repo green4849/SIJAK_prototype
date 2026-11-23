@@ -17,7 +17,7 @@ export async function verifyPhone(
   await page.getByLabel('년', { exact: true }).fill(p.year)
   await page.getByLabel('월', { exact: true }).fill(p.month)
   await page.getByLabel('일', { exact: true }).fill(p.day)
-  await page.getByLabel('휴대전화 번호').fill(p.phone)
+  await page.getByLabel('휴대폰 번호').fill(p.phone)
   await page.getByRole('radio', { name: p.gender }).click()
   await page.getByRole('button', { name: '인증번호 받기' }).click()
   const banner = await page.getByRole('status').filter({ hasText: '시연용' }).textContent()

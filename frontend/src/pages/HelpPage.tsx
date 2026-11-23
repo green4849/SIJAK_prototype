@@ -41,7 +41,7 @@ export function HelpPage() {
         <details className={styles.item}>
           <summary>누가 돈이나 계좌번호를 물어봐요</summary>
           <p>
-            절대 알려 주지 마세요. 시작에서는 누구도 돈을 요구하지 않아요. 대화 화면에서 바로
+            절대 알려 주지 마세요. 시작 직원이나 이웃이 돈이나 계좌번호를 묻는 일은 없어요. 대화 화면에서 바로
             신고하고 차단할 수 있어요. <Link to="/safety">안전하게 이용하기</Link>
           </p>
         </details>
