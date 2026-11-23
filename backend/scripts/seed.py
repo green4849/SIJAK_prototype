@@ -327,9 +327,118 @@ async def seed_activities() -> None:
         print(f"activities: +{added}" if added else "activities: 이미 있음 — 건너뜀")
 
 
+# ---------- C7 가까운 복지시설: 예시 시설 ----------
+# 공공데이터포털 키가 없을 때 화면을 확인하기 위한 **가명 예시**다 (source='sample').
+# 실제 기관 이름·전화번호를 쓰지 않는다 — 이름에 '(예시)'·'예시',
+# 전화번호는 비움(화면에서 전화 버튼이 숨는다).
+# 위치는 위 시연 이웃들이 사는 동네 둘레. 실제 시설은 scripts.import_welfare (키 필요)
+# (source_id, 이름, 종류, 주소, 위도, 경도, 여는 시간,
+#  프로그램[(제목, 일정, 비용, 남은 자리)], 모임 공간[(이름, 인원, 빈 시간)])
+SAMPLE_WELFARE = [
+    (
+        "sample-1",
+        "햇살마을 경로당 (예시)",
+        "kyungrodang",
+        "경기도 예시시 햇살마을 안",
+        37.195,
+        127.026,
+        "매일 10시 ~ 17시",
+        [
+            ("노래 교실", "매주 화·목 오후 2시", "무료", 3),
+            ("바둑·장기 한마당", "매일 오후", "무료", None),
+        ],
+        [("큰방", 15, "주말에 비어 있어요")],
+    ),
+    (
+        "sample-2",
+        "솔바람 경로당 (예시)",
+        "kyungrodang",
+        "경기도 예시시 솔바람마을 안",
+        37.199,
+        127.021,
+        "매일 10시 ~ 17시",
+        [
+            ("건강 걷기", "매주 토 오전 8시", "무료", None),
+            ("스마트폰 기초반", "매주 수 오전 10시", "무료", 0),
+        ],
+        [("작은방", 8, "평일 오전 비어 있어요")],
+    ),
+    (
+        "sample-3",
+        "예시 노인종합복지관",
+        "welfare_center",
+        "경기도 예시시 복지로 1",
+        37.160,
+        127.050,
+        "평일 9시 ~ 18시",
+        [
+            ("건강 체조", "매일 오전 9시 30분", "무료", None),
+            ("치매 예방 교실", "매주 목 오전 10시", "무료", 1),
+        ],
+        [("1층 사랑방", 12, "평일 오후 비어 있어요"), ("강당", 40, "하루 전까지 전화로 예약")],
+    ),
+    (
+        "sample-4",
+        "예시 시니어클럽",
+        "senior_center",
+        "경기도 예시시 일자리로 2",
+        37.170,
+        127.060,
+        "평일 9시 ~ 18시",
+        [("어르신 일자리 상담", "평일 상시", "무료", None)],
+        [],
+    ),
+]
+
+
+async def seed_welfare() -> None:
+    from sqlalchemy import select
+
+    from app.domains.welfare.models import WelfareCenter, WelfareProgram, WelfareRoom
+
+    async with SessionLocal() as session:
+        have = set(
+            await session.scalars(
+                select(WelfareCenter.source_id).where(WelfareCenter.source == "sample")
+            )
+        )
+        added = 0
+        for sid, name, kind, address, lat, lng, hours, programs, rooms in SAMPLE_WELFARE:
+            if sid in have:
+                continue
+            session.add(
+                WelfareCenter(
+                    source="sample",
+                    source_id=sid,
+                    name=name,
+                    kind=kind,
+                    address=address,
+                    phone="",
+                    region_code="41",
+                    lat=lat,
+                    lng=lng,
+                    open_hours=hours,
+                    programs=[
+                        WelfareProgram(
+                            sort=i, title=t, schedule_text=when, fee_text=fee, seats_left=seats
+                        )
+                        for i, (t, when, fee, seats) in enumerate(programs)
+                    ],
+                    rooms=[
+                        WelfareRoom(sort=i, name=n, capacity=cap, available_text=free)
+                        for i, (n, cap, free) in enumerate(rooms)
+                    ],
+                )
+            )
+            added += 1
+        await session.commit()
+        print(f"welfare (예시): +{added} (총 {len(SAMPLE_WELFARE)}곳 중)")
+
+
 async def main() -> None:
     await seed_users()
     await seed_activities()
+    await seed_welfare()
 
 
 if __name__ == "__main__":

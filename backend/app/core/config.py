@@ -62,6 +62,10 @@ class Settings(BaseSettings):
     # 비우면 체험 기간 없음
     point_free_until: date | None = None
 
+    # 공공데이터포털 인증키 (C7 노인복지시설 가져오기) — 사용자가 발급해 환경 변수로만.
+    # 없으면 가져오기 스크립트가 실행되지 않는다
+    public_data_api_key: str | None = None
+
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60
 
