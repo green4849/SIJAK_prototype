@@ -27,3 +27,15 @@ test('⑥ 분류 탭 → ⑦ 상세 → 관심·신청 → ⑨ 개수 반영 →
   await page.getByRole('dialog', { name: '신청을 취소할까요?' }).getByRole('button', { name: '신청 취소' }).click()
   await expect(page.getByRole('button', { name: /신청하기/ })).toBeVisible()
 })
+
+test('마이페이지를 내려 보다 다른 화면으로 가면 맨 위부터 보인다', async ({ page }) => {
+  await startTour(page)
+  await page.setViewportSize({ width: 393, height: 600 })
+  await page.goto('/me')
+  const settings = page.locator('a[href$="/me/settings"]').last()
+  await settings.scrollIntoViewIfNeeded()
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(200)
+  await settings.click()
+  await expect(page).toHaveURL(/\/me\/settings$/)
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0)
+})

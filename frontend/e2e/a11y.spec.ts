@@ -51,14 +51,15 @@ for (const mode of MODES) {
     for (const path of [...STATIC_ROUTES, ...(await dynamicRoutes(page))]) {
       await page.goto(path)
       await page.waitForLoadState('networkidle')
-      const r = await page.evaluate(() => ({
-        overflow: document.documentElement.scrollWidth > innerWidth,
+      // 휴대폰 흉내에서는 내용이 넘치면 innerWidth 도 같이 늘어난다 → 정해 둔 화면 폭과 비교해야 넘침이 잡힌다
+      const r = await page.evaluate((vw) => ({
+        overflow: document.documentElement.scrollWidth > vw,
         small: [...document.querySelectorAll<HTMLElement>('button, a, input, [role=tab]')]
           .filter((el) => el.offsetParent !== null)
           .map((el) => ({ el, h: el.getBoundingClientRect().height }))
           .filter(({ h }) => h > 0 && h < 44)
           .map(({ el, h }) => `${el.tagName.toLowerCase()}「${(el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 12)}」${Math.round(h)}px`),
-      }))
+      }), page.viewportSize()!.width)
       if (r.overflow) problems.push(`${path}: 가로 넘침`)
       if (r.small.length) problems.push(`${path}: 작은 터치 영역 ${r.small.join(', ')}`)
     }

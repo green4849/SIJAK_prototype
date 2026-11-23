@@ -20,6 +20,8 @@ body {
   font-weight: var(--weight-regular);
   line-height: var(--leading-body);
   word-break: keep-all;
+  /* 낱말 단위로 끊되, 한 낱말이 칸보다 길면(아주 큰 글씨의 '오산노인종합복지관') 그 안에서 끊는다 — 화면 밖으로 넘치지 않게 */
+  overflow-wrap: break-word;
 }
 
 h1,

@@ -5,6 +5,7 @@
 
 .item {
   flex: 1;
+  min-width: 0; /* 칸보다 넓어지지 않게 — 아주 큰 글씨에서 화면 밖으로 밀리던 것 */
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
   display: flex;
   align-items: flex-start; /* 제목이 길어 두 줄 이상이어도 썸네일·제목 시작선 고정 (리뷰 ⑥-9) */
@@ -23,6 +24,7 @@
 .main {
   flex: 1;
   min-width: 0;
+  overflow-wrap: anywhere; /* 아주 큰 글씨에서 긴 장소 이름도 칸 안에서 줄바꿈 */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -41,6 +43,10 @@
   gap: 4px;
   color: var(--color-text-muted);
   font-size: var(--text-meta);
+}
+
+.metaText {
+  min-width: 0; /* 아이콘 옆 글자가 줄어들며 줄바꿈되게 (아주 큰 글씨의 긴 장소 이름) */
 }
 
 /* 글자 옆 아이콘: 줄어들지 않고 첫 줄 가운데에 — 내용이 여러 줄로 넘어가도 제자리 */

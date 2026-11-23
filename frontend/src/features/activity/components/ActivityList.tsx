@@ -31,7 +31,7 @@ export function ActivityList({ items, loading, error, detailHref, emptyText }: P
               <span className={styles.title}>{a.title}</span>
               <span className={styles.meta}>{a.schedule_text}</span>
               <span className={styles.meta}>
-                <MapPin aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> {a.place}
+                <MapPin aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> <span className={styles.metaText}>{a.place}</span>
               </span>
               {(a.applied || a.is_full || a.reward_points > 0) && (
                 <span className={styles.badges}>
