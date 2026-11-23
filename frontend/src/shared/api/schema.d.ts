@@ -347,6 +347,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/emergency/sos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sos
+         * @description 긴급 도움 요청 — 지금은 기록만 (보호자·복지사 알림 발송은 C4)
+         */
+        post: operations["sos_api_v1_emergency_sos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/friends": {
         parameters: {
             query?: never;
@@ -483,6 +503,41 @@ export interface paths {
         head?: never;
         /** Update Me */
         patch: operations["update_me_api_v1_me_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/guardians": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Guardians */
+        get: operations["list_guardians_api_v1_me_guardians_get"];
+        put?: never;
+        /** Add Guardian */
+        post: operations["add_guardian_api_v1_me_guardians_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/guardians/{guardian_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Guardian */
+        delete: operations["remove_guardian_api_v1_me_guardians__guardian_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/me/location": {
@@ -825,6 +880,37 @@ export interface components {
              */
             to_user_id: string;
         };
+        /** GuardianIn */
+        GuardianIn: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Relation */
+            relation: string;
+        };
+        /** GuardianOut */
+        GuardianOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Phone
+             * @description 전화 걸기용 숫자 (본인 화면에서만)
+             */
+            phone: string;
+            /**
+             * Phone Masked
+             * @description 010-****-5678
+             */
+            phone_masked: string;
+            /** Relation */
+            relation: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1155,6 +1241,31 @@ export interface components {
              * @enum {string}
              */
             status: "signup_required";
+        };
+        /** SosNotified */
+        SosNotified: {
+            /** Name */
+            name: string;
+            /** Relation */
+            relation: string;
+        };
+        /** SosOut */
+        SosOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Notified
+             * @description 알린 사람들 (보호자 + 담당 복지사)
+             */
+            notified: components["schemas"]["SosNotified"][];
         };
         /** TextMessageCreate */
         TextMessageCreate: {
@@ -1938,6 +2049,26 @@ export interface operations {
             };
         };
     };
+    sos_api_v1_emergency_sos_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SosOut"];
+                };
+            };
+        };
+    };
     my_friends_api_v1_friends_get: {
         parameters: {
             query?: never;
@@ -2198,6 +2329,88 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_guardians_api_v1_me_guardians_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardianOut"][];
+                };
+            };
+        };
+    };
+    add_guardian_api_v1_me_guardians_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuardianIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardianOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_guardian_api_v1_me_guardians__guardian_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                guardian_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

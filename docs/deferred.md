@@ -53,12 +53,13 @@ AI 말동무, 음성 통화(⑤ 📞), 사회적 관계 지수·자가평가, �
 - API 계약: `frontend/src/shared/api/draft.ts` (손으로 적은 임시 타입 — 원래 규칙은 OpenAPI 생성, dev-order §3-6)
 - 응답: `frontend/src/demo/handlers/*` 만. 실제 서버로 띄우면 해당 화면은 「아직 준비 중인 기능이에요」로 표시된다
 - 백엔드를 붙일 때: draft.ts 의 모양대로 backend 스키마 → `gen:api` → feature api 파일의 import 를 `Schema<'…'>` 로 → draft.ts 에서 삭제
+- **✅ 백엔드 있음** 표시한 줄은 실제 서버(FastAPI + DB)로도 동작한다. 데모 핸들러는 시연용으로 그대로 두되 응답 타입은 `Schema<'…'>` 로 검사된다
 
 | 기능 | 화면 | 데모 API | 꽂는 곳 (백엔드) |
 |---|---|---|---|
 | C8 AI 말동무 | `/companion` (홈 카드) | `GET /companion` · `GET·POST /companion/messages` | `domains/companion` + `integrations/llm`·`stt`·`tts`. 답은 지금 `demo/companion.ts` 키워드 규칙(위기 → 의료 → 나머지 순서는 실제 가드레일과 같게). 말하기는 녹음 없이 시연 문장으로 받아쓴 척 → C2에서 녹음 파일 업로드로. 듣기는 브라우저 음성 합성(`shared/a11y/speak.ts`) |
 | C11 사회적 관계 지수·자가평가 | `/me/wellbeing` (마이페이지), `/me/wellbeing/check/:kind` | `GET /me/relation-index` · `GET /me/self-assessment(/:kind)` · `POST /me/self-assessment` | `domains/wellbeing`. 지수는 지금 `demo/wellbeing.ts` 가 보고서 4.5.3 고립 지수 공식을 뒤집어(100 − II, 높을수록 좋음) 데모 활동으로 계산(답장 요인은 고정 70, 지난 3주는 시드). 정서 요인은 말동무 대화 정서 라벨. 긴급 단계 → 보호자·복지사 알림은 C4 푸시와 함께 |
-| C10 긴급 도움·보호자 | `/sos` (홈 오른쪽 위 '긴급'), `/me/guardians` | `POST /emergency/sos` · `GET·POST /me/guardians` · `DELETE /me/guardians/:id` | `domains/emergency`. 알림 발송(문자·푸시)·복지사 연계는 비어 있음 — 데모는 기록만. 보호자 전화번호는 실서비스에서 users 처럼 암호화 저장 |
+| C10 긴급 도움·보호자 ✅ 백엔드 있음 | `/sos` (홈 오른쪽 위 '긴급'), `/me/guardians` | `POST /emergency/sos` · `GET·POST /me/guardians` · `DELETE /me/guardians/:id` | `domains/emergency` (guardians·sos_events). 보호자 전화번호는 users 처럼 AES-256-GCM 암호화, 3명까지. 긴급 도움은 **기록만** — 그때의 보호자 목록(이름·관계)을 `sos_events.notified` 에 남긴다. 남은 것: 문자·푸시 발송(C4)·복지사 연계·위치 첨부는 `EmergencyService.sos` 에 붙인다 |
 | C7 가까운 복지시설 | `/welfare` (지역생활 맨 위 카드), `/welfare/:id` | `GET /welfare/nearby?kind=` · `GET /welfare/:id` | `integrations/public_data` (공공데이터포털 노인복지시설) + PostGIS `ST_DWithin` 반경 검색(§1과 같은 자리). 시설·프로그램·공간은 `demo/handlers/welfare.ts` 가상 데이터, 거리는 고정값. 신청은 전화로만 |
 | 두뇌 운동 (인지 훈련) | `/brain` (홈 아래 카드), `/brain/match` `/brain/calc` | `GET /brain/stats` · `POST /brain/results` | 새 도메인 필요(예: `domains/brain`). 게임은 화면에서만 돌고 서버는 기록(연속 일수·이번 주·최고 기록)만 |
 | 알림함 (C4 일부) | `/notifications` (마이페이지 '알림함') | `GET /notifications` · `POST /notifications/:id/read` · `POST /notifications/read-all` | `domains/notification` 에 알림 목록 테이블. 소식은 지금 시드 6개뿐 — 실제로는 신청·위험 감지·활동 하루 전 등에서 생성 |

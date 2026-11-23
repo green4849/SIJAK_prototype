@@ -1,9 +1,14 @@
-/** 마음 건강 (C11) · 긴급 도움·보호자 (C10) — 백엔드 없음. 계약: shared/api/draft.ts */
+/** 마음 건강 (C11, 백엔드 없음 — 계약: shared/api/draft.ts) · 긴급 도움·보호자 (C10, 백엔드 domains/emergency) */
 import { fail, json, noContent, type Route } from '../http'
 import { db, newId, save, type DGuardian } from '../store'
 import { FORMS, relationIndex, resultOf } from '../wellbeing'
 import { requireUser } from './auth'
-import type { AssessmentIn, GuardianIn, GuardianOut, SosOut } from '@/shared/api/draft'
+import type { AssessmentIn } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
+
+type GuardianOut = Schema<'GuardianOut'>
+type GuardianIn = Schema<'GuardianIn'>
+type SosOut = Schema<'SosOut'>
 
 const digits = (s: string) => s.replace(/\D/g, '')
 const isKind = (k: string): k is 'phq9' | 'gad7' => k === 'phq9' || k === 'gad7'

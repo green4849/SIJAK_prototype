@@ -1,11 +1,10 @@
-/**
- * emergency API (C10 긴급 도움·보호자) — 백엔드가 아직 없어 계약은 shared/api/draft.ts (데모 서버만 응답).
- */
+/** emergency API (C10 긴급 도움·보호자) — 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts) */
 import { api } from '@/shared/api/client'
-import type { GuardianIn, GuardianOut, SosOut } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
 
-export type Guardian = GuardianOut
-export type SosResult = SosOut
+export type Guardian = Schema<'GuardianOut'>
+export type GuardianIn = Schema<'GuardianIn'>
+export type SosResult = Schema<'SosOut'>
 
 export const emergencyApi = {
   guardians: () => api.get<Guardian[]>('/me/guardians'),

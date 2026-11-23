@@ -351,6 +351,68 @@
         "title": "FriendRequestCreate",
         "type": "object"
       },
+      "GuardianIn": {
+        "properties": {
+          "name": {
+            "maxLength": 30,
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 20,
+            "title": "Phone",
+            "type": "string"
+          },
+          "relation": {
+            "maxLength": 20,
+            "title": "Relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "relation",
+          "phone"
+        ],
+        "title": "GuardianIn",
+        "type": "object"
+      },
+      "GuardianOut": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "description": "전화 걸기용 숫자 (본인 화면에서만)",
+            "title": "Phone",
+            "type": "string"
+          },
+          "phone_masked": {
+            "description": "010-****-5678",
+            "title": "Phone Masked",
+            "type": "string"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "relation",
+          "phone_masked",
+          "phone"
+        ],
+        "title": "GuardianOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1159,6 +1221,53 @@
           "name"
         ],
         "title": "SignupRequiredResult",
+        "type": "object"
+      },
+      "SosNotified": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "relation"
+        ],
+        "title": "SosNotified",
+        "type": "object"
+      },
+      "SosOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "notified": {
+            "description": "알린 사람들 (보호자 + 담당 복지사)",
+            "items": {
+              "$ref": "#/components/schemas/SosNotified"
+            },
+            "title": "Notified",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "notified"
+        ],
+        "title": "SosOut",
         "type": "object"
       },
       "TextMessageCreate": {
@@ -2432,6 +2541,33 @@
         ]
       }
     },
+    "/api/v1/emergency/sos": {
+      "post": {
+        "description": "긴급 도움 요청 — 지금은 기록만 (보호자·복지사 알림 발송은 C4)",
+        "operationId": "sos_api_v1_emergency_sos_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SosOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sos",
+        "tags": [
+          "emergency"
+        ]
+      }
+    },
     "/api/v1/friends": {
       "get": {
         "operationId": "my_friends_api_v1_friends_get",
@@ -2824,6 +2960,121 @@
         "summary": "Update Me",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/me/guardians": {
+      "get": {
+        "operationId": "list_guardians_api_v1_me_guardians_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GuardianOut"
+                  },
+                  "title": "Response List Guardians Api V1 Me Guardians Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Guardians",
+        "tags": [
+          "emergency"
+        ]
+      },
+      "post": {
+        "operationId": "add_guardian_api_v1_me_guardians_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardianIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuardianOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Guardian",
+        "tags": [
+          "emergency"
+        ]
+      }
+    },
+    "/api/v1/me/guardians/{guardian_id}": {
+      "delete": {
+        "operationId": "remove_guardian_api_v1_me_guardians__guardian_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "guardian_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Guardian Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Guardian",
+        "tags": [
+          "emergency"
         ]
       }
     },
