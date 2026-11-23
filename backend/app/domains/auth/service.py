@@ -6,16 +6,17 @@
                                        신규면 signup_token 발급
   3) signup             : signup_token + 지역·관심사 → 가입 + 로그인
   4) refresh / logout   : refresh 토큰 회전·폐기
+  5) withdraw           : 회원 탈퇴 (B3) — 바로 deleted, 30일 뒤 완전 삭제 예정일 기록
 """
 
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta, timezone
 
 from app.core.config import get_settings
 from app.core.errors import ConflictError, DomainError, ForbiddenError, UnauthorizedError
 from app.core.security import create_token, decode_token, encrypt, hash_phone, normalize_phone
-from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS
+from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS, WITHDRAW_GRACE_DAYS
 from app.domains.auth.models import User
 from app.domains.auth.repository import AuthRepository
 from app.integrations.identity.base import (
@@ -25,6 +26,8 @@ from app.integrations.identity.base import (
     IdentityVerificationFailed,
     VerifiedIdentity,
 )
+
+_KST = timezone(timedelta(hours=9))
 
 
 class VerificationFailedError(DomainError):
@@ -145,6 +148,19 @@ class AuthService:
         await self.repo.revoke_refresh_token(claims["jti"])
         await self.repo.commit()
 
+    # ---------- 회원 탈퇴 (B3) ----------
+
+    async def withdraw(self, user: User, reason: str | None) -> date:
+        """바로 status=deleted(로그인·추천·친구 목록에서 빠짐), 모든 기기 로그아웃.
+
+        반환: 개인정보를 완전히 지우는 날(한국 날짜). 실제 삭제·음성 90일 정리는
+        예약 작업이 할 일 — 지금은 날짜만 기록한다 (docs/deferred.md §7).
+        """
+        delete_after = datetime.now(_KST).date() + timedelta(days=WITHDRAW_GRACE_DAYS)
+        await self.repo.withdraw(user, datetime.now(UTC), delete_after, reason)
+        await self.repo.commit()
+        return delete_after
+
     # ---------- 프로필 (⑨ 마이페이지) ----------
 
     async def update_profile(
@@ -245,9 +261,11 @@ class AuthService:
             "banned": "이용이 제한된 계정이에요.",
             "deleted": "탈퇴한 계정이에요.",
         }
-        raise ForbiddenError(
-            messages.get(user.status, "이용할 수 없는 계정이에요."), code=f"user_{user.status}"
-        )
+        message = messages.get(user.status, "이용할 수 없는 계정이에요.")
+        if user.status == "deleted" and user.delete_after:
+            d = user.delete_after
+            message += f" {d.month}월 {d.day}일 뒤에 다시 가입할 수 있어요."
+        raise ForbiddenError(message, code=f"user_{user.status}")
 
     @classmethod
     def _validate_profile(cls, region_code: str, interests: list[str]) -> None:

@@ -1,12 +1,14 @@
-/** 알림함 (백엔드 domains/notification) · 회원 탈퇴(B3) · 운영자 화면(B7) — 뒤 둘은 백엔드 없음, 계약: shared/api/draft.ts */
+/** 알림함 (백엔드 domains/notification) · 회원 탈퇴(B3, 백엔드 auth) · 운영자 화면(B7, 백엔드 없음 — 계약: shared/api/draft.ts) */
 import { REPORT_REASONS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, save, userById, type DAdminCase, regionLabel } from '../store'
 import { requireUser } from './auth'
-import type { AdminCaseOut, AdminWatchOut, CaseAction, WithdrawIn, WithdrawOut } from '@/shared/api/draft'
+import type { AdminCaseOut, AdminWatchOut, CaseAction } from '@/shared/api/draft'
 import type { Schema } from '@/shared/api/types'
 
 type NotificationItemOut = Schema<'NotificationItemOut'>
+type WithdrawIn = Schema<'WithdrawIn'>
+type WithdrawOut = Schema<'WithdrawOut'>
 
 const DAY = 86400_000
 
@@ -94,7 +96,8 @@ export const inboxRoutes: Route[] = [
     const me = requireUser(req)
     const s = db()
     void (req.body as WithdrawIn) // 이유는 실제로는 통계용으로만 저장
-    const deleteAt = new Date(Date.now() + 30 * DAY).toISOString().slice(0, 10)
+    // 한국 날짜 기준 (백엔드와 같게)
+    const deleteAt = new Date(Date.now() + 9 * 3600_000 + 30 * DAY).toISOString().slice(0, 10)
     s.withdrawn[me.id] = deleteAt
     s.me = null // 바로 로그아웃
     save()

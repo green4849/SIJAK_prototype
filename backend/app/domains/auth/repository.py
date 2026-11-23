@@ -4,7 +4,7 @@
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -82,6 +82,16 @@ class AuthRepository:
             .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
             .values(revoked_at=datetime.now(UTC))
         )
+
+    async def withdraw(
+        self, user: User, at: datetime, delete_after: date, reason: str | None
+    ) -> None:
+        user.status = "deleted"
+        user.withdrawn_at = at
+        user.delete_after = delete_after
+        user.withdraw_reason = reason
+        await self.revoke_all_refresh_tokens(user.id)
+        await self.session.flush()
 
     async def commit(self) -> None:
         await self.session.commit()

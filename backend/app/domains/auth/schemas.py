@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.security import normalize_phone
-from app.domains.auth.constants import INTRO_MAX_LEN, REGIONS
+from app.domains.auth.constants import INTRO_MAX_LEN, REGIONS, WITHDRAW_REASON_MAX_LEN
 from app.domains.auth.models import User
 from app.domains.auth.service import age_on
 
@@ -134,3 +134,18 @@ class SignupOptions(BaseModel):
     regions: list[Option]
     interests: list[Option]
     max_interests: int
+
+
+class WithdrawIn(BaseModel):
+    reason: str | None = Field(
+        default=None, max_length=WITHDRAW_REASON_MAX_LEN, description="고른 이유 (선택, 통계용)"
+    )
+
+    @field_validator("reason")
+    @classmethod
+    def _blank_is_none(cls, v: str | None) -> str | None:
+        return (v or "").strip() or None
+
+
+class WithdrawOut(BaseModel):
+    delete_at: date = Field(description="이 날 개인정보가 완전히 지워진다 (탈퇴 + 30일, 한국 날짜)")

@@ -1,6 +1,5 @@
 /** auth API — 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts) */
 import { api } from '@/shared/api/client'
-import type { WithdrawIn, WithdrawOut } from '@/shared/api/draft'
 import type { Schema } from '@/shared/api/types'
 
 export type User = Schema<'UserOut'>
@@ -46,5 +45,6 @@ export const authApi = {
     api.put<User>('/me/location', { lat, lng } satisfies Schema<'LocationUpdate'>),
 
   /** 회원 탈퇴 (B3) — 백엔드 없음, 임시 계약 shared/api/draft.ts */
-  withdraw: (reason: string | null) => api.post<WithdrawOut>('/me/withdraw', { reason } satisfies WithdrawIn),
+  withdraw: (reason: string | null) =>
+    api.post<Schema<'WithdrawOut'>>('/me/withdraw', { reason } satisfies Schema<'WithdrawIn'>),
 }
