@@ -52,7 +52,7 @@ export function PointGuide({ rateHref, volunteerHref }: GuideProps) {
         <ul className={styles.rows}>
           <GuideRow
             to={rateHref}
-            title="추천 친구 평가하기"
+            title="추천에 답하기"
             amount={`+${won(s.rating_reward)}`}
           />
           <GuideRow

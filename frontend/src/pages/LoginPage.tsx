@@ -33,8 +33,7 @@ export function LoginPage() {
           accent="yellow"
           icon={IdCard}
           title="신분증 인증"
-          description="준비 중"
-          to="/login/id-card"
+          description="곧 열려요 · 지금은 휴대폰 인증만 돼요"
         />
         <ActionCard
           variant="subtle"

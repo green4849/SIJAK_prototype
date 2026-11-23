@@ -23,16 +23,16 @@ test('C12 홈: 포인트 칩·첫 친구 미션 → 내 포인트 화면', async
   await expect(history).toContainText('가입 축하')
 })
 
-test('C12 추천 평가: 만나보고 싶어요를 누르면 표시 + 포인트', async ({ page }) => {
+test('C12 추천 평가: ‘이런 분 더 보여 주세요’를 누르면 표시 + 포인트', async ({ page }) => {
   await startTour(page)
   await page.goto('/friends')
-  await expect(page.getByText(/평가하면 \+10P · 오늘 5번/)).toBeVisible()
+  await expect(page.getByText(/추천에 답하면 \+10P · 오늘 5번 더/)).toBeVisible()
 
   const younghee = page.getByRole('article', { name: '김영희님' })
-  await younghee.getByRole('button', { name: '만나보고 싶어요' }).click()
-  await expect(younghee.getByRole('button', { name: /만나보고 싶어요/ })).toHaveAttribute('aria-pressed', 'true')
+  await younghee.getByRole('button', { name: '이런 분 더 보여 주세요' }).click()
+  await expect(younghee.getByRole('button', { name: /이런 분 더 보여 주세요/ })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('status').filter({ hasText: '+10P' })).toBeVisible()
-  await expect(page.getByText(/오늘 4번/)).toBeVisible()
+  await expect(page.getByText(/오늘 4번 더/)).toBeVisible()
 
   await expect(younghee.getByRole('button', { name: /그저 그래요|잘 안 맞아요/ })).toHaveCount(0)
 
@@ -59,8 +59,10 @@ test('C12 친구 신청 포인트: 가격 표시 → 모자라면 안내 창 (�
   await expect(sheet).toBeVisible()
   await expect(sheet).toContainText('30P 필요')
   await expect(sheet).toContainText('10P')
-  await sheet.getByRole('button', { name: /구독하고 매달 받기/ }).click()
-  await expect(page.getByRole('status').filter({ hasText: '준비 중' })).toBeVisible()
+  // 아직 없는 결제는 누를 수 없는 '곧 열려요' 카드 — 눌러지는데 아무 일도 없던 버튼을 없앴다
+  await expect(sheet).toContainText('구독하고 매달 받기')
+  await expect(sheet).toContainText('곧 열려요')
+  await expect(sheet.getByRole('button', { name: /구독하고 매달 받기|한 번 충전하기/ })).toHaveCount(0)
 
   await sheet.getByRole('link', { name: /무료로 모으기/ }).click()
   await expect(page.getByRole('heading', { name: '내 포인트' })).toBeVisible()
@@ -131,7 +133,7 @@ test('C12 첫 친구 미션: 서로 대화한 친구 3명 → 500P 받기', asyn
   await page.goto('/friends')
   const received = page.getByRole('region', { name: /나에게 온 친구 신청/ })
   await received.getByRole('button', { name: '수락하기' }).click()
-  await expect(received).toHaveCount(0) // 수락이 끝난 뒤에 이동
+  await expect(received.getByRole('link', { name: '인사하러 가기' })).toBeVisible() // 수락이 끝난 뒤에 이동
   // 정덕수님은 먼저 말을 걸어 왔음 → 내가 답하면 1명
   await page.goto('/chats/with/u-deoksu')
   await page.getByLabel('보낼 메시지').fill('네, 바둑 좋아요!')
@@ -184,7 +186,7 @@ test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ p
 test('시연 대본 순서 — 평가(+10P)를 먼저 해도 네 번째 신청에서 포인트 부족 안내가 나온다', async ({ page }) => {
   await startTour(page)
   await page.goto('/friends')
-  await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '만나보고 싶어요' }).click()
+  await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '이런 분 더 보여 주세요' }).click()
   await expect(page.getByRole('status').filter({ hasText: '+10P' })).toBeVisible()
   for (const name of ['김영희님', '최말순님', '한옥자님']) {
     const card = page.getByRole('article', { name })

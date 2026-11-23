@@ -1,13 +1,21 @@
 import { expect, test } from '@playwright/test'
 import { confirmRequest, mainNav, startTour } from './helpers'
 
-test('④ 받은 친구 신청 수락 → 친구 수 증가', async ({ page }) => {
+test('④ 받은 친구 신청 수락 → 그 자리에서 인사하러 가기 → 친구 수 증가', async ({ page }) => {
   await startTour(page)
   await mainNav(page).getByRole('link', { name: '친구' }).click()
   const received = page.getByRole('region', { name: /나에게 온 친구 신청/ })
   await expect(received.getByRole('article', { name: '박정호님' })).toBeVisible()
   await received.getByRole('button', { name: '수락하기' }).click()
-  await expect(received).toHaveCount(0)
+  // 수락한 카드는 사라지지 않고 '인사하러 가기'로 — 대화로 가는 길을 찾지 않아도 된다
+  await expect(received).toContainText('박정호님과 친구가 됐어요')
+  await expect(received.getByRole('button', { name: '수락하기' })).toHaveCount(0)
+  await received.getByRole('link', { name: '인사하러 가기' }).click()
+  await expect(page).toHaveURL(/\/chats\/(?!with)/)
+  await expect(page.getByLabel('보낼 메시지')).toBeVisible()
+  // 대화방의 '뒤로'는 들어온 곳(친구 화면)으로
+  await page.getByRole('button', { name: '뒤로' }).click()
+  await expect(page.getByRole('heading', { name: '동네 친구 찾기' })).toBeVisible()
 
   await page.goto('/me')
   await expect(page.getByRole('link', { name: /내 친구 목록/ })).toContainText('3명')

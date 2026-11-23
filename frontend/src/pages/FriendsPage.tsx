@@ -32,7 +32,7 @@ export function FriendsPage() {
     <section className={styles.page}>
       <TopBar title="동네 친구 찾기" back={false} />
 
-      <ReceivedRequests onChanged={() => setVersion((v) => v + 1)} />
+      <ReceivedRequests onChanged={() => setVersion((v) => v + 1)} chatHref={chatWith} />
 
       <SegmentTabs label="친구 찾는 방법" tabs={TABS} value={tab} onChange={setTab} />
 

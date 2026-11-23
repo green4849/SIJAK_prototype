@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ApiError, errorMessage } from '@/shared/api/client'
 import { useAsync } from '@/shared/lib/useAsync'
 import { toast } from '@/shared/lib/toast'
@@ -14,7 +14,7 @@ export interface PointHooks {
 }
 
 const RATING_TOAST: Record<Rating, string> = {
-  like: '만나보고 싶은 이웃으로 담았어요',
+  like: '이런 분을 더 추천해 드릴게요',
   neutral: '평가를 남겼어요',
   dislike: '다음부터 추천하지 않을게요',
 }
@@ -91,20 +91,31 @@ export function useRecommendations(tab: FriendTab, points: PointHooks = {}) {
   return { ...state, request, rate, actionError }
 }
 
-/** 나에게 온 신청 — 수락·거절하면 목록에서 빠진다 */
+/** 나에게 온 신청 — 수락·거절하면 목록에서 빠진다. 수락한 카드는 '인사하러 가기'로 남긴다 */
 export function useReceivedRequests(onChanged?: () => void) {
   const state = useAsync(() => friendApi.received(), [])
+  const [accepted, setAccepted] = useState<FriendCardData[]>([])
+  const busy = useRef(false)
 
   async function respond(card: FriendCardData, accept: boolean) {
-    if (!card.request_id) return
-    await (accept ? friendApi.accept(card.request_id) : friendApi.decline(card.request_id))
+    if (!card.request_id || busy.current) return // 연타로 같은 신청을 두 번 보내지 않게
+    busy.current = true
+    try {
+      await (accept ? friendApi.accept(card.request_id) : friendApi.decline(card.request_id))
+    } catch (e) {
+      toast(errorMessage(e), 'error')
+      return
+    } finally {
+      busy.current = false
+    }
     state.setData((cur) => cur?.filter((c) => c.user_id !== card.user_id) ?? null)
+    if (accept) setAccepted((cur) => [...cur, { ...card, relation: 'friends', request_id: null }])
     void refreshReceivedCount()
     toast(accept ? `${card.name}님과 친구가 됐어요` : '신청을 거절했어요', accept ? 'success' : 'info')
     onChanged?.()
   }
 
-  return { ...state, respond }
+  return { ...state, accepted, respond }
 }
 
 export function useMyFriends() {

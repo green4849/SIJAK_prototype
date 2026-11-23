@@ -1,5 +1,4 @@
 import { CreditCard, Gift, Sprout } from 'lucide-react'
-import { toast } from '@/shared/lib/toast'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
 import { Sheet } from '@/shared/ui/Sheet'
@@ -15,12 +14,12 @@ interface Props {
 
 /**
  * 친구 신청에 포인트가 모자랄 때. 결제를 먼저 내밀지 않고 '무료로 모으기'를 맨 위에.
- * 충전·구독은 아직 화면 안내만 (결제 연동은 docs/deferred.md §6).
+ * 충전·구독은 아직 없어 누를 수 없는 '곧 열려요' 카드로만 (결제 연동은 docs/deferred.md §6).
+ * 예전에는 눌러지는데 '준비 중' 알림만 떠서 고장 난 버튼처럼 보였다.
  */
 export function InsufficientPointsSheet({ open, onClose, earnHref }: Props) {
   const s = usePointSummary()
   const need = s?.friend_request_cost ?? 0
-  const notYet = () => toast('결제는 아직 준비 중이에요. 지금은 무료로 모아 주세요.', 'info')
 
   return (
     <Sheet open={open} title="포인트가 조금 부족해요" onClose={onClose}>
@@ -48,13 +47,13 @@ export function InsufficientPointsSheet({ open, onClose, earnHref }: Props) {
           icon={Gift}
           accent="yellow"
           title="구독하고 매달 받기"
-          onClick={notYet}
+          description="곧 열려요"
         />
         <ActionCard
           icon={CreditCard}
           accent="sky"
           title="포인트 한 번 충전하기"
-          onClick={notYet}
+          description="곧 열려요"
         />
       </div>
     </Sheet>

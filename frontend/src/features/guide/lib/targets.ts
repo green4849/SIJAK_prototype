@@ -64,7 +64,7 @@ export const TARGETS = {
   'friends-nearby': target('‘같은 동네’', (f) => f.text('[role="tab"]', '같은 동네')),
   'friends-recommended': target('‘추천 친구’', (f) => f.text('[role="tab"]', '추천 친구')),
   'friend-location': target('‘내 위치 사용하기’ 버튼', (f) => f.text('button', '내 위치 사용하기')),
-  'friend-rate': target('‘만나보고 싶어요’ 버튼', (f) => f.text('button', /만나보고 싶어요/)),
+  'friend-rate': target('‘이런 분 더 보여 주세요’ 버튼', (f) => f.text('button', /이런 분 더 보여 주세요/)),
 
   // 대화
   'chats-room': target('대화 목록의 이웃', (f) => f.linkUnder('/chats/')),

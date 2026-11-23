@@ -72,7 +72,7 @@ test('A4: 토스트는 4초 뒤 사라진다', async ({ page }) => {
   await startTour(page)
   await page.goto('/friends')
   // 평가 토스트로 확인 (친구 신청은 3초 뒤 '받아 주셨어요' 토스트가 이어서 뜬다)
-  await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '만나보고 싶어요' }).click()
+  await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '이런 분 더 보여 주세요' }).click()
   await expect(toastOf(page)).toBeVisible()
   await expect(toastOf(page)).toHaveCount(0, { timeout: 6000 })
 })
