@@ -2,6 +2,7 @@
 
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -164,6 +165,11 @@ class ChatService:
         return suggest([i.category for i in me.interests], [i.category for i in other.interests])
 
     # ---------- 다른 도메인용 공개 메서드 ----------
+
+    async def sent_count_since(self, me: "User", since: datetime) -> int:
+        """since 이후 내가 이웃에게 보낸 메시지 수 (C11 사회적 관계 지수 '대화')"""
+        rooms = await self.repo.list_rooms(me.id)
+        return await self.repo.count_sent_since(me.id, [r.id for r in rooms], since)
 
     async def talked_friend_ids(self, me: "User") -> set[uuid.UUID]:
         """서로 한 번 이상 말을 주고받은 친구 (차단한 사람 제외)"""

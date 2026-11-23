@@ -594,6 +594,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/relation-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Relation Index
+         * @description 사회적 관계 지수 — 볼 때마다 새로 계산하고 이번 주 값으로 남긴다
+         */
+        get: operations["relation_index_api_v1_me_relation_index_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/self-assessment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Assessment History
+         * @description 지난 자가평가 결과 (새것부터)
+         */
+        get: operations["assessment_history_api_v1_me_self_assessment_get"];
+        put?: never;
+        /** Submit Assessment */
+        post: operations["submit_assessment_api_v1_me_self_assessment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/self-assessment/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Assessment Form */
+        get: operations["assessment_form_api_v1_me_self_assessment__kind__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/withdraw": {
         parameters: {
             query?: never;
@@ -879,6 +937,87 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** AssessmentFormOut */
+        AssessmentFormOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "phq9" | "gad7";
+            /**
+             * Lead
+             * @description '지난 2주 동안 …'
+             */
+            lead: string;
+            /** Options */
+            options: components["schemas"]["AssessmentOption"][];
+            /** Questions */
+            questions: components["schemas"]["AssessmentQuestion"][];
+            /** Title */
+            title: string;
+        };
+        /** AssessmentIn */
+        AssessmentIn: {
+            /**
+             * Answers
+             * @description 문항 순서대로 0~3
+             */
+            answers: number[];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "phq9" | "gad7";
+        };
+        /** AssessmentOption */
+        AssessmentOption: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+        };
+        /** AssessmentQuestion */
+        AssessmentQuestion: {
+            /** Id */
+            id: number;
+            /** Text */
+            text: string;
+        };
+        /** AssessmentResultOut */
+        AssessmentResultOut: {
+            /** Advice */
+            advice: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Crisis
+             * @description PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내
+             */
+            crisis: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "phq9" | "gad7";
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "minimal" | "mild" | "moderate" | "severe";
+            /** Level Label */
+            level_label: string;
+            /** Max Score */
+            max_score: number;
+            /** Score */
+            score: number;
+            /** Title */
+            title: string;
+        };
         /** BlockCreate */
         BlockCreate: {
             /**
@@ -1147,6 +1286,32 @@ export interface components {
             /** Title */
             title: string;
         };
+        /**
+         * MoodOut
+         * @description 요즘 마음 — 최근 14일 말동무 대화의 정서 (보고서 4.5.2). 말동무 백엔드(C8) 전에는 none
+         */
+        MoodOut: {
+            /**
+             * Crisis
+             * @description 최근 14일 안에 위기 신호가 있었는지
+             */
+            crisis: boolean;
+            /**
+             * Heavy
+             * @description 그중 슬픔·불안이 읽힌 말 수
+             */
+            heavy: number;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "calm" | "mixed" | "heavy" | "none";
+            /**
+             * Talked
+             * @description 최근 14일 말동무에게 한 말 수 (정서를 읽은 것만)
+             */
+            talked: number;
+        };
         /** MyActivityCounts */
         MyActivityCounts: {
             /** Applied */
@@ -1343,6 +1508,54 @@ export interface components {
         RefreshRequest: {
             /** Refresh Token */
             refresh_token?: string | null;
+        };
+        /** RelationFactor */
+        RelationFactor: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "activity" | "communication" | "emotion" | "social" | "responsiveness";
+            /** Label */
+            label: string;
+            /**
+             * Score
+             * @description 0~100, 높을수록 좋음
+             */
+            score: number;
+        };
+        /** RelationIndexOut */
+        RelationIndexOut: {
+            /** Factors */
+            factors: components["schemas"]["RelationFactor"][];
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "normal" | "caution" | "risk" | "urgent";
+            mood: components["schemas"]["MoodOut"];
+            /**
+             * Score
+             * @description 사회적 관계 지수 0~100, 높을수록 좋음 (= 100 − 고립 지수 II)
+             */
+            score: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Weekly
+             * @description 지난 주들 → 이번 주 (마지막이 지금)
+             */
+            weekly: components["schemas"]["RelationWeek"][];
+        };
+        /** RelationWeek */
+        RelationWeek: {
+            /** Label */
+            label: string;
+            /** Score */
+            score: number;
         };
         /** ReportCreate */
         ReportCreate: {
@@ -2698,6 +2911,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    relation_index_api_v1_me_relation_index_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelationIndexOut"];
+                };
+            };
+        };
+    };
+    assessment_history_api_v1_me_self_assessment_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentResultOut"][];
+                };
+            };
+        };
+    };
+    submit_assessment_api_v1_me_self_assessment_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssessmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assessment_form_api_v1_me_self_assessment__kind__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentFormOut"];
                 };
             };
             /** @description Validation Error */

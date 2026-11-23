@@ -1,24 +1,21 @@
 /**
- * wellbeing API (C11 사회적 관계 지수·자가평가) — 백엔드가 아직 없어 계약은 shared/api/draft.ts (데모 서버만 응답).
+ * wellbeing API (C11 사회적 관계 지수·자가평가) — 타입은 백엔드 OpenAPI에서 생성 (shared/api/types.ts).
  */
 import { api } from '@/shared/api/client'
-import type {
-  AssessmentFormOut,
-  AssessmentIn,
-  AssessmentKind,
-  AssessmentResultOut,
-  RelationIndexOut,
-} from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
 
-export type { AssessmentKind, MoodLevel, RelationFactor, RelationLevel } from '@/shared/api/draft'
-export type RelationIndex = RelationIndexOut
-export type AssessmentForm = AssessmentFormOut
-export type AssessmentResult = AssessmentResultOut
+export type RelationIndex = Schema<'RelationIndexOut'>
+export type RelationFactor = Schema<'RelationFactor'>
+export type RelationLevel = RelationIndex['level']
+export type MoodLevel = Schema<'MoodOut'>['level']
+export type AssessmentKind = Schema<'AssessmentIn'>['kind']
+export type AssessmentForm = Schema<'AssessmentFormOut'>
+export type AssessmentResult = Schema<'AssessmentResultOut'>
 
 export const wellbeingApi = {
   relationIndex: () => api.get<RelationIndex>('/me/relation-index'),
   history: () => api.get<AssessmentResult[]>('/me/self-assessment'),
   form: (kind: AssessmentKind) => api.get<AssessmentForm>(`/me/self-assessment/${kind}`),
   submit: (kind: AssessmentKind, answers: number[]) =>
-    api.post<AssessmentResult>('/me/self-assessment', { kind, answers } satisfies AssessmentIn),
+    api.post<AssessmentResult>('/me/self-assessment', { kind, answers } satisfies Schema<'AssessmentIn'>),
 }

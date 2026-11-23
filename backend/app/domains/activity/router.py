@@ -1,27 +1,15 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from app.core.deps import DbSession
+from app.domains.activity.deps import ActivityServiceDep
 from app.domains.activity.models import CATEGORIES
-from app.domains.activity.repository import ActivityRepository
 from app.domains.activity.schemas import ActivityOut, CategoryOption, MyActivityCounts
-from app.domains.activity.service import ActivityService, MineKind
+from app.domains.activity.service import MineKind
 from app.domains.auth.deps import CurrentUser
-from app.domains.notification.deps import NotificationServiceDep
-from app.domains.point.deps import PointServiceDep
 
 router = APIRouter(prefix="/activities", tags=["activity"])
-
-
-def get_activity_service(
-    session: DbSession, points: PointServiceDep, notifications: NotificationServiceDep
-) -> ActivityService:
-    return ActivityService(ActivityRepository(session), points, notifications)
-
-
-ActivityServiceDep = Annotated[ActivityService, Depends(get_activity_service)]
 
 
 @router.get("/categories", response_model=list[CategoryOption])

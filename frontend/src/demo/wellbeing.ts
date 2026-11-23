@@ -1,12 +1,19 @@
 /**
- * 마음 건강 계산 — 데모용 (C11).
+ * 마음 건강 계산 — 데모용 (C11). 백엔드 domains/wellbeing/service.py 가 같은 공식을 쓴다 — 고치면 둘 다.
  *  - 사회적 관계 지수: 보고서 4.5.3 고립 지수 II = 100 − (0.25A + 0.30C + 0.20E + 0.15S + 0.10R) 를 뒤집은 값
  *    = 0.25A + 0.30C + 0.20E + 0.15S + 0.10R (높을수록 좋음). 단계 경계도 그대로 뒤집었다.
  *    각 요인은 데모 저장소의 실제 활동(접속·대화·말동무 정서·친구·활동 신청)으로 어림한다
  *  - 자가평가: PHQ-9 · GAD-7 (쉬운 말로 다듬은 문항), 점수 구간은 표준 기준
  */
 import { db, type DAssessment, type DUser } from './store'
-import type { AssessmentFormOut, AssessmentResultOut, MoodOut, RelationFactor, RelationIndexOut, RelationLevel } from '@/shared/api/draft'
+import type { Schema } from '@/shared/api/types'
+
+type AssessmentFormOut = Schema<'AssessmentFormOut'>
+type AssessmentResultOut = Schema<'AssessmentResultOut'>
+type MoodOut = Schema<'MoodOut'>
+type RelationFactor = Schema<'RelationFactor'>
+type RelationIndexOut = Schema<'RelationIndexOut'>
+type RelationLevel = RelationIndexOut['level']
 
 const DAY = 86400_000
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))

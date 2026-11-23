@@ -101,5 +101,17 @@ class ChatRepository:
         )
         return list(await self.session.scalars(q))
 
+    async def count_sent_since(
+        self, user_id: uuid.UUID, room_ids: list[uuid.UUID], since: datetime
+    ) -> int:
+        if not room_ids:
+            return 0
+        q = select(func.count()).where(
+            ChatMessage.room_id.in_(room_ids),
+            ChatMessage.sender_id == user_id,
+            ChatMessage.created_at >= since,
+        )
+        return int(await self.session.scalar(q) or 0)
+
     async def commit(self) -> None:
         await self.session.commit()
