@@ -10,6 +10,8 @@ interface Props {
   pending: boolean
   error: string | null
   onSubmit: (input: PassStartInput) => void
+  /** 인증번호 단계에서 돌아왔을 때 다시 채울 값 */
+  initial?: PassStartInput
 }
 
 const GENDERS = [
@@ -38,13 +40,14 @@ function toIsoDate(y: string, m: string, d: string): string | null {
 }
 
 /** 본인인증 1단계 — 이름·생년월일·휴대전화·성별 */
-export function IdentityForm({ pending, error, onSubmit }: Props) {
-  const [name, setName] = useState('')
-  const [year, setYear] = useState('')
-  const [month, setMonth] = useState('')
-  const [day, setDay] = useState('')
-  const [phone, setPhone] = useState('')
-  const [gender, setGender] = useState<Gender | ''>('')
+export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
+  const [y0 = '', m0 = '', d0 = ''] = initial?.birth_date.split('-') ?? []
+  const [name, setName] = useState(initial?.name ?? '')
+  const [year, setYear] = useState(y0)
+  const [month, setMonth] = useState(m0 ? String(Number(m0)) : '')
+  const [day, setDay] = useState(d0 ? String(Number(d0)) : '')
+  const [phone, setPhone] = useState(initial ? formatPhone(initial.phone) : '')
+  const [gender, setGender] = useState<Gender | ''>(initial?.gender ?? '')
   const [localError, setLocalError] = useState<string | null>(null)
   // 고치기 시작하면 이전 오류는 바로 지운다 (다 고쳤는데 오류가 남아 있으면 혼란)
   const [showServerError, setShowServerError] = useState(true)

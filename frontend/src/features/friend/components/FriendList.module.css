@@ -30,3 +30,11 @@
   background: var(--color-surface);
   border-radius: var(--radius-card);
 }
+
+/* 받은 신청을 수락한 뒤 카드에 남는 한 줄 */
+.done {
+  margin: 0;
+  flex-basis: 100%;
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}

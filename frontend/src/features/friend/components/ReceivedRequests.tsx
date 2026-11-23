@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@/shared/ui/Button'
+import { Button, ButtonLink } from '@/shared/ui/Button'
 import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import type { FriendCardData } from '../api/friendApi'
 import { useReceivedRequests } from '../hooks/useFriends'
@@ -7,36 +7,60 @@ import { FriendCard } from './FriendCard'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
 
+interface Props {
+  onChanged?: () => void
+  /** 수락한 뒤 '인사하러 가기' — 대화방 경로는 페이지가 넘긴다 */
+  chatHref?: (userId: string) => string
+}
+
 /**
  * 나에게 온 친구 신청 — 없으면 아무것도 그리지 않는다.
+ * 수락하면 카드가 그 자리에 남아 '인사하러 가기'로 바뀐다 — 친구가 된 뒤 대화로 가는 길을 찾지 않아도 되게.
  * 거절은 되돌릴 수 없어 한 번 묻는다 (예전 '다음에'는 이름과 달리 바로 거절이었다).
  * 아직 모르겠으면 그냥 두면 된다.
  */
-export function ReceivedRequests({ onChanged }: { onChanged?: () => void }) {
-  const { data, respond } = useReceivedRequests(onChanged)
+export function ReceivedRequests({ onChanged, chatHref }: Props) {
+  const { data, accepted, respond } = useReceivedRequests(onChanged)
   const [declining, setDeclining] = useState<FriendCardData | null>(null)
-  if (!data || data.length === 0) return null
+  const shown = [...accepted, ...(data ?? [])]
+  if (shown.length === 0) return null
+  const waiting = data?.length ?? 0
 
   return (
     <section className={styles.section} aria-labelledby="received-title">
       <h2 id="received-title" className={styles.heading}>
-        나에게 온 친구 신청 <span className={styles.count}>{data.length}</span>
+        나에게 온 친구 신청 {waiting > 0 && <span className={styles.count}>{waiting}</span>}
       </h2>
       <CardGrid stretch>
-        {data.map((card) => (
-          <FriendCard
-            key={card.user_id}
-            card={card}
-            actions={
-              <>
-                <Button onClick={() => respond(card, true)}>수락하기</Button>
-                <Button variant="secondary" onClick={() => setDeclining(card)}>
-                  거절하기
-                </Button>
-              </>
-            }
-          />
-        ))}
+        {shown.map((card) =>
+          card.relation === 'friends' ? (
+            <FriendCard
+              key={card.user_id}
+              card={card}
+              actions={
+                <>
+                  <p className={styles.done} role="status">
+                    {card.name}님과 친구가 됐어요
+                  </p>
+                  {chatHref && <ButtonLink to={chatHref(card.user_id)}>인사하러 가기</ButtonLink>}
+                </>
+              }
+            />
+          ) : (
+            <FriendCard
+              key={card.user_id}
+              card={card}
+              actions={
+                <>
+                  <Button onClick={() => respond(card, true)}>수락하기</Button>
+                  <Button variant="secondary" onClick={() => setDeclining(card)}>
+                    거절하기
+                  </Button>
+                </>
+              }
+            />
+          ),
+        )}
       </CardGrid>
 
       <ConfirmSheet

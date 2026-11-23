@@ -1,0 +1,10 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--text-card-title);
+}

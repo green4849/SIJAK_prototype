@@ -59,7 +59,7 @@ export const POINTS = {
 export const REWARD_CATEGORIES = new Set(['volunteer'])
 export const POINT_REASONS: Record<string, string> = {
   welcome: '가입 축하',
-  rating: '추천 친구 평가',
+  rating: '추천에 답하기',
   volunteer: '봉사모임 참여',
   mission_first_friends: '첫 친구 3명 사귀기',
   friend_request: '친구 신청',

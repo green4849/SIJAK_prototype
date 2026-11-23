@@ -132,13 +132,13 @@ export const TOPICS: Topic[] = [
   },
   {
     id: 'friend-rate',
-    ask: '‘만나보고 싶어요’는 뭐예요?',
-    cues: [[/만나보고싶|평가/, 4]],
+    ask: '‘이런 분 더 보여 주세요’는 뭐예요?',
+    cues: [[/만나보고싶|이런분더|더보여|평가/, 4]],
     screens: ['friends'],
     reply: () => ({
       text: '추천이 마음에 드는지 알려 주는 버튼이에요. 누르면 포인트를 받아요.',
       actions: [
-        walk('/friends', [nav('nav-friends', '친구'), { on: ['friends'], target: 'friend-rate', say: '여기 ‘만나보고 싶어요’예요.' }], '어디 있는지 보기'),
+        walk('/friends', [nav('nav-friends', '친구'), { on: ['friends'], target: 'friend-rate', say: '여기 ‘이런 분 더 보여 주세요’예요.' }], '어디 있는지 보기'),
       ],
     }),
   },

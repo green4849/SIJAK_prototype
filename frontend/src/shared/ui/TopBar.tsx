@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styles from './TopBar.module.css'
 import { ICON, ICON_STROKE } from './icon'
 
@@ -8,7 +8,7 @@ interface Props {
   title?: string
   /** 제목 바로 아래 한 줄 설명 (제목과 가깝게 붙는다) */
   description?: ReactNode
-  /** 뒤로 갈 경로. 없으면 브라우저 뒤로가기 */
+  /** 앱 안에서 들어온 곳이 없을 때(주소로 바로 열었을 때) 갈 경로. 들어온 곳이 있으면 그리로 돌아간다 */
   backTo?: string
   /** 뒤로를 눌렀을 때 페이지 이동 대신 할 일 (여러 단계 화면에서 이전 단계로) */
   onBack?: () => void
@@ -26,7 +26,18 @@ interface Props {
  */
 export function TopBar({ title, description, backTo, onBack, back = true, right }: Props) {
   const navigate = useNavigate()
+  const location = useLocation()
   if (!back && !title && !right) return null
+
+  // 들어온 곳으로 돌아간다 — 포인트를 보러 갔다가 친구 신청으로, 알림함에서 연 활동은 알림함으로.
+  // 주소로 바로 열어 앱 안의 앞 화면이 없을 때만 정해 둔 곳으로 가고, 그때는 기록을 쌓지 않는다
+  // (쌓으면 휴대폰의 '뒤로'가 방금 나온 화면으로 되돌아간다)
+  const hasPrevious = location.key !== 'default'
+  const goBack = () => {
+    if (onBack) return onBack()
+    if (!backTo || hasPrevious) return navigate(-1)
+    navigate(backTo, { replace: true })
+  }
 
   const heading = title ? <h1 className={styles.title}>{title}</h1> : null
   return (
@@ -37,7 +48,7 @@ export function TopBar({ title, description, backTo, onBack, back = true, right 
             <button
               type="button"
               className={styles.back}
-              onClick={() => (onBack ? onBack() : backTo ? navigate(backTo) : navigate(-1))}
+              onClick={goBack}
             >
               <ChevronLeft aria-hidden="true" size={ICON.md} strokeWidth={ICON_STROKE} />
               <span className={styles.backLabel}>뒤로</span>

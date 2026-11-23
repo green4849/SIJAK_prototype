@@ -39,6 +39,11 @@ export function FriendCard({ card, actions, footer }: Props) {
 
       {card.intro && <p className={styles.intro}>{card.intro}</p>}
 
+      {/* 추천 이유 — 겹치는 취미가 없으면 '왜 이분이?'에 답할 것이 없었다 */}
+      {card.common_interests.length === 0 && (card.relation === 'none' || card.relation === 'sent') && (
+        <p className={styles.reason}>{card.distance_km != null ? '가까이 사는 이웃이라 추천했어요' : '같은 동네 이웃이라 추천했어요'}</p>
+      )}
+
       {card.common_interests.length > 0 && (
         <p className={styles.common}>
           <span className={styles.commonLabel}>같이 좋아해요</span>

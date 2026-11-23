@@ -85,7 +85,11 @@ test('관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ p
 
 test('신분증·도움받기 안내 화면', async ({ page }) => {
   await page.goto('/login')
-  await page.getByRole('link', { name: /신분증 인증/ }).click()
+  // 신분증 인증은 아직 없어 누를 수 없는 안내 카드
+  await expect(page.getByText('곧 열려요 · 지금은 휴대폰 인증만 돼요')).toBeVisible()
+  await expect(page.getByRole('link', { name: /신분증 인증/ })).toHaveCount(0)
+  // 주소로 바로 들어오면 안내 화면
+  await page.goto('/login/id-card')
   await expect(page.getByRole('heading', { name: '신분증 인증은 준비 중이에요' })).toBeVisible()
   await page.getByRole('link', { name: '도움받기' }).click()
   await expect(page.getByRole('heading', { name: '함께 해요' })).toBeVisible()

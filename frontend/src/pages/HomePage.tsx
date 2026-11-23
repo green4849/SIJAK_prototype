@@ -1,4 +1,5 @@
 import { MapPin, MessageCircleMore, Siren, Sprout, Users } from 'lucide-react'
+import { NextActivity } from '@/features/activity'
 import { useAuth } from '@/features/auth'
 import { BrainTodayCard } from '@/features/brain'
 import { useUnreadTotal } from '@/features/chat'
@@ -9,6 +10,7 @@ import { IconAction } from '@/shared/ui/IconAction'
 import { Badge } from '@/shared/ui/Badge'
 import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
+import { activityDetail } from './routes'
 
 /** ③ 홈 — 큰 카드 네 개로 핵심 기능에 바로 (3-tap rule). 말동무는 C8 */
 export function HomePage() {
@@ -58,6 +60,9 @@ export function HomePage() {
         />
         <ActionCard accent="sky" icon={Sprout} title="말동무" to="/companion" />
       </nav>
+
+      {/* 신청한 활동 중 가장 가까운 것 — 활동에 나가도록 돕는 앱이라 홈에서 바로 */}
+      <NextActivity detailHref={activityDetail} />
 
       {/* 첫 친구 3명 사귀기 (C12) — 받고 나면 홈에서는 사라진다 */}
       <MissionCards hideClaimed />

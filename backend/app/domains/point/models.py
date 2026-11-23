@@ -24,7 +24,7 @@ from app.core.database import Base
 # 사유 → 화면 문구. 순서는 화면 '모으는 방법'과 무관
 REASONS = {
     "welcome": "가입 축하",
-    "rating": "추천 친구 평가",
+    "rating": "추천에 답하기",
     "volunteer": "봉사모임 참여",
     "mission_first_friends": "첫 친구 3명 사귀기",
     "friend_request": "친구 신청",

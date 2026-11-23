@@ -18,7 +18,7 @@ test('A16: ?reset 으로 이 탭 데이터 처음 상태로', async ({ page }) =
   await startTour(page)
   await mainNav(page).getByRole('link', { name: /친구/ }).click()
   await page.getByRole('region', { name: /나에게 온 친구 신청/ }).getByRole('button', { name: '수락하기' }).click()
-  await expect(page.getByRole('region', { name: /나에게 온 친구 신청/ })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: /나에게 온 친구 신청/ }).getByRole('link', { name: '인사하러 가기' })).toBeVisible()
 
   await page.goto('/?reset')
   await expect(page.getByRole('link', { name: '시작하기' })).toBeVisible() // 로그아웃된 처음 상태

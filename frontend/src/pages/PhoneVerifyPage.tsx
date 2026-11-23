@@ -21,7 +21,8 @@ export function PhoneVerifyPage() {
 
   return (
     <>
-      <TopBar backTo="/login" />
+      {/* 인증번호 단계의 '뒤로'는 한 단계만 — 적어 둔 이름·생년월일·번호를 지우지 않는다 */}
+      <TopBar backTo="/login" onBack={step.name === 'code' ? reset : undefined} />
       {step.name === 'code' ? (
         <CodeForm
           devCode={step.devCode}
@@ -32,7 +33,7 @@ export function PhoneVerifyPage() {
           onBack={reset}
         />
       ) : (
-        <IdentityForm pending={pending} error={error} onSubmit={start} />
+        <IdentityForm pending={pending} error={error} onSubmit={start} initial={step.name === 'identity' ? step.last : undefined} />
       )}
     </>
   )

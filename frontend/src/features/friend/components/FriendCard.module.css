@@ -81,6 +81,7 @@
 /* 버튼·평가는 카드 아래쪽에 붙인다 — 2~3열에서 소개 글 길이가 달라도 같은 줄 카드끼리 버튼 높이가 맞도록 */
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
   margin-top: auto;
   padding-top: var(--space-1);
@@ -96,4 +97,11 @@
   flex: 0 1 auto;
   width: auto;
   min-width: 50%;
+}
+
+/* 겹치는 취미가 없을 때 추천 이유 한 줄 */
+.reason {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
 }
