@@ -1,6 +1,6 @@
 /** backend/app/domains/risk/rules.py 의 사본 — 위험 대화 1단계 키워드 룰 */
 
-const RULES: [code: string, label: string, level: number, patterns: RegExp[]][] = [
+export const RULES: [code: string, label: string, level: number, patterns: RegExp[]][] = [
   [
     'money',
     '돈·송금 이야기',
@@ -86,7 +86,7 @@ export function withinReach<U extends { geo: [number, number] | null; region_cod
 
 // ---------- 대화 주제 추천 — backend/app/domains/chat/topics.py 의 사본 (C12) ----------
 
-const PHRASES: Record<string, [string, string]> = {
+export const PHRASES: Record<string, [string, string]> = {
   walking: ['자주 가시는 산책길이 있으세요?', '날 좋은 날 같이 천천히 걸으실래요?'],
   movies: ['요즘 재미있게 보신 영화가 있으세요?', '다음에 공연 같이 보러 가실래요?'],
   cooking: ['요즘 자주 해 드시는 음식이 있으세요?', '동네에 맛있는 집 아시는 데 있으세요?'],
@@ -98,8 +98,8 @@ const PHRASES: Record<string, [string, string]> = {
   gardening: ['요즘 키우시는 꽃이나 화분이 있으세요?', '텃밭에 뭐 심으셨어요?'],
   volunteer: ['봉사는 주로 어디서 하세요?', '다음에 봉사 같이 가 보실래요?'],
 }
-const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
-const MAX_TOPICS = 4
+export const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
+export const MAX_TOPICS = 4
 
 export function suggestTopics(
   mine: string[],

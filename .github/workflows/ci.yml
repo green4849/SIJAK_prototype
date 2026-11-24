@@ -36,6 +36,8 @@ jobs:
       - run: uv run alembic check
       # API 계약(OpenAPI)이 커밋된 파일과 같은지 — 백엔드만 고치고 프론트 타입 갱신을 잊으면 실패 (D3)
       - run: uv run python -m scripts.export_openapi --check
+      # 시연이 복사해 둔 백엔드 값의 기준 파일이 최신인지 — 시연 사본과의 비교는 e2e/demo-constants.spec.ts (H37)
+      - run: uv run python -m scripts.export_demo_constants --check
       - run: uv run pytest -q
 
   frontend:
