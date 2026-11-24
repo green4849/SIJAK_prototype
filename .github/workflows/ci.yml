@@ -56,6 +56,8 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm run build:demo
+      # 시연 배포(pages.yml)가 쓰는 화면 주소별 사본 — App.tsx 형식이 바뀌어 주소를 못 읽으면 여기서 실패 (H35)
+      - run: node scripts/pages-spa.mjs dist && test -f dist/welcome.html && test -f dist/me/index.html
 
   e2e:
     # 데모 빌드 대상 → 백엔드 없이 실행. 실패하면 화면 녹화(trace)가 아티팩트로 남는다

@@ -57,6 +57,12 @@ docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d
 | 보안 헤더 | HSTS, nosniff, Referrer-Policy, Permissions-Policy(위치·마이크만 허용) — `infra/Caddyfile` |
 | 실제 IP | Caddy가 넘긴 사용자 IP를 uvicorn `--proxy-headers`로 받음 → 요청 횟수 제한(B2)이 IP 기준으로 동작 |
 
+## 시연 사이트 (GitHub Pages, 서버 없음)
+
+- `.github/workflows/pages.yml` — main 에 push 하면 `build:demo` 를 `https://<계정>.github.io/<저장소>/` 로 배포
+- 직접 연 화면 주소(`/welcome`, `/me/points` 등)도 HTTP 200 — `frontend/scripts/pages-spa.mjs` 가 `src/app/App.tsx` 의 화면 주소마다 `index.html` 사본(`welcome.html`, 하위 화면이 있으면 `me/index.html`)을 둔다. 값이 들어가는 주소(`/chats/:id` 등)는 `404.html`(같은 앱)로 열려 화면은 뜨지만 상태는 404 (H35)
+- 공유 미리보기: `index.html` 의 `og:` 태그 + `public/icons/og-image.png`(1200×630, `npm run icons` 로 다시 만듦). 카카오톡은 그림 주소가 절대 주소여야 해서 빌드 때 `VITE_SITE_URL` 로 채운다 — 운영 서버에 올릴 때도 `VITE_SITE_URL=https://도메인/` 을 주면 같은 미리보기가 나온다
+
 ## ⚠️ 서버를 늘리기 전에 (B9)
 
 지금은 **API 프로세스 1개**(`WEB_CONCURRENCY=1`) 기준이다. 아래가 프로세스 메모리에 있어서,
