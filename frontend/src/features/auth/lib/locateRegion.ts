@@ -4,7 +4,12 @@
  * 1) OpenStreetMap Nominatim 역지오코딩(무료, 키 없음)으로 "경기도 수원시 영통구 매탄동" 같은 주소를 받고
  * 2) 실패하면(오프라인·차단·느림) 시·도 중심점에서 가장 가까운 곳으로 어림한다.
  * 서버에는 시·도 코드만 보낸다 — 동네 이름은 확인용으로 화면에만 쓴다.
+ * 바깥 지도 서비스에는 소수 2자리(≈1.1km)로 뭉갠 좌표만 보낸다 — 우리 서버가 저장하는 만큼보다 자세히
+ * 바깥에 알리지 않게 (H38. 예전엔 소수 4자리 ≈11m 를 IP와 함께 보냈다).
  */
+
+/** 소수 2자리 ≈ 1.1km — backend auth.service 가 저장하는 정밀도와 같다 */
+const coarseCoord = (n: number) => (Math.round(n * 100) / 100).toFixed(2)
 
 /** 시·도 대략 중심 (위도, 경도) — 역지오코딩이 안 될 때만 쓰는 어림값 */
 const CENTERS: Record<string, [number, number]> = {
@@ -69,7 +74,7 @@ export async function locateRegion(
     const timer = setTimeout(() => ctrl.abort(), 5000)
     const url =
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=ko` +
-      `&lat=${lat.toFixed(4)}&lon=${lng.toFixed(4)}`
+      `&lat=${coarseCoord(lat)}&lon=${coarseCoord(lng)}`
     const res = await fetch(url, { signal: ctrl.signal })
     clearTimeout(timer)
     if (res.ok) {
