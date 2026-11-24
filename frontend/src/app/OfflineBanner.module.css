@@ -13,3 +13,19 @@
   font-weight: var(--weight-medium);
   text-align: center;
 }
+
+/* 새 버전 알림(UpdateBanner)의 [새로 고침] — 띠 안에서도 누르기 쉬운 크기 */
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}

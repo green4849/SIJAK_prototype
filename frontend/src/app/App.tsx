@@ -1,50 +1,58 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ScrollToTop } from './ScrollToTop'
 import { AuthProvider } from '@/features/auth'
-import { AssistPage } from '@/pages/AssistPage'
-import { ActivitiesPage } from '@/pages/ActivitiesPage'
-import { ActivityDetailPage } from '@/pages/ActivityDetailPage'
-import { BlockedPage } from '@/pages/BlockedPage'
-import { ChatListPage } from '@/pages/ChatListPage'
-import { ChatOpenPage } from '@/pages/ChatOpenPage'
-import { ChatRoomPage } from '@/pages/ChatRoomPage'
-import { CompanionPage } from '@/pages/CompanionPage'
-import { AssessmentPage } from '@/pages/AssessmentPage'
-import { FriendSurveyPage } from '@/pages/FriendSurveyPage'
-import { Who5HistoryPage } from '@/pages/Who5HistoryPage'
-import { GuardiansPage } from '@/pages/GuardiansPage'
-import { SosPage } from '@/pages/SosPage'
-import { WellbeingPage } from '@/pages/WellbeingPage'
-import { WelfarePage } from '@/pages/WelfarePage'
-import { WelfareDetailPage } from '@/pages/WelfareDetailPage'
-import { BrainPage } from '@/pages/BrainPage'
-import { BrainGamePage } from '@/pages/BrainGamePage'
-import { NotificationsPage } from '@/pages/NotificationsPage'
-import { WithdrawPage } from '@/pages/WithdrawPage'
-import { AdminPage } from '@/pages/AdminPage'
-import { FriendListPage } from '@/pages/FriendListPage'
-import { FriendsPage } from '@/pages/FriendsPage'
-import { HelpPage } from '@/pages/HelpPage'
 import { HomePage } from '@/pages/HomePage'
-import { IdCardPage } from '@/pages/IdCardPage'
-import { InstallPage } from '@/pages/InstallPage'
-import { LoginPage } from '@/pages/LoginPage'
-import { MyActivitiesPage } from '@/pages/MyActivitiesPage'
-import { MyPage } from '@/pages/MyPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { NotificationSettingsPage } from '@/pages/NotificationSettingsPage'
-import { PhoneVerifyPage } from '@/pages/PhoneVerifyPage'
-import { PointsPage } from '@/pages/PointsPage'
-import { ProfileEditPage } from '@/pages/ProfileEditPage'
-import { SafetyPage } from '@/pages/SafetyPage'
-import { SettingsPage } from '@/pages/SettingsPage'
-import { SignupPage } from '@/pages/SignupPage'
 import { WelcomePage } from '@/pages/WelcomePage'
 import { ToastHost } from '@/shared/ui/Toast'
-import { Guide } from '@/features/guide'
 import { PlainLayout, TabLayout } from './AppLayout'
 import { OfflineBanner } from './OfflineBanner'
+import { UpdateBanner } from './UpdateBanner'
 import { RequireAuth, RequireGuest } from './guards'
+
+/**
+ * 첫 화면(시작·홈)과 없는 주소만 앱 본체에 두고, 나머지 화면은 들어갈 때 받는다 (H33).
+ * 서비스 워커가 화면 조각을 미리 저장하므로(H34) 오프라인에서도 열린다.
+ */
+// 시작이 안내는 첫 화면이 그려진 뒤 받아 구석에 선다
+const Guide = lazy(() => import('@/features/guide').then((m) => ({ default: m.Guide })))
+const AssistPage = lazy(() => import('@/pages/AssistPage').then((m) => ({ default: m.AssistPage })))
+const ActivitiesPage = lazy(() => import('@/pages/ActivitiesPage').then((m) => ({ default: m.ActivitiesPage })))
+const ActivityDetailPage = lazy(() => import('@/pages/ActivityDetailPage').then((m) => ({ default: m.ActivityDetailPage })))
+const BlockedPage = lazy(() => import('@/pages/BlockedPage').then((m) => ({ default: m.BlockedPage })))
+const ChatListPage = lazy(() => import('@/pages/ChatListPage').then((m) => ({ default: m.ChatListPage })))
+const ChatOpenPage = lazy(() => import('@/pages/ChatOpenPage').then((m) => ({ default: m.ChatOpenPage })))
+const ChatRoomPage = lazy(() => import('@/pages/ChatRoomPage').then((m) => ({ default: m.ChatRoomPage })))
+const CompanionPage = lazy(() => import('@/pages/CompanionPage').then((m) => ({ default: m.CompanionPage })))
+const AssessmentPage = lazy(() => import('@/pages/AssessmentPage').then((m) => ({ default: m.AssessmentPage })))
+const Who5HistoryPage = lazy(() => import('@/pages/Who5HistoryPage').then((m) => ({ default: m.Who5HistoryPage })))
+const FriendSurveyPage = lazy(() => import('@/pages/FriendSurveyPage').then((m) => ({ default: m.FriendSurveyPage })))
+const GuardiansPage = lazy(() => import('@/pages/GuardiansPage').then((m) => ({ default: m.GuardiansPage })))
+const SosPage = lazy(() => import('@/pages/SosPage').then((m) => ({ default: m.SosPage })))
+const WellbeingPage = lazy(() => import('@/pages/WellbeingPage').then((m) => ({ default: m.WellbeingPage })))
+const WelfarePage = lazy(() => import('@/pages/WelfarePage').then((m) => ({ default: m.WelfarePage })))
+const WelfareDetailPage = lazy(() => import('@/pages/WelfareDetailPage').then((m) => ({ default: m.WelfareDetailPage })))
+const BrainPage = lazy(() => import('@/pages/BrainPage').then((m) => ({ default: m.BrainPage })))
+const BrainGamePage = lazy(() => import('@/pages/BrainGamePage').then((m) => ({ default: m.BrainGamePage })))
+const NotificationsPage = lazy(() => import('@/pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })))
+const WithdrawPage = lazy(() => import('@/pages/WithdrawPage').then((m) => ({ default: m.WithdrawPage })))
+const AdminPage = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
+const FriendListPage = lazy(() => import('@/pages/FriendListPage').then((m) => ({ default: m.FriendListPage })))
+const FriendsPage = lazy(() => import('@/pages/FriendsPage').then((m) => ({ default: m.FriendsPage })))
+const HelpPage = lazy(() => import('@/pages/HelpPage').then((m) => ({ default: m.HelpPage })))
+const IdCardPage = lazy(() => import('@/pages/IdCardPage').then((m) => ({ default: m.IdCardPage })))
+const InstallPage = lazy(() => import('@/pages/InstallPage').then((m) => ({ default: m.InstallPage })))
+const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })))
+const MyActivitiesPage = lazy(() => import('@/pages/MyActivitiesPage').then((m) => ({ default: m.MyActivitiesPage })))
+const MyPage = lazy(() => import('@/pages/MyPage').then((m) => ({ default: m.MyPage })))
+const NotificationSettingsPage = lazy(() => import('@/pages/NotificationSettingsPage').then((m) => ({ default: m.NotificationSettingsPage })))
+const PhoneVerifyPage = lazy(() => import('@/pages/PhoneVerifyPage').then((m) => ({ default: m.PhoneVerifyPage })))
+const PointsPage = lazy(() => import('@/pages/PointsPage').then((m) => ({ default: m.PointsPage })))
+const ProfileEditPage = lazy(() => import('@/pages/ProfileEditPage').then((m) => ({ default: m.ProfileEditPage })))
+const SafetyPage = lazy(() => import('@/pages/SafetyPage').then((m) => ({ default: m.SafetyPage })))
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const SignupPage = lazy(() => import('@/pages/SignupPage').then((m) => ({ default: m.SignupPage })))
 
 /**
  * 라우트 등록 지점 — 화면 번호는 docs/design/screens-v1.png
@@ -60,6 +68,7 @@ export function App() {
     <AuthProvider>
       {/* GitHub Pages 같은 하위 경로(/저장소명/)에서도 동작하도록 */}
       <OfflineBanner />
+      <UpdateBanner />
       <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <ScrollToTop />
         <Routes>
@@ -120,7 +129,9 @@ export function App() {
           </Route>
         </Routes>
         <ToastHost />
-        <Guide />
+        <Suspense fallback={null}>
+          <Guide />
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   )

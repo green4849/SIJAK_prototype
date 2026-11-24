@@ -39,6 +39,48 @@ test.describe('서비스 워커 사용', () => {
     await context.setOffline(false)
     await expect(page.getByText('인터넷이 끊겼어요')).toHaveCount(0)
   })
+
+  test('H34: 서비스 워커에 빌드 버전과 미리 저장할 파일이 들어 있고, 그 파일이 실제로 저장된다', async ({ page, request }) => {
+    const sw = await (await request.get('/sw.js')).text()
+    expect(sw).not.toContain('__SW_')
+    const version = sw.match(/const VERSION = "([0-9a-f]{12})"/)?.[1]
+    expect(version).toBeTruthy()
+    const files: string[] = JSON.parse(sw.match(/const PRECACHE = (\[.*\])/)![1])
+    expect(files.some((f) => /^assets\/index-.*\.js$/.test(f))).toBe(true)
+    expect(files.some((f) => /sijagi3d|\.glb$/.test(f))).toBe(false) // 3D는 쓸 때 받는다
+
+    await page.goto('/')
+    await page.waitForFunction(() => navigator.serviceWorker.ready.then(() => true))
+    const cached = await page.evaluate(async (v) => {
+      const c = await caches.open(`sijak-${v}`)
+      return (await c.keys()).map((r) => new URL(r.url).pathname.replace(/^\//, ''))
+    }, version)
+    expect(cached).toEqual(expect.arrayContaining(files))
+  })
+
+  test('H34: 새 배포가 받아지면 "새 버전이 있어요" → 새로 고침하면 새 워커로 바뀐다', async ({ page }) => {
+    await startTour(page)
+    await page.waitForFunction(() => navigator.serviceWorker.ready.then(() => true))
+    await page.reload()
+    await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
+
+    // 새 배포 흉내 — 같은 범위에 다른 주소의 워커를 받게 한다 (실제 배포는 sw.js 내용이 바뀌어 같은 일이 일어남)
+    await page.evaluate(() => navigator.serviceWorker.register('/sw.js?next', { scope: '/' }))
+
+    const banner = page.getByRole('status').filter({ hasText: '새 버전이 있어요' })
+    await expect(banner).toBeVisible()
+    const waitingBefore = await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => !!r?.waiting))
+    expect(waitingBefore).toBe(true)
+
+    // 누르면 새 워커로 바뀌고 화면을 다시 읽는다 (다시 읽기 전 표시가 사라짐)
+    await page.evaluate(() => ((window as Window & { __beforeUpdate?: boolean }).__beforeUpdate = true))
+    await Promise.all([page.waitForEvent('load'), banner.getByRole('button', { name: '새로 고침' }).click()])
+    await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
+    expect(await page.evaluate(() => (window as Window & { __beforeUpdate?: boolean }).__beforeUpdate ?? false)).toBe(false)
+    const active = await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r?.active?.scriptURL))
+    expect(active).toMatch(/sw\.js\?next$/)
+    // (다시 읽힌 앱은 원래 주소 sw.js 를 등록하므로 여기서는 또 '새 버전'으로 보인다 — 흉내의 부작용이라 더 보지 않는다)
+  })
 })
 
 test('C5: 마이페이지 → 홈 화면에 아이콘 놓기 안내 (아이폰은 공유 버튼 순서)', async ({ browser }) => {

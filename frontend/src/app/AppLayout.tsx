@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { BottomNav } from './BottomNav'
+import { RouteBoundary } from './RouteBoundary'
 import styles from './AppLayout.module.css'
 
 /** 하단 탭이 없는 화면 (시작·로그인·상세 화면) */
@@ -7,7 +8,9 @@ export function PlainLayout() {
   return (
     <div className={styles.shell}>
       <main className={styles.main}>
-        <Outlet />
+        <RouteBoundary>
+          <Outlet />
+        </RouteBoundary>
       </main>
     </div>
   )
@@ -18,7 +21,9 @@ export function TabLayout() {
   return (
     <div className={`${styles.shell} ${styles.wide}`}>
       <main className={`${styles.main} ${styles.withNav}`}>
-        <Outlet />
+        <RouteBoundary>
+          <Outlet />
+        </RouteBoundary>
       </main>
       <BottomNav />
     </div>

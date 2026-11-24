@@ -24,3 +24,17 @@
 .withNav {
   padding-bottom: calc(var(--nav-height) + var(--space-3) + env(safe-area-inset-bottom) + var(--guide-lane, 0px));
 }
+
+/* 화면 조각을 받는 중 안내 — 0.4초 안에 끝나면 보이지 않는다 (RouteBoundary) */
+.pending {
+  animation: pending-show 0s linear 0.4s both;
+}
+
+@keyframes pending-show {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}

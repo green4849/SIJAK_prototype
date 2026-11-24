@@ -1,17 +1,20 @@
 import { MapPin, MessageCircleMore, Siren, Sprout, Users } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { NextActivity } from '@/features/activity'
 import { useAuth } from '@/features/auth'
 import { BrainTodayCard } from '@/features/brain'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
 import { MissionCards, PointChip } from '@/features/points'
-import { Who5DueCard } from '@/features/wellbeing'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { IconAction } from '@/shared/ui/IconAction'
 import { Badge } from '@/shared/ui/Badge'
 import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
 import { activityDetail, assessment } from './routes'
+
+// 마음 건강 살펴보기 카드는 홈이 그려진 뒤 받는다 — 마음 건강 화면 전체가 첫 화면 묶음에 끼지 않게 (H33)
+const Who5DueCard = lazy(() => import('@/features/wellbeing').then((m) => ({ default: m.Who5DueCard })))
 
 /** ③ 홈 — 큰 카드 네 개로 핵심 기능에 바로 (3-tap rule). 말동무는 C8 */
 export function HomePage() {
@@ -63,7 +66,9 @@ export function HomePage() {
       </nav>
 
       {/* 마음 건강 살펴보기(WHO-5) — 처음이거나 4주가 지났을 때만 */}
-      <Who5DueCard to={assessment('who5')} />
+      <Suspense fallback={null}>
+        <Who5DueCard to={assessment('who5')} />
+      </Suspense>
 
       {/* 신청한 활동 중 가장 가까운 것 — 활동에 나가도록 돕는 앱이라 홈에서 바로 */}
       <NextActivity detailHref={activityDetail} />
