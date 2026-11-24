@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 30
     refresh_token_days: int = 14
+    # 회전 직후 이 시간 안에 옛 refresh 토큰이 다시 오면 탈취가 아니라 동시 요청으로 본다
+    # (홈 화면 앱과 브라우저 탭이 거의 같이 갱신) → 전체 로그아웃 대신 그 요청만 거절
+    refresh_reuse_grace_seconds: int = 30
     signup_token_minutes: int = 10
     refresh_cookie_name: str = "wipi_refresh"
     cookie_secure: bool = False  # prod 에서는 자동으로 True (HTTPS 전용 쿠키)
@@ -54,6 +57,10 @@ class Settings(BaseSettings):
     # 음성 메시지 등 업로드 파일 저장 위치 (backend/ 기준, git 제외)
     media_dir: str = "data/media"
     voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
+    # 음성 메시지 파일 보관 기간 (B3, 보고서 4.6.3) — 지나면 예약 작업이 파일을 지운다
+    voice_retention_days: int = 90
+    # 예약 작업(scripts.jobs loop)이 매일 도는 한국 시각 (새벽, 사용이 적을 때)
+    jobs_daily_hour_kst: int = 4
 
     # 요청 횟수 제한 (B2). 규칙은 각 router, 저장은 core/ratelimit (지금은 메모리)
     rate_limit_enabled: bool = True

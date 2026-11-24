@@ -1,0 +1,23 @@
+/*
+ * 로고 글꼴 Jua — '시작' 두 글자에만 쓴다 (Brand, 로그인 머리).
+ * 패키지 CSS(@fontsource/jua/400.css)는 한글 전체를 87조각으로 나눈 규칙이라 첫 화면 CSS만 무거워져서,
+ * 두 글자가 든 조각 2개만 직접 건다 (H33). 다른 글자는 본문 글꼴로 그려진다.
+ * 로고 글자를 바꾸면 그 글자가 든 조각을 여기에 더할 것.
+ */
+@font-face {
+  font-family: 'Jua';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('@fontsource/jua/files/jua-119-400-normal.woff2') format('woff2');
+  unicode-range: U+C2DC; /* 시 */
+}
+
+@font-face {
+  font-family: 'Jua';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('@fontsource/jua/files/jua-118-400-normal.woff2') format('woff2');
+  unicode-range: U+C791; /* 작 */
+}

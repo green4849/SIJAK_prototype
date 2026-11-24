@@ -55,6 +55,22 @@ function canDraw3d() {
   }
 }
 
+interface NetworkInformationLike {
+  saveData?: boolean
+  type?: string
+  effectiveType?: string
+}
+
+/**
+ * 데이터를 아껴야 하는 연결인지 — 데이터 절약 모드, 휴대폰 데이터(셀룰러), 느린 연결.
+ * 이때는 3D(약 1MB)를 저절로 받지 않고 시작이를 처음 눌렀을 때 받는다 (H33). 알 수 없으면(아이폰·PC) 저절로 받는다.
+ */
+function shouldSaveData() {
+  const c = (navigator as Navigator & { connection?: NetworkInformationLike }).connection
+  if (!c) return false
+  return Boolean(c.saveData) || c.type === 'cellular' || /(^|-)2g|3g/.test(c.effectiveType ?? '')
+}
+
 interface Props {
   /** 발이 놓일 화면 좌표(px) */
   x: number
@@ -85,6 +101,9 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
   const canvas = useRef<HTMLCanvasElement>(null)
   const three = useRef<Sijagi3d | null>(null)
   const [live, setLive] = useState(false)
+  // 3D를 받을지 — 데이터를 아껴야 하면 시작이를 처음 누를 때까지 미룬다. 한 번 켜지면 계속 둔다
+  const [auto] = useState(() => !shouldSaveData())
+  const [wanted, setWanted] = useState(auto)
   const latest = useRef({ pose, face, yaw, lively })
   useEffect(() => {
     latest.current = { pose, face, yaw, lively }
@@ -92,7 +111,7 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
 
   useEffect(() => {
     const el = canvas.current
-    if (!el || !canDraw3d()) return
+    if (!wanted || !el || !canDraw3d()) return
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     let cancelled = false
     let handle = 0
@@ -120,9 +139,10 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
           // 받지 못했거나 그리지 못하면 정지 그림 그대로 둔다
         })
     }
+    // 눌러서 부른 경우엔 바로, 저절로 받을 때는 첫 화면이 다 그려진 뒤에
     const timer = window.setTimeout(() => {
       handle = idle(load)
-    }, WARM_UP_MS)
+    }, auto ? WARM_UP_MS : 0)
     return () => {
       cancelled = true
       window.clearTimeout(timer)
@@ -130,7 +150,7 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
       three.current?.dispose()
       three.current = null
     }
-  }, [])
+  }, [wanted, auto])
 
   useEffect(() => three.current?.set({ pose, face, yaw }), [pose, face, yaw])
   useEffect(() => three.current?.lively(lively), [lively])
@@ -147,7 +167,17 @@ export function SijagiActor({ x, y, scale, pose, face, yaw, hop, lively, hidden,
       <img className={styles.actorStill} src={stillFor(pose, face)} alt="" hidden={live} />
       <canvas ref={canvas} className={styles.actorCanvas} hidden={!live} aria-hidden="true" />
       {button && (
-        <button ref={buttonRef} type="button" className={styles.actorButton} aria-label={button.label} aria-haspopup="dialog" onClick={button.onClick} />
+        <button
+          ref={buttonRef}
+          type="button"
+          className={styles.actorButton}
+          aria-label={button.label}
+          aria-haspopup="dialog"
+          onClick={() => {
+            setWanted(true)
+            button.onClick()
+          }}
+        />
       )}
     </div>
   )

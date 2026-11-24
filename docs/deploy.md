@@ -51,7 +51,8 @@ docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d
 |---|---|
 | 로그 | `docker compose -f infra/docker-compose.prod.yml logs -f api` |
 | DB 백업 | `docker compose … exec db pg_dump -U wipi wipi \| gzip > backup-$(date +%F).sql.gz` — 정기 실행·서버 밖 보관은 B12 |
-| 음성 파일 | `media` 볼륨 (`/data/media`). 90일 자동 삭제는 B3 |
+| 음성 파일 | `media` 볼륨 (`/data/media`). 90일 지나면 `jobs` 서비스가 파일을 지우고 메시지는 「보관 기간이 지나 지운 음성 메시지예요」로 |
+| 예약 작업 | `jobs` 서비스(api 와 같은 이미지)가 매일 새벽 4시(한국, `JOBS_DAILY_HOUR_KST`)에: ① 탈퇴 30일 지난 계정 완전 삭제(이유만 달별 집계 `withdrawal_reason_counts`) ② 음성 파일 정리(`VOICE_RETENTION_DAYS`, 기본 90) ③ 사회적 관계 지수 일괄 계산. 지금 한 번 돌리기: `docker compose … exec jobs python -m scripts.jobs daily` · 로그: `… logs -f jobs` |
 | 캐시 | `index.html`·`sw.js`·manifest는 매번 확인(no-cache), `assets/`·`icons/`는 1년 — 배포 즉시 새 화면. `sw.js`는 빌드마다 버전이 바뀌어, 이미 열어 둔 앱에는 「새 버전이 있어요 [새로 고침]」이 뜬다 (H34) |
 | 보안 헤더 | HSTS, nosniff, Referrer-Policy, Permissions-Policy(위치·마이크만 허용) — `infra/Caddyfile` |
 | 실제 IP | Caddy가 넘긴 사용자 IP를 uvicorn `--proxy-headers`로 받음 → 요청 횟수 제한(B2)이 IP 기준으로 동작 |
