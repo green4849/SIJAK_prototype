@@ -1,7 +1,7 @@
 """WHO-5 self assessment kind
 
 Revision ID: 5b1f0c3a9d21
-Revises: e73e5b94a74e
+Revises: fe218df23639
 Create Date: 2026-11-24 12:00:00.000000
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "5b1f0c3a9d21"
-down_revision: str | Sequence[str] | None = "e73e5b94a74e"
+down_revision: str | Sequence[str] | None = "fe218df23639"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

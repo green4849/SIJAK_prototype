@@ -128,7 +128,11 @@ class AuthService:
         if stored is None:
             raise UnauthorizedError("다시 로그인해 주세요.", code="invalid_token")
         if stored.revoked_at is not None:
-            # 이미 회전된 토큰이 다시 쓰임 → 탈취 의심, 해당 사용자 세션 전부 폐기
+            grace = timedelta(seconds=get_settings().refresh_reuse_grace_seconds)
+            if datetime.now(UTC) - stored.revoked_at < grace:
+                # 방금 다른 요청(다른 탭)이 회전시킨 토큰 → 새 쿠키로 다시 시도하면 된다
+                raise UnauthorizedError("잠시 후 다시 시도해 주세요.", code="token_rotated")
+            # 이미 회전된 토큰이 한참 뒤 다시 쓰임 → 탈취 의심, 해당 사용자 세션 전부 폐기
             await self.repo.revoke_all_refresh_tokens(user_id)
             await self.repo.commit()
             raise UnauthorizedError("다시 로그인해 주세요.", code="token_reused")
@@ -161,6 +165,19 @@ class AuthService:
         await self.repo.withdraw(user, datetime.now(UTC), delete_after, reason)
         await self.repo.commit()
         return delete_after
+
+    async def withdrawn_due(self, today: date | None = None) -> list[User]:
+        """완전 삭제일(delete_after, 한국 날짜)이 된 탈퇴 계정 — 예약 작업용"""
+        return await self.repo.withdrawn_due(today or datetime.now(_KST).date())
+
+    async def purge_withdrawn(self, user: User) -> None:
+        """탈퇴 이유만 달별로 세고 사용자 행을 지운다 (친구·대화·포인트 등은 DB가 함께 지움)"""
+        if user.status != "deleted":
+            return
+        at = (user.withdrawn_at or datetime.now(UTC)).astimezone(_KST).date()
+        await self.repo.count_withdraw_reason(at.replace(day=1), user.withdraw_reason or "")
+        await self.repo.delete_user(user.id)
+        await self.repo.commit()
 
     # ---------- 프로필 (⑨ 마이페이지) ----------
 

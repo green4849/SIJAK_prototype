@@ -6,10 +6,11 @@
 import uuid
 from datetime import UTC, date, datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domains.auth.models import RefreshToken, User, UserInterest
+from app.domains.auth.models import RefreshToken, User, UserInterest, WithdrawalReasonCount
 
 
 class AuthRepository:
@@ -99,6 +100,28 @@ class AuthRepository:
         user.status = status
         user.suspended_until = suspended_until
         await self.session.flush()
+
+    # ---------- 탈퇴 정리 (B3 예약 작업) ----------
+
+    async def withdrawn_due(self, today: date) -> list[User]:
+        q = select(User).where(
+            User.status == "deleted", User.delete_after.is_not(None), User.delete_after <= today
+        )
+        return list(await self.session.scalars(q))
+
+    async def count_withdraw_reason(self, month: date, reason: str) -> None:
+        await self.session.execute(
+            insert(WithdrawalReasonCount)
+            .values(month=month, reason=reason, count=1)
+            .on_conflict_do_update(
+                index_elements=["month", "reason"],
+                set_={"count": WithdrawalReasonCount.count + 1},
+            )
+        )
+
+    async def delete_user(self, user_id: uuid.UUID) -> None:
+        """행째 지운다 — 다른 테이블은 외래키 ON DELETE 로 함께 지워진다"""
+        await self.session.execute(delete(User).where(User.id == user_id))
 
     async def commit(self) -> None:
         await self.session.commit()

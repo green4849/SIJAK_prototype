@@ -4,7 +4,7 @@
  *
  * 인증은 auth feature가 configureAuth()로 주입한다 (shared는 features를 모른다).
  *  - getAccessToken : 매 요청에 Bearer 토큰 첨부
- *  - refreshAccessToken : 401이면 한 번 갱신 후 재시도
+ *  - refreshAccessToken : 401이면 한 번 갱신 후 재시도 (null = 로그아웃됨, 연결 문제면 예외 → 로그인 유지)
  */
 
 const API_PREFIX = '/api/v1'

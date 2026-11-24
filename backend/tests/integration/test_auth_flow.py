@@ -1,6 +1,9 @@
 """인증 전체 흐름: 본인인증 → 가입 → /me → refresh 회전 → 로그아웃 → 재로그인."""
 
+import pytest
 from httpx import AsyncClient
+
+from app.core.config import get_settings
 
 PERSON = {"name": "김영희", "birth_date": "1955-03-01", "phone": "010-1234-5678", "gender": "F"}
 COOKIE = "wipi_refresh"
@@ -52,7 +55,11 @@ async def test_existing_member_logs_in_directly(client: AsyncClient) -> None:
     assert again["user"]["name"] == "김영희"
 
 
-async def test_refresh_rotation_and_reuse_detection(client: AsyncClient) -> None:
+async def test_refresh_rotation_and_reuse_detection(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # 유예 없음 = 회전된 토큰이 한참 뒤 다시 온 경우
+    monkeypatch.setattr(get_settings(), "refresh_reuse_grace_seconds", 0)
     await _signup(client)
     old = client.cookies.get(COOKIE)
 
@@ -67,6 +74,20 @@ async def test_refresh_rotation_and_reuse_detection(client: AsyncClient) -> None
     assert r2.status_code == 401 and r2.json()["error"]["code"] == "token_reused"
     r3 = await client.post("/api/v1/auth/refresh", json={"refresh_token": new})
     assert r3.status_code == 401
+
+
+async def test_refresh_reuse_right_after_rotation_keeps_session(client: AsyncClient) -> None:
+    """두 탭이 거의 같이 갱신 — 늦은 쪽만 거절(token_rotated), 다른 기기 세션은 살아 있다 (H32)."""
+    await _signup(client)
+    old = client.cookies.get(COOKIE)
+    assert (await client.post("/api/v1/auth/refresh")).status_code == 200
+    new = client.cookies.get(COOKIE)
+
+    client.cookies.clear()
+    late = await client.post("/api/v1/auth/refresh", json={"refresh_token": old})
+    assert late.status_code == 401 and late.json()["error"]["code"] == "token_rotated"
+    again = await client.post("/api/v1/auth/refresh", json={"refresh_token": new})
+    assert again.status_code == 200 and again.json()["access_token"]
 
 
 async def test_logout_revokes_refresh(client: AsyncClient) -> None:
