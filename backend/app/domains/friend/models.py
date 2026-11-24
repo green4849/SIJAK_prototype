@@ -1,9 +1,9 @@
-"""friend 도메인: 친구 신청. 수락된 신청 = 친구 관계."""
+"""friend 도메인: 친구 신청(수락된 신청 = 친구 관계), 추천 평가, 성향조사."""
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -51,6 +51,30 @@ class RecommendationRating(Base):
     )
     target_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     rating: Mapped[str] = mapped_column(String(10))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class FriendSurvey(Base):
+    """성향조사 Q2~Q8 (2026-11-24). Q1(좋아하는 활동)은 auth 의 user_interests 에 둔다.
+
+    코드 값은 friend/survey.py 의 목록 — 목록이 바뀔 수 있어 DB 제약은 걸지 않고 저장할 때 검사한다.
+    """
+
+    __tablename__ = "friend_surveys"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    purpose: Mapped[str] = mapped_column(String(20))
+    places: Mapped[list[str]] = mapped_column(JSON)
+    times: Mapped[list[str]] = mapped_column(JSON)
+    frequency: Mapped[str] = mapped_column(String(20))
+    talk_style: Mapped[str] = mapped_column(String(20))
+    want: Mapped[str] = mapped_column(String(20))
+    traits: Mapped[list[str]] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

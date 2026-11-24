@@ -27,7 +27,7 @@ async def _signup(client: AsyncClient, person: dict = PERSON) -> dict:
         json={
             "signup_token": v["signup_token"],
             "region_code": "41",
-            "interests": ["walking", "music"],
+            "interests": ["walking", "movies"],
         },
     )
     assert res.status_code == 201, res.text
@@ -43,7 +43,7 @@ async def test_signup_then_me(client: AsyncClient) -> None:
     assert me.status_code == 200
     assert me.json()["name"] == "김영희"
     assert me.json()["region_name"] == "경기도"
-    assert sorted(me.json()["interests"]) == ["music", "walking"]
+    assert sorted(me.json()["interests"]) == ["movies", "walking"]
     assert "phone" not in me.json()  # 개인정보 미노출
 
 
@@ -169,20 +169,20 @@ async def test_update_profile_partial(client: AsyncClient) -> None:
     body = r.json()
     assert body["intro"] == "산책과 영화를 좋아해요"
     assert body["region_code"] == "41"  # 안 보낸 항목은 그대로
-    assert sorted(body["interests"]) == ["music", "walking"]
+    assert sorted(body["interests"]) == ["movies", "walking"]
 
 
 async def test_update_interests_keeps_overlap(client: AsyncClient) -> None:
     h = await _auth_headers(client)
     r = await client.patch(
-        "/api/v1/me", headers=h, json={"interests": ["music", "cooking"], "region_code": "11"}
+        "/api/v1/me", headers=h, json={"interests": ["movies", "cooking"], "region_code": "11"}
     )
     assert r.status_code == 200, r.text
-    assert sorted(r.json()["interests"]) == ["cooking", "music"]
+    assert sorted(r.json()["interests"]) == ["cooking", "movies"]
     assert r.json()["region_name"] == "서울특별시"
     # 다시 조회해도 반영돼 있어야 함
     me = (await client.get("/api/v1/me", headers=h)).json()
-    assert sorted(me["interests"]) == ["cooking", "music"]
+    assert sorted(me["interests"]) == ["cooking", "movies"]
 
 
 async def test_update_profile_validation(client: AsyncClient) -> None:

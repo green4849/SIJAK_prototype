@@ -9,6 +9,9 @@ export type FriendTab = 'recommended' | 'nearby'
 /** 추천 평가 (C12): 만나보고 싶어요 / 그저 그래요 / 잘 안 맞아요 */
 export type Rating = Schema<'RatingCreate'>['rating']
 export type RatingResult = Schema<'RatingOut'>
+export type Survey = Schema<'SurveyOut'>
+export type SurveyAnswers = Schema<'SurveyAnswers'>
+export type SurveyQuestion = Schema<'SurveyQuestion'>
 
 export const friendApi = {
   recommendations: (tab: FriendTab) =>
@@ -19,6 +22,10 @@ export const friendApi = {
     api.post<FriendCardData>('/friends/requests', { to_user_id: toUserId } satisfies Schema<'FriendRequestCreate'>),
   rate: (userId: string, rating: Rating) =>
     api.put<RatingResult>(`/friends/recommendations/${userId}/rating`, { rating } satisfies Schema<'RatingCreate'>),
+  /** 성향조사 문항과 내 답 (안 했으면 answers=null) */
+  survey: () => api.get<Survey>('/friends/survey'),
+  /** 성향조사 저장 — Q1은 내 '좋아하는 것'도 함께 바뀐다 */
+  saveSurvey: (answers: SurveyAnswers) => api.put<Survey>('/friends/survey', answers),
   accept: (requestId: string) => api.post<void>(`/friends/requests/${requestId}/accept`),
   decline: (requestId: string) => api.post<void>(`/friends/requests/${requestId}/decline`),
 }

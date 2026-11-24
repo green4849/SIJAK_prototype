@@ -73,7 +73,7 @@ export const inboxRoutes: Route[] = [
     const list = db()
       .notifications.filter((n) => n.uid === me.id)
       .sort((a, b) => b.at.localeCompare(a.at))
-      .map(({ uid: _uid, at, ...n }): NotificationItemOut => ({ ...n, created_at: at }))
+      .map(({ uid: _uid, at, ref: _ref, ...n }): NotificationItemOut => ({ ...n, created_at: at }))
     return json(list)
   }],
 

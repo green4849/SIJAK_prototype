@@ -37,6 +37,8 @@ export function assessText(text: string): { level: number; labels: string[] } {
 // ---------- 같은 동네 반경 검색 — backend/app/domains/friend/nearby.py 의 사본 (C3) ----------
 
 export const NEARBY_RADIUS_KM = 2
+/** 추천 친구 탭 후보 반경 — backend friend/nearby.py RECOMMEND_RADIUS_KM */
+export const RECOMMEND_RADIUS_KM = 5
 
 export function haversineKm([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]) {
   const r = (d: number) => (d * Math.PI) / 180
@@ -67,22 +69,34 @@ export function findNearby<U extends { geo: [number, number] | null; region_code
   return [...within, ...sameRegion.filter((u) => !u.geo).map((u) => [u, null] as [U, null])]
 }
 
+/** 추천 친구 탭 후보 (성향조사 알고리즘 1단계) — 둘 다 위치가 있으면 5km 안, 아니면 같은 시·도 */
+export function withinReach<U extends { geo: [number, number] | null; region_code: string }>(
+  me: U,
+  pool: U[],
+): [U, number | null][] {
+  const out: [U, number | null][] = []
+  for (const u of pool) {
+    if (me.geo && u.geo) {
+      const km = haversineKm(me.geo, u.geo)
+      if (km <= RECOMMEND_RADIUS_KM) out.push([u, coarseKm(km)])
+    } else if (u.region_code === me.region_code) out.push([u, null])
+  }
+  return out
+}
+
 // ---------- 대화 주제 추천 — backend/app/domains/chat/topics.py 의 사본 (C12) ----------
 
 const PHRASES: Record<string, [string, string]> = {
   walking: ['자주 가시는 산책길이 있으세요?', '날 좋은 날 같이 천천히 걸으실래요?'],
-  music: ['요즘 즐겨 들으시는 노래가 있으세요?', '젊을 때 좋아하시던 가수가 누구세요?'],
-  cooking: ['요즘 자주 해 드시는 음식이 있으세요?', '제일 자신 있는 요리가 뭐예요?'],
-  gardening: ['요즘 텃밭에 뭐 심으셨어요?', '키우시는 꽃이 있으세요?'],
-  baduk: ['바둑은 얼마나 두셨어요?', '다음에 한 판 두실래요?'],
+  movies: ['요즘 재미있게 보신 영화가 있으세요?', '다음에 공연 같이 보러 가실래요?'],
+  cooking: ['요즘 자주 해 드시는 음식이 있으세요?', '동네에 맛있는 집 아시는 데 있으세요?'],
+  fishing: ['낚시는 주로 어디로 가세요?', '제일 크게 잡으신 게 뭐였어요?'],
+  reading: ['요즘 읽고 계신 책이 있으세요?', '신문은 어떤 걸 보세요?'],
+  finance: ['요즘 경제 소식 중에 눈여겨보시는 게 있으세요?', '용돈 관리는 어떻게 하세요?'],
   travel: ['가 보신 곳 중에 제일 좋았던 데가 어디세요?', '가까운 데 바람 쐬러 가실래요?'],
   health: ['요즘 건강 챙기시려고 하시는 운동 있으세요?', '아침에 체조 같은 거 하세요?'],
-  tv: ['요즘 재미있게 보시는 드라마 있으세요?', '즐겨 보시는 프로그램이 뭐예요?'],
-  reading: ['요즘 읽고 계신 책이 있으세요?', '신문은 어떤 걸 보세요?'],
-  crafts: ['요즘 뜨고 계신 게 있으세요?', '만드신 것 중에 제일 마음에 드는 게 뭐예요?'],
-  faith: ['다니시는 곳은 가까우세요?', '모임은 일주일에 몇 번 가세요?'],
-  memories: ['어릴 적 고향은 어디세요?', '젊을 때 어떤 일 하셨어요?'],
-  fishing: ['낚시는 주로 어디로 가세요?', '제일 크게 잡으신 게 뭐였어요?'],
+  gardening: ['요즘 키우시는 꽃이나 화분이 있으세요?', '텃밭에 뭐 심으셨어요?'],
+  volunteer: ['봉사는 주로 어디서 하세요?', '다음에 봉사 같이 가 보실래요?'],
 }
 const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
 const MAX_TOPICS = 4

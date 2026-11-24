@@ -8,6 +8,7 @@ from app.core.deps import DbSession
 from app.domains.activity.deps import ActivityServiceDep
 from app.domains.chat.deps import ChatServiceDep
 from app.domains.friend.deps import FriendServiceDep
+from app.domains.notification.deps import NotificationServiceDep
 from app.domains.wellbeing.repository import WellbeingRepository
 from app.domains.wellbeing.service import WellbeingService
 
@@ -17,8 +18,9 @@ def get_wellbeing_service(
     chat: ChatServiceDep,
     friends: FriendServiceDep,
     activities: ActivityServiceDep,
+    notifications: NotificationServiceDep,
 ) -> WellbeingService:
-    return WellbeingService(WellbeingRepository(session), chat, friends, activities)
+    return WellbeingService(WellbeingRepository(session), chat, friends, activities, notifications)
 
 
 WellbeingServiceDep = Annotated[WellbeingService, Depends(get_wellbeing_service)]

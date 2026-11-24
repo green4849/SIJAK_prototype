@@ -1,9 +1,12 @@
 import { expect, type Page } from '@playwright/test'
 
 /** 둘러보기 링크(?tour) → 시드 계정(김시작)으로 홈까지 */
-export async function startTour(page: Page) {
+export async function startTour(page: Page, { survey = false }: { survey?: boolean } = {}) {
   await page.goto('/?tour')
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
+  // 둘러보기 계정은 성향조사를 안 해서 추천 친구 탭에 처음 가면 시작 화면으로 간다 —
+  // 그 흐름을 보는 테스트(survey: true)가 아니면 '다음에 하기'를 누른 것으로 둔다
+  if (!survey) await page.evaluate(() => localStorage.setItem('wipi.surveyLater', '1'))
 }
 
 export const mainNav = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' })

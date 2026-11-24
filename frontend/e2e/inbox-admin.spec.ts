@@ -2,17 +2,18 @@
 import { expect, test } from '@playwright/test'
 import { startTour } from './helpers'
 
-test('마이페이지 → 알림함: 새 소식 3개, 누르면 그 화면으로 가고 읽음 처리', async ({ page }) => {
+test('마이페이지 → 알림함: 새 소식 4개, 누르면 그 화면으로 가고 읽음 처리', async ({ page }) => {
   await startTour(page)
   await page.goto('/me')
-  await expect(page.getByRole('link', { name: /알림함.*새 소식 3개/ })).toBeVisible()
+  // 시드 3개 + 홈을 열 때 쌓인 '마음 건강 살펴볼 때예요'(시연 계정은 WHO-5를 한 지 4주가 지남)
+  await expect(page.getByRole('link', { name: /알림함.*새 소식 4개/ })).toBeVisible()
   await page.getByRole('link', { name: /알림함/ }).click()
-  await expect(page.getByText('새 소식', { exact: true })).toHaveCount(3)
+  await expect(page.getByText('새 소식', { exact: true })).toHaveCount(4)
 
   await page.getByRole('button', { name: /새 친구 신청/ }).click()
   await expect(page).toHaveURL(/\/friends$/)
   await page.goto('/notifications')
-  await expect(page.getByText('새 소식', { exact: true })).toHaveCount(2)
+  await expect(page.getByText('새 소식', { exact: true })).toHaveCount(3)
 
   await page.getByRole('button', { name: '모두 읽음' }).click()
   await expect(page.getByText('새 소식', { exact: true })).toHaveCount(0)

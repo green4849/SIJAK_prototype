@@ -24,21 +24,20 @@ REGIONS: dict[str, str] = {
     "52": "전북특별자치도",
 }
 
-# 매칭(Stage 5)의 관심사 기반 추천에 쓰인다
+# 좋아하는 활동 — 가입·프로필·성향조사 Q1이 같은 목록을 쓴다 (매칭 H = 취미 유사도).
+# 2026-11-24 성향조사 질문지(Q1)에 맞춰 13개 → 10개. 뜻이 같은 코드는 그대로 두고 이름만 바꿨다
+# (cooking·reading·health·gardening). 빠진 코드의 기존 기록은 마이그레이션이 옮기거나 지운다
 INTERESTS: dict[str, str] = {
     "walking": "산책·등산",
-    "music": "노래·음악",
-    "cooking": "요리",
-    "gardening": "텃밭·꽃 가꾸기",
-    "baduk": "바둑·장기",
-    "travel": "여행",
-    "health": "건강·운동",
-    "tv": "TV·드라마",
-    "reading": "책·신문",
-    "crafts": "뜨개질·만들기",
-    "faith": "종교 활동",
-    "memories": "옛날이야기",
+    "movies": "영화·공연",
+    "cooking": "요리·맛집 탐방",
     "fishing": "낚시",
+    "reading": "독서·문화생활",
+    "finance": "경제·재테크",
+    "travel": "여행",
+    "health": "운동·건강관리",
+    "gardening": "원예·식물 가꾸기",
+    "volunteer": "봉사활동",
 }
 
 MAX_INTERESTS = 5

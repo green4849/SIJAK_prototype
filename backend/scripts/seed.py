@@ -13,6 +13,7 @@ from app.core.database import SessionLocal
 from app.core.security import encrypt, hash_phone
 from app.domains.auth.models import User
 from app.domains.auth.repository import AuthRepository
+from app.domains.friend.models import FriendSurvey
 from app.integrations.identity.base import IdentityRequest
 from app.integrations.identity.mock_pass import MockPassProvider
 
@@ -25,7 +26,7 @@ DEMO_USERS = [
         "F",
         "41",
         "산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!",
-        ["walking", "tv", "travel"],
+        ["walking", "movies", "travel"],
         (37.193, 127.024),
     ),
     (
@@ -35,7 +36,7 @@ DEMO_USERS = [
         "M",
         "41",
         "매일 아침 오산천 걷기를 해요. 좋은 친구를 만나고 싶어요.",
-        ["walking", "health", "baduk"],
+        ["walking", "health", "volunteer"],
         (37.203, 127.034),
     ),
     (
@@ -54,8 +55,8 @@ DEMO_USERS = [
         "01020000004",
         "F",
         "41",
-        "옛날 노래 들으며 뜨개질해요.",
-        ["music", "crafts", "memories"],
+        "공연 보러 다니고 책 읽는 걸 좋아해요.",
+        ["movies", "reading"],
         None,
     ),
     (
@@ -64,8 +65,8 @@ DEMO_USERS = [
         "01020000005",
         "M",
         "41",
-        "바둑 두실 분 찾아요.",
-        ["baduk", "reading"],
+        "신문 보며 세상 이야기 나눌 분 찾아요.",
+        ["reading", "finance"],
         (37.213, 127.044),
     ),
     (
@@ -75,7 +76,7 @@ DEMO_USERS = [
         "F",
         "11",
         "복지관 노래교실 다녀요.",
-        ["music", "health"],
+        ["movies", "health"],
         (37.57, 126.98),
     ),
     (
@@ -91,6 +92,27 @@ DEMO_USERS = [
         None,
     ),
 ]
+
+
+# 성향조사 Q2~Q8 (이름 → 답). 없는 분은 아직 안 한 것으로 — 추천 카드의 '잘 맞아요'·이유 시연용
+DEMO_SURVEYS: dict[str, dict] = {
+    "이순자": dict(
+        purpose="hobby", places=["park", "cafe"], times=["weekday_am", "weekend"],
+        frequency="weekly", talk_style="talker", want="listener", traits=["lively", "warm"],
+    ),
+    "박정호": dict(
+        purpose="exercise", places=["park"], times=["weekday_am"],
+        frequency="often", talk_style="listener", want="lively", traits=["listening", "careful"],
+    ),
+    "김영희": dict(
+        purpose="chat", places=["cafe", "restaurant"], times=["weekday_pm"],
+        frequency="monthly", talk_style="balanced", want="calm", traits=["warm", "caring", "calm"],
+    ),
+    "정덕수": dict(
+        purpose="community", places=["center"], times=["any"],
+        frequency="sometimes", talk_style="talker", want="hobby", traits=["curious", "humor"],
+    ),
+}  # fmt: skip
 
 
 async def seed_users() -> None:
@@ -118,6 +140,8 @@ async def seed_users() -> None:
                 geo_lng=geo[1] if geo else None,
             )
             await repo.add_user(user, interests)
+            if name in DEMO_SURVEYS:
+                session.add(FriendSurvey(user_id=user.id, **DEMO_SURVEYS[name]))
             added += 1
         await repo.commit()
         print(f"users: +{added} (총 {len(DEMO_USERS)}명 중)")

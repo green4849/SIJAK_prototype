@@ -1,6 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { LocationConsent, useAuth } from '@/features/auth'
-import { FriendFinder, ReceivedRequests, type FriendTab } from '@/features/friend'
+import {
+  FriendFinder,
+  ReceivedRequests,
+  SurveyPrompt,
+  surveyPostponed,
+  useSurveyGate,
+  type FriendTab,
+} from '@/features/friend'
 import {
   InsufficientPointsSheet,
   RatingRewardNote,
@@ -10,7 +18,7 @@ import {
 } from '@/features/points'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
 import { TopBar } from '@/shared/ui/TopBar'
-import { chatWith } from './routes'
+import { chatWith, friendSurvey } from './routes'
 import styles from './TabPage.module.css'
 
 const TABS: { value: FriendTab; label: string }[] = [
@@ -28,6 +36,13 @@ export function FriendsPage() {
   const points = usePointSummary()
   const [shortOfPoints, setShortOfPoints] = useState(false)
 
+  // 성향조사를 안 했으면 처음 들어올 때 시작 화면으로 ('다음에 하기'를 누른 뒤로는 탭 위 카드로만 권한다)
+  const navigate = useNavigate()
+  const needsSurvey = useSurveyGate()
+  useEffect(() => {
+    if (needsSurvey && !surveyPostponed()) navigate(friendSurvey, { replace: true })
+  }, [needsSurvey, navigate])
+
   return (
     <section className={styles.page}>
       <TopBar title="동네 친구 찾기" back={false} />
@@ -44,7 +59,10 @@ export function FriendsPage() {
           tab === 'nearby' && user && !user.has_location ? (
             <LocationConsent />
           ) : tab === 'recommended' ? (
-            <RatingRewardNote />
+            <>
+              <SurveyPrompt to={friendSurvey} editTo={`${friendSurvey}?edit`} />
+              <RatingRewardNote />
+            </>
           ) : undefined
         }
         requestPrice={friendRequestPrice(points)}

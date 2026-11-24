@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react'
+import { MapPin, Sparkles } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Avatar } from '@/shared/ui/Avatar'
 import type { FriendCardData } from '../api/friendApi'
@@ -23,6 +23,7 @@ function where(card: FriendCardData) {
 
 /** ④ 친구 카드 — 이름·나이·소개·겹치는 관심사 */
 export function FriendCard({ card, actions, footer }: Props) {
+  const reasons = card.reasons ?? []
   return (
     <article className={styles.card} aria-label={`${card.name}님`}>
       <div className={styles.top}>
@@ -39,8 +40,28 @@ export function FriendCard({ card, actions, footer }: Props) {
 
       {card.intro && <p className={styles.intro}>{card.intro}</p>}
 
-      {/* 추천 이유 — 겹치는 취미가 없으면 '왜 이분이?'에 답할 것이 없었다 */}
-      {card.common_interests.length === 0 && (card.relation === 'none' || card.relation === 'sent') && (
+      {/* 성향조사 적합도 (추천 탭) — 점수 숫자 대신 말과 이유로 (100% 맞는 사람처럼 읽히지 않게) */}
+      {(card.match_label || reasons.length > 0) && (
+        <div className={styles.match}>
+          {card.match_label && (
+            <p className={styles.matchLabel}>
+              <Sparkles aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} /> {card.match_label}
+            </p>
+          )}
+          {reasons.length > 0 && (
+            <ul className={styles.reasons} aria-label="추천 이유">
+              {reasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* 추천 이유 — 겹치는 취미도 성향 이유도 없으면 '왜 이분이?'에 답할 것이 없었다 */}
+      {card.common_interests.length === 0 &&
+        reasons.length === 0 &&
+        (card.relation === 'none' || card.relation === 'sent') && (
         <p className={styles.reason}>{card.distance_km != null ? '가까이 사는 이웃이라 추천했어요' : '같은 동네 이웃이라 추천했어요'}</p>
       )}
 

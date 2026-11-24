@@ -3,12 +3,17 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.domains.wellbeing.service import AssessmentForm, AssessmentResult, RelationIndex
+from app.domains.wellbeing.service import (
+    AssessmentForm,
+    AssessmentResult,
+    RelationIndex,
+    Who5Status,
+)
 
 RelationLevel = Literal["normal", "caution", "risk", "urgent"]
 FactorCode = Literal["activity", "communication", "emotion", "social", "responsiveness"]
 MoodLevel = Literal["calm", "mixed", "heavy", "none"]
-AssessmentKind = Literal["phq9", "gad7"]  # models.ASSESSMENT_KINDS
+AssessmentKind = Literal["phq9", "gad7", "who5"]  # models.ASSESSMENT_KINDS
 
 
 class RelationFactor(BaseModel):
@@ -89,7 +94,7 @@ class AssessmentFormOut(BaseModel):
 
 class AssessmentIn(BaseModel):
     kind: AssessmentKind
-    answers: list[int] = Field(max_length=20, description="문항 순서대로 0~3")
+    answers: list[int] = Field(max_length=20, description="문항 순서대로 0~3 (WHO-5는 0~5)")
 
 
 class AssessmentResultOut(BaseModel):
@@ -98,12 +103,35 @@ class AssessmentResultOut(BaseModel):
     title: str
     score: int
     max_score: int
-    level: Literal["minimal", "mild", "moderate", "severe"]
+    level: Literal["minimal", "mild", "moderate", "severe", "good", "fair", "low"] = Field(
+        description="PHQ-9·GAD-7: minimal~severe (높을수록 힘듦) / WHO-5: low·fair·good"
+    )
     level_label: str
     advice: str
-    crisis: bool = Field(description="PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내")
+    crisis: bool = Field(
+        description="상담 전화 안내 — PHQ-9 9번(죽음·자해 생각)에 '있음', 또는 WHO-5 28점 이하"
+    )
     created_at: datetime
+    previous_score: int | None = Field(
+        default=None, description="같은 점검의 바로 전 점수 (처음이면 null)"
+    )
 
     @classmethod
     def of(cls, r: AssessmentResult) -> "AssessmentResultOut":
         return cls(**r.__dict__)
+
+
+class Who5StatusOut(BaseModel):
+    """WHO-5 웰빙 지수 — 가입할 때 처음, 그 뒤 4주마다"""
+
+    last: AssessmentResultOut | None = Field(description="마지막 결과 (한 번도 안 했으면 null)")
+    next_due_at: datetime | None = Field(description="다음에 살펴볼 날 (안 했으면 null)")
+    due: bool = Field(description="지금 살펴볼 때인지 (한 번도 안 했거나 4주가 지남)")
+
+    @classmethod
+    def of(cls, st: Who5Status) -> "Who5StatusOut":
+        return cls(
+            last=AssessmentResultOut.of(st.last) if st.last else None,
+            next_due_at=st.next_due_at,
+            due=st.due,
+        )

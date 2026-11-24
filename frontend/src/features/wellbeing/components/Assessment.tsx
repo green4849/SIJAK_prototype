@@ -10,11 +10,12 @@ import { useAssessment, useAssessmentHistory } from '../hooks/useWellbeing'
 import styles from './Wellbeing.module.css'
 
 const KINDS: { kind: AssessmentKind; title: string; count: number }[] = [
+  { kind: 'who5', title: '마음 건강 살펴보기', count: 5 },
   { kind: 'phq9', title: '기분 점검', count: 9 },
   { kind: 'gad7', title: '걱정 점검', count: 7 },
 ]
 
-/** 자가평가 시작 카드 두 개 — 지난 결과를 설명 자리에 */
+/** 자가평가 시작 카드 (WHO-5 · PHQ-9 · GAD-7) — 지난 결과를 설명 자리에. WHO-5는 0~100점이라 점수로 */
 export function AssessmentCards({ hrefOf }: { hrefOf: (kind: AssessmentKind) => string }) {
   const { data } = useAssessmentHistory()
   return (
@@ -30,7 +31,11 @@ export function AssessmentCards({ hrefOf }: { hrefOf: (kind: AssessmentKind) => 
             icon={ClipboardCheck}
             accent="mint"
             title={`${title} · 질문 ${count}개`}
-            description={last ? `지난번: ${last.level_label} · ${formatDate(last.created_at)}` : undefined}
+            description={
+              last
+                ? `지난번: ${kind === 'who5' ? `${last.score}점` : last.level_label} · ${formatDate(last.created_at)}`
+                : undefined
+            }
             to={hrefOf(kind)}
           />
         )

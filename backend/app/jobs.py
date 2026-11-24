@@ -58,7 +58,9 @@ def _services(session: AsyncSession, storage: LocalMediaStorage) -> _Services:
     friends = FriendService(FriendRepository(session), auth, risk, points, notifications)
     chat = ChatService(ChatRepository(session), auth, friends, risk, storage, notifications)
     activities = ActivityService(ActivityRepository(session), points, notifications)
-    wellbeing = WellbeingService(WellbeingRepository(session), chat, friends, activities)
+    wellbeing = WellbeingService(
+        WellbeingRepository(session), chat, friends, activities, notifications
+    )
     return _Services(auth, chat, wellbeing)
 
 

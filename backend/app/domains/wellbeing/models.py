@@ -1,8 +1,9 @@
-"""wellbeing 도메인: 사회적 관계 지수 주간 기록 + 자가평가(PHQ-9·GAD-7) (C11).
+"""wellbeing 도메인: 사회적 관계 지수 주간 기록 + 자가평가(PHQ-9·GAD-7·WHO-5) (C11).
 
 - 지수는 조회할 때마다 활동 기록으로 새로 계산하고, 그 주(월요일 시작, 한국 날짜) 값을 덮어 쓴다
   → 지난 주들의 값이 남아 '4주 변화'가 된다.
-- 자가평가는 고른 답(0~3)을 그대로 남긴다. 점수·단계는 답으로 다시 계산할 수 있다.
+- 자가평가는 고른 답(PHQ-9·GAD-7 0~3, WHO-5 0~5)을 그대로 남긴다.
+  점수·단계는 답으로 다시 계산할 수 있다.
 """
 
 import uuid
@@ -23,7 +24,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
-ASSESSMENT_KINDS = ("phq9", "gad7")
+# who5: WHO-5 웰빙 지수 — 가입할 때 처음, 그 뒤 4주마다
+ASSESSMENT_KINDS = ("phq9", "gad7", "who5")
 
 
 class RelationIndexWeek(Base):

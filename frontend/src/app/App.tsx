@@ -26,6 +26,8 @@ const ChatOpenPage = lazy(() => import('@/pages/ChatOpenPage').then((m) => ({ de
 const ChatRoomPage = lazy(() => import('@/pages/ChatRoomPage').then((m) => ({ default: m.ChatRoomPage })))
 const CompanionPage = lazy(() => import('@/pages/CompanionPage').then((m) => ({ default: m.CompanionPage })))
 const AssessmentPage = lazy(() => import('@/pages/AssessmentPage').then((m) => ({ default: m.AssessmentPage })))
+const Who5HistoryPage = lazy(() => import('@/pages/Who5HistoryPage').then((m) => ({ default: m.Who5HistoryPage })))
+const FriendSurveyPage = lazy(() => import('@/pages/FriendSurveyPage').then((m) => ({ default: m.FriendSurveyPage })))
 const GuardiansPage = lazy(() => import('@/pages/GuardiansPage').then((m) => ({ default: m.GuardiansPage })))
 const SosPage = lazy(() => import('@/pages/SosPage').then((m) => ({ default: m.SosPage })))
 const WellbeingPage = lazy(() => import('@/pages/WellbeingPage').then((m) => ({ default: m.WellbeingPage })))
@@ -87,6 +89,7 @@ export function App() {
             <Route element={<TabLayout />}>
               <Route index element={<HomePage />} />
               <Route path="friends" element={<FriendsPage />} />
+              <Route path="friends/survey" element={<FriendSurveyPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="me" element={<MyPage />} />
             </Route>
@@ -108,6 +111,7 @@ export function App() {
               <Route path="companion" element={<CompanionPage />} />
               <Route path="me/wellbeing" element={<WellbeingPage />} />
               <Route path="me/wellbeing/check/:kind" element={<AssessmentPage />} />
+              <Route path="me/wellbeing/history" element={<Who5HistoryPage />} />
               <Route path="sos" element={<SosPage />} />
               <Route path="me/guardians" element={<GuardiansPage />} />
               <Route path="welfare" element={<WelfarePage />} />

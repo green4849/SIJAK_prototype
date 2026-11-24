@@ -107,10 +107,10 @@ async def test_free_period(client: AsyncClient, free_period: None) -> None:
 
 
 async def test_rating_reorders_and_rewards(client: AsyncClient) -> None:
-    ha, _ = await signup_user(client, "김영희", interests=["walking", "music"])
-    _, b = await signup_user(client, "박철수", interests=["walking", "music"])  # 원래 1순위
+    ha, _ = await signup_user(client, "김영희", interests=["walking", "movies"])
+    _, b = await signup_user(client, "박철수", interests=["walking", "movies"])  # 원래 1순위
     _, c = await signup_user(client, "이순자", interests=["cooking"])
-    _, d = await signup_user(client, "최말순", interests=["tv"])
+    _, d = await signup_user(client, "최말순", interests=["fishing"])
 
     rec = (await client.get(f"{API}/friends/recommendations", headers=ha)).json()
     assert rec[0]["name"] == "박철수" and rec[0]["my_rating"] is None
@@ -250,21 +250,21 @@ async def test_volunteer_reward_and_cancel(
 
 
 async def test_topic_suggestions(client: AsyncClient) -> None:
-    ha, a = await signup_user(client, "김영희", interests=["walking", "music"])
-    hb, b = await signup_user(client, "박철수", interests=["tv", "walking"])
+    ha, a = await signup_user(client, "김영희", interests=["walking", "movies"])
+    hb, b = await signup_user(client, "박철수", interests=["fishing", "walking"])
     await _request(client, ha, b)
     await _request(client, hb, a)
     room = (await client.post(f"{API}/chats/with/{b['id']}", headers=ha)).json()
 
     topics = (await client.get(f"{API}/chats/{room['id']}/topics", headers=ha)).json()
     assert len(topics) == 4
-    # 공통 관심사(산책) 먼저, 그다음 상대 관심사(TV)
+    # 공통 관심사(산책) 먼저, 그다음 상대 관심사(낚시)
     assert topics[0] == {
         "label": "산책·등산",
         "text": "자주 가시는 산책길이 있으세요?",
         "common": True,
     }
-    assert topics[1]["label"] == "TV·드라마" and topics[1]["common"] is False
+    assert topics[1]["label"] == "낚시" and topics[1]["common"] is False
 
     # 방에 없는 사람은 못 본다
     hc, _ = await signup_user(client, "이순자")

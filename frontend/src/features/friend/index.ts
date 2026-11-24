@@ -1,6 +1,8 @@
 /** friend feature 공개 API */
 export type { FriendCardData, FriendTab, Rating } from './api/friendApi'
 export { FriendFinder } from './components/FriendFinder'
+export { SurveyFlow, SurveyPrompt } from './components/Survey'
+export { surveyPostponed, useSurveyGate } from './hooks/useSurvey'
 export { ReceivedRequests } from './components/ReceivedRequests'
 export { MyFriendList } from './components/MyFriendList'
 export { useMyFriends } from './hooks/useFriends'

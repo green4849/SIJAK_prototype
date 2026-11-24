@@ -8,6 +8,7 @@ from app.domains.wellbeing.schemas import (
     AssessmentIn,
     AssessmentResultOut,
     RelationIndexOut,
+    Who5StatusOut,
 )
 from app.domains.wellbeing.service import FORMS, WellbeingService
 
@@ -26,6 +27,12 @@ async def assessment_history(
 ) -> list[AssessmentResultOut]:
     """지난 자가평가 결과 (새것부터)"""
     return [AssessmentResultOut.of(r) for r in await service.history(me.id)]
+
+
+@router.get("/who5", response_model=Who5StatusOut)
+async def who5_status(me: CurrentUser, service: WellbeingServiceDep) -> Who5StatusOut:
+    """WHO-5를 할 때인지 — 4주가 지났으면 알림함에도 한 번 알린다 (홈에서 부른다)"""
+    return Who5StatusOut.of(await service.who5_status(me.id))
 
 
 @router.get("/self-assessment/{kind}", response_model=AssessmentFormOut)

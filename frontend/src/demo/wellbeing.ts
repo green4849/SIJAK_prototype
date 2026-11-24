@@ -110,7 +110,7 @@ const OPTIONS = [
   { value: 3, label: '거의 매일' },
 ]
 
-export const FORMS: Record<'phq9' | 'gad7', AssessmentFormOut> = {
+export const FORMS: Record<DAssessment['kind'], AssessmentFormOut> = {
   phq9: {
     kind: 'phq9',
     title: '기분 점검',
@@ -143,7 +143,26 @@ export const FORMS: Record<'phq9' | 'gad7', AssessmentFormOut> = {
       '무언가 끔찍한 일이 생길 것처럼 두려웠다',
     ].map((text, i) => ({ id: i + 1, text })),
   },
+  // WHO-5 웰빙 지수 — 백엔드 wellbeing/service.py 와 같게 (문항·보기는 사용자가 준 그대로)
+  who5: {
+    kind: 'who5',
+    title: '마음 건강 살펴보기',
+    lead: '얼마나 자주 그랬는지 골라 주세요.',
+    options: ['전혀 없음', '가끔', '절반 미만', '절반 이상', '대부분', '항상'].map((label, value) => ({ value, label })),
+    questions: [
+      '지난 2주간 나는 밝고 기분이 좋았다',
+      '지난 2주간 나는 차분하고 편안했다',
+      '지난 2주간 나는 활기차고 에너지가 있었다',
+      '지난 2주간 나는 상쾌하고 개운하게 일어났다',
+      '지난 2주간 내 일상은 흥미로운 것들로 채워졌다',
+    ].map((text, i) => ({ id: i + 1, text })),
+  },
 }
+
+/** WHO-5: 합(0~25) × 4 = 0~100, 4주마다, 28 이하 상담 전화 안내 */
+const WHO5_SCALE = 4
+export const WHO5_INTERVAL_MS = 28 * 24 * 3600_000
+const WHO5_CRISIS_MAX = 28
 
 const LEVELS: { max: number; level: AssessmentResultOut['level']; label: string; advice: string }[] = [
   { max: 4, level: 'minimal', label: '괜찮아요', advice: '마음이 편안한 편이에요. 지금처럼 이웃과 자주 이야기 나눠요.' },
@@ -152,20 +171,41 @@ const LEVELS: { max: number; level: AssessmentResultOut['level']; label: string;
   { max: 99, level: 'severe', label: '도움이 꼭 필요해요', advice: '전문가와 꼭 이야기해 보세요. 109에 전화하면 하루 종일 상담해 줘요.' },
 ]
 
-export function resultOf(a: DAssessment): AssessmentResultOut {
+const WHO5_LEVELS: typeof LEVELS = [
+  {
+    max: 50,
+    level: 'low',
+    label: '마음이 지쳐 있어요',
+    advice: '요즘 마음이 많이 지쳐 있어요. 마음을 돌보는 일을 해 보고, 이런 날이 이어지면 전문가와 이야기해 보세요.',
+  },
+  { max: 65, level: 'fair', label: '보통이에요', advice: '요즘 마음이 보통이에요. 일상에 작은 활력을 더해 봐요.' },
+  { max: 100, level: 'good', label: '마음이 건강한 편이에요', advice: '요즘 마음이 밝고 활기찬 편이에요. 지금의 좋은 흐름을 이어 가요.' },
+]
+
+const scoreOf = (a: DAssessment) => a.answers.reduce((x, y) => x + y, 0) * (a.kind === 'who5' ? WHO5_SCALE : 1)
+
+export function resultOf(a: DAssessment, previous?: DAssessment): AssessmentResultOut {
   const form = FORMS[a.kind]
-  const score = a.answers.reduce((x, y) => x + y, 0)
-  const lv = LEVELS.find((l) => score <= l.max) ?? LEVELS[LEVELS.length - 1]
+  const score = scoreOf(a)
+  const levels = a.kind === 'who5' ? WHO5_LEVELS : LEVELS
+  const lv = levels.find((l) => score <= l.max) ?? levels[levels.length - 1]
+  const who5 = a.kind === 'who5'
   return {
     id: a.id,
     kind: a.kind,
     title: form.title,
     score,
-    max_score: form.questions.length * 3,
+    max_score: form.questions.length * (who5 ? 5 * WHO5_SCALE : 3),
     level: lv.level,
     level_label: lv.label,
     advice: lv.advice,
-    crisis: a.kind === 'phq9' && (a.answers[8] ?? 0) > 0,
+    crisis: who5 ? score <= WHO5_CRISIS_MAX : a.kind === 'phq9' && (a.answers[8] ?? 0) > 0,
     created_at: a.at,
+    previous_score: previous ? scoreOf(previous) : null,
   }
+}
+
+/** 새것부터 — 각 결과에 같은 점검의 바로 전 점수 */
+export function resultsWithPrevious(newestFirst: DAssessment[]): AssessmentResultOut[] {
+  return newestFirst.map((a, i) => resultOf(a, newestFirst.slice(i + 1).find((b) => b.kind === a.kind)))
 }

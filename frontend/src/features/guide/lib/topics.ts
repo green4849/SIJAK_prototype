@@ -536,11 +536,11 @@ export const TOPICS: Topic[] = [
   {
     id: 'wellbeing',
     ask: '마음 건강은 뭐예요?',
-    cues: [[/마음(건강|날씨|점검)|기분점검|걱정점검|관계지수|우울(증)?(검사|점검|테스트)|자가(진단|평가|점검)/, 5]],
-    screens: ['wellbeing', 'check'],
+    cues: [[/마음(건강|날씨|점검)|기분점검|걱정점검|관계지수|웰빙|who-?5|우울(증)?(검사|점검|테스트)|자가(진단|평가|점검)/, 5]],
+    screens: ['wellbeing', 'check', 'mindlog'],
     reply: (ctx) => ({
       text: '마이페이지의 ‘마음 건강’에 있어요. 스스로 살펴보는 점검이고, 병원 진단은 아니에요.',
-      actions: ctx.screen === 'wellbeing' || ctx.screen === 'check' ? undefined : [viaMe('me-wellbeing', '‘마음 건강’')],
+      actions: ctx.screen === 'wellbeing' || ctx.screen === 'check' || ctx.screen === 'mindlog' ? undefined : [viaMe('me-wellbeing', '‘마음 건강’')],
       demoNote: '시연 화면의 숫자는 예시예요.',
     }),
   },

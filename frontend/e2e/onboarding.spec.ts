@@ -5,7 +5,7 @@ import { verifyPhone } from './helpers'
 test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
 /** 가입 1/2(좋아하는 것)에서 하나 고르고 2/2(사는 동네)로 */
 async function toLocationStep(page: Page) {
-  await page.getByRole('button', { name: '요리' }).click()
+  await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
   await page.getByRole('button', { name: /^다음/ }).click()
 }
 
@@ -32,11 +32,11 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
   // 1/2 좋아하는 것 — 안 고르면 버튼이 할 일을 알려 준다
   await expect(page.getByRole('heading', { name: /어떤 활동을 좋아하시나요/ })).toBeVisible()
   await expect(page.getByRole('button', { name: '하나 이상 골라 주세요' })).toBeDisabled()
-  await page.getByRole('button', { name: '요리' }).click()
+  await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
   await page.getByRole('button', { name: /^다음/ }).click()
   // 2/2 사는 동네 — 뒤로 누르면 1단계로, 고른 것은 그대로
   await page.getByRole('button', { name: '뒤로' }).click()
-  await expect(page.getByRole('button', { name: '요리' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: '요리·맛집 탐방' })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: /^다음/ }).click()
   // 위치 정보 수집 동의 → 그 자리에서 동네를 찾아 보여 준다
   await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
@@ -46,7 +46,14 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
   await expect(page.getByRole('heading', { name: '시작은 이렇게 지켜 드려요' })).toBeVisible()
   await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0) // 가입 직후엔 뒤로 없음
   await page.getByRole('link', { name: '알겠어요, 시작할게요' }).click()
+  // 첫 마음 건강 살펴보기(WHO-5) — 가입할 때 처음, 미룰 수 있다
+  await expect(page.getByRole('heading', { name: '최근 2주 동안의 기분을 같이 살펴볼까요?' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: '나의 이전 결과 보기' })).toHaveCount(0)
+  await page.getByRole('link', { name: '나중에 할게요' }).click()
   await expect(page.getByRole('heading', { name: '홍길순님' })).toBeVisible()
+  // 미룬 분은 홈 카드로 다시 권한다
+  await expect(page.getByRole('link', { name: /마음 건강 살펴볼 때예요.*질문 다섯 개/ })).toBeVisible()
 })
 
 test('역지오코딩이 안 되면 가까운 시·도로 어림한다', async ({ page }) => {
@@ -77,7 +84,7 @@ test.describe('위치 권한이 없으면', () => {
 test('관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ page }) => {
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
-  for (const i of ['산책·등산', '노래·음악', '요리', '여행', '건강·운동', '바둑·장기'])
+  for (const i of ['산책·등산', '영화·공연', '요리·맛집 탐방', '여행', '운동·건강관리', '봉사활동'])
     await page.getByRole('button', { name: i }).click()
   await expect(page.locator('[aria-pressed=true]')).toHaveCount(5)
   await expect(page.getByRole('alert')).toContainText('5개까지 고를 수 있어요')

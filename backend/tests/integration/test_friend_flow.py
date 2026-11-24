@@ -6,15 +6,15 @@ from tests.integration.helpers import signup_user
 
 
 async def test_recommend_request_accept(client: AsyncClient) -> None:
-    ha, a = await signup_user(client, "김영희", interests=["walking", "music"])
-    hb, b = await signup_user(client, "박철수", interests=["music", "cooking"])
-    hc, _ = await signup_user(client, "이순자", region="11", interests=["tv"])
+    ha, a = await signup_user(client, "김영희", interests=["walking", "movies"])
+    hb, b = await signup_user(client, "박철수", interests=["movies", "cooking"])
+    hc, _ = await signup_user(client, "이순자", region="11", interests=["fishing"])
 
     # 추천: 관심사 겹치는 박철수가 먼저, 나 자신은 없음
     rec = (await client.get("/api/v1/friends/recommendations", headers=ha)).json()
     assert [c["name"] for c in rec][0] == "박철수"
     assert a["id"] not in {c["user_id"] for c in rec}
-    assert rec[0]["common_interests"] == ["노래·음악"]
+    assert rec[0]["common_interests"] == ["영화·공연"]
     assert rec[0]["relation"] == "none"
     assert "phone" not in rec[0] and "birth_date" not in rec[0]
 
@@ -89,3 +89,89 @@ async def test_nearby_radius(client: AsyncClient) -> None:
 
     near = (await client.get("/api/v1/friends/recommendations?tab=nearby", headers=ha)).json()
     assert [(c["name"], c["distance_km"]) for c in near] == [("박철수", 1.0), ("최말순", None)]
+
+
+SURVEY = {
+    "interests": ["walking", "cooking"],
+    "purpose": "hobby",
+    "places": ["park"],
+    "times": ["weekday_am"],
+    "frequency": "weekly",
+    "talk_style": "balanced",
+    "want": "listener",
+    "traits": ["caring"],
+}
+
+
+async def test_survey_save_and_prefill(client: AsyncClient) -> None:
+    h, _ = await signup_user(client, "김영희", interests=["fishing"])
+    out = (await client.get("/api/v1/friends/survey", headers=h)).json()
+    assert out["answers"] is None and out["my_interests"] == ["fishing"]
+    assert [q["key"] for q in out["questions"]] == [
+        "interests", "purpose", "places", "times", "frequency", "talk_style", "want", "traits"
+    ]  # fmt: skip
+    q1 = out["questions"][0]
+    assert (q1["min"], q1["max"]) == (1, 5) and len(q1["options"]) == 10
+    assert q1["options"][1] == {"code": "movies", "label": "영화·공연"}
+    assert out["questions"][2]["max"] == 2 and out["questions"][7]["max"] == 3
+
+    r = await client.put("/api/v1/friends/survey", headers=h, json=SURVEY)
+    assert r.status_code == 200, r.text
+    assert r.json()["answers"] == SURVEY
+    # Q1은 내 '좋아하는 것'도 바꾼다
+    me = (await client.get("/api/v1/me", headers=h)).json()
+    assert sorted(me["interests"]) == ["cooking", "walking"]
+    again = (await client.get("/api/v1/friends/survey", headers=h)).json()
+    assert again["answers"] == SURVEY
+
+    bad = await client.put(
+        "/api/v1/friends/survey", headers=h, json={**SURVEY, "places": ["park", "cafe", "center"]}
+    )
+    assert bad.status_code == 422
+    assert bad.json()["error"]["message"] == "3번 질문은 2개까지 고를 수 있어요."
+    assert (await client.get("/api/v1/friends/survey")).status_code == 401
+
+
+async def test_recommend_by_survey_match(client: AsyncClient) -> None:
+    """성향이 잘 맞는 분이 관심사만 겹치는 분보다 먼저, 이유는 말로 — 점수 숫자는 내보내지 않는다"""
+    ha, _ = await signup_user(client, "김영희", interests=["walking"])
+    hb, _ = await signup_user(client, "박철수", interests=["walking"])  # 성향조사 안 함
+    hc, _ = await signup_user(client, "이순자", interests=["cooking"])  # 성향이 잘 맞음
+    hd, _ = await signup_user(client, "최말순", region="11", interests=["walking"])  # 다른 시·도
+
+    await client.put("/api/v1/friends/survey", headers=ha, json=SURVEY)
+    await client.put(
+        "/api/v1/friends/survey",
+        headers=hc,
+        json={**SURVEY, "interests": ["cooking", "walking"], "talk_style": "listener"},
+    )
+    rec = (await client.get("/api/v1/friends/recommendations", headers=ha)).json()
+    # 위치가 없으면 같은 시·도만
+    assert [c["name"] for c in rec] == ["이순자", "박철수"]
+    lee, park = rec
+    assert lee["match_label"] == "잘 맞아요"
+    assert lee["reasons"][0] == "둘 다 평일 오전이 편해요"
+    assert "score" not in lee
+    # 성향조사를 안 한 분 — 관심사(H)로만, 말·이유 없음
+    assert park["match_label"] is None and park["reasons"] == []
+    assert hb and hd
+
+
+async def test_recommend_within_5km(client: AsyncClient) -> None:
+    ha, _ = await signup_user(client, "김영희")
+    hb, _ = await signup_user(client, "박철수")  # 약 3.3km — 추천 반경(5km) 안
+    hc, _ = await signup_user(client, "이순자")  # 약 7.8km — 밖
+    await signup_user(client, "최말순")  # 위치 없음 — 같은 시·도라 후보
+    hd, _ = await signup_user(client, "한옥자", region="11")  # 다른 시·도지만 약 1.1km
+    await client.put("/api/v1/me/location", headers=ha, json={"lat": 37.27, "lng": 127.01})
+    await client.put("/api/v1/me/location", headers=hb, json={"lat": 37.30, "lng": 127.01})
+    await client.put("/api/v1/me/location", headers=hc, json={"lat": 37.34, "lng": 127.01})
+    await client.put("/api/v1/me/location", headers=hd, json={"lat": 37.28, "lng": 127.01})
+
+    rec = (await client.get("/api/v1/friends/recommendations", headers=ha)).json()
+    # 같은 점수면 가까운 순, 거리 모르는 분은 뒤에
+    assert [(c["name"], c["distance_km"]) for c in rec] == [
+        ("한옥자", 1.0),
+        ("박철수", 3.5),
+        ("최말순", None),
+    ]

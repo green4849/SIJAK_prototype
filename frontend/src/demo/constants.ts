@@ -20,20 +20,18 @@ export const REGIONS: Record<string, string> = {
   '52': '전북특별자치도',
 }
 
+/** 좋아하는 활동 = 성향조사 Q1 (2026-11-24, 13개 → 10개) — backend auth/constants.py */
 export const INTERESTS: Record<string, string> = {
   walking: '산책·등산',
-  music: '노래·음악',
-  cooking: '요리',
-  gardening: '텃밭·꽃 가꾸기',
-  baduk: '바둑·장기',
-  travel: '여행',
-  health: '건강·운동',
-  tv: 'TV·드라마',
-  reading: '책·신문',
-  crafts: '뜨개질·만들기',
-  faith: '종교 활동',
-  memories: '옛날이야기',
+  movies: '영화·공연',
+  cooking: '요리·맛집 탐방',
   fishing: '낚시',
+  reading: '독서·문화생활',
+  finance: '경제·재테크',
+  travel: '여행',
+  health: '운동·건강관리',
+  gardening: '원예·식물 가꾸기',
+  volunteer: '봉사활동',
 }
 
 export const MAX_INTERESTS = 5

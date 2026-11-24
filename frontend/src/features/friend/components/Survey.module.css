@@ -1,0 +1,104 @@
+/* 성향조사 — 토큰만 사용 */
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-title);
+  line-height: var(--leading-title);
+}
+
+.lead {
+  margin: 0;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+/* 시작이 + 말풍선 */
+.speech {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.bubble {
+  position: relative;
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  line-height: var(--leading-body);
+}
+
+:root[data-contrast='high'] .bubble {
+  border: 2px solid var(--color-border);
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+}
+
+.progressText {
+  margin: 0;
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+}
+
+.stepName {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.steps {
+  display: flex;
+  gap: 4px;
+}
+
+.step {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+}
+
+.step[data-done='true'] {
+  background: var(--color-primary);
+}
+
+.question {
+  font-size: var(--text-card-title);
+  line-height: var(--leading-title);
+}
+
+/* OptionGrid 의 legend(질문)를 질문 제목처럼 */
+.grid legend {
+  line-height: var(--leading-title);
+}
+
+/* 보기가 길어도 버튼이 늘 손 닿는 곳에 — 아래 메뉴(BottomNav, 늘 화면 아래 고정) 바로 위에 붙인다 */
+.actions {
+  position: sticky;
+  bottom: calc(var(--nav-height) + 2 * var(--space-1) + 1px + env(safe-area-inset-bottom));
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) var(--space-2));
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-1);
+}

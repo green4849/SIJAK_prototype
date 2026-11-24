@@ -5,6 +5,7 @@
  */
 
 import type { Schema } from '@/shared/api/types'
+import type { DSurvey } from './matching'
 
 type ActivityCategory = Schema<'ActivityOut'>['category']
 
@@ -111,7 +112,7 @@ export interface DGuardian {
 export interface DAssessment {
   id: number
   uid: string
-  kind: 'phq9' | 'gad7'
+  kind: 'phq9' | 'gad7' | 'who5'
   answers: number[]
   at: string
 }
@@ -126,6 +127,8 @@ export interface DNotification {
   at: string
   read: boolean
   link: string | null
+  /** 같은 일로 두 번 쌓이지 않게 (백엔드 notifications.ref) */
+  ref?: string
 }
 
 /** 운영자 화면 사건 (B7, 백엔드 없음) */
@@ -157,6 +160,8 @@ export interface DemoState {
   // C12
   points: DPointEntry[]
   ratings: { uid: string; target: string; rating: 'like' | 'neutral' | 'dislike' }[]
+  /** 성향조사 Q2~Q8 (uid → 답) — Q1은 users[].interests */
+  surveys: Record<string, DSurvey>
   notif: Record<string, { enabled: boolean; times: ('morning' | 'noon' | 'evening')[] }>
   // C8 — 화면·데모만 (백엔드 없음)
   companion: DCompanionMsg[]
@@ -180,7 +185,7 @@ export interface DemoState {
 }
 
 const KEY = 'wipi.demo.v1'
-const VERSION = 11 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자, 9: 오산시 양산동 기준 동네·장소, 10: 고립 지수 → 사회적 관계 지수(뒤집음), 11: 포인트 100P·서울 자리표시 활동을 오산으로
+const VERSION = 12 // 시드 내용이 바뀌면 올린다 (열려 있던 탭도 새 시드로) — 4: C12 포인트·봉사, 5: C8 말동무, 6: C10·C11, 7: 복지시설·두뇌 운동, 8: 알림함·탈퇴·운영자, 9: 오산시 양산동 기준 동네·장소, 10: 고립 지수 → 사회적 관계 지수(뒤집음), 11: 포인트 100P·서울 자리표시 활동을 오산으로, 12: WHO-5 기록·성향조사·관심사 10개
 export const DEMO_ME_ID = 'u-me'
 
 const uid = () => crypto.randomUUID()
@@ -217,21 +222,32 @@ function seed(): DemoState {
     user(DEMO_ME_ID, '김시작', '1956-04-12', 'M', '01055551234', '41',
       ['walking', 'health', 'gardening'], '좋은 벗들과 함께하는 행복한 일상!', null, '오산시 세마동'),
     user('u-sunja', '이순자', '1958-05-02', 'F', '01020000001', '41',
-      ['walking', 'tv', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!', [37.193, 127.024], '오산시 세마동'),
+      ['walking', 'movies', 'travel'], '산책과 영화, 여행을 좋아해요. 같이 이야기 나눠요!', [37.193, 127.024], '오산시 세마동'),
     user('u-jungho', '박정호', '1954-11-20', 'M', '01020000002', '41',
-      ['walking', 'health', 'baduk'], '매일 아침 오산천 걷기를 해요. 좋은 친구를 만나고 싶어요.', [37.203, 127.034], '오산시 세마동'),
+      ['walking', 'health', 'volunteer'], '매일 아침 오산천 걷기를 해요. 좋은 친구를 만나고 싶어요.', [37.203, 127.034], '오산시 세마동'),
     user('u-younghee', '김영희', '1956-02-14', 'F', '01020000003', '41',
       ['cooking', 'gardening'], '요리와 텃밭 가꾸기를 좋아해요.', [37.183, 127.014], '오산시 세마동'),
     user('u-malsoon', '최말순', '1952-08-08', 'F', '01020000004', '41',
-      ['music', 'crafts', 'memories'], '옛날 노래 들으며 뜨개질해요.', null, '오산시 세마동'),
+      ['movies', 'reading'], '공연 보러 다니고 책 읽는 걸 좋아해요.', null, '오산시 세마동'),
     user('u-deoksu', '정덕수', '1950-03-30', 'M', '01020000005', '41',
-      ['baduk', 'reading', 'health'], '바둑 두실 분 찾아요.', [37.213, 127.044], '화성시 병점동'),
+      ['reading', 'finance', 'health'], '신문 보며 세상 이야기 나눌 분 찾아요.', [37.213, 127.044], '화성시 병점동'),
     // 같은 오산시지만 반경(2km) 밖 — '같은 동네' 탭에는 안 나온다
     user('u-okja', '한옥자', '1957-12-01', 'F', '01020000006', '41',
-      ['music', 'health'], '복지관 노래 교실 다녀요.', [37.153, 127.071], '오산시 대원동'),
+      ['movies', 'health'], '복지관 노래 교실 다녀요.', [37.153, 127.071], '오산시 대원동'),
     user('u-gicheol', '윤기철', '1953-06-17', 'M', '01020000007', '41',
       ['walking', 'travel'], '등산과 사진 찍기를 좋아해요. 주말마다 산에 올라 꽃 사진을 찍어 손주들에게 보내요. 천천히 같이 걸어요!', [37.149, 127.077], '오산시 신장동'),
   ]
+
+  // 성향조사 — 둘러보기 계정(김시작)은 아직 안 함: 추천 친구 탭에 처음 들어가면 시작 화면이 뜬다.
+  // 최말순은 안 한 이웃 (관심사로만 추천되는 모습)
+  const surveys: Record<string, DSurvey> = {
+    'u-sunja': { purpose: 'hobby', places: ['park', 'cafe'], times: ['weekday_am', 'weekend'], frequency: 'weekly', talk_style: 'talker', want: 'listener', traits: ['lively', 'warm'] },
+    'u-jungho': { purpose: 'exercise', places: ['park'], times: ['weekday_am'], frequency: 'often', talk_style: 'listener', want: 'lively', traits: ['listening', 'careful'] },
+    'u-younghee': { purpose: 'chat', places: ['cafe', 'restaurant'], times: ['weekday_pm'], frequency: 'monthly', talk_style: 'balanced', want: 'calm', traits: ['warm', 'caring', 'calm'] },
+    'u-deoksu': { purpose: 'community', places: ['center'], times: ['any'], frequency: 'sometimes', talk_style: 'talker', want: 'hobby', traits: ['curious', 'humor'] },
+    'u-okja': { purpose: 'hobby', places: ['center', 'cafe'], times: ['weekday_pm', 'weekend'], frequency: 'weekly', talk_style: 'listener', want: 'lively', traits: ['caring', 'listening'] },
+    'u-gicheol': { purpose: 'exercise', places: ['park'], times: ['weekday_am', 'weekend'], frequency: 'weekly', talk_style: 'balanced', want: 'calm', traits: ['calm', 'planned'] },
+  }
 
   const now = Date.now()
   const requests: DFriendRequest[] = [
@@ -337,7 +353,11 @@ function seed(): DemoState {
   ]
 
   // 마음 건강 (C11): 2주 전 기분 점검, 지난주 걱정 점검
+  // WHO-5: 4주마다 세 번(44 → 52 → 60점) — 마지막이 29일 전이라 지금 '살펴볼 때'
   const assessments: DAssessment[] = [
+    { id: ++seq, uid: DEMO_ME_ID, kind: 'who5', answers: [2, 2, 2, 2, 3], at: iso(-85, 10) },
+    { id: ++seq, uid: DEMO_ME_ID, kind: 'who5', answers: [3, 3, 2, 2, 3], at: iso(-57, 10) },
+    { id: ++seq, uid: DEMO_ME_ID, kind: 'who5', answers: [3, 3, 3, 3, 3], at: iso(-29, 10) },
     { id: ++seq, uid: DEMO_ME_ID, kind: 'phq9', answers: [1, 1, 1, 1, 0, 1, 0, 0, 0], at: iso(-14, 10) },
     { id: ++seq, uid: DEMO_ME_ID, kind: 'gad7', answers: [1, 0, 1, 0, 0, 1, 0], at: iso(-7, 10) },
   ]
@@ -384,6 +404,7 @@ function seed(): DemoState {
     likes: [activities[0].id, activities[2].id].map((aid) => ({ aid, uid: DEMO_ME_ID })),
     points,
     ratings: [],
+    surveys,
     notif: {},
     companion,
     companionVoiceTurn: 0,
