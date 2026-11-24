@@ -51,11 +51,14 @@ function parseBody(init: RequestInit): unknown {
 declare global {
   interface Window {
     __demoCalls?: Record<string, number>
+    /** e2e용: true면 진짜 fetch처럼 '연결 실패'(TypeError) — 데모 자체는 오프라인에서도 돌아가야 해서 평소엔 끔 */
+    __demoNetworkDown?: boolean
   }
 }
 
 export const demoTransport: Transport = async (url, init) => {
   await new Promise((r) => setTimeout(r, LATENCY_MS))
+  if (window.__demoNetworkDown) throw new TypeError('Failed to fetch')
   const u = new URL(url, 'http://demo.local')
   const path = u.pathname.startsWith(PREFIX) ? u.pathname.slice(PREFIX.length) : u.pathname
   const method = (init.method ?? 'GET').toUpperCase()

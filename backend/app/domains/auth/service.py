@@ -128,7 +128,11 @@ class AuthService:
         if stored is None:
             raise UnauthorizedError("다시 로그인해 주세요.", code="invalid_token")
         if stored.revoked_at is not None:
-            # 이미 회전된 토큰이 다시 쓰임 → 탈취 의심, 해당 사용자 세션 전부 폐기
+            grace = timedelta(seconds=get_settings().refresh_reuse_grace_seconds)
+            if datetime.now(UTC) - stored.revoked_at < grace:
+                # 방금 다른 요청(다른 탭)이 회전시킨 토큰 → 새 쿠키로 다시 시도하면 된다
+                raise UnauthorizedError("잠시 후 다시 시도해 주세요.", code="token_rotated")
+            # 이미 회전된 토큰이 한참 뒤 다시 쓰임 → 탈취 의심, 해당 사용자 세션 전부 폐기
             await self.repo.revoke_all_refresh_tokens(user_id)
             await self.repo.commit()
             raise UnauthorizedError("다시 로그인해 주세요.", code="token_reused")
