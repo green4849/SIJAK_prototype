@@ -77,3 +77,54 @@ async def test_invalid_report(client: AsyncClient) -> None:
         "/api/v1/safety/reports", headers=ha, json={"target_user_id": a["id"], "reason": "spam"}
     )
     assert me.status_code == 422
+
+
+async def test_report_and_block_need_a_real_person(client: AsyncClient) -> None:
+    """없는 사람·남의 메시지로 신고하면 500 대신 알아들을 수 있는 오류 (H42)"""
+    ha, a, hb, b, rid = await _chat(client)
+    nobody = "00000000-0000-0000-0000-000000000001"
+    r = await client.post(
+        "/api/v1/safety/reports", headers=ha, json={"target_user_id": nobody, "reason": "spam"}
+    )
+    assert r.status_code == 404 and r.json()["error"]["code"] == "not_found"
+    r = await client.post("/api/v1/safety/blocks", headers=ha, json={"user_id": nobody})
+    assert r.status_code == 404
+
+    # 없는 메시지
+    r = await client.post(
+        "/api/v1/safety/reports",
+        headers=ha,
+        json={"target_user_id": b["id"], "reason": "spam", "message_id": 987654321},
+    )
+    assert r.status_code == 404
+
+    # 신고하는 사람이 보낸 메시지(상대가 보낸 것이 아님)
+    mine = (
+        await client.post(f"/api/v1/chats/{rid}/messages", headers=ha, json={"text": "안녕하세요"})
+    ).json()
+    r = await client.post(
+        "/api/v1/safety/reports",
+        headers=ha,
+        json={"target_user_id": b["id"], "reason": "spam", "message_id": mine["id"]},
+    )
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_report"
+
+    # 내가 들어 있지 않은 방의 메시지
+    hc, c = await signup_user(client, "최민수")
+    r = await client.post(
+        "/api/v1/safety/reports",
+        headers=hc,
+        json={"target_user_id": a["id"], "reason": "spam", "message_id": mine["id"]},
+    )
+    assert r.status_code == 404
+
+    # 제대로 된 신고는 그대로 된다
+    theirs = (
+        await client.post(f"/api/v1/chats/{rid}/messages", headers=hb, json={"text": "계좌로 송금"})
+    ).json()
+    r = await client.post(
+        "/api/v1/safety/reports",
+        headers=ha,
+        json={"target_user_id": b["id"], "reason": "money", "message_id": theirs["id"]},
+    )
+    assert r.status_code == 201

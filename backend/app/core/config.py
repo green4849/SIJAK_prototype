@@ -64,6 +64,9 @@ class Settings(BaseSettings):
 
     # 요청 횟수 제한 (B2). 규칙은 각 router, 저장은 core/ratelimit (지금은 메모리)
     rate_limit_enabled: bool = True
+    # uvicorn 워커 수 (docker-entrypoint.sh 와 같은 환경 변수). 요청 제한을 프로세스 메모리에 세므로
+    # 워커가 여럿이면 워커마다 따로 세어 제한이 그만큼 느슨해진다 → 운영에서 막는다 (H42)
+    web_concurrency: int = 1
 
     # 포인트 (C12) — 체험단 기간: 이 날짜(한국 날짜)까지 친구 신청에 포인트를 쓰지 않는다.
     # 비우면 체험 기간 없음
@@ -97,6 +100,11 @@ class Settings(BaseSettings):
             problems.append(
                 "IDENTITY_PROVIDER=mock: 누구나 가입할 수 있음 "
                 "(시범 운영이면 ALLOW_MOCK_IDENTITY_IN_PROD=true)"
+            )
+        if self.rate_limit_enabled and self.web_concurrency > 1:
+            problems.append(
+                "WEB_CONCURRENCY>1: 요청 횟수 제한을 워커마다 따로 셈 "
+                "(1로 두거나, 공유 저장소(Redis, B9)로 바꾼 뒤 늘리기)"
             )
         if problems:
             raise ValueError("운영 설정을 확인하세요 (ENV=prod):\n  - " + "\n  - ".join(problems))

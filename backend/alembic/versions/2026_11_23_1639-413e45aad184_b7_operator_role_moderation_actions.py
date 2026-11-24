@@ -64,9 +64,7 @@ def upgrade() -> None:
     )
     op.add_column("users", sa.Column("suspended_until", sa.DateTime(timezone=True), nullable=True))
     # CHECK 제약은 autogenerate가 못 잡아 손으로
-    op.create_check_constraint(
-        op.f("ck_users_role"), "users", "role IN ('member', 'operator')"
-    )
+    op.create_check_constraint(op.f("ck_users_role"), "users", "role IN ('member', 'operator')")
     # ### end Alembic commands ###
 
 
