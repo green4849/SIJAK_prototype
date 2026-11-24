@@ -7,6 +7,12 @@
 import re
 from dataclasses import dataclass, field
 
+# 영문 낱말 경계 (H36). 파이썬의 \b는 한글도 낱말 글자로 봐서
+# "OTP번호"·"otp를"에서 경계를 못 찾는다.
+# 앞쪽은 뒤돌아보기 대신 (?:^|...) — 시연(JS) 사본이 옛 아이폰 사파리에서도 같은 식으로 돌게
+_A = "(?:^|[^A-Za-z0-9])"
+_Z = "(?![A-Za-z0-9])"
+
 # (분류, 사용자에게 보여 줄 설명, 위험도 1~3, 패턴들)
 RULES: list[tuple[str, str, int, list[str]]] = [
     (
@@ -35,7 +41,8 @@ RULES: list[tuple[str, str, int, list[str]]] = [
         3,
         [
             r"비밀\s*번호",
-            r"\bOTP\b",
+            _A + "OTP" + _Z,
+            r"오티피",
             r"인증\s*번호",
             r"주민\s*(등록)?\s*번호",
             r"카드\s*번호",
@@ -54,7 +61,7 @@ RULES: list[tuple[str, str, int, list[str]]] = [
         "off_platform",
         "다른 앱이나 링크로 옮기자는 말",
         1,
-        [r"카톡\s*(아이디|ID)", r"텔레그램", r"라인\s*아이디", r"https?://", r"\bbit\.ly\b"],
+        [r"카톡\s*(아이디|ID)", r"텔레그램", r"라인\s*아이디", r"https?://", _A + r"bit\.ly" + _Z],
     ),
 ]
 
