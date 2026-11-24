@@ -113,6 +113,30 @@ class ChatRepository:
         )
         return int(await self.session.scalar(q) or 0)
 
+    async def voice_older_than(self, before: datetime, limit: int) -> list[ChatMessage]:
+        """파일이 남아 있는 오래된 음성 메시지 (B3 보관 기간)"""
+        q = (
+            select(ChatMessage)
+            .where(
+                ChatMessage.kind == "voice",
+                ChatMessage.audio_key.is_not(None),
+                ChatMessage.created_at < before,
+            )
+            .order_by(ChatMessage.id)
+            .limit(limit)
+        )
+        return list(await self.session.scalars(q))
+
+    async def voice_keys_in_rooms_of(self, user_id: uuid.UUID) -> list[str]:
+        """이 사람이 들어 있는 방의 음성 파일 (방이 지워질 때 같이 지울 것)"""
+        rooms = select(ChatRoom.id).where(
+            or_(ChatRoom.user_a_id == user_id, ChatRoom.user_b_id == user_id)
+        )
+        q = select(ChatMessage.audio_key).where(
+            ChatMessage.room_id.in_(rooms), ChatMessage.audio_key.is_not(None)
+        )
+        return [k for k in await self.session.scalars(q) if k]
+
     async def message_bodies(self, ids: set[int]) -> dict[int, str]:
         if not ids:
             return {}

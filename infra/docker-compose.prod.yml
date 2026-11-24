@@ -39,6 +39,27 @@ services:
         condition: service_healthy
     # 포트를 외부에 열지 않는다 — web(Caddy)만 접근
 
+  # 예약 작업 (B3·C11) — api 와 같은 이미지, 매일 새벽 4시(한국)에 한 번:
+  # 탈퇴 30일 지난 계정 삭제 · 보관 기간 지난 음성 파일 정리 · 사회적 관계 지수 계산 (backend/app/jobs.py)
+  jobs:
+    build: ../backend
+    restart: unless-stopped
+    entrypoint: ["python", "-m", "scripts.jobs", "loop"]
+    env_file: .env.prod
+    environment:
+      ENV: prod
+      DATABASE_URL: postgresql+asyncpg://wipi:${POSTGRES_PASSWORD}@db:5432/wipi
+      CORS_ORIGINS: '["https://${DOMAIN:?DOMAIN 필요}"]'
+      MEDIA_DIR: /data/media
+    volumes:
+      - media:/data/media
+    healthcheck:
+      disable: true  # 이미지의 healthcheck 는 API 포트용
+    depends_on:
+      # api 가 마이그레이션을 끝낸 뒤에 시작
+      api:
+        condition: service_healthy
+
   web:
     build: ../frontend
     restart: unless-stopped

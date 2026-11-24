@@ -18,7 +18,8 @@
 ## 완료 기준
 - [x] 화면·데모, e2e (`e2e/wellbeing.spec.ts`), 접근성 스윕
 - [x] 백엔드 `domains/wellbeing` — 통합 테스트 `tests/integration/test_wellbeing_flow.py`
-- [ ] 주간 일괄 계산 작업(지금은 볼 때 계산), 마음 요인 = 말동무 정서(C8), 긴급 단계 알림(C4·C10)
+- [x] 일괄 계산 작업 — 매일 예약 작업(`app/jobs.py` `refresh_relation_index`)이 이용 중인 모든 분의 이번 주 값을 남긴다
+- [ ] 마음 요인 = 말동무 정서(C8), 긴급 단계 알림(C4·C10)
 
 ## 진행 기록
 - 점수만 크게 보이면 어르신에게 낙인처럼 느껴질 수 있어 '날씨' 비유를 앞에 — 단계 이름은 글자로도 전달
