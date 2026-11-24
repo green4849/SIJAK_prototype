@@ -42,6 +42,7 @@ import { ToastHost } from '@/shared/ui/Toast'
 import { Guide } from '@/features/guide'
 import { PlainLayout, TabLayout } from './AppLayout'
 import { OfflineBanner } from './OfflineBanner'
+import { UpdateBanner } from './UpdateBanner'
 import { RequireAuth, RequireGuest } from './guards'
 
 /**
@@ -58,6 +59,7 @@ export function App() {
     <AuthProvider>
       {/* GitHub Pages 같은 하위 경로(/저장소명/)에서도 동작하도록 */}
       <OfflineBanner />
+      <UpdateBanner />
       <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <ScrollToTop />
         <Routes>
