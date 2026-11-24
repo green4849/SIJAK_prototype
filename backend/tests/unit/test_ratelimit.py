@@ -40,3 +40,25 @@ def test_message_is_plain_korean() -> None:
     assert e1.headers == {"Retry-After": "540"}
     e2 = RateLimitedError(Rule("x", 1, 60, "메시지 보내기"), retry_after=12)
     assert e2.message == "메시지 보내기를 너무 여러 번 했어요. 12초 뒤에 다시 해 주세요."
+
+
+def test_old_keys_are_swept_so_memory_does_not_grow() -> None:
+    """전화번호·IP마다 키가 생겨도, 창이 지난 키는 정리된다 (H42)"""
+    store = MemoryRateLimitStore()
+    for i in range(store.SWEEP_EVERY - 1):
+        store.hit(f"phone:{i}", limit=5, window_sec=600, now=0)
+    assert len(store) == store.SWEEP_EVERY - 1
+    # 창(600초)이 지난 뒤의 기록 → 정리가 돌고 새 키 하나만 남는다
+    store.hit("phone:new", limit=5, window_sec=600, now=601)
+    assert len(store) == 1
+
+
+def test_sweep_keeps_keys_still_inside_the_window() -> None:
+    store = MemoryRateLimitStore()
+    store.hit("recent", limit=1, window_sec=60, now=950)
+    for i in range(store.SWEEP_EVERY - 2):
+        store.hit(f"old:{i}", limit=5, window_sec=60, now=0)
+    assert (
+        store.hit("recent", limit=1, window_sec=60, now=1000) is not None
+    )  # 정리 뒤에도 제한 유지
+    assert len(store) == 1

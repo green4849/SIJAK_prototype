@@ -174,6 +174,15 @@ class ChatService:
         rooms = await self.repo.list_rooms(me.id)
         return await self.repo.count_sent_since(me.id, [r.id for r in rooms], since)
 
+    async def sender_in_my_room(self, me: "User", message_id: int) -> uuid.UUID:
+        """내가 들어 있는 방의 메시지를 보낸 사람 — 신고할 때 그 메시지가 정말 상대 것인지 (H42).
+        없는 메시지거나 남의 방이면 NotFoundError (있는지조차 알려 주지 않는다)."""
+        msg = await self.repo.get_message(message_id)
+        if msg is None:
+            raise NotFoundError("메시지를 찾을 수 없어요.")
+        await self._member_room(me, msg.room_id)
+        return msg.sender_id
+
     # ---------- 예약 작업 (app/jobs.py) ----------
 
     async def expire_old_voice(self, now: datetime) -> int:

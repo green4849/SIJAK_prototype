@@ -16,10 +16,10 @@
 
 ## 손댄 곳
 - `features/auth/components/LocationAgreement` — 동의 카드 (줄 전체가 터치 영역, 실제 체크박스는 낭독기용)
-- `features/auth/lib/locateRegion` — 위치 → 시·도 + 동네 이름 (OpenStreetMap 역지오코딩, 실패 시 시·도 중심점 어림)
+- `features/auth/lib/locateRegion` — 위치 → 시·도 + 동네 이름 (OpenStreetMap 역지오코딩, 실패 시 시·도 중심점 어림). 바깥 서비스에는 소수 2자리(≈1.1km)로 뭉갠 좌표만 보낸다 — 서버가 저장하는 정밀도와 같게 (H38, 2026-11-24. 전엔 소수 4자리 ≈11m)
 - `features/auth/hooks/useLocationRecheck` + `pages/MyPage` — 위치 다시 확인
 - `SignupProfileForm`·`ProfileEditForm`·`HelpPage` 문구
-- e2e: 동의 흐름 / 역지오코딩 실패 / 권한 거부 / 위치 다시 확인
+- e2e: 동의 흐름 / 역지오코딩 실패 / 권한 거부 / 위치 다시 확인 / 바깥으로 보내는 좌표가 소수 2자리인지(H38)
 
 ## 완료 기준
 - [x] 가입·마이페이지 흐름, 권한 거부 안내

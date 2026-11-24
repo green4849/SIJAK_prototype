@@ -98,6 +98,8 @@ backend 스키마 수정 → (backend) uv run python -m scripts.export_openapi
 ```
 `openapi.json`·`schema.d.ts` 둘 다 커밋한다. 갱신을 잊으면 CI(backend `--check`, frontend `git diff`)가 실패한다.
 
+시연(`frontend/src/demo`)이 손으로 복사해 둔 백엔드 값(지역·관심사·포인트·알림 시간대·신고 이유·동네 반경·대화 주제·위험 규칙·성향조사 문항과 점수 규칙)은 `uv run python -m scripts.export_demo_constants` 가 `frontend/e2e/backend-constants.json` 으로 내보내고, `e2e/demo-constants.spec.ts` 가 시연 사본과 비교한다. 백엔드 값을 바꾸면 이 파일을 다시 만들고 시연 사본도 같이 고친다 — 어느 하나를 잊으면 CI가 실패한다 (H37).
+
 ---
 
 ## 4. 프로토타입 범위 결정 (보고서 대비)

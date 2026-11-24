@@ -32,3 +32,17 @@ test('오산 밖으로 옮기면 지역생활에 시연 기준을 밝히고, 자
   await expect(page.getByRole('link', { name: /건강 걷기 모임/ })).toBeVisible()
   await expect(page.locator('main')).not.toContainText('○○')
 })
+
+test('H38: 바깥 지도 서비스에는 소수 2자리(≈1.1km)로 뭉갠 좌표만 보낸다', async ({ page }) => {
+  const asked: URL[] = []
+  await page.route('https://nominatim.openstreetmap.org/**', (r) => {
+    asked.push(new URL(r.request().url()))
+    return r.fulfill({ json: { address: { city: '부산광역시', borough: '연제구', quarter: '연산동' } } })
+  })
+  await startTour(page)
+  await page.goto('/me')
+  await page.getByRole('button', { name: /위치 다시 확인/ }).click()
+  await expect(page.getByRole('status').filter({ hasText: '부산광역시로 바꿨어요' })).toBeVisible()
+  // 브라우저 위치는 35.1796, 129.0756 (이 파일 맨 위)
+  expect(asked.map((u) => [u.searchParams.get('lat'), u.searchParams.get('lon')])).toEqual([['35.18', '129.08']])
+})

@@ -1,0 +1,2521 @@
+{
+  "_설명": "scripts/export_demo_constants.py 가 만든 파일 — 손으로 고치지 말 것",
+  "auth": {
+    "regions": {
+      "11": "서울특별시",
+      "26": "부산광역시",
+      "27": "대구광역시",
+      "28": "인천광역시",
+      "29": "광주광역시",
+      "30": "대전광역시",
+      "31": "울산광역시",
+      "36": "세종특별자치시",
+      "41": "경기도",
+      "43": "충청북도",
+      "44": "충청남도",
+      "46": "전라남도",
+      "47": "경상북도",
+      "48": "경상남도",
+      "50": "제주특별자치도",
+      "51": "강원특별자치도",
+      "52": "전북특별자치도"
+    },
+    "interests": {
+      "walking": "산책·등산",
+      "movies": "영화·공연",
+      "cooking": "요리·맛집 탐방",
+      "fishing": "낚시",
+      "reading": "독서·문화생활",
+      "finance": "경제·재테크",
+      "travel": "여행",
+      "health": "운동·건강관리",
+      "gardening": "원예·식물 가꾸기",
+      "volunteer": "봉사활동"
+    },
+    "max_interests": 5,
+    "intro_max_len": 60
+  },
+  "chat": {
+    "text_max": 500
+  },
+  "activity": {
+    "categories": {
+      "culture": "문화·여가",
+      "health": "건강",
+      "learning": "배움",
+      "volunteer": "봉사"
+    },
+    "reward_categories": [
+      "volunteer"
+    ]
+  },
+  "points": {
+    "welcome": 100,
+    "rating": 10,
+    "ratingDailyLimit": 5,
+    "volunteer": 100,
+    "firstFriends": 500,
+    "friendRequest": 30,
+    "reasons": {
+      "welcome": "가입 축하",
+      "rating": "추천에 답하기",
+      "volunteer": "봉사 활동 참여",
+      "mission_first_friends": "첫 친구 3명 사귀기",
+      "friend_request": "친구 신청"
+    }
+  },
+  "notification": {
+    "time_slots": {
+      "morning": "아침 9시",
+      "noon": "점심 1시",
+      "evening": "저녁 7시"
+    },
+    "max_per_day": 2
+  },
+  "risk": {
+    "report_reasons": {
+      "money": "돈을 요구해요",
+      "personal_info": "개인정보를 물어봐요",
+      "harassment": "불쾌한 말을 해요",
+      "spam": "광고·홍보를 해요",
+      "other": "기타"
+    },
+    "rules": [
+      [
+        "money",
+        "돈·송금 이야기",
+        2,
+        [
+          "송금",
+          "계좌",
+          "이체",
+          "입금",
+          "돈\\s*(좀|을|이)?\\s*(빌려|보내|부쳐)",
+          "빌려\\s*줘",
+          "대출",
+          "투자",
+          "수익",
+          "코인",
+          "상품권",
+          "기프트\\s*카드",
+          "선물\\s*카드"
+        ]
+      ],
+      [
+        "personal_info",
+        "비밀번호·인증번호 같은 개인정보",
+        3,
+        [
+          "비밀\\s*번호",
+          "(?:^|[^A-Za-z0-9])OTP(?![A-Za-z0-9])",
+          "오티피",
+          "인증\\s*번호",
+          "주민\\s*(등록)?\\s*번호",
+          "카드\\s*번호",
+          "보안\\s*카드",
+          "공인\\s*인증서",
+          "신분증\\s*(사진|찍어)"
+        ]
+      ],
+      [
+        "urgency",
+        "급하게 서두르게 하는 말",
+        1,
+        [
+          "급해",
+          "긴급",
+          "지금\\s*당장",
+          "병원비",
+          "사고\\s*(났|가)",
+          "아무한테도\\s*말하지"
+        ]
+      ],
+      [
+        "off_platform",
+        "다른 앱이나 링크로 옮기자는 말",
+        1,
+        [
+          "카톡\\s*(아이디|ID)",
+          "텔레그램",
+          "라인\\s*아이디",
+          "https?://",
+          "(?:^|[^A-Za-z0-9])bit\\.ly(?![A-Za-z0-9])"
+        ]
+      ]
+    ]
+  },
+  "nearby": {
+    "default_radius_km": 2.0,
+    "recommend_radius_km": 5.0
+  },
+  "topics": {
+    "phrases": {
+      "walking": [
+        "자주 가시는 산책길이 있으세요?",
+        "날 좋은 날 같이 천천히 걸으실래요?"
+      ],
+      "movies": [
+        "요즘 재미있게 보신 영화가 있으세요?",
+        "다음에 공연 같이 보러 가실래요?"
+      ],
+      "cooking": [
+        "요즘 자주 해 드시는 음식이 있으세요?",
+        "동네에 맛있는 집 아시는 데 있으세요?"
+      ],
+      "fishing": [
+        "낚시는 주로 어디로 가세요?",
+        "제일 크게 잡으신 게 뭐였어요?"
+      ],
+      "reading": [
+        "요즘 읽고 계신 책이 있으세요?",
+        "신문은 어떤 걸 보세요?"
+      ],
+      "finance": [
+        "요즘 경제 소식 중에 눈여겨보시는 게 있으세요?",
+        "용돈 관리는 어떻게 하세요?"
+      ],
+      "travel": [
+        "가 보신 곳 중에 제일 좋았던 데가 어디세요?",
+        "가까운 데 바람 쐬러 가실래요?"
+      ],
+      "health": [
+        "요즘 건강 챙기시려고 하시는 운동 있으세요?",
+        "아침에 체조 같은 거 하세요?"
+      ],
+      "gardening": [
+        "요즘 키우시는 꽃이나 화분이 있으세요?",
+        "텃밭에 뭐 심으셨어요?"
+      ],
+      "volunteer": [
+        "봉사는 주로 어디서 하세요?",
+        "다음에 봉사 같이 가 보실래요?"
+      ]
+    },
+    "general": [
+      "오늘 점심은 뭐 드셨어요?",
+      "이번 주 날씨가 좋다던데, 어떻게 지내세요?",
+      "요즘 즐거운 일 있으셨어요?"
+    ],
+    "max_topics": 4
+  },
+  "survey": {
+    "questions": [
+      {
+        "key": "interests",
+        "step": "나의 관심사",
+        "text": "평소 어떤 활동을 좋아하시나요?",
+        "hint": "1개부터 5개까지 골라 주세요",
+        "min": 1,
+        "max": 5,
+        "options": [
+          {
+            "code": "walking",
+            "label": "산책·등산"
+          },
+          {
+            "code": "movies",
+            "label": "영화·공연"
+          },
+          {
+            "code": "cooking",
+            "label": "요리·맛집 탐방"
+          },
+          {
+            "code": "fishing",
+            "label": "낚시"
+          },
+          {
+            "code": "reading",
+            "label": "독서·문화생활"
+          },
+          {
+            "code": "finance",
+            "label": "경제·재테크"
+          },
+          {
+            "code": "travel",
+            "label": "여행"
+          },
+          {
+            "code": "health",
+            "label": "운동·건강관리"
+          },
+          {
+            "code": "gardening",
+            "label": "원예·식물 가꾸기"
+          },
+          {
+            "code": "volunteer",
+            "label": "봉사활동"
+          }
+        ]
+      },
+      {
+        "key": "purpose",
+        "step": "나의 관심사",
+        "text": "새 친구와 가장 하고 싶은 일은 무엇인가요?",
+        "hint": "하나만 골라 주세요",
+        "min": 1,
+        "max": 1,
+        "options": [
+          {
+            "code": "chat",
+            "label": "편하게 일상 이야기 나누기"
+          },
+          {
+            "code": "hobby",
+            "label": "함께 취미활동 즐기기"
+          },
+          {
+            "code": "exercise",
+            "label": "산책하거나 운동하기"
+          },
+          {
+            "code": "community",
+            "label": "지역 모임 및 행사 참여하기"
+          }
+        ]
+      },
+      {
+        "key": "places",
+        "step": "나의 생활 방식",
+        "text": "친구와 주로 어디에서 만나고 싶으신가요?",
+        "hint": "2개까지 골라 주세요",
+        "min": 1,
+        "max": 2,
+        "options": [
+          {
+            "code": "park",
+            "label": "공원"
+          },
+          {
+            "code": "cafe",
+            "label": "카페"
+          },
+          {
+            "code": "center",
+            "label": "복지관·문화센터"
+          },
+          {
+            "code": "restaurant",
+            "label": "동네 식당"
+          }
+        ]
+      },
+      {
+        "key": "times",
+        "step": "나의 생활 방식",
+        "text": "주로 언제 활동하기 편하신가요?",
+        "hint": "여러 개 골라도 돼요",
+        "min": 1,
+        "max": 5,
+        "options": [
+          {
+            "code": "weekday_am",
+            "label": "평일 오전"
+          },
+          {
+            "code": "weekday_pm",
+            "label": "평일 오후"
+          },
+          {
+            "code": "weekday_eve",
+            "label": "평일 저녁"
+          },
+          {
+            "code": "weekend",
+            "label": "주말"
+          },
+          {
+            "code": "any",
+            "label": "시간 상관없음"
+          }
+        ]
+      },
+      {
+        "key": "frequency",
+        "step": "나의 생활 방식",
+        "text": "친구와 얼마나 자주 만나고 싶으신가요?",
+        "hint": "하나만 골라 주세요",
+        "min": 1,
+        "max": 1,
+        "options": [
+          {
+            "code": "often",
+            "label": "일주일에 여러 번"
+          },
+          {
+            "code": "weekly",
+            "label": "일주일에 한 번"
+          },
+          {
+            "code": "monthly",
+            "label": "한 달에 몇 번"
+          },
+          {
+            "code": "sometimes",
+            "label": "가끔 편할 때"
+          }
+        ]
+      },
+      {
+        "key": "talk_style",
+        "step": "나의 관계 성향",
+        "text": "처음 만난 친구와 이야기할 때, 평소 나는 어떤 편인가요?",
+        "hint": "정답은 없어요. 평소 내 모습에 가까운 답을 골라 주세요",
+        "min": 1,
+        "max": 1,
+        "options": [
+          {
+            "code": "talker",
+            "label": "먼저 이야기를 꺼내는 편이에요."
+          },
+          {
+            "code": "listener",
+            "label": "상대방의 이야기를 주로 들어주는 편이에요."
+          },
+          {
+            "code": "balanced",
+            "label": "이야기하고 듣는 것을 비슷하게 해요."
+          }
+        ]
+      },
+      {
+        "key": "want",
+        "step": "나의 관계 성향",
+        "text": "어떤 친구와 함께할 때 가장 편안하신가요?",
+        "hint": "하나만 골라 주세요",
+        "min": 1,
+        "max": 1,
+        "options": [
+          {
+            "code": "listener",
+            "label": "이야기를 잘 들어주는 친구"
+          },
+          {
+            "code": "lively",
+            "label": "밝고 활발한 친구"
+          },
+          {
+            "code": "calm",
+            "label": "조용하고 차분한 친구"
+          },
+          {
+            "code": "hobby",
+            "label": "취미를 함께 즐기는 친구"
+          }
+        ]
+      },
+      {
+        "key": "traits",
+        "step": "나의 관계 성향",
+        "text": "나를 가장 잘 표현하는 단어는 무엇인가요?",
+        "hint": "3개까지 골라 주세요",
+        "min": 1,
+        "max": 3,
+        "options": [
+          {
+            "code": "lively",
+            "label": "활발함"
+          },
+          {
+            "code": "calm",
+            "label": "차분함"
+          },
+          {
+            "code": "warm",
+            "label": "다정함"
+          },
+          {
+            "code": "listening",
+            "label": "경청"
+          },
+          {
+            "code": "curious",
+            "label": "호기심"
+          },
+          {
+            "code": "careful",
+            "label": "신중함"
+          },
+          {
+            "code": "planned",
+            "label": "계획적"
+          },
+          {
+            "code": "spontaneous",
+            "label": "즉흥적"
+          },
+          {
+            "code": "caring",
+            "label": "배려심"
+          },
+          {
+            "code": "humor",
+            "label": "유머감각"
+          }
+        ]
+      }
+    ],
+    "match_cases": [
+      {
+        "my_interests": [
+          "movies",
+          "gardening",
+          "walking",
+          "finance",
+          "cooking"
+        ],
+        "their_interests": [
+          "gardening",
+          "movies",
+          "health",
+          "reading"
+        ],
+        "mine": null,
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "restaurant",
+            "cafe"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "often",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "curious",
+            "careful",
+            "planned"
+          ]
+        },
+        "expected": {
+          "score": 15,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "finance",
+          "walking",
+          "travel",
+          "reading"
+        ],
+        "their_interests": [
+          "fishing",
+          "gardening",
+          "travel",
+          "walking",
+          "health"
+        ],
+        "mine": {
+          "purpose": "chat",
+          "places": [
+            "park",
+            "center"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "lively"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "cafe",
+            "center"
+          ],
+          "times": [
+            "any",
+            "weekday_am"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "warm",
+            "listening"
+          ]
+        },
+        "expected": {
+          "score": 48,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 오전이 편해요",
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "walking",
+          "health"
+        ],
+        "their_interests": [
+          "movies",
+          "gardening",
+          "walking",
+          "cooking"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "monthly",
+          "talk_style": "talker",
+          "want": "listener",
+          "traits": [
+            "calm"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_am",
+            "weekday_pm"
+          ],
+          "frequency": "monthly",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 43,
+          "label": null,
+          "reasons": [
+            "둘 다 취미를 함께 즐기고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "gardening",
+          "walking",
+          "cooking"
+        ],
+        "their_interests": [
+          "movies",
+          "walking",
+          "fishing"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "restaurant",
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "often",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "listening"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center",
+            "restaurant"
+          ],
+          "times": [
+            "any",
+            "weekday_am"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "calm",
+          "traits": [
+            "lively",
+            "curious",
+            "humor"
+          ]
+        },
+        "expected": {
+          "score": 49,
+          "label": null,
+          "reasons": [
+            "둘 다 동네 식당에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "health",
+          "fishing"
+        ],
+        "their_interests": [
+          "volunteer",
+          "finance",
+          "fishing"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_am",
+            "weekend"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "listener",
+          "traits": [
+            "careful",
+            "lively"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekend",
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "balanced",
+          "want": "lively",
+          "traits": [
+            "careful"
+          ]
+        },
+        "expected": {
+          "score": 53,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 평일 오전이 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "cooking",
+          "volunteer"
+        ],
+        "their_interests": [
+          "finance",
+          "movies"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekday_am"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "lively",
+            "warm",
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekend"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "listener",
+          "traits": [
+            "spontaneous",
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 27,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 오후가 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "gardening",
+          "walking"
+        ],
+        "their_interests": [
+          "gardening",
+          "fishing",
+          "movies",
+          "health"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "restaurant",
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm",
+            "any"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "listener",
+          "traits": [
+            "spontaneous",
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "weekday_am",
+            "any"
+          ],
+          "frequency": "often",
+          "talk_style": "balanced",
+          "want": "lively",
+          "traits": [
+            "caring"
+          ]
+        },
+        "expected": {
+          "score": 76,
+          "label": "잘 맞아요",
+          "reasons": [
+            "바라시던 '이야기를 잘 들어주는' 분이에요",
+            "둘 다 카페에서 만나고 싶어 해요",
+            "둘 다 취미를 함께 즐기고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "reading"
+        ],
+        "their_interests": [
+          "gardening",
+          "fishing",
+          "volunteer"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "center",
+            "restaurant"
+          ],
+          "times": [
+            "weekend",
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "balanced",
+          "want": "listener",
+          "traits": [
+            "humor",
+            "caring",
+            "listening"
+          ]
+        },
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "center",
+            "restaurant"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "planned",
+            "humor"
+          ]
+        },
+        "expected": {
+          "score": 64,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "cooking",
+          "health"
+        ],
+        "their_interests": [
+          "fishing",
+          "travel"
+        ],
+        "mine": null,
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "listener",
+          "traits": [
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 0,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "walking"
+        ],
+        "their_interests": [
+          "reading",
+          "fishing",
+          "walking",
+          "volunteer",
+          "gardening"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "listening",
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center",
+            "restaurant"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "caring",
+            "careful",
+            "calm"
+          ]
+        },
+        "expected": {
+          "score": 84,
+          "label": "잘 맞아요",
+          "reasons": [
+            "바라시던 '조용하고 차분한' 분이에요",
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "travel",
+          "gardening"
+        ],
+        "their_interests": [
+          "health",
+          "gardening",
+          "movies",
+          "volunteer",
+          "reading"
+        ],
+        "mine": {
+          "purpose": "chat",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "weekly",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "warm",
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "calm"
+          ]
+        },
+        "expected": {
+          "score": 33,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "gardening",
+          "cooking",
+          "travel",
+          "fishing",
+          "reading"
+        ],
+        "their_interests": [
+          "travel",
+          "volunteer"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "often",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "calm",
+            "listening",
+            "humor"
+          ]
+        },
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "any",
+            "weekend"
+          ],
+          "frequency": "monthly",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "calm",
+            "humor"
+          ]
+        },
+        "expected": {
+          "score": 48,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "walking",
+          "movies"
+        ],
+        "their_interests": [
+          "reading",
+          "volunteer",
+          "walking",
+          "travel"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "restaurant",
+            "cafe"
+          ],
+          "times": [
+            "any",
+            "weekday_eve"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "curious",
+            "humor"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "curious",
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 59,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 동네 식당에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "movies",
+          "walking",
+          "reading",
+          "travel"
+        ],
+        "their_interests": [
+          "finance"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "center",
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "humor",
+            "planned"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekday_am",
+            "any"
+          ],
+          "frequency": "weekly",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 44,
+          "label": null,
+          "reasons": [
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "finance",
+          "volunteer",
+          "travel"
+        ],
+        "their_interests": [
+          "health",
+          "walking",
+          "cooking",
+          "travel",
+          "gardening"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "hobby",
+          "traits": [
+            "caring",
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekend",
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "careful"
+          ]
+        },
+        "expected": {
+          "score": 36,
+          "label": null,
+          "reasons": [
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "fishing"
+        ],
+        "their_interests": [
+          "volunteer",
+          "travel",
+          "reading"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "park",
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekend"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "listener",
+          "traits": [
+            "planned",
+            "listening"
+          ]
+        },
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "hobby",
+          "traits": [
+            "listening",
+            "careful",
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 41,
+          "label": null,
+          "reasons": [
+            "둘 다 함께 걷거나 운동하고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "fishing",
+          "movies",
+          "gardening",
+          "travel"
+        ],
+        "their_interests": [
+          "finance",
+          "reading",
+          "health"
+        ],
+        "mine": null,
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekend",
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "curious",
+            "humor"
+          ]
+        },
+        "expected": {
+          "score": 0,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "movies",
+          "finance",
+          "walking",
+          "reading",
+          "travel"
+        ],
+        "their_interests": [
+          "gardening",
+          "walking",
+          "fishing"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "cafe",
+            "restaurant"
+          ],
+          "times": [
+            "weekend",
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "planned",
+            "caring"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "park",
+            "restaurant"
+          ],
+          "times": [
+            "weekday_eve",
+            "any"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "listener",
+          "traits": [
+            "humor"
+          ]
+        },
+        "expected": {
+          "score": 61,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 동네 식당에서 만나고 싶어 해요",
+            "둘 다 동네 모임에 나가고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "health",
+          "walking"
+        ],
+        "their_interests": [
+          "movies",
+          "fishing",
+          "volunteer",
+          "health",
+          "walking"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "park",
+            "restaurant"
+          ],
+          "times": [
+            "weekend",
+            "any"
+          ],
+          "frequency": "weekly",
+          "talk_style": "listener",
+          "want": "calm",
+          "traits": [
+            "curious",
+            "planned",
+            "calm"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "listening"
+          ]
+        },
+        "expected": {
+          "score": 60,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "gardening"
+        ],
+        "their_interests": [
+          "walking",
+          "finance",
+          "travel",
+          "volunteer",
+          "gardening"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "any",
+            "weekend"
+          ],
+          "frequency": "weekly",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "planned",
+            "caring"
+          ]
+        },
+        "expected": {
+          "score": 97,
+          "label": "잘 맞아요",
+          "reasons": [
+            "바라시던 '이야기를 잘 들어주는' 분이에요",
+            "둘 다 카페에서 만나고 싶어 해요",
+            "둘 다 취미를 함께 즐기고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "health",
+          "movies",
+          "travel"
+        ],
+        "their_interests": [
+          "cooking",
+          "fishing",
+          "movies"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "cafe",
+            "park"
+          ],
+          "times": [
+            "weekend",
+            "any"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "lively",
+          "traits": [
+            "planned"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "any",
+            "weekend"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 34,
+          "label": null,
+          "reasons": [
+            "둘 다 주말이 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "movies",
+          "reading",
+          "cooking",
+          "health",
+          "walking"
+        ],
+        "their_interests": [
+          "movies",
+          "finance",
+          "walking",
+          "health",
+          "volunteer"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "cafe",
+            "center"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "spontaneous",
+            "curious"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekend",
+            "weekday_am"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "humor",
+            "warm",
+            "planned"
+          ]
+        },
+        "expected": {
+          "score": 64,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 평일 오전이 편해요",
+            "바라시던 '조용하고 차분한' 분이에요",
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "volunteer",
+          "health",
+          "cooking"
+        ],
+        "their_interests": [
+          "walking",
+          "reading",
+          "finance"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "restaurant",
+            "park"
+          ],
+          "times": [
+            "weekday_am",
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "planned",
+            "careful"
+          ]
+        },
+        "expected": {
+          "score": 45,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 저녁이 편해요",
+            "둘 다 공원에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "gardening"
+        ],
+        "their_interests": [
+          "movies",
+          "travel",
+          "walking"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "cafe",
+            "restaurant"
+          ],
+          "times": [
+            "any",
+            "weekday_eve"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_am",
+            "weekday_eve"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "hobby",
+          "traits": [
+            "caring",
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 26,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 저녁이 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "health",
+          "cooking",
+          "travel",
+          "volunteer",
+          "walking"
+        ],
+        "their_interests": [
+          "movies",
+          "travel",
+          "fishing",
+          "reading",
+          "cooking"
+        ],
+        "mine": null,
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center",
+            "restaurant"
+          ],
+          "times": [
+            "weekday_eve",
+            "any"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "calm",
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 12,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "movies",
+          "volunteer"
+        ],
+        "their_interests": [
+          "finance",
+          "cooking"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_eve",
+            "any"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "calm",
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "center",
+            "cafe"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekday_eve"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "caring"
+          ]
+        },
+        "expected": {
+          "score": 36,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 저녁이 편해요",
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "travel",
+          "reading",
+          "gardening",
+          "cooking"
+        ],
+        "their_interests": [
+          "walking",
+          "health",
+          "movies"
+        ],
+        "mine": {
+          "purpose": "hobby",
+          "places": [
+            "cafe",
+            "restaurant"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "warm",
+            "listening"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_am",
+            "weekday_pm"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "careful",
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 29,
+          "label": null,
+          "reasons": [
+            "바라시던 '조용하고 차분한' 분이에요",
+            "둘 다 취미를 함께 즐기고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "cooking"
+        ],
+        "their_interests": [
+          "fishing",
+          "cooking"
+        ],
+        "mine": {
+          "purpose": "chat",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "listener",
+          "traits": [
+            "calm",
+            "listening",
+            "caring"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "any",
+            "weekday_am"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "hobby",
+          "traits": [
+            "lively",
+            "warm",
+            "careful"
+          ]
+        },
+        "expected": {
+          "score": 63,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 평일 오전이 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "movies"
+        ],
+        "their_interests": [
+          "movies",
+          "volunteer",
+          "fishing"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "weekly",
+          "talk_style": "balanced",
+          "want": "calm",
+          "traits": [
+            "listening",
+            "planned",
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekday_eve"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "listener",
+          "traits": [
+            "caring",
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 41,
+          "label": null,
+          "reasons": [
+            "둘 다 함께 걷거나 운동하고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "fishing",
+          "walking"
+        ],
+        "their_interests": [
+          "finance",
+          "reading"
+        ],
+        "mine": {
+          "purpose": "chat",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "hobby",
+          "traits": [
+            "careful",
+            "curious"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "listening"
+          ]
+        },
+        "expected": {
+          "score": 33,
+          "label": null,
+          "reasons": [
+            "둘 다 평일 오후가 편해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "volunteer",
+          "cooking",
+          "finance",
+          "walking"
+        ],
+        "their_interests": [
+          "finance"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "cafe"
+          ],
+          "times": [
+            "any",
+            "weekday_pm"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "caring",
+            "spontaneous",
+            "lively"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "cafe",
+            "restaurant"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "humor",
+            "planned"
+          ]
+        },
+        "expected": {
+          "score": 90,
+          "label": "잘 맞아요",
+          "reasons": [
+            "바라시던 '밝고 활발한' 분이에요",
+            "둘 다 카페에서 만나고 싶어 해요",
+            "둘 다 동네 모임에 나가고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "travel",
+          "reading",
+          "gardening",
+          "volunteer"
+        ],
+        "their_interests": [
+          "volunteer",
+          "reading",
+          "gardening"
+        ],
+        "mine": {
+          "purpose": "chat",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "listening"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "center"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "caring",
+            "careful"
+          ]
+        },
+        "expected": {
+          "score": 63,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요",
+            "둘 다 편하게 이야기 나누고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "volunteer",
+          "movies",
+          "fishing",
+          "health"
+        ],
+        "their_interests": [
+          "travel",
+          "volunteer",
+          "finance",
+          "fishing",
+          "gardening"
+        ],
+        "mine": null,
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "restaurant",
+            "cafe"
+          ],
+          "times": [
+            "weekend",
+            "weekday_eve"
+          ],
+          "frequency": "monthly",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "lively",
+            "curious",
+            "listening"
+          ]
+        },
+        "expected": {
+          "score": 12,
+          "label": null,
+          "reasons": []
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "cooking"
+        ],
+        "their_interests": [
+          "cooking",
+          "fishing",
+          "walking"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "often",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "caring"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "restaurant",
+            "park"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "calm"
+          ]
+        },
+        "expected": {
+          "score": 54,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 평일 오후가 편해요",
+            "둘 다 공원에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "movies",
+          "volunteer",
+          "gardening",
+          "walking"
+        ],
+        "their_interests": [
+          "finance",
+          "gardening",
+          "cooking",
+          "health"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "weekly",
+          "talk_style": "listener",
+          "want": "lively",
+          "traits": [
+            "careful"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "calm",
+          "traits": [
+            "planned",
+            "lively"
+          ]
+        },
+        "expected": {
+          "score": 49,
+          "label": null,
+          "reasons": [
+            "바라시던 '밝고 활발한' 분이에요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "travel",
+          "gardening",
+          "walking"
+        ],
+        "their_interests": [
+          "reading",
+          "cooking",
+          "finance",
+          "health",
+          "gardening"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "cafe",
+            "park"
+          ],
+          "times": [
+            "weekend",
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "talker",
+          "want": "lively",
+          "traits": [
+            "spontaneous",
+            "humor",
+            "warm"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "lively",
+          "traits": [
+            "calm"
+          ]
+        },
+        "expected": {
+          "score": 51,
+          "label": "비슷한 점이 많아요",
+          "reasons": [
+            "둘 다 평일 오전이 편해요",
+            "둘 다 공원에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "movies"
+        ],
+        "their_interests": [
+          "gardening",
+          "finance",
+          "travel",
+          "reading",
+          "health"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "park"
+          ],
+          "times": [
+            "any",
+            "weekday_am"
+          ],
+          "frequency": "monthly",
+          "talk_style": "balanced",
+          "want": "hobby",
+          "traits": [
+            "lively",
+            "curious",
+            "calm"
+          ]
+        },
+        "theirs": {
+          "purpose": "hobby",
+          "places": [
+            "cafe",
+            "park"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "often",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "warm",
+            "curious"
+          ]
+        },
+        "expected": {
+          "score": 43,
+          "label": null,
+          "reasons": [
+            "둘 다 공원에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "finance",
+          "fishing",
+          "health"
+        ],
+        "their_interests": [
+          "cooking",
+          "health"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "cafe",
+            "center"
+          ],
+          "times": [
+            "weekday_pm",
+            "weekday_eve"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "calm"
+          ]
+        },
+        "theirs": {
+          "purpose": "chat",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "weekend"
+          ],
+          "frequency": "often",
+          "talk_style": "balanced",
+          "want": "lively",
+          "traits": [
+            "listening",
+            "caring"
+          ]
+        },
+        "expected": {
+          "score": 23,
+          "label": null,
+          "reasons": [
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "gardening"
+        ],
+        "their_interests": [
+          "reading",
+          "finance",
+          "volunteer",
+          "movies"
+        ],
+        "mine": {
+          "purpose": "community",
+          "places": [
+            "restaurant"
+          ],
+          "times": [
+            "any"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "balanced",
+          "want": "calm",
+          "traits": [
+            "listening",
+            "lively",
+            "spontaneous"
+          ]
+        },
+        "theirs": {
+          "purpose": "exercise",
+          "places": [
+            "cafe",
+            "restaurant"
+          ],
+          "times": [
+            "weekday_am"
+          ],
+          "frequency": "sometimes",
+          "talk_style": "listener",
+          "want": "hobby",
+          "traits": [
+            "lively",
+            "curious",
+            "warm"
+          ]
+        },
+        "expected": {
+          "score": 49,
+          "label": null,
+          "reasons": [
+            "둘 다 동네 식당에서 만나고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      },
+      {
+        "my_interests": [
+          "reading",
+          "travel"
+        ],
+        "their_interests": [
+          "travel",
+          "reading",
+          "volunteer"
+        ],
+        "mine": {
+          "purpose": "exercise",
+          "places": [
+            "center",
+            "park"
+          ],
+          "times": [
+            "any",
+            "weekday_eve"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "listener",
+          "traits": [
+            "planned",
+            "warm",
+            "calm"
+          ]
+        },
+        "theirs": {
+          "purpose": "community",
+          "places": [
+            "cafe",
+            "center"
+          ],
+          "times": [
+            "weekday_pm"
+          ],
+          "frequency": "weekly",
+          "talk_style": "talker",
+          "want": "calm",
+          "traits": [
+            "caring"
+          ]
+        },
+        "expected": {
+          "score": 78,
+          "label": "잘 맞아요",
+          "reasons": [
+            "둘 다 복지관·문화센터에서 만나고 싶어 해요",
+            "만나고 싶은 횟수가 비슷해요"
+          ]
+        }
+      }
+    ]
+  }
+}

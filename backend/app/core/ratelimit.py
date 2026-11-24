@@ -65,12 +65,34 @@ class RateLimitStore(Protocol):
 
 
 class MemoryRateLimitStore:
-    """프로세스 메모리 저장 — 서버 1대·시연용. 여러 대면 Redis 구현으로 (B9)."""
+    """프로세스 메모리 저장 — 서버 1대·워커 1개·시연용. 여러 대면 Redis 구현으로 (B9).
+
+    키(전화번호·사용자·IP마다 하나)는 한 번 쓰이면 계속 남으므로, 일정 횟수마다
+    창이 지나 아무 기록도 쓸모없어진 키를 지운다 (H42).
+    """
+
+    #: 이만큼 기록할 때마다 오래된 키 정리
+    SWEEP_EVERY = 1000
 
     def __init__(self) -> None:
         self._hits: dict[str, deque[float]] = {}
+        self._longest_window = 0
+        self._since_sweep = 0
+
+    def __len__(self) -> int:
+        return len(self._hits)
+
+    def _sweep(self, now: float) -> None:
+        stale = [k for k, q in self._hits.items() if not q or q[-1] <= now - self._longest_window]
+        for k in stale:
+            del self._hits[k]
 
     def hit(self, key: str, limit: int, window_sec: int, now: float) -> int | None:
+        self._longest_window = max(self._longest_window, window_sec)
+        self._since_sweep += 1
+        if self._since_sweep >= self.SWEEP_EVERY:
+            self._since_sweep = 0
+            self._sweep(now)
         q = self._hits.setdefault(key, deque())
         while q and q[0] <= now - window_sec:
             q.popleft()
