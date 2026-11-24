@@ -1,25 +1,36 @@
-/** backend/app/domains/risk/rules.py 의 사본 — 위험 대화 1단계 키워드 룰 */
+/**
+ * backend/app/domains/risk/rules.py 의 사본 — 위험 대화 1단계 키워드 룰.
+ * 패턴 글자는 백엔드와 똑같이 두고, 백엔드처럼 대소문자를 가리지 않는다(i).
+ * 같은 입력·기대값(backend/tests/fixtures/risk_cases.json)으로 양쪽을 시험한다 (H36).
+ */
 
-const RULES: [code: string, label: string, level: number, patterns: RegExp[]][] = [
+/** 영문 낱말 경계 — \b 대신 (한글 옆 "OTP번호"도 잡고, 옛 사파리에 없는 뒤돌아보기도 안 씀) */
+const A = '(?:^|[^A-Za-z0-9])'
+const Z = '(?![A-Za-z0-9])'
+
+/** 패턴 글자 — 백엔드 risk/rules.py 와 같은 문자열 (e2e/demo-constants.spec.ts 가 비교) */
+export const RULE_SOURCES: [code: string, label: string, level: number, patterns: string[]][] = [
   [
     'money',
     '돈·송금 이야기',
     2,
-    [/송금/, /계좌/, /이체/, /입금/, /돈\s*(좀|을|이)?\s*(빌려|보내|부쳐)/, /빌려\s*줘/, /대출/,
-     /투자/, /수익/, /코인/, /상품권/, /기프트\s*카드/, /선물\s*카드/],
+    ['송금', '계좌', '이체', '입금', '돈\\s*(좀|을|이)?\\s*(빌려|보내|부쳐)', '빌려\\s*줘', '대출',
+     '투자', '수익', '코인', '상품권', '기프트\\s*카드', '선물\\s*카드'],
   ],
   [
     'personal_info',
     '비밀번호·인증번호 같은 개인정보',
     3,
-    [/비밀\s*번호/, /\bOTP\b/i, /인증\s*번호/, /주민\s*(등록)?\s*번호/, /카드\s*번호/, /보안\s*카드/,
-     /공인\s*인증서/, /신분증\s*(사진|찍어)/],
+    ['비밀\\s*번호', `${A}OTP${Z}`, '오티피', '인증\\s*번호', '주민\\s*(등록)?\\s*번호', '카드\\s*번호', '보안\\s*카드',
+     '공인\\s*인증서', '신분증\\s*(사진|찍어)'],
   ],
-  ['urgency', '급하게 서두르게 하는 말', 1, [/급해/, /긴급/, /지금\s*당장/, /병원비/, /사고\s*(났|가)/, /아무한테도\s*말하지/]],
-  ['off_platform', '다른 앱이나 링크로 옮기자는 말', 1, [/카톡\s*(아이디|ID)/i, /텔레그램/, /라인\s*아이디/, /https?:\/\//, /\bbit\.ly\b/]],
+  ['urgency', '급하게 서두르게 하는 말', 1, ['급해', '긴급', '지금\\s*당장', '병원비', '사고\\s*(났|가)', '아무한테도\\s*말하지']],
+  ['off_platform', '다른 앱이나 링크로 옮기자는 말', 1, ['카톡\\s*(아이디|ID)', '텔레그램', '라인\\s*아이디', 'https?://', `${A}bit\\.ly${Z}`]],
 ]
 
-export function assessText(text: string): { level: number; labels: string[] } {
+const RULES = RULE_SOURCES.map(([code, label, level, sources]) => [code, label, level, sources.map((p) => new RegExp(p, 'i'))] as const)
+
+export function assessText(text: string): { level: number; codes: string[]; labels: string[] } {
   const codes: string[] = []
   const labels: string[] = []
   let level = 0
@@ -31,7 +42,7 @@ export function assessText(text: string): { level: number; labels: string[] } {
     }
   }
   if (codes.includes('money') && codes.includes('urgency')) level = Math.min(3, level + 1)
-  return { level, labels }
+  return { level, codes, labels }
 }
 
 // ---------- 같은 동네 반경 검색 — backend/app/domains/friend/nearby.py 의 사본 (C3) ----------
@@ -86,7 +97,7 @@ export function withinReach<U extends { geo: [number, number] | null; region_cod
 
 // ---------- 대화 주제 추천 — backend/app/domains/chat/topics.py 의 사본 (C12) ----------
 
-const PHRASES: Record<string, [string, string]> = {
+export const PHRASES: Record<string, [string, string]> = {
   walking: ['자주 가시는 산책길이 있으세요?', '날 좋은 날 같이 천천히 걸으실래요?'],
   movies: ['요즘 재미있게 보신 영화가 있으세요?', '다음에 공연 같이 보러 가실래요?'],
   cooking: ['요즘 자주 해 드시는 음식이 있으세요?', '동네에 맛있는 집 아시는 데 있으세요?'],
@@ -98,8 +109,8 @@ const PHRASES: Record<string, [string, string]> = {
   gardening: ['요즘 키우시는 꽃이나 화분이 있으세요?', '텃밭에 뭐 심으셨어요?'],
   volunteer: ['봉사는 주로 어디서 하세요?', '다음에 봉사 같이 가 보실래요?'],
 }
-const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
-const MAX_TOPICS = 4
+export const GENERAL = ['오늘 점심은 뭐 드셨어요?', '이번 주 날씨가 좋다던데, 어떻게 지내세요?', '요즘 즐거운 일 있으셨어요?']
+export const MAX_TOPICS = 4
 
 export function suggestTopics(
   mine: string[],

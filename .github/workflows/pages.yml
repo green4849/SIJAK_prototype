@@ -44,8 +44,10 @@ jobs:
         run: npm run build:demo
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
-      # SPA: 새로고침·직접 링크(/저장소/friends 등)도 열리도록 404를 index로
-      - run: cp dist/index.html dist/404.html
+          # 공유 미리보기(og:image·og:url)는 절대 주소여야 한다 (H35)
+          VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      # SPA: 새로고침·직접 링크(/저장소/friends 등)도 HTTP 200 으로 — 화면 주소마다 index.html 사본, 나머지는 404.html
+      - run: node scripts/pages-spa.mjs dist
       - uses: actions/upload-pages-artifact@v5
         with:
           path: frontend/dist

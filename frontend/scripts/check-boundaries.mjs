@@ -6,8 +6,10 @@
 //  5. demo(가짜 서버)는 shared만 사용
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const SRC = new URL('../src', import.meta.url).pathname
+// URL.pathname 은 한글·공백을 %EC.. 로 남겨 그런 경로에서는 폴더를 못 찾았다 → fileURLToPath (H42)
+const SRC = fileURLToPath(new URL('../src', import.meta.url))
 // from 절 / side-effect import('x') / dynamic import('x') 모두 포착
 const IMPORT_RE =
   /(?:import|export)[^'"]*?from\s*['"]([^'"]+)['"]|import\s*\(?\s*['"]([^'"]+)['"]/g

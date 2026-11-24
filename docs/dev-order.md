@@ -98,6 +98,8 @@ backend 스키마 수정 → (backend) uv run python -m scripts.export_openapi
 ```
 `openapi.json`·`schema.d.ts` 둘 다 커밋한다. 갱신을 잊으면 CI(backend `--check`, frontend `git diff`)가 실패한다.
 
+시연(`frontend/src/demo`)이 손으로 복사해 둔 백엔드 값(지역·관심사·포인트·알림 시간대·신고 이유·동네 반경·대화 주제·위험 규칙·성향조사 문항과 점수 규칙)은 `uv run python -m scripts.export_demo_constants` 가 `frontend/e2e/backend-constants.json` 으로 내보내고, `e2e/demo-constants.spec.ts` 가 시연 사본과 비교한다. 백엔드 값을 바꾸면 이 파일을 다시 만들고 시연 사본도 같이 고친다 — 어느 하나를 잊으면 CI가 실패한다 (H37).
+
 ---
 
 ## 4. 프로토타입 범위 결정 (보고서 대비)
@@ -140,6 +142,6 @@ docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → 브랜치 
 - 커밋 메시지: `<ID>: 무엇을` — 예: `A1: 하단 탭에 안 읽은 메시지 배지`
 - 스테이지 내부 순서(§1)는 그대로: 백엔드(model→…→router→test) → 프론트(api→hooks→components→page)
 - **main은 항상 데모가 동작하는 상태** — 깨지면 그 PR을 되돌린다
-- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/build · **e2e(데모 대상, 접근성 스윕 포함, 두 대로 나눠 실행)**. PR 과 main push 에서만 돈다 — 작업 브랜치는 PR 을 열어야 검사된다. 같은 PR 에 새로 push 하면 앞 실행은 취소 (H40)
+- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/**단위 테스트(`npm test`, vitest — `src/**/*.test.ts`, 화면 없이 도는 순수 로직)**/build · **e2e(데모 대상, 접근성 스윕 포함, 두 대로 나눠 실행)**. PR 과 main push 에서만 돈다 — 작업 브랜치는 PR 을 열어야 검사
 - 시연 배포(`pages.yml`)는 main 의 CI 가 **성공한 뒤** 그 커밋으로 (H39)
 - 권장 설정(저장소 관리자): Settings → Branches → `main` 보호 — PR 필수, CI 통과 필수

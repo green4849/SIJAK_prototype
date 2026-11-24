@@ -42,6 +42,7 @@ def test_safe_prod_starts_with_secure_cookie() -> None:
         ("phone_hash_pepper", "change-me-pepper", "PHONE_HASH_PEPPER"),
         ("cors_origins", ["http://localhost:5173"], "CORS_ORIGINS"),
         ("allow_mock_identity_in_prod", False, "IDENTITY_PROVIDER"),
+        ("web_concurrency", 4, "WEB_CONCURRENCY"),
     ],
 )
 def test_unsafe_prod_refuses_to_start(field: str, value: object, message: str) -> None:

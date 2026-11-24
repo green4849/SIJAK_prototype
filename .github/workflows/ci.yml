@@ -39,10 +39,14 @@ jobs:
       - run: psql -h localhost -U wipi -c "create database wipi_test"
       - run: uv sync
       - run: uv run ruff check .
+      # 포맷도 — 로컬 완료 기준(docs/dev-order.md)과 같게. 빠져 있어서 포맷이 어긋난 파일이 main 에 들어갔었다 (H42)
+      - run: uv run ruff format --check .
       - run: uv run alembic upgrade head
       - run: uv run alembic check
       # API 계약(OpenAPI)이 커밋된 파일과 같은지 — 백엔드만 고치고 프론트 타입 갱신을 잊으면 실패 (D3)
       - run: uv run python -m scripts.export_openapi --check
+      # 시연이 복사해 둔 백엔드 값의 기준 파일이 최신인지 — 시연 사본과의 비교는 e2e/demo-constants.spec.ts (H37)
+      - run: uv run python -m scripts.export_demo_constants --check
       - run: uv run pytest -q
 
   frontend:
@@ -61,8 +65,12 @@ jobs:
       # 생성 타입(schema.d.ts)이 openapi.json 과 같은지 (D3)
       - run: npm run gen:api && git diff --exit-code src/shared/api/schema.d.ts
       - run: npm run lint
+      # 단위 테스트 — 토큰 갱신·요청 재시도·메시지 합치기 같은 순수 로직 (H41)
+      - run: npm test
       - run: npm run build
       - run: npm run build:demo
+      # 시연 배포(pages.yml)가 쓰는 화면 주소별 사본 — App.tsx 형식이 바뀌어 주소를 못 읽으면 여기서 실패 (H35)
+      - run: node scripts/pages-spa.mjs dist && test -f dist/welcome.html && test -f dist/me/index.html
 
   e2e:
     # 데모 빌드 대상 → 백엔드 없이 실행. 실패하면 화면 녹화(trace)가 아티팩트로 남는다
@@ -118,6 +126,7 @@ jobs:
           c -f https://localhost/friends | grep -q 'id="root"'          # 화면 주소 → index.html
           test "$(c -o /dev/null -w '%{http_code}' https://localhost/api/v1/me)" = 401
           c -I https://localhost/sw.js | grep -qi 'cache-control: no-cache'
+          c -I https://localhost/ | grep -qi '^content-security-policy:.*frame-ancestors'   # H42
           c -sI http://localhost/ | grep -qi '^location: https://'       # http → https
           # 운영 안전장치(B1): 기본 비밀값이면 API가 뜨지 않아야 한다
           ! docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod run --rm --no-deps \

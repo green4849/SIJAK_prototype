@@ -75,6 +75,7 @@ test('같이 가 보기 — 버튼을 짚어 주고, 누르는 것은 사용자�
   await expect(callout(page)).toContainText('여기 ‘친구 신청’이에요')
   // 시작이가 그 버튼 옆으로 가서 가리키고, 누를 때까지 그 자리에 있다
   await expect(sijagi(page)).toHaveAttribute('data-pose', /^point[LR]$/)
+  // 의도된 대기: '누를 때까지 그 자리에 있다'를 보려면 잠시 시간이 지나도 그대로인지 봐야 한다
   await page.waitForTimeout(1000)
   await expect(sijagi(page)).toHaveAttribute('data-pose', /^point[LR]$/)
   const beside = (await sijagi(page).boundingBox())!
@@ -295,10 +296,12 @@ test('아주 큰 글씨 + 선명한 화면 + 좁은 화면에서도 창을 쓸 �
   // 짚어 줄 때도 넘치지 않고, 말풍선이 그 버튼을 가리지 않는다
   await log(page).getByRole('button', { name: '‘친구 신청’ 어디 있어요?' }).click()
   await expect(callout(page)).toBeVisible()
-  await page.waitForTimeout(400)
-  const target = (await page.getByRole('button', { name: /^친구 신청/ }).first().boundingBox())!
+  // 말풍선이 자리를 잡을 때까지 (옮겨 가는 중에는 잠깐 겹칠 수 있다 — 고정 대기 대신, H41)
+  await expect(async () => {
+    const t = (await page.getByRole('button', { name: /^친구 신청/ }).first().boundingBox())!
+    expect(overlaps(t, (await callout(page).boundingBox())!)).toBe(false)
+  }).toPass({ timeout: 5000 })
   const said = (await callout(page).boundingBox())!
-  expect(overlaps(target, said)).toBe(false)
   // 말풍선은 화면 안에 다 들어온다
   expect(said.y).toBeGreaterThanOrEqual(0)
   expect(said.y + said.height).toBeLessThanOrEqual(720)
@@ -333,6 +336,7 @@ test('처음 온 화면에서는 시작이가 먼저 한마디 건넨다 — 잠
   await mainNav(page).getByRole('link', { name: /친구/ }).click()
   await expect(page.getByText('친구 신청이 처음이면 저를 눌러 주세요.')).toBeVisible()
   await mainNav(page).getByRole('link', { name: /홈/ }).click()
+  // 의도된 대기: '다시 와도 또 말을 걸지 않는다'는 말을 걸 만한 시간이 지나도 조용한지로만 볼 수 있다
   await page.waitForTimeout(2000)
   await expect(hint).toBeHidden()
 })
