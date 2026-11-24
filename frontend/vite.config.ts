@@ -5,6 +5,24 @@ import { resolve } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 
+/**
+ * 공유 미리보기 그림·주소 (H35). 카카오톡 등은 og:image 가 절대 주소여야 그림을 띄우므로,
+ * 사이트 주소(VITE_SITE_URL, 예: https://계정.github.io/저장소/)를 알 때만 절대 주소로 넣는다.
+ */
+function ogAbsolute(): Plugin {
+  return {
+    name: 'sijak-og-absolute',
+    transformIndexHtml(html, ctx) {
+      const site = process.env.VITE_SITE_URL?.replace(/\/?$/, '/')
+      const base = ctx.server ? '/' : (process.env.VITE_BASE ?? '/')
+      const image = `${site ?? base}icons/og-image.png`
+      const tags = [`<meta property="og:image" content="${image}" />`, '<meta property="og:image:width" content="1200" />', '<meta property="og:image:height" content="630" />']
+      if (site) tags.push(`<meta property="og:url" content="${site}" />`)
+      return html.replace('<meta name="twitter:card"', `${tags.join('\n    ')}\n    <meta name="twitter:card"`)
+    },
+  }
+}
+
 /** 미리 저장하지 않는 큰 파일 — 3D 시작이는 쓸 때 받는다 (H33) */
 const NOT_PRECACHED = /sijagi3d|\.glb$/
 
@@ -42,7 +60,7 @@ function swBuildInfo(): Plugin {
 export default defineConfig({
   // GitHub Pages: https://<계정>.github.io/<저장소명>/ → VITE_BASE=/<저장소명>/ 로 빌드
   base: process.env.VITE_BASE ?? '/',
-  plugins: [react(), swBuildInfo()],
+  plugins: [react(), swBuildInfo(), ogAbsolute()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
