@@ -1,9 +1,12 @@
-# 데모(서버 없음)를 GitHub Pages에 자동 배포 — main에 push하면 갱신
+# 데모(서버 없음)를 GitHub Pages에 자동 배포 — main 의 CI 가 성공하면 그 커밋으로 갱신
+# (예전에는 push 즉시 배포돼 e2e 가 깨진 커밋도 올라갔다, H39)
 # 주소: https://<계정>.github.io/<저장소명>/
 name: Deploy demo to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -18,13 +21,20 @@ concurrency:
 
 jobs:
   build:
+    # CI 가 main 에 push 된 커밋에서 성공했을 때만 (손으로 돌릴 때는 지금 main)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+        with:
+          # CI 가 검사한 바로 그 커밋을 배포 (그사이 main 이 더 나아갔어도)
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -38,7 +48,7 @@ jobs:
           VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
       # SPA: 새로고침·직접 링크(/저장소/friends 등)도 HTTP 200 으로 — 화면 주소마다 index.html 사본, 나머지는 404.html
       - run: node scripts/pages-spa.mjs dist
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: frontend/dist
 
@@ -50,4 +60,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

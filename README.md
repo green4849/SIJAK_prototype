@@ -90,7 +90,7 @@ docker exec -it wipi-db psql -U wipi -c "create database wipi_test"
 
 ## 데모 빌드 (GitHub Pages)
 
-`main` 에 push하면 `.github/workflows/pages.yml` 이 데모를 빌드해 Pages에 올린다.
+`main` 의 CI 가 성공하면 `.github/workflows/pages.yml` 이 그 커밋으로 데모를 빌드해 Pages에 올린다.
 
 ```bash
 cd frontend

@@ -2,9 +2,16 @@
 name: CI
 
 on:
-  # 작업 브랜치(polish/·prod/·feat/·infra/)도 병합 전에 검사
+  # 작업 브랜치는 PR로만 검사 — push 와 PR 이 같은 커밋을 두 번 돌리지 않게 (H40)
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# 같은 PR 에 새로 push 하면 앞의 실행은 취소. main 은 배포(pages.yml)가 이 결과를 기다리므로 끝까지 돌린다
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   backend:
@@ -27,8 +34,8 @@ jobs:
       TEST_DATABASE_URL: postgresql+asyncpg://wipi:wipi@localhost:5432/wipi_test
       PGPASSWORD: wipi
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
       - run: psql -h localhost -U wipi -c "create database wipi_test"
       - run: uv sync
       - run: uv run ruff check .
@@ -48,8 +55,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -67,24 +74,34 @@ jobs:
 
   e2e:
     # 데모 빌드 대상 → 백엔드 없이 실행. 실패하면 화면 녹화(trace)가 아티팩트로 남는다
+    # 2코어 러너에 1 worker 라 한 줄로 8분 걸려, 두 대에 나눠 돌린다 (H40)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
-      - if: failure()
-        uses: actions/upload-artifact@v4
+      # 브라우저 파일은 저장해 두고 다시 씀 (Playwright 버전이 바뀌면 lock 파일이 바뀌어 새로 받음)
+      - uses: actions/cache@v6
         with:
-          name: playwright-report
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e -- --shard=${{ matrix.shard }}/2
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ matrix.shard }}
           path: frontend/playwright-report
           retention-days: 7
 
@@ -92,7 +109,7 @@ jobs:
     # 운영 구성(B10)을 그대로 띄워 확인 — 이미지 빌드, 마이그레이션 자동 적용, HTTPS, /api 프록시, SPA 주소
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: 시험용 운영 환경값 (비밀값은 매번 새로 생성)
         run: |
           cp infra/.env.prod.example infra/.env.prod
