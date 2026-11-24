@@ -1,6 +1,7 @@
 // 앱 아이콘·공유 미리보기 PNG 생성 — 원본: icons/leaf.svg, 결과: public/icons/*.png
 // 실행: npm run icons  (PW_CHROMIUM_PATH 로 Chromium 경로 지정 가능)
 import { readFileSync, mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
 
 const BG = '#fbf7ec'
@@ -29,7 +30,7 @@ for (const o of outputs) {
   await page.setContent(
     `<style>html,body{margin:0;background:transparent}svg{display:block;width:100vw;height:100vh}</style>${svg(o)}`,
   )
-  await page.screenshot({ path: new URL(o.file, outDir).pathname, omitBackground: true })
+  await page.screenshot({ path: fileURLToPath(new URL(o.file, outDir)), omitBackground: true })
   console.log('✓', o.file)
 }
 
