@@ -11,8 +11,8 @@
   /*
    * 글꼴 — 하나로 통일 (디자인 리뷰 v1 공통 1). Jua는 로고(Brand) 전용.
    */
-  --font-brand: 'Jua', 'Noto Sans KR', system-ui, sans-serif;
-  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-brand: 'Jua', 'Noto Sans KR Variable', system-ui, sans-serif;
+  --font-ui: 'Noto Sans KR Variable', 'Apple SD Gothic Neo', system-ui, sans-serif;
 
   /*
    * 글자 크기 — 역할별. 모두 --font-base 의 배수라 4단계 글자 설정에 비례해 커진다.

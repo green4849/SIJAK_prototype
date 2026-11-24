@@ -16,8 +16,8 @@
     "gen:api": "openapi-typescript src/shared/api/openapi.json -o src/shared/api/schema.d.ts"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-kr": "^5.3.1",
     "@fontsource/jua": "^5.3.0",
-    "@fontsource/noto-sans-kr": "^5.3.0",
     "lucide-react": "^1.49.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
