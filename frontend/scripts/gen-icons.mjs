@@ -1,4 +1,4 @@
-// 앱 아이콘 PNG 생성 — 원본: icons/leaf.svg, 결과: public/icons/*.png
+// 앱 아이콘·공유 미리보기 PNG 생성 — 원본: icons/leaf.svg, 결과: public/icons/*.png
 // 실행: npm run icons  (PW_CHROMIUM_PATH 로 Chromium 경로 지정 가능)
 import { readFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -33,4 +33,20 @@ for (const o of outputs) {
   await page.screenshot({ path: fileURLToPath(new URL(o.file, outDir)), omitBackground: true })
   console.log('✓', o.file)
 }
+
+// 공유 미리보기(og:image, 1200×630) — 카카오톡 등에 링크를 보낼 때 뜨는 그림 (H35)
+const font = (f) => readFileSync(new URL(`../node_modules/${f}`, import.meta.url)).toString('base64')
+await page.setViewportSize({ width: 1200, height: 630 })
+await page.setContent(`<style>
+  @font-face { font-family: Jua; src: url(data:font/woff2;base64,${font('@fontsource/jua/files/jua-119-400-normal.woff2')}) format('woff2'); unicode-range: U+C2DC; }
+  @font-face { font-family: Jua; src: url(data:font/woff2;base64,${font('@fontsource/jua/files/jua-118-400-normal.woff2')}) format('woff2'); unicode-range: U+C791; }
+  html, body { margin: 0; width: 1200px; height: 630px; background: ${BG}; }
+  body { display: flex; align-items: center; justify-content: center; gap: 40px; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; color: #2e5a1c; }
+  svg { width: 260px; height: 260px; }
+  h1 { margin: 0; font-family: Jua, sans-serif; font-weight: 400; font-size: 200px; line-height: 1; }
+  p { margin: 16px 0 0; font-size: 44px; color: #4a4a40; }
+</style><svg viewBox="0 0 64 64">${leaf}</svg><div><h1>시작</h1><p>같은 동네, 좋은 이웃과</p></div>`)
+await page.evaluate(() => document.fonts.ready)
+await page.screenshot({ path: new URL('og-image.png', outDir).pathname })
+console.log('✓ og-image.png')
 await browser.close()
