@@ -58,6 +58,8 @@ jobs:
       # 생성 타입(schema.d.ts)이 openapi.json 과 같은지 (D3)
       - run: npm run gen:api && git diff --exit-code src/shared/api/schema.d.ts
       - run: npm run lint
+      # 단위 테스트 — 토큰 갱신·요청 재시도·메시지 합치기 같은 순수 로직 (H41)
+      - run: npm test
       - run: npm run build
       - run: npm run build:demo
       # 시연 배포(pages.yml)가 쓰는 화면 주소별 사본 — App.tsx 형식이 바뀌어 주소를 못 읽으면 여기서 실패 (H35)

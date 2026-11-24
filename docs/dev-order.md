@@ -142,5 +142,5 @@ docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → 브랜치 
 - 커밋 메시지: `<ID>: 무엇을` — 예: `A1: 하단 탭에 안 읽은 메시지 배지`
 - 스테이지 내부 순서(§1)는 그대로: 백엔드(model→…→router→test) → 프론트(api→hooks→components→page)
 - **main은 항상 데모가 동작하는 상태** — 깨지면 그 PR을 되돌린다
-- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/build · **e2e(데모 대상, 접근성 스윕 포함)**
+- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/**단위 테스트(`npm test`, vitest — `src/**/*.test.ts`, 화면 없이 도는 순수 로직)**/build · **e2e(데모 대상, 접근성 스윕 포함)**
 - 권장 설정(저장소 관리자): Settings → Branches → `main` 보호 — PR 필수, CI 통과 필수
