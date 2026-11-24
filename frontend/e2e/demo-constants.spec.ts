@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
 import * as C from '../src/demo/constants'
 import { match, QUESTIONS, type DSurvey } from '../src/demo/matching'
-import { GENERAL, MAX_TOPICS, NEARBY_RADIUS_KM, PHRASES, RECOMMEND_RADIUS_KM, RULES } from '../src/demo/rules'
+import { GENERAL, MAX_TOPICS, NEARBY_RADIUS_KM, PHRASES, RECOMMEND_RADIUS_KM, RULE_SOURCES } from '../src/demo/rules'
 
 const B = JSON.parse(readFileSync(new URL('./backend-constants.json', import.meta.url), 'utf8'))
 
@@ -38,11 +38,8 @@ test('H37: 알림 시간대·신고 이유·동네 반경', () => {
 })
 
 test('H37: 위험 대화 규칙 — 분류·문구·위험도·패턴 글자', () => {
-  // JS 정규식은 / 를 \/ 로 적으므로, 백엔드 패턴도 RegExp 로 만들어 같은 표기로 비교
-  const norm = (p: string) => new RegExp(p).source
-  const demo = RULES.map(([code, label, level, patterns]) => [code, label, level, patterns.map((p) => norm(p instanceof RegExp ? p.source : p))])
-  const back = B.risk.rules.map(([code, label, level, patterns]: [string, string, number, string[]]) => [code, label, level, patterns.map(norm)])
-  expect(demo).toEqual(back)
+  // 시연 사본은 백엔드와 같은 패턴 문자열을 두고 new RegExp(p, 'i')로 만든다 (H36) → 글자 그대로 비교
+  expect(RULE_SOURCES).toEqual(B.risk.rules)
 })
 
 test('H37: 대화 주제 추천 문구', () => {
