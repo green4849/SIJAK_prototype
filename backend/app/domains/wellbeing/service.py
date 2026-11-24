@@ -8,6 +8,7 @@
   S 이웃 만남 : 친구 수 × 20 + 신청한 활동 수 × 15
   R 답장      : 알림 응답 속도 — 측정 전이라 고정 70
 자가평가: PHQ-9 · GAD-7 (쉬운 말로 다듬은 문항), 점수 구간은 표준 기준.
+WHO-5 웰빙 지수: 5문항 0~5점, 합 × 4 = 0~100 (높을수록 좋음). 가입할 때 처음, 그 뒤 4주마다.
 """
 
 import math
@@ -20,6 +21,7 @@ from app.core.errors import DomainError
 from app.domains.activity.service import ActivityService
 from app.domains.chat.service import ChatService
 from app.domains.friend.service import FriendService
+from app.domains.notification.service import NotificationService
 from app.domains.wellbeing.models import SelfAssessment
 from app.domains.wellbeing.repository import WellbeingRepository
 
@@ -145,6 +147,33 @@ FORMS = {
         ],
     ),
 }
+# WHO-5 — 문항·보기는 사용자가 준 표준 한국어 그대로 (2026-11-24)
+WHO5_OPTIONS = [
+    (0, "전혀 없음"),
+    (1, "가끔"),
+    (2, "절반 미만"),
+    (3, "절반 이상"),
+    (4, "대부분"),
+    (5, "항상"),
+]
+FORMS["who5"] = AssessmentForm(
+    kind="who5",
+    title="마음 건강 살펴보기",
+    lead="얼마나 자주 그랬는지 골라 주세요.",
+    options=WHO5_OPTIONS,
+    questions=[
+        "지난 2주간 나는 밝고 기분이 좋았다",
+        "지난 2주간 나는 차분하고 편안했다",
+        "지난 2주간 나는 활기차고 에너지가 있었다",
+        "지난 2주간 나는 상쾌하고 개운하게 일어났다",
+        "지난 2주간 내 일상은 흥미로운 것들로 채워졌다",
+    ],
+)
+WHO5_SCALE = 4  # 합(0~25) × 4 = 0~100
+WHO5_INTERVAL = timedelta(days=28)
+# 표준 해석: 50 이하 웰빙 낮음, 28 이하 우울 가능성 → 상담 전화 안내
+WHO5_CRISIS_MAX = 28
+
 # PHQ-9 9번(죽음·자해 생각) — 0보다 크면 상담 전화 안내
 PHQ9_CRISIS_INDEX = 8
 
@@ -170,6 +199,23 @@ LEVELS = [
         "전문가와 꼭 이야기해 보세요. 109에 전화하면 하루 종일 상담해 줘요.",
     ),
 ]
+# WHO-5 (이 점수까지, 단계, 문구, 권하는 일) — 높을수록 좋음. 구간은 디자인(2026-11-24) 그대로
+WHO5_LEVELS = [
+    (
+        50,
+        "low",
+        "마음이 지쳐 있어요",
+        "요즘 마음이 많이 지쳐 있어요. 마음을 돌보는 일을 해 보고, "
+        "이런 날이 이어지면 전문가와 이야기해 보세요.",
+    ),
+    (65, "fair", "보통이에요", "요즘 마음이 보통이에요. 일상에 작은 활력을 더해 봐요."),
+    (
+        100,
+        "good",
+        "마음이 건강한 편이에요",
+        "요즘 마음이 밝고 활기찬 편이에요. 지금의 좋은 흐름을 이어 가요.",
+    ),
+]
 RECENT_ASSESSMENTS = 20
 
 
@@ -185,6 +231,16 @@ class AssessmentResult:
     advice: str
     crisis: bool
     created_at: datetime
+    #: 같은 점검의 바로 전 점수 (처음이면 None)
+    previous_score: int | None = None
+
+
+@dataclass(frozen=True)
+class Who5Status:
+    last: AssessmentResult | None
+    #: 다음에 살펴볼 날 (한 번도 안 했으면 None — 지금 바로)
+    next_due_at: datetime | None
+    due: bool
 
 
 @dataclass(frozen=True)
@@ -203,22 +259,43 @@ class InvalidAssessmentError(DomainError):
     code = "validation_error"
 
 
-def result_of(a: SelfAssessment) -> AssessmentResult:
+def score_of(a: SelfAssessment) -> int:
+    return sum(a.answers) * (WHO5_SCALE if a.kind == "who5" else 1)
+
+
+def result_of(a: SelfAssessment, previous: SelfAssessment | None = None) -> AssessmentResult:
     form = FORMS[a.kind]
-    score = sum(a.answers)
-    _, level, label, advice = next((lv for lv in LEVELS if score <= lv[0]), LEVELS[-1])
+    score = score_of(a)
+    levels = WHO5_LEVELS if a.kind == "who5" else LEVELS
+    _, level, label, advice = next((lv for lv in levels if score <= lv[0]), levels[-1])
+    if a.kind == "who5":
+        max_score = len(form.questions) * 5 * WHO5_SCALE
+        crisis = score <= WHO5_CRISIS_MAX
+    else:
+        max_score = len(form.questions) * 3
+        crisis = a.kind == "phq9" and a.answers[PHQ9_CRISIS_INDEX] > 0
     return AssessmentResult(
         id=a.id,
         kind=a.kind,
         title=form.title,
         score=score,
-        max_score=len(form.questions) * 3,
+        max_score=max_score,
         level=level,
         level_label=label,
         advice=advice,
-        crisis=a.kind == "phq9" and a.answers[PHQ9_CRISIS_INDEX] > 0,
+        crisis=crisis,
         created_at=a.created_at,
+        previous_score=score_of(previous) if previous else None,
     )
+
+
+def results_with_previous(newest_first: list[SelfAssessment]) -> list[AssessmentResult]:
+    """새것부터 받은 기록 — 각 결과에 같은 점검의 바로 전 점수를 붙인다"""
+    out: list[AssessmentResult] = []
+    for i, a in enumerate(newest_first):
+        prev = next((b for b in newest_first[i + 1 :] if b.kind == a.kind), None)
+        out.append(result_of(a, prev))
+    return out
 
 
 class WellbeingService:
@@ -228,11 +305,13 @@ class WellbeingService:
         chat: ChatService,
         friends: FriendService,
         activities: ActivityService,
+        notifications: NotificationService,
     ) -> None:
         self.repo = repo
         self.chat = chat
         self.friends = friends
         self.activities = activities
+        self.notifications = notifications
 
     # ---------- 사회적 관계 지수 ----------
 
@@ -304,15 +383,36 @@ class WellbeingService:
         return FORMS[kind]
 
     async def submit(self, user_id: uuid.UUID, kind: str, answers: list[int]) -> AssessmentResult:
-        n = len(FORMS[kind].questions)
-        if len(answers) != n or any(v not in (0, 1, 2, 3) for v in answers):
+        form = FORMS[kind]
+        allowed = {v for v, _ in form.options}
+        if len(answers) != len(form.questions) or any(v not in allowed for v in answers):
             raise InvalidAssessmentError("모든 질문에 답해 주세요.")
+        previous = await self.repo.last_assessment(user_id, kind)
         a = await self.repo.add_assessment(user_id, kind, answers)
         await self.repo.commit()
-        return result_of(a)
+        return result_of(a, previous)
 
     async def history(self, user_id: uuid.UUID) -> list[AssessmentResult]:
-        return [result_of(a) for a in await self.repo.assessments(user_id, RECENT_ASSESSMENTS)]
+        return results_with_previous(await self.repo.assessments(user_id, RECENT_ASSESSMENTS))
+
+    async def who5_status(self, user_id: uuid.UUID) -> Who5Status:
+        """WHO-5를 할 때인지. 4주가 지났으면 알림함에 한 번 알린다.
+
+        발송 일괄 작업이 없어(docs/deferred.md) 앱을 열 때(홈) 이걸 불러 그때 쌓는다.
+        한 번도 안 한 분(가입할 때 건너뛴 분)은 홈 카드로만 권하고 알림은 쌓지 않는다.
+        """
+        recent = await self.repo.assessments_of(user_id, "who5", 2)
+        if not recent:
+            return Who5Status(last=None, next_due_at=None, due=True)
+        last = recent[0]
+        next_due = last.created_at + WHO5_INTERVAL
+        due = datetime.now(UTC) >= next_due
+        if due:
+            added = await self.notifications.on_who5_due(user_id, last.id)
+            if added:
+                await self.repo.commit()
+        prev = recent[1] if len(recent) > 1 else None
+        return Who5Status(last=result_of(last, prev), next_due_at=next_due, due=due)
 
 
 def _weeks_ago_label(this_week: date, week_start: date) -> str:

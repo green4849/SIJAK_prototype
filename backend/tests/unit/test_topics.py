@@ -10,12 +10,12 @@ def test_every_interest_has_two_phrases() -> None:
 
 
 def test_common_first_then_theirs_then_general() -> None:
-    out = suggest(["walking", "music"], ["tv", "walking"])
+    out = suggest(["walking", "movies"], ["fishing", "walking"])
     assert [(t.label, t.common) for t in out] == [
         ("산책·등산", True),
-        ("TV·드라마", False),
+        ("낚시", False),
         ("산책·등산", True),
-        ("TV·드라마", False),
+        ("낚시", False),
     ]
     assert out[0].text != out[2].text  # 같은 관심사는 다른 문구
 

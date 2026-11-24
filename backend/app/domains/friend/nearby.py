@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from app.domains.auth.models import User
 
 DEFAULT_RADIUS_KM = 2.0
+# 추천 친구 탭 (성향조사 알고리즘 1단계 '같은 동네 또는 인접 지역') — 둘 다 위치가 있을 때
+RECOMMEND_RADIUS_KM = 5.0
 
 
 @dataclass(frozen=True)
@@ -49,3 +51,21 @@ def find_nearby(
 
     unknown = [NearbyUser(u, None) for u in same_region if u.geo_lat is None]
     return within + unknown
+
+
+def within_reach(
+    me: "User", candidates: list["User"], radius_km: float = RECOMMEND_RADIUS_KM
+) -> list[NearbyUser]:
+    """추천 친구 탭의 후보 (알고리즘 1단계).
+
+    둘 다 위치가 있으면 반경 안만, 어느 한쪽이라도 위치가 없으면 같은 시·도.
+    """
+    out: list[NearbyUser] = []
+    for u in candidates:
+        if None not in (me.geo_lat, me.geo_lng, u.geo_lat, u.geo_lng):
+            km = haversine_km(me.geo_lat, me.geo_lng, u.geo_lat, u.geo_lng)  # type: ignore[arg-type]
+            if km <= radius_km:
+                out.append(NearbyUser(u, _coarse(km)))
+        elif u.region_code == me.region_code:
+            out.append(NearbyUser(u, None))
+    return out

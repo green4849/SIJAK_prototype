@@ -105,3 +105,32 @@
   color: var(--color-text-muted);
   font-size: var(--text-meta);
 }
+
+/* 성향조사 적합도 — '잘 맞아요' + 이유 (최대 3줄) */
+.match {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-primary-soft);
+}
+
+:root[data-contrast='high'] .match {
+  border: 2px solid var(--color-border);
+}
+
+.matchLabel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight);
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.reasons {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: var(--text-meta);
+}

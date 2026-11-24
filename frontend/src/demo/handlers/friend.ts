@@ -2,7 +2,8 @@
 import { INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type Route } from '../http'
 import { ageOf, db, newId, relatedBlocks, save, type DUser, regionLabel } from '../store'
-import { findNearby } from '../rules'
+import { findNearby, withinReach } from '../rules'
+import { match, QUESTIONS, validateSurvey, type Match, type SurveyAnswers } from '../matching'
 import { chargeFriendRequest, earnRating, ratingsLeftToday } from '../points'
 import { requireUser } from './auth'
 import type { Schema } from '@/shared/api/types'
@@ -60,6 +61,7 @@ function card(
   me: DUser,
   rel: Map<string, [Relation, string]>,
   distance: number | null = null,
+  m?: Match,
 ): Schema<'FriendCard'> {
   const [relation, request_id] = rel.get(u.id) ?? ['none', null]
   return {
@@ -75,7 +77,14 @@ function card(
     relation,
     request_id,
     my_rating: ratingsBy(me.id).get(u.id) ?? null,
+    match_label: m?.label ?? null,
+    reasons: m?.reasons ?? [],
   }
+}
+
+function surveyOut(me: DUser): Schema<'SurveyOut'> {
+  const a = db().surveys[me.id]
+  return { questions: QUESTIONS, answers: a ? { interests: me.interests, ...a } : null, my_interests: me.interests }
 }
 
 function listBy(me: DUser, wanted: Relation) {
@@ -100,20 +109,49 @@ export const friendRoutes: Route[] = [
       const near = findNearby(me, pool).slice(0, 30)
       return json(near.map(([u, km]) => card(u, me, rel, km)))
     }
-    // C12: '잘 안 맞아요'는 빼고, 평가 → 관심사 점수(+만나보고 싶은 이웃의 관심사 0.5) → 같은 지역
+    // 성향조사 알고리즘 (backend friend/service.py _recommend_by_match): 5km 안(위치 없으면 같은 시·도) →
+    // '잘 안 맞아요'는 빼고, 평가 → 적합도 → '더 보여 주세요' 한 분들의 관심사와 겹침 → 가까운 순
     const ratings = ratingsBy(me.id)
-    const candidates = pool.filter((u) => ratings.get(u.id) !== 'dislike')
-    const likedInterests = new Set(candidates.filter((u) => ratings.get(u.id) === 'like').flatMap((u) => u.interests))
-    const score = (u: DUser) =>
-      u.interests.filter((i) => me.interests.includes(i)).length +
-      0.5 * u.interests.filter((i) => likedInterests.has(i)).length
-    const list = [...candidates].sort(
+    const reach = withinReach(me, pool.filter((u) => ratings.get(u.id) !== 'dislike'))
+    const surveys = db().surveys
+    const likedInterests = new Set(reach.filter(([u]) => ratings.get(u.id) === 'like').flatMap(([u]) => u.interests))
+    const scored = reach.map(([u, km]) => ({
+      u,
+      km,
+      m: match(me.interests, u.interests, surveys[me.id], surveys[u.id]),
+      liked: u.interests.filter((i) => likedInterests.has(i)).length,
+    }))
+    scored.sort(
       (a, b) =>
-        RATING_ORDER(ratings.get(a.id)) - RATING_ORDER(ratings.get(b.id)) ||
-        score(b) - score(a) ||
-        Number(a.region_code !== me.region_code) - Number(b.region_code !== me.region_code),
+        RATING_ORDER(ratings.get(a.u.id)) - RATING_ORDER(ratings.get(b.u.id)) ||
+        b.m.score - a.m.score ||
+        b.liked - a.liked ||
+        (a.km ?? Infinity) - (b.km ?? Infinity),
     )
-    return json(list.slice(0, 30).map((u) => card(u, me, rel)))
+    return json(scored.slice(0, 30).map(({ u, km, m }) => card(u, me, rel, km, m)))
+  }],
+
+  // 성향조사 — Q1은 내 '좋아하는 것'도 함께 바꾼다
+  ['GET', '/friends/survey', (req) => json(surveyOut(requireUser(req)))],
+
+  ['PUT', '/friends/survey', (req) => {
+    const me = requireUser(req)
+    const body = req.body as SurveyAnswers
+    const problem = body ? validateSurvey(body) : '1번 질문에 답해 주세요.'
+    if (problem) return fail(422, 'validation_error', problem)
+    const uniq = (xs: string[]) => [...new Set(xs)]
+    me.interests = uniq(body.interests)
+    db().surveys[me.id] = {
+      purpose: body.purpose,
+      places: uniq(body.places),
+      times: uniq(body.times),
+      frequency: body.frequency,
+      talk_style: body.talk_style,
+      want: body.want,
+      traits: uniq(body.traits),
+    }
+    save()
+    return json(surveyOut(me))
   }],
 
   ['PUT', '/friends/recommendations/:userId/rating', (req) => {

@@ -3,12 +3,16 @@
  * 페이지가 여기서 만들어 props로 넘긴다 (예: 친구 카드 → 대화방).
  */
 export const chatWith = (userId: string) => `/chats/with/${userId}`
+/** 성향조사 — 처음이면 시작 화면부터, 고치러 갈 때는 ?edit */
+export const friendSurvey = '/friends/survey'
 export const chatRoom = (roomId: string) => `/chats/${roomId}`
 export const activityDetail = (activityId: string) => `/activities/${activityId}`
 /** 지역생활 목록을 특정 분류로 열기 (예: 내 포인트 → 봉사 활동) */
 export const activitiesOf = (category: string) => `/activities?category=${category}`
 /** 마음 건강 → 자가평가 (C11) */
 export const assessment = (kind: string) => `/me/wellbeing/check/${kind}`
+/** 마음 건강 살펴보기(WHO-5) 이전 결과 */
+export const who5History = '/me/wellbeing/history'
 /** 가까운 복지시설 상세 (C7) */
 export const welfareDetail = (id: string) => `/welfare/${id}`
 /** 두뇌 운동 게임 */

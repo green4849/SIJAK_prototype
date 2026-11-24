@@ -567,6 +567,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/friends/survey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Survey
+         * @description 성향조사 문항과 내 답 (안 했으면 answers=null)
+         */
+        get: operations["survey_api_v1_friends_survey_get"];
+        /**
+         * Save Survey
+         * @description 성향조사 저장 — Q1은 내 '좋아하는 것'도 함께 바꾼다
+         */
+        put: operations["save_survey_api_v1_friends_survey_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -704,6 +728,26 @@ export interface paths {
         };
         /** Assessment Form */
         get: operations["assessment_form_api_v1_me_self_assessment__kind__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/who5": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who5 Status
+         * @description WHO-5를 할 때인지 — 4주가 지났으면 알림함에도 한 번 알린다 (홈에서 부른다)
+         */
+        get: operations["who5_status_api_v1_me_who5_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1119,7 +1163,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "phq9" | "gad7";
+            kind: "phq9" | "gad7" | "who5";
             /**
              * Lead
              * @description '지난 2주 동안 …'
@@ -1136,14 +1180,14 @@ export interface components {
         AssessmentIn: {
             /**
              * Answers
-             * @description 문항 순서대로 0~3
+             * @description 문항 순서대로 0~3 (WHO-5는 0~5)
              */
             answers: number[];
             /**
              * Kind
              * @enum {string}
              */
-            kind: "phq9" | "gad7";
+            kind: "phq9" | "gad7" | "who5";
         };
         /** AssessmentOption */
         AssessmentOption: {
@@ -1170,7 +1214,7 @@ export interface components {
             created_at: string;
             /**
              * Crisis
-             * @description PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내
+             * @description 상담 전화 안내 — PHQ-9 9번(죽음·자해 생각)에 '있음', 또는 WHO-5 28점 이하
              */
             crisis: boolean;
             /** Id */
@@ -1179,16 +1223,22 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "phq9" | "gad7";
+            kind: "phq9" | "gad7" | "who5";
             /**
              * Level
+             * @description PHQ-9·GAD-7: minimal~severe (높을수록 힘듦) / WHO-5: low·fair·good
              * @enum {string}
              */
-            level: "minimal" | "mild" | "moderate" | "severe";
+            level: "minimal" | "mild" | "moderate" | "severe" | "good" | "fair" | "low";
             /** Level Label */
             level_label: string;
             /** Max Score */
             max_score: number;
+            /**
+             * Previous Score
+             * @description 같은 점검의 바로 전 점수 (처음이면 null)
+             */
+            previous_score?: number | null;
             /** Score */
             score: number;
             /** Title */
@@ -1330,12 +1380,22 @@ export interface components {
             /** Intro */
             intro: string;
             /**
+             * Match Label
+             * @description 추천 탭 — 적합도를 말로 ('잘 맞아요' · '비슷한 점이 많아요'). 점수는 안 보냄
+             */
+            match_label?: string | null;
+            /**
              * My Rating
              * @description 내가 남긴 추천 평가. 상대에게는 보이지 않는다
              */
             my_rating: ("like" | "neutral" | "dislike") | null;
             /** Name */
             name: string;
+            /**
+             * Reasons
+             * @description 추천 탭 — 추천 이유 최대 3개 (공통 취미 제외). 예: '둘 다 평일 오전이 편해요'
+             */
+            reasons?: string[];
             /** Region Name */
             region_name: string;
             /**
@@ -1849,6 +1909,70 @@ export interface components {
              */
             notified: components["schemas"]["SosNotified"][];
         };
+        /**
+         * SurveyAnswers
+         * @description Q1 interests(가입 '좋아하는 것'과 같은 코드) · Q2~Q8
+         */
+        SurveyAnswers: {
+            /** Frequency */
+            frequency: string;
+            /** Interests */
+            interests: string[];
+            /** Places */
+            places: string[];
+            /** Purpose */
+            purpose: string;
+            /** Talk Style */
+            talk_style: string;
+            /** Times */
+            times: string[];
+            /** Traits */
+            traits: string[];
+            /** Want */
+            want: string;
+        };
+        /** SurveyOption */
+        SurveyOption: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+        };
+        /** SurveyOut */
+        SurveyOut: {
+            /** @description 아직 안 했으면 null */
+            answers: components["schemas"]["SurveyAnswers"] | null;
+            /** My Interests */
+            my_interests: string[];
+            /** Questions */
+            questions: components["schemas"]["SurveyQuestion"][];
+        };
+        /** SurveyQuestion */
+        SurveyQuestion: {
+            /** Hint */
+            hint: string;
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "interests" | "purpose" | "places" | "times" | "frequency" | "talk_style" | "want" | "traits";
+            /**
+             * Max
+             * @description 1이면 하나만 고른다
+             */
+            max: number;
+            /** Min */
+            min: number;
+            /** Options */
+            options: components["schemas"]["SurveyOption"][];
+            /**
+             * Step
+             * @description 묶음 이름 — '나의 관심사' · '나의 생활 방식' · '나의 관계 성향'
+             */
+            step: string;
+            /** Text */
+            text: string;
+        };
         /** TextMessageCreate */
         TextMessageCreate: {
             /** Text */
@@ -2008,6 +2132,24 @@ export interface components {
             capacity: number;
             /** Name */
             name: string;
+        };
+        /**
+         * Who5StatusOut
+         * @description WHO-5 웰빙 지수 — 가입할 때 처음, 그 뒤 4주마다
+         */
+        Who5StatusOut: {
+            /**
+             * Due
+             * @description 지금 살펴볼 때인지 (한 번도 안 했거나 4주가 지남)
+             */
+            due: boolean;
+            /** @description 마지막 결과 (한 번도 안 했으면 null) */
+            last: components["schemas"]["AssessmentResultOut"] | null;
+            /**
+             * Next Due At
+             * @description 다음에 살펴볼 날 (안 했으면 null)
+             */
+            next_due_at: string | null;
         };
         /** WithdrawIn */
         WithdrawIn: {
@@ -3067,6 +3209,59 @@ export interface operations {
             };
         };
     };
+    survey_api_v1_friends_survey_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyOut"];
+                };
+            };
+        };
+    };
+    save_survey_api_v1_friends_survey_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SurveyAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_v1_health_get: {
         parameters: {
             query?: never;
@@ -3357,6 +3552,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    who5_status_api_v1_me_who5_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Who5StatusOut"];
                 };
             };
         };

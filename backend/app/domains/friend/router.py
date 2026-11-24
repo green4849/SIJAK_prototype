@@ -6,7 +6,14 @@ from fastapi import APIRouter, Query
 from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import CurrentUser
 from app.domains.friend.deps import FriendServiceDep
-from app.domains.friend.schemas import FriendCard, FriendRequestCreate, RatingCreate, RatingOut
+from app.domains.friend.schemas import (
+    FriendCard,
+    FriendRequestCreate,
+    RatingCreate,
+    RatingOut,
+    SurveyAnswers,
+    SurveyOut,
+)
 from app.domains.friend.service import Tab
 
 router = APIRouter(prefix="/friends", tags=["friend"])
@@ -20,6 +27,19 @@ async def recommendations(
     me: CurrentUser, service: FriendServiceDep, tab: Annotated[Tab, Query()] = "recommended"
 ) -> list[FriendCard]:
     return [FriendCard.of(c) for c in await service.recommend(me, tab)]
+
+
+@router.get("/survey", response_model=SurveyOut)
+async def survey(me: CurrentUser, service: FriendServiceDep) -> SurveyOut:
+    """성향조사 문항과 내 답 (안 했으면 answers=null)"""
+    return SurveyOut.of([i.category for i in me.interests], await service.survey(me))
+
+
+@router.put("/survey", response_model=SurveyOut)
+async def save_survey(body: SurveyAnswers, me: CurrentUser, service: FriendServiceDep) -> SurveyOut:
+    """성향조사 저장 — Q1은 내 '좋아하는 것'도 함께 바꾼다"""
+    saved = await service.save_survey(me, body.interests, body.to_answers())
+    return SurveyOut.of([i.category for i in me.interests], saved)
 
 
 @router.put("/recommendations/{user_id}/rating", response_model=RatingOut)

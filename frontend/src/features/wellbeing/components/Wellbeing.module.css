@@ -279,3 +279,228 @@
 .card[data-mood='crisis'] {
   border: 2px solid var(--color-danger);
 }
+
+/* ---- WHO-5 마음 건강 살펴보기 ---- */
+.introTitle {
+  font-size: var(--text-title);
+  line-height: var(--leading-title);
+}
+
+/* 0~5 여섯 단계 — 숫자 동그라미 + 말, 고른 것은 색 + ✓ + aria-checked */
+.scale {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-button);
+  text-align: left;
+  cursor: pointer;
+}
+
+.scale[data-selected='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: var(--weight-semibold);
+}
+
+.scaleNum {
+  flex: none;
+  width: 1.8em;
+  height: 1.8em;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.scale[data-selected='true'] .scaleNum {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.scaleLabel {
+  flex: 1;
+}
+
+.scaleCheck {
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-1);
+}
+
+/* 이전 결과 · 이번 결과 */
+.compare {
+  margin: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--space-1);
+}
+
+.compareBox {
+  padding: var(--space-2) var(--space-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-tight);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.compareBox dt {
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+.compareBox dd {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: var(--weight-bold);
+}
+
+.compareBox[data-current='true'] {
+  border: 2px solid var(--color-primary);
+}
+
+.compareBox[data-current='true'] dd {
+  color: var(--color-primary);
+}
+
+:root[data-contrast='high'] .compareBox {
+  border: 2px solid var(--color-border);
+}
+
+.change {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.change[data-dir='up'] {
+  color: var(--color-primary);
+}
+
+.change[data-dir='down'] {
+  color: var(--color-danger);
+}
+
+.change[data-dir='first'] {
+  font-size: inherit;
+  font-weight: inherit;
+  color: var(--color-text-muted);
+}
+
+.result[data-level='low'] {
+  background: var(--color-card-sky);
+}
+
+/* 점수 선 그래프 — 선은 SVG, 점·숫자는 글자 크기를 따르도록 HTML */
+.chart {
+  position: relative;
+  height: 150px;
+  margin: var(--space-3) 0 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.chartLine {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chartLine polyline {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 -7px -7px;
+  border: 3px solid var(--color-primary);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.dot[data-current='true'] {
+  background: var(--color-primary);
+}
+
+.dotValue {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.chartDates li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: var(--leading-title);
+}
+
+.chartDates {
+  margin: var(--gap-tight) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  text-align: center;
+}
+
+.records {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.record {
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+:root[data-contrast='high'] .record {
+  border: 2px solid var(--color-border);
+}
+
+.recordDate {
+  color: var(--color-text-muted);
+}
+
+.recordScore {
+  font-weight: var(--weight-bold);
+}

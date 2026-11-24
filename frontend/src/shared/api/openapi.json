@@ -247,7 +247,8 @@
           "kind": {
             "enum": [
               "phq9",
-              "gad7"
+              "gad7",
+              "who5"
             ],
             "title": "Kind",
             "type": "string"
@@ -289,7 +290,7 @@
       "AssessmentIn": {
         "properties": {
           "answers": {
-            "description": "문항 순서대로 0~3",
+            "description": "문항 순서대로 0~3 (WHO-5는 0~5)",
             "items": {
               "type": "integer"
             },
@@ -300,7 +301,8 @@
           "kind": {
             "enum": [
               "phq9",
-              "gad7"
+              "gad7",
+              "who5"
             ],
             "title": "Kind",
             "type": "string"
@@ -361,7 +363,7 @@
             "type": "string"
           },
           "crisis": {
-            "description": "PHQ-9 9번(죽음·자해 생각)에 '있음' → 상담 전화 안내",
+            "description": "상담 전화 안내 — PHQ-9 9번(죽음·자해 생각)에 '있음', 또는 WHO-5 28점 이하",
             "title": "Crisis",
             "type": "boolean"
           },
@@ -372,17 +374,22 @@
           "kind": {
             "enum": [
               "phq9",
-              "gad7"
+              "gad7",
+              "who5"
             ],
             "title": "Kind",
             "type": "string"
           },
           "level": {
+            "description": "PHQ-9·GAD-7: minimal~severe (높을수록 힘듦) / WHO-5: low·fair·good",
             "enum": [
               "minimal",
               "mild",
               "moderate",
-              "severe"
+              "severe",
+              "good",
+              "fair",
+              "low"
             ],
             "title": "Level",
             "type": "string"
@@ -394,6 +401,18 @@
           "max_score": {
             "title": "Max Score",
             "type": "integer"
+          },
+          "previous_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "같은 점검의 바로 전 점수 (처음이면 null)",
+            "title": "Previous Score"
           },
           "score": {
             "title": "Score",
@@ -692,6 +711,18 @@
             "title": "Intro",
             "type": "string"
           },
+          "match_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "추천 탭 — 적합도를 말로 ('잘 맞아요' · '비슷한 점이 많아요'). 점수는 안 보냄",
+            "title": "Match Label"
+          },
           "my_rating": {
             "anyOf": [
               {
@@ -712,6 +743,14 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "reasons": {
+            "description": "추천 탭 — 추천 이유 최대 3개 (공통 취미 제외). 예: '둘 다 평일 오전이 편해요'",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
           },
           "region_name": {
             "title": "Region Name",
@@ -1895,6 +1934,187 @@
         "title": "SosOut",
         "type": "object"
       },
+      "SurveyAnswers": {
+        "description": "Q1 interests(가입 '좋아하는 것'과 같은 코드) · Q2~Q8",
+        "properties": {
+          "frequency": {
+            "maxLength": 20,
+            "title": "Frequency",
+            "type": "string"
+          },
+          "interests": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Interests",
+            "type": "array"
+          },
+          "places": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Places",
+            "type": "array"
+          },
+          "purpose": {
+            "maxLength": 20,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "talk_style": {
+            "maxLength": 20,
+            "title": "Talk Style",
+            "type": "string"
+          },
+          "times": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Times",
+            "type": "array"
+          },
+          "traits": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Traits",
+            "type": "array"
+          },
+          "want": {
+            "maxLength": 20,
+            "title": "Want",
+            "type": "string"
+          }
+        },
+        "required": [
+          "interests",
+          "purpose",
+          "places",
+          "times",
+          "frequency",
+          "talk_style",
+          "want",
+          "traits"
+        ],
+        "title": "SurveyAnswers",
+        "type": "object"
+      },
+      "SurveyOption": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label"
+        ],
+        "title": "SurveyOption",
+        "type": "object"
+      },
+      "SurveyOut": {
+        "properties": {
+          "answers": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SurveyAnswers"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "아직 안 했으면 null"
+          },
+          "my_interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "My Interests",
+            "type": "array"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/SurveyQuestion"
+            },
+            "title": "Questions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "questions",
+          "answers",
+          "my_interests"
+        ],
+        "title": "SurveyOut",
+        "type": "object"
+      },
+      "SurveyQuestion": {
+        "properties": {
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "key": {
+            "enum": [
+              "interests",
+              "purpose",
+              "places",
+              "times",
+              "frequency",
+              "talk_style",
+              "want",
+              "traits"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "max": {
+            "description": "1이면 하나만 고른다",
+            "title": "Max",
+            "type": "integer"
+          },
+          "min": {
+            "title": "Min",
+            "type": "integer"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/SurveyOption"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "step": {
+            "description": "묶음 이름 — '나의 관심사' · '나의 생활 방식' · '나의 관계 성향'",
+            "title": "Step",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "step",
+          "text",
+          "hint",
+          "min",
+          "max",
+          "options"
+        ],
+        "title": "SurveyQuestion",
+        "type": "object"
+      },
       "TextMessageCreate": {
         "properties": {
           "text": {
@@ -2241,6 +2461,47 @@
           "available_text"
         ],
         "title": "WelfareRoomOut",
+        "type": "object"
+      },
+      "Who5StatusOut": {
+        "description": "WHO-5 웰빙 지수 — 가입할 때 처음, 그 뒤 4주마다",
+        "properties": {
+          "due": {
+            "description": "지금 살펴볼 때인지 (한 번도 안 했거나 4주가 지남)",
+            "title": "Due",
+            "type": "boolean"
+          },
+          "last": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssessmentResultOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "마지막 결과 (한 번도 안 했으면 null)"
+          },
+          "next_due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "다음에 살펴볼 날 (안 했으면 null)",
+            "title": "Next Due At"
+          }
+        },
+        "required": [
+          "last",
+          "next_due_at",
+          "due"
+        ],
+        "title": "Who5StatusOut",
         "type": "object"
       },
       "WithdrawIn": {
@@ -3879,6 +4140,78 @@
         ]
       }
     },
+    "/api/v1/friends/survey": {
+      "get": {
+        "description": "성향조사 문항과 내 답 (안 했으면 answers=null)",
+        "operationId": "survey_api_v1_friends_survey_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Survey",
+        "tags": [
+          "friend"
+        ]
+      },
+      "put": {
+        "description": "성향조사 저장 — Q1은 내 '좋아하는 것'도 함께 바꾼다",
+        "operationId": "save_survey_api_v1_friends_survey_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveyAnswers"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Survey",
+        "tags": [
+          "friend"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "health_api_v1_health_get",
@@ -4279,6 +4612,33 @@
           }
         ],
         "summary": "Assessment Form",
+        "tags": [
+          "wellbeing"
+        ]
+      }
+    },
+    "/api/v1/me/who5": {
+      "get": {
+        "description": "WHO-5를 할 때인지 — 4주가 지났으면 알림함에도 한 번 알린다 (홈에서 부른다)",
+        "operationId": "who5_status_api_v1_me_who5_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Who5StatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Who5 Status",
         "tags": [
           "wellbeing"
         ]

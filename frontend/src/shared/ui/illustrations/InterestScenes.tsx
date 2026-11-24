@@ -1,5 +1,5 @@
 /**
- * 좋아하는 활동 일러스트 (A24) — 가입 '좋아하는 것' 둥근 칸에 들어가는 장면 13개.
+ * 좋아하는 활동 일러스트 (A24) — 가입 '좋아하는 것'·성향조사 Q1 둥근 칸에 들어가는 장면 10개.
  * A19 그림체 그대로: 갈색 선 + 연한 면, 웃는 어르신(SeniorFigure)이 그 활동을 하고 있는 모습.
  * 100×100 좌표, 둥글게 잘려도 핵심이 가운데 지름 80 안에 오도록 그렸다.
  * 모두 장식이라 화면 낭독기에서는 건너뛴다 (이름은 버튼 글자로 읽힌다).
@@ -68,7 +68,7 @@ function Note({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   )
 }
 
-/* ---------------- 13개 장면 ---------------- */
+/* ---------------- 10개 장면 (2026-11-24 성향조사 Q1 목록) ---------------- */
 
 /** 산책·등산 — 산을 배경으로 지팡이 든 할아버지 */
 function Walking() {
@@ -88,26 +88,7 @@ function Walking() {
   )
 }
 
-/** 노래·음악 — 마이크 들고 노래하는 할머니, 음표 */
-function Music() {
-  const look = P('F', 0, false, 'pink')
-  return (
-    <Frame bg="var(--color-card-pink)">
-      <Note x={14} y={20} s={1.1} />
-      <Note x={76} y={14} s={0.9} />
-      <Note x={84} y={40} s={0.75} />
-      <Person look={look} x={16} y={34} />
-      {/* 마이크 — 입 앞 아래쪽, 얼굴을 가리지 않게 */}
-      <g transform="rotate(-35 64 84)">
-        <rect x="61.5" y="82" width="5" height="17" rx="2.5" fill={LINE} />
-        <circle cx="64" cy="79" r="5.4" fill="var(--illust-hair-shade)" {...line} />
-      </g>
-      <Arm d="M80 100 Q78 94 72 90" cloth="pink" hand={[70, 89]} />
-    </Frame>
-  )
-}
-
-/** 요리 — 김 나는 뚝배기를 든 할머니 */
+/** 요리·맛집 탐방 — 김 나는 뚝배기를 든 할머니 */
 function Cooking() {
   const look = P('F', 1, true, 'yellow')
   return (
@@ -130,7 +111,7 @@ function Cooking() {
   )
 }
 
-/** 텃밭·꽃 가꾸기 — 밀짚모자 할머니와 새싹·꽃 */
+/** 원예·식물 가꾸기 — 밀짚모자 할머니와 새싹·꽃 */
 function Gardening() {
   const look = P('F', 2, false, 'green')
   return (
@@ -157,37 +138,6 @@ function Gardening() {
   )
 }
 
-/** 바둑·장기 — 바둑판 앞에서 돌을 놓는 할아버지 */
-function Baduk() {
-  const look = P('M', 2, true, 'sky')
-  const grid = [0, 1, 2, 3, 4]
-  return (
-    <Frame bg="var(--color-card-beige)">
-      <Person look={look} x={18} y={14} s={0.95} />
-      {/* 바둑판 (앞으로 기울어진 사다리꼴) */}
-      <path d="M22 66 H78 L90 96 H10Z" fill="#e2b56f" {...line} />
-      <path d="M10 96 H90 V100 H10Z" fill="#b98a4a" {...line} />
-      <g stroke={LINE} strokeWidth="0.9" opacity="0.7">
-        {grid.map((i) => {
-          const t = (i + 0.5) / 5
-          return <path key={`h${i}`} d={`M${22 - 12 * t} ${66 + 30 * t} H${78 + 12 * t}`} />
-        })}
-        {grid.map((i) => {
-          const x = 27 + i * 11.5
-          return <path key={`v${i}`} d={`M${x} 66 L${50 + (x - 50) * 1.42} 96`} />
-        })}
-      </g>
-      <circle cx="38" cy="78" r="3.6" fill="#2b2b2b" />
-      <circle cx="60" cy="72" r="3.2" fill="#fff" {...thin} />
-      <circle cx="50" cy="86" r="4" fill="#fff" {...thin} />
-      <circle cx="68" cy="88" r="4" fill="#2b2b2b" />
-      {/* 돌을 집은 손 */}
-      <Arm d="M70 64 Q66 66 62 76" cloth="sky" hand={[62, 78]} />
-      <circle cx="62" cy="82" r="3" fill="#2b2b2b" />
-    </Frame>
-  )
-}
-
 /** 여행 — 챙 넓은 모자를 쓰고 호수·산을 바라보는 할머니 */
 function Travel() {
   const look = P('F', 1, false, 'sky')
@@ -207,7 +157,7 @@ function Travel() {
   )
 }
 
-/** 건강·운동 — 머리띠 하고 아령 드는 할아버지 */
+/** 운동·건강관리 — 머리띠 하고 아령 드는 할아버지 */
 function Health() {
   const look = P('M', 1, false, 'green')
   return (
@@ -230,28 +180,7 @@ function Health() {
   )
 }
 
-/** TV·드라마 — 리모컨 든 할머니와 TV */
-function Tv() {
-  const look = P('F', 0, true, 'yellow')
-  return (
-    <Frame bg="var(--color-card-sky)">
-      {/* TV */}
-      <g>
-        <path d="M58 70 l-5 8 M70 70 l5 8" {...line} />
-        <rect x="46" y="38" width="38" height="32" rx="5" fill="#5a4632" {...line} />
-        <rect x="50" y="42" width="30" height="24" rx="3" fill="var(--illust-sky)" />
-        <path d="M50 60 Q60 54 66 58 Q72 52 80 56 V66 H50Z" fill="var(--illust-hill)" />
-        <Heart x={65} y={50} s={1.1} />
-      </g>
-      <Person look={look} x={-4} y={40} />
-      {/* 리모컨 */}
-      <Arm d="M36 100 Q40 88 44 84" cloth="yellow" hand={[46, 82]} />
-      <rect x="44" y="74" width="5" height="11" rx="2" fill="#3d3d3d" transform="rotate(20 46 80)" />
-    </Frame>
-  )
-}
-
-/** 책·신문 — 안경 쓰고 책 읽는 할아버지 */
+/** 독서·문화생활 — 안경 쓰고 책 읽는 할아버지 */
 function Reading() {
   const look = P('M', 0, true, 'sky')
   return (
@@ -272,77 +201,73 @@ function Reading() {
   )
 }
 
-/** 뜨개질·만들기 — 털실과 바늘을 든 할머니 */
-function Crafts() {
-  const look = P('F', 2, true, 'pink')
+/** 영화·공연 — 큰 화면 앞에서 팝콘을 든 할머니, 음표 */
+function Movies() {
+  const look = P('F', 0, true, 'pink')
   return (
     <Frame bg="var(--color-card-pink)">
-      <Person look={look} x={18} y={24} />
-      {/* 뜨던 목도리 */}
-      <path d="M30 74 H66 V88 H30Z" fill="var(--illust-cloth-green)" {...line} />
-      <g fill="none" stroke={LINE} strokeWidth="0.9" opacity="0.55">
-        <path d="M34 78 l3 3 l3 -3 l3 3 l3 -3 l3 3 l3 -3 l3 3 l3 -3 l3 3" />
-        <path d="M34 84 l3 3 l3 -3 l3 3 l3 -3 l3 3 l3 -3 l3 3 l3 -3 l3 3" />
+      {/* 막 걷힌 무대 화면 */}
+      <rect x="40" y="10" width="56" height="40" rx="3" fill="var(--illust-sky)" {...line} />
+      <path d="M40 10 Q48 22 44 50 H40Z M96 10 Q88 22 92 50 H96Z" fill="var(--illust-heart)" {...thin} />
+      <path d="M50 44 Q60 34 68 40 Q76 30 86 38 V48 H50Z" fill="var(--illust-hill)" />
+      <Note x={60} y={18} s={0.8} />
+      <Note x={76} y={22} s={0.65} />
+      <Person look={look} x={-6} y={38} />
+      {/* 팝콘 */}
+      <path d="M44 80 L48 100 H62 L66 80Z" fill="#fff" {...line} />
+      <path d="M48.5 80 L51 100 M55 80 V100 M61.5 80 L59 100" stroke="var(--illust-heart)" strokeWidth="2" />
+      <g fill="var(--illust-cloth-yellow)" {...thin}>
+        <circle cx="48" cy="78" r="3.6" />
+        <circle cx="55" cy="76" r="4" />
+        <circle cx="62" cy="78" r="3.6" />
       </g>
-      {/* 바늘 */}
-      <path d="M26 66 L44 80 M70 66 L52 80" {...line} stroke="#8a5a3c" strokeWidth="2.2" />
-      <circle cx="26" cy="66" r="2" fill="#8a5a3c" />
-      <circle cx="70" cy="66" r="2" fill="#8a5a3c" />
-      <circle cx="28" cy="72" r="3.8" fill={SKIN} {...line} />
-      <circle cx="68" cy="72" r="3.8" fill={SKIN} {...line} />
-      {/* 털실 뭉치 */}
-      <circle cx="80" cy="88" r="11" fill="var(--illust-cloth-yellow)" {...line} />
-      <g fill="none" stroke={LINE} strokeWidth="1" opacity="0.6">
-        <path d="M71 84 Q80 80 89 86" />
-        <path d="M70 90 Q80 86 90 92" />
-        <path d="M76 78 Q72 88 78 98" />
-      </g>
-      <path d="M69 88 Q60 92 66 88" fill="none" stroke="var(--illust-cloth-yellow)" strokeWidth="1.6" />
+      <Arm d="M34 100 Q38 92 44 88" cloth="pink" hand={[45, 87]} />
     </Frame>
   )
 }
 
-/** 종교 활동 — 두 손 모은 할머니와 은은한 빛 (특정 종교 상징 없이) */
-function Faith() {
-  const look = P('F', 1, false, 'yellow')
+/** 경제·재테크 — 돼지 저금통에 동전을 넣는 할아버지 */
+function Finance() {
+  const look = P('M', 0, true, 'sky')
   return (
     <Frame bg="var(--color-card-yellow)">
-      <circle cx="50" cy="52" r="34" fill="#fff" opacity="0.55" />
-      <circle cx="50" cy="52" r="24" fill="#fff" opacity="0.5" />
-      <g stroke="var(--illust-sun)" strokeWidth="2.4" strokeLinecap="round">
-        <path d="M50 8 v7 M20 20 l5 5 M80 20 l-5 5 M8 48 h7 M85 48 h7" />
+      <Person look={look} x={-6} y={22} />
+      {/* 돼지 저금통 */}
+      <g transform={at(70, 80)}>
+        <ellipse cx="0" cy="0" rx="20" ry="14" fill="var(--illust-cloth-pink)" {...line} />
+        <path d="M-8 -12 l-3 -7 l8 4" fill="var(--illust-cloth-pink)" {...thin} />
+        <ellipse cx="19" cy="-1" rx="4" ry="5" fill="var(--illust-blush)" {...thin} />
+        <circle cx="10" cy="-5" r="1.3" fill={LINE} />
+        <path d="M-4 -13 h8" stroke={LINE} strokeWidth="2" strokeLinecap="round" />
+        <path d="M-12 12 v5 M10 12 v5" stroke={LINE} strokeWidth="3" strokeLinecap="round" />
       </g>
-      <Person look={look} x={18} y={30} />
-      {/* 모은 두 손 */}
-      <Arm d="M28 100 Q30 88 44 84" cloth="yellow" />
-      <Arm d="M72 100 Q70 88 56 84" cloth="yellow" />
-      <path d="M50 72 Q44 76 45 86 Q48 90 50 89 Q52 90 55 86 Q56 76 50 72Z" fill={SKIN} {...line} />
-      <path d="M50 74 V88" {...thin} />
+      {/* 동전 */}
+      <g fill="var(--illust-sun)" {...thin}>
+        <ellipse cx="70" cy="56" rx="5" ry="5" />
+        <ellipse cx="84" cy="40" rx="4" ry="4" />
+      </g>
+      <path d="M68.5 56 h3 M82.8 40 h2.4" stroke={LINE} strokeWidth="1.2" strokeLinecap="round" />
+      <Arm d="M38 100 Q44 80 60 64" cloth="sky" hand={[62, 62]} />
     </Frame>
   )
 }
 
-/** 옛날이야기 — 오래된 흑백 사진을 들고 이야기하는 할아버지 */
-function Memories() {
-  const look = P('M', 1, true, 'yellow')
+/** 봉사활동 — 조끼를 입고 하트 상자를 든 할머니 */
+function Volunteer() {
+  const look = P('F', 1, false, 'green')
   return (
-    <Frame bg="var(--color-card-beige)">
-      <Person look={look} x={-2} y={24} />
-      {/* 사진 액자 */}
-      <g transform="rotate(8 70 66)">
-        <rect x="52" y="46" width="36" height="40" rx="2" fill="#fff" {...line} />
-        <rect x="56" y="50" width="28" height="26" fill="#d8cdb8" />
-        {/* 사진 속 두 사람 (세피아) */}
-        <g fill="#a08a6c">
-          <circle cx="64" cy="60" r="4" />
-          <path d="M57 76 Q58 66 64 66 Q70 66 71 76Z" />
-          <circle cx="76" cy="61" r="3.6" />
-          <path d="M70 76 Q71 67 76 67 Q81 67 82 76Z" />
-        </g>
-      </g>
-      <Arm d="M40 100 Q44 88 52 82" cloth="yellow" hand={[54, 80]} />
-      <Heart x={84} y={30} s={1.1} />
-      <Heart x={92} y={20} s={0.7} />
+    <Frame bg="var(--color-card-mint)">
+      <Person look={look} x={18} y={18} />
+      {/* 봉사 조끼 줄 */}
+      <path d="M36 96 L40 78 M64 96 L60 78" stroke="var(--illust-cloth-yellow)" strokeWidth="4" strokeLinecap="round" />
+      {/* 나눔 상자 */}
+      <rect x="30" y="74" width="40" height="24" rx="2" fill="#d9b38c" {...line} />
+      <path d="M30 80 H70" {...thin} />
+      <Heart x={50} y={88} s={1.4} />
+      <circle cx="28" cy="80" r="3.8" fill={SKIN} {...line} />
+      <circle cx="72" cy="80" r="3.8" fill={SKIN} {...line} />
+      <Heart x={84} y={26} s={1} />
+      <Heart x={14} y={34} s={0.8} />
     </Frame>
   )
 }
@@ -374,18 +299,15 @@ function Fishing() {
 
 const SCENES: Record<string, () => ReactNode> = {
   walking: Walking,
-  music: Music,
+  movies: Movies,
   cooking: Cooking,
-  gardening: Gardening,
-  baduk: Baduk,
+  fishing: Fishing,
+  reading: Reading,
+  finance: Finance,
   travel: Travel,
   health: Health,
-  tv: Tv,
-  reading: Reading,
-  crafts: Crafts,
-  faith: Faith,
-  memories: Memories,
-  fishing: Fishing,
+  gardening: Gardening,
+  volunteer: Volunteer,
 }
 
 /** 관심사 코드에 맞는 장면 — 모르는 코드면 아무것도 그리지 않는다 (칸의 연한 바탕만 보임) */

@@ -1,4 +1,4 @@
-"""친구 찾기·신청 (④). 사용자 정보는 AuthService(공개 메서드)로만 얻는다."""
+"""친구 찾기·신청 (④), 성향조사와 추천 적합도. 사용자 정보는 AuthService(공개 메서드)로만 얻는다."""
 
 import uuid
 from dataclasses import dataclass
@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING, Literal
 from app.core.errors import ConflictError, DomainError, ForbiddenError, NotFoundError
 from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
-from app.domains.friend.nearby import find_nearby
+from app.domains.friend.nearby import find_nearby, within_reach
 from app.domains.friend.repository import FriendRepository
+from app.domains.friend.survey import Answers, Match, match, validate
 from app.domains.notification.service import NotificationService
 from app.domains.point.service import PointService
 from app.domains.risk.service import RiskService
@@ -20,11 +21,9 @@ Relation = Literal["none", "sent", "received", "friends"]
 Tab = Literal["recommended", "nearby"]
 Rating = Literal["like", "neutral", "dislike"]
 MAX_RESULTS = 30
-# 평가 반영 (C12): 추천 탭에서 '만나보고 싶어요' 먼저, 평가 안 한 사람, '그저 그래요' 순.
+# 평가 반영 (C12): 추천 탭에서 '이런 분 더 보여 주세요' 먼저, 평가 안 한 사람, '그저 그래요' 순.
 # '잘 안 맞아요'는 추천 탭에서 다시 보이지 않는다 (같은 동네 탭은 거리 목록이라 그대로)
 _RATING_ORDER = {"like": 0, None: 1, "neutral": 2}
-# '만나보고 싶어요'를 받은 사람들의 관심사를 가진 사람은 조금 더 앞으로
-_LIKED_INTEREST_WEIGHT = 0.5
 
 
 @dataclass(frozen=True)
@@ -35,6 +34,9 @@ class Candidate:
     common_interests: list[str]
     distance_km: float | None = None
     my_rating: Rating | None = None
+    #: 추천 탭만 — 적합도를 말로 ('잘 맞아요') + 이유. 점수 숫자는 순서에만 쓴다
+    match_label: str | None = None
+    reasons: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,11 @@ class RatingResult:
 
 class CannotRequestSelfError(DomainError):
     code = "cannot_request_self"
+
+
+class InvalidSurveyError(DomainError):
+    status_code = 422
+    code = "validation_error"
 
 
 class FriendService:
@@ -80,32 +87,69 @@ class FriendService:
             # 거리가 있으면 가까운 순, 없으면 최근 접속 순(조회 순서 유지)
             pairs.sort(key=lambda p: (p[1] is None, p[1] or 0))
         else:
-            disliked = {uid for uid, r in ratings.items() if r == "dislike"}
-            pool = await self.auth.list_active_users(exclude_ids=exclude | disliked)
-            liked_interests = {
-                i.category for u in pool if ratings.get(u.id) == "like" for i in u.interests
-            }
-
-            def score(u: "User") -> float:
-                theirs = {i.category for i in u.interests}
-                return len(my_interests & theirs) + _LIKED_INTEREST_WEIGHT * len(
-                    liked_interests & theirs
-                )
-
-            pairs = [(u, None) for u in pool]
-            # 평가 → 관심사 점수 높은 순 → 같은 지역 우선
-            pairs.sort(
-                key=lambda p: (
-                    _RATING_ORDER[ratings.get(p[0].id)],
-                    -score(p[0]),
-                    p[0].region_code != me.region_code,
-                )
-            )
+            return await self._recommend_by_match(me, exclude, relations, ratings)
 
         return [
             self._candidate(u, my_interests, relations, distance, ratings.get(u.id))
             for u, distance in pairs[:MAX_RESULTS]
         ]
+
+    async def _recommend_by_match(
+        self,
+        me: "User",
+        exclude: set[uuid.UUID],
+        relations: dict[uuid.UUID, tuple[Relation, uuid.UUID]],
+        ratings: dict[uuid.UUID, str],
+    ) -> list[Candidate]:
+        """추천 친구 탭 — 성향조사 알고리즘 (friend/survey.py).
+
+        1단계 5km 안(위치 없으면 같은 시·도) → 2~4단계 적합도 → 5단계 높은 순.
+        평가는 지금처럼: '잘 안 맞아요'는 빼고, '이런 분 더 보여 주세요' 한 분은 앞으로.
+        같은 점수면 '더 보여 주세요' 한 분들의 관심사와 겹치는 분, 가까운 분 먼저.
+        """
+        disliked = {uid for uid, r in ratings.items() if r == "dislike"}
+        pool = await self.auth.list_active_users(exclude_ids=exclude | disliked)
+        reach = within_reach(me, pool)
+        surveys = await self.repo.surveys_of({me.id} | {n.user.id for n in reach})
+        mine = surveys.get(me.id)
+        my_list = [i.category for i in me.interests]
+        liked_interests = {
+            i.category for n in reach if ratings.get(n.user.id) == "like" for i in n.user.interests
+        }
+
+        scored: list[tuple[Match, int, User, float | None]] = []
+        for n in reach:
+            theirs = [i.category for i in n.user.interests]
+            m = match(my_list, theirs, mine, surveys.get(n.user.id))
+            scored.append((m, len(liked_interests & set(theirs)), n.user, n.distance_km))
+        scored.sort(
+            key=lambda s: (
+                _RATING_ORDER[ratings.get(s[2].id)],
+                -s[0].score,
+                -s[1],
+                s[3] if s[3] is not None else float("inf"),
+            )
+        )
+        my_interests = set(my_list)
+        return [
+            self._candidate(u, my_interests, relations, km, ratings.get(u.id), m)
+            for m, _, u, km in scored[:MAX_RESULTS]
+        ]
+
+    # ---------- 성향조사 ----------
+
+    async def survey(self, me: "User") -> Answers | None:
+        return (await self.repo.surveys_of({me.id})).get(me.id)
+
+    async def save_survey(self, me: "User", interests: list[str], answers: Answers) -> Answers:
+        """Q1은 프로필 관심사로(가입 '좋아하는 것'과 같은 목록), Q2~Q8은 성향조사로 저장"""
+        problem = validate(interests, answers)
+        if problem:
+            raise InvalidSurveyError(problem)
+        await self.auth.update_profile(me, interests=list(dict.fromkeys(interests)))
+        await self.repo.save_survey(me.id, answers)
+        await self.repo.commit()
+        return answers
 
     # ---------- 평가 (C12) ----------
 
@@ -225,6 +269,7 @@ class FriendService:
         relations: dict[uuid.UUID, tuple[Relation, uuid.UUID]],
         distance_km: float | None = None,
         my_rating: str | None = None,
+        m: Match | None = None,
     ) -> Candidate:
         rel, req_id = relations.get(u.id, ("none", None))
         theirs = [i.category for i in u.interests]
@@ -235,4 +280,6 @@ class FriendService:
             common_interests=[c for c in theirs if c in my_interests],
             distance_km=distance_km,
             my_rating=my_rating,  # type: ignore[arg-type]
+            match_label=m.label if m else None,
+            reasons=m.reasons if m else None,
         )

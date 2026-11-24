@@ -121,3 +121,75 @@ test('받은 신청 거절과 로그아웃은 한 번 묻는다 — 그만두면
   await expect(page).toHaveURL(/\/me$/)
   await expect(page.getByRole('button', { name: '로그아웃' })).toBeVisible()
 })
+
+test('성향조사: 추천 친구 탭 처음 → 시작 화면 → 8문항 → 잘 맞는 이웃과 이유', async ({ page }) => {
+  await startTour(page, { survey: true })
+  await page.getByRole('link', { name: '친구 찾기' }).click()
+  // 아직 안 했으니 시작 화면으로
+  await expect(page).toHaveURL(/\/friends\/survey$/)
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
+  await page.getByRole('button', { name: '시작하기' }).click()
+
+  // 1. 좋아하는 활동 — 가입 때 고른 것이 미리 골라져 있다
+  await expect(page.getByText('1 / 8')).toBeVisible()
+  await expect(page.getByRole('button', { name: '산책·등산' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: '다음' }).click()
+  // 2. 하고 싶은 일 — 고르기 전에는 넘어갈 수 없다
+  await expect(page.getByRole('button', { name: '골라 주세요' })).toBeDisabled()
+  await page.getByRole('radio', { name: '산책하거나 운동하기' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  // 3. 장소 — 2개까지
+  await page.getByRole('button', { name: '공원' }).click()
+  await page.getByRole('button', { name: '카페' }).click()
+  await page.getByRole('button', { name: '동네 식당' }).click()
+  await expect(page.getByRole('alert')).toContainText('2개까지 고를 수 있어요')
+  await page.getByRole('button', { name: '카페' }).click() // 빼기
+  await page.getByRole('button', { name: '다음' }).click()
+  // 4. 시간 — '시간 상관없음'은 다른 시간과 함께 고르지 않는다
+  await page.getByRole('button', { name: '시간 상관없음' }).click()
+  await page.getByRole('button', { name: '평일 오전' }).click()
+  await expect(page.getByRole('button', { name: '시간 상관없음' })).toHaveAttribute('aria-pressed', 'false')
+  await page.getByRole('button', { name: '다음' }).click()
+  // 이전으로 가도 고른 답이 남아 있다
+  await page.getByRole('button', { name: '이전' }).click()
+  await expect(page.getByRole('button', { name: '평일 오전' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: '다음' }).click()
+  // 5~8
+  await page.getByRole('radio', { name: '일주일에 한 번' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: /상대방의 이야기를 주로 들어주는 편/ }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: '조용하고 차분한 친구' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await expect(page.getByText('8 / 8')).toBeVisible()
+  await page.getByRole('button', { name: '차분함' }).click()
+  await page.getByRole('button', { name: '계획적' }).click()
+  await page.getByRole('button', { name: '다 했어요' }).click()
+
+  await expect(page.getByRole('heading', { name: '성향조사를 마쳤어요!' })).toBeVisible()
+  await page.getByRole('link', { name: '추천 친구 만나보기' }).click()
+  await expect(page).toHaveURL(/\/friends$/)
+  // 윤기철님: 산책·평일 오전·공원·주 1회·차분 — 맨 위, 점수 대신 말과 이유
+  const first = page.getByRole('region', { name: '추천 친구 목록' }).getByRole('article').first()
+  await expect(first).toHaveAccessibleName('윤기철님')
+  await expect(first).toContainText('잘 맞아요')
+  await expect(first.getByRole('list', { name: '추천 이유' })).toContainText('둘 다 평일 오전이 편해요')
+  await expect(first).not.toContainText('점')
+  // 했으니 탭 위에는 고치러 가는 카드
+  await expect(page.getByRole('link', { name: '내 취향 수정하기' })).toBeVisible()
+  await page.getByRole('link', { name: '내 취향 수정하기' }).click()
+  await expect(page.getByText('1 / 8')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toHaveCount(0)
+})
+
+test('성향조사: 다음에 하기 → 목록으로, 다시 와도 시작 화면 없이 탭 위 카드로 권한다', async ({ page }) => {
+  await startTour(page, { survey: true })
+  await page.goto('/friends')
+  await page.getByRole('link', { name: '다음에 하기' }).click()
+  await expect(page).toHaveURL(/\/friends$/)
+  await expect(page.getByRole('link', { name: /나와 잘 맞는 친구 찾기/ })).toBeVisible()
+  await page.goto('/')
+  await page.goto('/friends')
+  await expect(page).toHaveURL(/\/friends$/)
+  await expect(page.getByRole('article').first()).toBeVisible()
+})

@@ -145,6 +145,17 @@ class NotificationService:
             f"risk:{message_id}",
         )
 
+    async def on_who5_due(self, user_id: uuid.UUID, last_id: int) -> bool:
+        """WHO-5 4주 재측정 — 지난 점검 하나에 한 번만. 새로 쌓였으면 True"""
+        return await self.repo.add(
+            user_id,
+            "wellbeing",
+            "마음 건강 살펴볼 때예요",
+            "지난 2주 동안의 기분을 질문 다섯 개로 살펴봐요",
+            "/me/wellbeing/check/who5",
+            f"who5_due:{last_id}",
+        )
+
     async def on_activity_applied(
         self, user_id: uuid.UUID, activity_id: uuid.UUID, title: str, schedule_text: str
     ) -> None:

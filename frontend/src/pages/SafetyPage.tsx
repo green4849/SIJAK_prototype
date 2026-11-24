@@ -4,6 +4,7 @@ import { ActionCard } from '@/shared/ui/ActionCard'
 import { ButtonLink } from '@/shared/ui/Button'
 import { TopBar } from '@/shared/ui/TopBar'
 import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
+import { assessment } from './routes'
 import styles from './SafetyPage.module.css'
 
 /**
@@ -49,7 +50,8 @@ export function SafetyPage() {
       </div>
 
       {afterSignup && (
-        <ButtonLink to="/" replace block large className={styles.cta}>
+        // 다음: 첫 마음 건강 살펴보기 (WHO-5, 가입할 때 처음 — 건너뛸 수 있음)
+        <ButtonLink to={assessment('who5')} state={{ afterSignup: true }} replace block large className={styles.cta}>
           알겠어요, 시작할게요
         </ButtonLink>
       )}

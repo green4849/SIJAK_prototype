@@ -1,4 +1,4 @@
-"""C11 사회적 관계 지수(데모 계산과 같은 공식) · 주간 기록 · 자가평가(PHQ-9·GAD-7)"""
+"""C11 사회적 관계 지수(데모 계산과 같은 공식) · 주간 기록 · 자가평가(PHQ-9·GAD-7·WHO-5)"""
 
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.domains.activity.models import Activity
-from app.domains.wellbeing.models import RelationIndexWeek
+from app.domains.wellbeing.models import RelationIndexWeek, SelfAssessment
 from app.domains.wellbeing.service import KST
 from tests.integration.helpers import signup_user
 
@@ -167,3 +167,106 @@ async def test_self_assessment_validation(client: AsyncClient) -> None:
         f"{API}/me/self-assessment", headers=hb, json={"kind": "gad7", "answers": [0] * 7}
     )
     assert (await client.get(f"{API}/me/self-assessment", headers=h)).json() == []
+
+
+async def test_who5_score_levels_and_previous(client: AsyncClient) -> None:
+    """WHO-5: 합 × 4 = 0~100 (높을수록 좋음), 구간 66~100 · 51~65 · 0~50, 28 이하 상담 안내"""
+    h, _ = await signup_user(client, "김영희")
+
+    form = (await client.get(f"{API}/me/self-assessment/who5", headers=h)).json()
+    assert form["kind"] == "who5" and form["title"] == "마음 건강 살펴보기"
+    assert len(form["questions"]) == 5
+    assert form["questions"][0]["text"] == "지난 2주간 나는 밝고 기분이 좋았다"
+    assert [o["value"] for o in form["options"]] == [0, 1, 2, 3, 4, 5]
+    assert [o["label"] for o in form["options"]] == [
+        "전혀 없음", "가끔", "절반 미만", "절반 이상", "대부분", "항상"
+    ]  # fmt: skip
+
+    async def submit(answers: list[int]) -> dict:
+        r = await client.post(
+            f"{API}/me/self-assessment", headers=h, json={"kind": "who5", "answers": answers}
+        )
+        assert r.status_code == 201, r.text
+        return r.json()
+
+    first = await submit([3, 3, 2, 3, 2])  # 13 × 4 = 52
+    assert first["score"] == 52 and first["max_score"] == 100
+    assert first["level"] == "fair" and first["crisis"] is False
+    assert first["previous_score"] is None
+
+    second = await submit([4, 3, 3, 3, 4])  # 17 × 4 = 68
+    assert second["score"] == 68 and second["level"] == "good"
+    assert second["previous_score"] == 52
+
+    # 다른 점검은 WHO-5 '지난번'에 끼지 않는다
+    await client.post(
+        f"{API}/me/self-assessment", headers=h, json={"kind": "phq9", "answers": [0] * 9}
+    )
+    third = await submit([1, 1, 1, 2, 2])  # 7 × 4 = 28
+    assert third["score"] == 28 and third["level"] == "low" and third["crisis"] is True
+    assert third["previous_score"] == 68
+    assert (await submit([2, 2, 2, 3, 4]))["score"] == 52  # 50 초과 → fair 경계 확인용
+    assert (await submit([2, 2, 2, 3, 3]))["level"] == "low"  # 48
+
+    hist = (await client.get(f"{API}/me/self-assessment", headers=h)).json()
+    who5 = [(x["score"], x["previous_score"]) for x in hist if x["kind"] == "who5"]
+    assert who5 == [(48, 52), (52, 28), (28, 68), (68, 52), (52, None)]
+    phq = next(x for x in hist if x["kind"] == "phq9")
+    assert phq["previous_score"] is None
+
+    # WHO-5는 0~5만, PHQ-9는 여전히 0~3만
+    r = await client.post(
+        f"{API}/me/self-assessment", headers=h, json={"kind": "who5", "answers": [6, 0, 0, 0, 0]}
+    )
+    assert r.status_code == 422
+    r = await client.post(
+        f"{API}/me/self-assessment", headers=h, json={"kind": "phq9", "answers": [4] + [0] * 8}
+    )
+    assert r.status_code == 422
+
+
+async def test_who5_due_every_four_weeks(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    h, _ = await signup_user(client, "김영희")
+
+    async def status() -> dict:
+        r = await client.get(f"{API}/me/who5", headers=h)
+        assert r.status_code == 200, r.text
+        return r.json()
+
+    async def who5_notices() -> list[dict]:
+        items = (await client.get(f"{API}/notifications", headers=h)).json()
+        return [n for n in items if n["title"] == "마음 건강 살펴볼 때예요"]
+
+    # 가입하고 아직 안 했으면 바로 할 때 — 알림은 쌓지 않는다 (홈 카드로 권함)
+    assert await status() == {"last": None, "next_due_at": None, "due": True}
+    assert await who5_notices() == []
+    assert (await client.get(f"{API}/me/who5")).status_code == 401
+
+    r = await client.post(
+        f"{API}/me/self-assessment", headers=h, json={"kind": "who5", "answers": [3] * 5}
+    )
+    st = await status()
+    assert st["due"] is False and st["last"]["score"] == 60
+    created = datetime.fromisoformat(r.json()["created_at"])
+    assert datetime.fromisoformat(st["next_due_at"]) == created + timedelta(days=28)
+
+    # 4주가 지나면 할 때 + 알림 한 번 (다시 불러도 한 번)
+    async with db_sessionmaker() as s:
+        a = await s.get(SelfAssessment, r.json()["id"])
+        assert a is not None
+        a.created_at = datetime.now(UTC) - timedelta(days=28, minutes=1)
+        await s.commit()
+    assert (await status())["due"] is True
+    await status()
+    notices = await who5_notices()
+    assert len(notices) == 1
+    assert notices[0]["link"] == "/me/wellbeing/check/who5"
+
+    # 다시 하면 다음 4주까지는 할 때가 아니다
+    await client.post(
+        f"{API}/me/self-assessment", headers=h, json={"kind": "who5", "answers": [4] * 5}
+    )
+    st = await status()
+    assert st["due"] is False and st["last"]["previous_score"] == 60

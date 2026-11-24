@@ -10,6 +10,8 @@ import { ChatOpenPage } from '@/pages/ChatOpenPage'
 import { ChatRoomPage } from '@/pages/ChatRoomPage'
 import { CompanionPage } from '@/pages/CompanionPage'
 import { AssessmentPage } from '@/pages/AssessmentPage'
+import { FriendSurveyPage } from '@/pages/FriendSurveyPage'
+import { Who5HistoryPage } from '@/pages/Who5HistoryPage'
 import { GuardiansPage } from '@/pages/GuardiansPage'
 import { SosPage } from '@/pages/SosPage'
 import { WellbeingPage } from '@/pages/WellbeingPage'
@@ -78,6 +80,7 @@ export function App() {
             <Route element={<TabLayout />}>
               <Route index element={<HomePage />} />
               <Route path="friends" element={<FriendsPage />} />
+              <Route path="friends/survey" element={<FriendSurveyPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="me" element={<MyPage />} />
             </Route>
@@ -99,6 +102,7 @@ export function App() {
               <Route path="companion" element={<CompanionPage />} />
               <Route path="me/wellbeing" element={<WellbeingPage />} />
               <Route path="me/wellbeing/check/:kind" element={<AssessmentPage />} />
+              <Route path="me/wellbeing/history" element={<Who5HistoryPage />} />
               <Route path="sos" element={<SosPage />} />
               <Route path="me/guardians" element={<GuardiansPage />} />
               <Route path="welfare" element={<WelfarePage />} />

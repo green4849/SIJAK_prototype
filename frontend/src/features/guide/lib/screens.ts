@@ -50,9 +50,9 @@ const DEMO_INFO = '시연이라 예시 정보예요. 가기 전에 전화로 확
 /** 위에서부터 먼저 맞는 화면 — 더 구체적인 주소를 위에 둔다 */
 const ORDER = [
   'welcome', 'phone', 'idcard', 'assist', 'login', 'signup',
-  'chat', 'chats', 'activity', 'activities', 'friends',
+  'chat', 'chats', 'activity', 'activities', 'survey', 'friends',
   'profile', 'settings', 'help', 'install', 'myfriends', 'blocks', 'myacts', 'points', 'notifyset',
-  'check', 'wellbeing', 'guardians', 'leave', 'me',
+  'check', 'mindlog', 'wellbeing', 'guardians', 'leave', 'me',
   'safety', 'companion', 'welfaredetail', 'welfare', 'braingame', 'brain', 'inbox', 'sos', 'admin', 'home', 'other',
 ] as const
 
@@ -189,6 +189,12 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     }),
     suggest: ['activity-apply', 'welfare', 'activity-mine'],
   },
+  survey: {
+    name: '성향조사',
+    match: /^\/friends\/survey$/,
+    help: () => ({ text: '평소 내 모습에 가까운 답을 고르고 ‘다음’을 누르세요. 정답은 없어요.' }),
+    suggest: ['friend-request', 'privacy'],
+  },
   friends: {
     name: '동네 친구 찾기',
     match: /^\/friends$/,
@@ -273,11 +279,17 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     help: () => ({ text: '읽어 보고 가장 가까운 답을 고르세요. 정답은 없어요.' }),
     suggest: ['wellbeing', 'companion', 'guardians'],
   },
+  mindlog: {
+    name: '나의 이전 결과',
+    match: /^\/me\/wellbeing\/history$/,
+    help: () => ({ text: '마음 건강 살펴보기 점수가 어떻게 바뀌었는지 보여 드려요. 높을수록 좋아요.' }),
+    suggest: ['wellbeing', 'companion', 'activities'],
+  },
   wellbeing: {
     name: '마음 건강',
     match: /^\/me\/wellbeing$/,
     help: () => ({
-      text: '이번 주 마음이 어땠는지 보여 드려요. ‘기분 점검’도 해 보세요.',
+      text: '이번 주 마음이 어땠는지 보여 드려요. ‘마음 건강 살펴보기’도 해 보세요.',
       demoNote: '시연 화면의 숫자는 예시예요.',
     }),
     suggest: ['wellbeing', 'companion', 'activities'],

@@ -5,12 +5,13 @@ import { BrainTodayCard } from '@/features/brain'
 import { useUnreadTotal } from '@/features/chat'
 import { useReceivedCount } from '@/features/friend'
 import { MissionCards, PointChip } from '@/features/points'
+import { Who5DueCard } from '@/features/wellbeing'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { IconAction } from '@/shared/ui/IconAction'
 import { Badge } from '@/shared/ui/Badge'
 import { NeighborsScene } from '@/shared/ui/illustrations/Scenes'
 import styles from './HomePage.module.css'
-import { activityDetail } from './routes'
+import { activityDetail, assessment } from './routes'
 
 /** ③ 홈 — 큰 카드 네 개로 핵심 기능에 바로 (3-tap rule). 말동무는 C8 */
 export function HomePage() {
@@ -60,6 +61,9 @@ export function HomePage() {
         />
         <ActionCard accent="sky" icon={Sprout} title="말동무" to="/companion" />
       </nav>
+
+      {/* 마음 건강 살펴보기(WHO-5) — 처음이거나 4주가 지났을 때만 */}
+      <Who5DueCard to={assessment('who5')} />
 
       {/* 신청한 활동 중 가장 가까운 것 — 활동에 나가도록 돕는 앱이라 홈에서 바로 */}
       <NextActivity detailHref={activityDetail} />

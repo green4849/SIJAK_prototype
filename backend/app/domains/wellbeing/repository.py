@@ -61,5 +61,21 @@ class WellbeingRepository:
         )
         return list(await self.session.scalars(q))
 
+    async def assessments_of(
+        self, user_id: uuid.UUID, kind: str, limit: int
+    ) -> list[SelfAssessment]:
+        """한 점검의 기록 — 새것부터"""
+        q = (
+            select(SelfAssessment)
+            .where(SelfAssessment.user_id == user_id, SelfAssessment.kind == kind)
+            .order_by(SelfAssessment.id.desc())
+            .limit(limit)
+        )
+        return list(await self.session.scalars(q))
+
+    async def last_assessment(self, user_id: uuid.UUID, kind: str) -> SelfAssessment | None:
+        found = await self.assessments_of(user_id, kind, 1)
+        return found[0] if found else None
+
     async def commit(self) -> None:
         await self.session.commit()

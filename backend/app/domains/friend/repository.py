@@ -5,7 +5,8 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domains.friend.models import FriendRequest, RecommendationRating
+from app.domains.friend.models import FriendRequest, FriendSurvey, RecommendationRating
+from app.domains.friend.survey import Answers
 
 
 class FriendRepository:
@@ -63,5 +64,42 @@ class FriendRepository:
             )
         )
 
+    # ---- 성향조사 ----
+
+    async def surveys_of(self, user_ids: set[uuid.UUID]) -> dict[uuid.UUID, Answers]:
+        if not user_ids:
+            return {}
+        q = select(FriendSurvey).where(FriendSurvey.user_id.in_(user_ids))
+        return {s.user_id: _answers(s) for s in await self.session.scalars(q)}
+
+    async def save_survey(self, user_id: uuid.UUID, a: Answers) -> None:
+        values = {
+            "purpose": a.purpose,
+            "places": a.places,
+            "times": a.times,
+            "frequency": a.frequency,
+            "talk_style": a.talk_style,
+            "want": a.want,
+            "traits": a.traits,
+        }
+        stmt = insert(FriendSurvey).values(user_id=user_id, **values)
+        await self.session.execute(
+            stmt.on_conflict_do_update(
+                index_elements=["user_id"], set_={**values, "updated_at": datetime.now(UTC)}
+            )
+        )
+
     async def commit(self) -> None:
         await self.session.commit()
+
+
+def _answers(s: FriendSurvey) -> Answers:
+    return Answers(
+        purpose=s.purpose,
+        places=list(s.places),
+        times=list(s.times),
+        frequency=s.frequency,
+        talk_style=s.talk_style,
+        want=s.want,
+        traits=list(s.traits),
+    )
