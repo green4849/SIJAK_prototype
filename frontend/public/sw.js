@@ -1,22 +1,41 @@
 /*
- * 서비스 워커 — 오프라인에서도 첫 화면이 뜨게 하는 최소 구성.
+ * 서비스 워커 — 오프라인에서도 앱이 뜨게 하는 최소 구성.
  *  - 화면 이동(HTML): 네트워크 우선 → 끊기면 저장해 둔 앱 화면
  *  - 빌드 파일(assets/, 해시 이름이라 내용이 안 바뀜)·아이콘·폰트: 저장본 우선
  *  - /api/ 요청: 절대 저장하지 않음 (개인 대화·정보)
- * 저장 방식을 바꿀 때만 VERSION 을 올린다 (예전 저장소는 activate 에서 지움).
+ *
+ * 버전과 미리 저장할 파일 목록은 빌드가 채운다 (vite.config.ts 의 swBuildInfo, H34).
+ *  - 배포마다 이 파일 내용이 바뀌어 브라우저가 새 워커를 받는다
+ *  - 새 워커는 설치만 하고 기다린다 → 화면이 "새 버전이 있어요 [새로 고침]"을 보이고,
+ *    누르면 SKIP_WAITING 으로 교체 (쓰던 글이 사라지지 않게 스스로 바꾸지 않는다)
+ *  - 교체되면 옛 저장소를 지운다 → 옛 빌드 파일이 쌓이지 않는다
+ * 개발 서버에서는 등록하지 않으므로 아래 자리표시는 그대로 남는다.
  */
-const VERSION = 'v1'
+const VERSION = '__SW_VERSION__'
+const PRECACHE = /*__SW_PRECACHE__*/ []
 const CACHE = `sijak-${VERSION}`
 const SCOPE = new URL(self.registration.scope)
 const SHELL = new URL('./', SCOPE).href
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE)
-      .then((c) => c.addAll([SHELL, new URL('manifest.webmanifest', SCOPE).href]))
-      .then(() => self.skipWaiting()),
+/** 예전 저장소에 같은 파일(해시 이름)이 있으면 다시 받지 않고 옮겨 담는다 */
+async function precache() {
+  const cache = await caches.open(CACHE)
+  await cache.addAll([SHELL, new URL('manifest.webmanifest', SCOPE).href])
+  await Promise.all(
+    PRECACHE.map(async (path) => {
+      const url = new URL(path, SCOPE).href
+      const old = await caches.match(url)
+      await (old ? cache.put(url, old) : cache.add(url))
+    }),
   )
+}
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(precache())
+})
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
