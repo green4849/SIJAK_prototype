@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 30
     refresh_token_days: int = 14
+    # 회전 직후 이 시간 안에 옛 refresh 토큰이 다시 오면 탈취가 아니라 동시 요청으로 본다
+    # (홈 화면 앱과 브라우저 탭이 거의 같이 갱신) → 전체 로그아웃 대신 그 요청만 거절
+    refresh_reuse_grace_seconds: int = 30
     signup_token_minutes: int = 10
     refresh_cookie_name: str = "wipi_refresh"
     cookie_secure: bool = False  # prod 에서는 자동으로 True (HTTPS 전용 쿠키)
