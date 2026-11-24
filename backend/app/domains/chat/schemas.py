@@ -44,7 +44,10 @@ class MessageOut(BaseModel):
             kind=m.kind,  # type: ignore[arg-type]
             body=m.body,
             duration_sec=m.duration_sec,
-            audio_url=f"{api_prefix}/chats/voice/{m.id}" if m.kind == "voice" else None,
+            # 보관 기간이 지나 파일을 지운 음성은 재생 주소 없이 본문(안내 글)만
+            audio_url=f"{api_prefix}/chats/voice/{m.id}"
+            if m.kind == "voice" and m.audio_key
+            else None,
             created_at=m.created_at,
             warning=(
                 RiskWarning(level=m.risk_level, reasons=[r for r in m.risk_labels.split(",") if r])

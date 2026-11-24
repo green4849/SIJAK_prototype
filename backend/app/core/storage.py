@@ -18,6 +18,14 @@ class LocalMediaStorage:
         (self.root / key).write_bytes(data)
         return key
 
+    def delete(self, key: str) -> bool:
+        """지웠으면 True, 이미 없으면 False"""
+        p = self.path(key)
+        if not p.exists():
+            return False
+        p.unlink()
+        return True
+
     def path(self, key: str) -> Path:
         p = (self.root / key).resolve()
         if self.root.resolve() not in p.parents:

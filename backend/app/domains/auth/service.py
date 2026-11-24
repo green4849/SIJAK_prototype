@@ -162,6 +162,19 @@ class AuthService:
         await self.repo.commit()
         return delete_after
 
+    async def withdrawn_due(self, today: date | None = None) -> list[User]:
+        """완전 삭제일(delete_after, 한국 날짜)이 된 탈퇴 계정 — 예약 작업용"""
+        return await self.repo.withdrawn_due(today or datetime.now(_KST).date())
+
+    async def purge_withdrawn(self, user: User) -> None:
+        """탈퇴 이유만 달별로 세고 사용자 행을 지운다 (친구·대화·포인트 등은 DB가 함께 지움)"""
+        if user.status != "deleted":
+            return
+        at = (user.withdrawn_at or datetime.now(UTC)).astimezone(_KST).date()
+        await self.repo.count_withdraw_reason(at.replace(day=1), user.withdraw_reason or "")
+        await self.repo.delete_user(user.id)
+        await self.repo.commit()
+
     # ---------- 프로필 (⑨ 마이페이지) ----------
 
     async def update_profile(

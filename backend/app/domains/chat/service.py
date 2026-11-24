@@ -2,7 +2,7 @@
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     from app.domains.auth.models import User
 
 TEXT_MAX = 500
+# 보관 기간이 지나 파일을 지운 음성 — 대화 화면은 재생 대신 이 글을 보여 준다
+VOICE_EXPIRED_TEXT = "🎤 보관 기간이 지나 지운 음성 메시지예요"
+VOICE_EXPIRE_BATCH = 500
 # 이 위험도(2 경고)부터 받는 사람 알림함에도 남긴다 — 1(주의: 서두르기·외부 링크)은 대화 화면 표시만
 NOTIFY_RISK_LEVEL = 2
 VOICE_TYPES = {"audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3"}
@@ -170,6 +173,33 @@ class ChatService:
         """since 이후 내가 이웃에게 보낸 메시지 수 (C11 사회적 관계 지수 '대화')"""
         rooms = await self.repo.list_rooms(me.id)
         return await self.repo.count_sent_since(me.id, [r.id for r in rooms], since)
+
+    # ---------- 예약 작업 (app/jobs.py) ----------
+
+    async def expire_old_voice(self, now: datetime) -> int:
+        """보관 기간(voice_retention_days)이 지난 음성 파일을 지운다. 메시지는 남기고 안내 글로.
+
+        DB를 먼저 저장하고 파일을 지운다 — 파일 지우기가 실패해도 남는 건 쓰지 않는 파일뿐.
+        """
+        before = now - timedelta(days=get_settings().voice_retention_days)
+        total = 0
+        while batch := await self.repo.voice_older_than(before, VOICE_EXPIRE_BATCH):
+            keys = [m.audio_key for m in batch if m.audio_key]
+            for m in batch:
+                m.audio_key = None
+                m.body = VOICE_EXPIRED_TEXT
+            await self.repo.commit()
+            for k in keys:
+                self.storage.delete(k)
+            total += len(batch)
+        return total
+
+    async def voice_keys_in_rooms_of(self, user_id: uuid.UUID) -> list[str]:
+        """탈퇴한 분을 지우기 전에 — 그 방들의 음성 파일 (방과 메시지는 DB에서 함께 지워진다)"""
+        return await self.repo.voice_keys_in_rooms_of(user_id)
+
+    def delete_voice_files(self, keys: list[str]) -> int:
+        return sum(self.storage.delete(k) for k in keys)
 
     async def message_texts(self, ids: set[int]) -> dict[int, str]:
         """운영자 화면(B7)의 문제 메시지 일부.
