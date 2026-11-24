@@ -16,6 +16,9 @@ const PRECACHE = /*__SW_PRECACHE__*/ []
 const CACHE = `sijak-${VERSION}`
 const SCOPE = new URL(self.registration.scope)
 const SHELL = new URL('./', SCOPE).href
+// 해시 이름 파일은 내용이 바뀌지 않으므로 Vary(예: Origin)를 보지 않고 주소로만 찾는다.
+// 미리 저장할 때(요청에 Origin 없음)와 화면이 모듈로 부를 때(Origin 있음)가 달라 못 찾는 일을 막는다
+const BY_URL = { ignoreVary: true }
 
 /** 예전 저장소에 같은 파일(해시 이름)이 있으면 다시 받지 않고 옮겨 담는다 */
 async function precache() {
@@ -24,7 +27,7 @@ async function precache() {
   await Promise.all(
     PRECACHE.map(async (path) => {
       const url = new URL(path, SCOPE).href
-      const old = await caches.match(url)
+      const old = await caches.match(url, BY_URL)
       await (old ? cache.put(url, old) : cache.add(url))
     }),
   )
@@ -71,7 +74,7 @@ self.addEventListener('fetch', (event) => {
 
   if (/\/(assets|icons)\//.test(url.pathname) || url.pathname.endsWith('.webmanifest')) {
     event.respondWith(
-      caches.match(req).then(
+      caches.match(req, BY_URL).then(
         (hit) =>
           hit ??
           fetch(req).then((res) => {

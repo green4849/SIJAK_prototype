@@ -19,7 +19,7 @@ public/manifest.webmanifest, service worker
 
 - `public/manifest.webmanifest`: 이름 '시작', standalone, 크림 배경(스플래시)·테마색, 아이콘 192/512 + maskable 512. 경로는 모두 상대(`./`)라 GitHub Pages 하위 경로에서도 동작
 - 아이콘: 원본 `frontend/icons/leaf.svg` → `npm run icons`(scripts/gen-icons.mjs, Chromium으로 렌더)로 `public/icons/*.png` 생성. iOS용 apple-touch-icon 180 포함
-- `public/sw.js` (직접 작성, 플러그인 없음): 화면 이동은 네트워크 우선 → 끊기면 저장해 둔 앱 화면, `assets/`·`icons/`는 저장본 우선, **`/api/`는 절대 저장 안 함**. ~~저장 방식 바꿀 때만 VERSION 올림~~ → H34(2026-11-24): 버전·미리 저장 목록(JS·CSS, 3D 제외)을 빌드가 채움(`vite.config.ts` swBuildInfo). 새 워커는 기다렸다가 화면의 「새 버전이 있어요 [새로 고침]」으로 교체, 옛 저장소 삭제. 열어 둔 앱도 1시간마다·다시 볼 때 새 배포 확인
+- `public/sw.js` (직접 작성, 플러그인 없음): 화면 이동은 네트워크 우선 → 끊기면 저장해 둔 앱 화면, `assets/`·`icons/`는 저장본 우선, **`/api/`는 절대 저장 안 함**. ~~저장 방식 바꿀 때만 VERSION 올림~~ → H34(2026-11-24): 버전·미리 저장 목록(JS·CSS, 3D 제외)을 빌드가 채움(`vite.config.ts` swBuildInfo). 새 워커는 기다렸다가 화면의 「새 버전이 있어요 [새로 고침]」으로 교체, 옛 저장소 삭제. 열어 둔 앱도 1시간마다·다시 볼 때 새 배포 확인. 해시 이름 파일은 `ignoreVary`로 찾음(미리 저장한 요청엔 Origin이 없고 모듈 요청엔 있어 `Vary: Origin` 서버에서 못 찾던 문제, H33 화면 나누기에서 발견)
 - 등록: `shared/lib/pwa.ts` `registerServiceWorker()` — 운영·데모 빌드에서만 (개발 서버 제외). 데모는 가짜 서버가 브라우저 안에 있어 오프라인에서도 전부 동작
 - 설치 제안: `beforeinstallprompt`를 붙잡아 두었다가 안내 화면 버튼으로만 띄움 (`useInstallState`, `promptInstall`)
 - 화면: 마이페이지 › '홈 화면에 아이콘 놓기'(`/me/install`, 설치되면 메뉴 숨김) — 버튼 한 번 설치가 되면 버튼, 아니면 아이폰/안드로이드별 3단계 안내. 도움말에 '매번 주소를 치기 어려워요' 추가
