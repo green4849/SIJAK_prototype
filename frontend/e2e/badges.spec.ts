@@ -37,7 +37,11 @@ test('A1 배지: 같은 값을 4곳(카드 2 + 탭 2)에서 써도 요청은 한
   await startTour(page)
   await page.reload() // 호출 수를 처음부터 센다
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
-  await page.waitForTimeout(1500)
+  // 네 곳이 모두 값을 그렸다 = 네 곳이 붙으면서 보낸 요청이 다 끝났다 (고정 대기 대신, H41)
+  await expect(mainNav(page).getByRole('link', { name: /^홈\s?, 안 읽은 메시지 1개$/ })).toBeVisible()
+  await expect(mainNav(page).getByRole('link', { name: /^친구\s?, 새 친구 신청 1개$/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^대화하기\s?, 안 읽은 메시지 1개/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^친구 찾기\s?, 새 친구 신청 1개/ })).toBeVisible()
   const calls = await page.evaluate(() => window.__demoCalls ?? {})
   expect(calls['GET /chats']).toBe(1)
   expect(calls['GET /friends/requests']).toBe(1)

@@ -10,6 +10,8 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
+  // 화면이 나타나기를 기다리는 시간 — 화면 조각을 들어갈 때 받으므로(H33) 느린 기계(CI 2코어, 바쁜 노트북)에서 5초는 빠듯했다 (H41)
+  expect: { timeout: 10_000 },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',

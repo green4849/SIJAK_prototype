@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { errorMessage } from '@/shared/api/client'
 import { chatApi, type ChatMessageData } from '../api/chatApi'
+import { mergeMessages } from '../lib/mergeMessages'
 import { usePolling } from './usePolling'
 import { refreshUnreadTotal } from './useUnreadTotal'
 
 const MESSAGES_POLL_MS = 3_000 // 실시간 대신 폴링 (docs/deferred.md §2)
-
-function merge(cur: ChatMessageData[], incoming: ChatMessageData[]) {
-  if (incoming.length === 0) return cur
-  const seen = new Set(cur.map((m) => m.id))
-  const added = incoming.filter((m) => !seen.has(m.id))
-  return added.length ? [...cur, ...added].sort((a, b) => a.id - b.id) : cur
-}
 
 /**
  * 대화방 메시지: 처음 불러오기 → 3초마다 새 메시지만 → 보내기.
@@ -25,7 +19,7 @@ export function useMessages(roomId: string) {
 
   const append = useCallback((incoming: ChatMessageData[]) => {
     setMessages((cur) => {
-      const next = merge(cur, incoming)
+      const next = mergeMessages(cur, incoming)
       lastId.current = next.at(-1)?.id ?? 0
       return next
     })
