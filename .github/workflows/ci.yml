@@ -35,7 +35,7 @@ jobs:
       PGPASSWORD: wipi
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v7
       - run: psql -h localhost -U wipi -c "create database wipi_test"
       - run: uv sync
       - run: uv run ruff check .
