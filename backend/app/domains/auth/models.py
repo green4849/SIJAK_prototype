@@ -13,6 +13,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Integer,
     LargeBinary,
     String,
     UniqueConstraint,
@@ -94,3 +95,18 @@ class RefreshToken(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class WithdrawalReasonCount(Base):
+    """탈퇴 이유 집계 (B3) — 탈퇴한 분의 행을 지우기 전에 이유만 달별로 센다.
+
+    누가 탈퇴했는지는 남기지 않는다 (이유 문구와 수만).
+    """
+
+    __tablename__ = "withdrawal_reason_counts"
+
+    # 탈퇴한 달의 1일 (한국 날짜)
+    month: Mapped[date] = mapped_column(Date, primary_key=True)
+    # 고르지 않았으면 빈 문자열
+    reason: Mapped[str] = mapped_column(String(WITHDRAW_REASON_MAX_LEN), primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=0)
