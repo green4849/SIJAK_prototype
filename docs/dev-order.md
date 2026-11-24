@@ -133,12 +133,13 @@ backend 스키마 수정 → (backend) uv run python -m scripts.export_openapi
 시안 화면이 다 나온 뒤부터는 **로드맵 항목 1개 = 작업 파일 1개(`docs/tasks/`) = 브랜치 1개**로 간다.
 
 ```
-docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → 브랜치 push(CI 자동) → PR(템플릿 체크)·리뷰 → main 병합(--no-ff) → 작업 파일 ✅ → 데모 링크 자동 갱신
+docs/tasks/<ID>.md 상태 🔨 → 브랜치 → 작은 커밋들 → 브랜치 push → PR(CI 자동, 템플릿 체크)·리뷰 → main 병합(--no-ff) → 작업 파일 ✅ → 데모 링크 자동 갱신
 ```
 
 - 브랜치 이름: `<영역>/<ID>-<짧은설명>` — 예: `polish/A1-unread-badge`, `prod/B1-secret-guard`, `feat/C2-stt`
 - 커밋 메시지: `<ID>: 무엇을` — 예: `A1: 하단 탭에 안 읽은 메시지 배지`
 - 스테이지 내부 순서(§1)는 그대로: 백엔드(model→…→router→test) → 프론트(api→hooks→components→page)
 - **main은 항상 데모가 동작하는 상태** — 깨지면 그 PR을 되돌린다
-- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/build · **e2e(데모 대상, 접근성 스윕 포함)**
+- CI(`.github/workflows/ci.yml`): 백엔드 테스트 · 프론트 lint/build · **e2e(데모 대상, 접근성 스윕 포함, 두 대로 나눠 실행)**. PR 과 main push 에서만 돈다 — 작업 브랜치는 PR 을 열어야 검사된다. 같은 PR 에 새로 push 하면 앞 실행은 취소 (H40)
+- 시연 배포(`pages.yml`)는 main 의 CI 가 **성공한 뒤** 그 커밋으로 (H39)
 - 권장 설정(저장소 관리자): Settings → Branches → `main` 보호 — PR 필수, CI 통과 필수
