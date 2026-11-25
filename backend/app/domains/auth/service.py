@@ -331,6 +331,23 @@ class AuthService:
             region_code=region_code, exclude_ids=exclude_ids or set()
         )
 
+    async def list_candidate_users(
+        self,
+        me: User,
+        *,
+        radius_km: float,
+        exclude_ids: set[uuid.UUID],
+        limit: int,
+        nearest_first: bool = False,
+    ) -> list[User]:
+        return await self.repo.list_candidate_users(
+            me,
+            radius_km=radius_km,
+            exclude_ids=exclude_ids,
+            limit=limit,
+            nearest_first=nearest_first,
+        )
+
     async def get_users(self, ids: set[uuid.UUID]) -> dict[uuid.UUID, User]:
         return {u.id: u for u in await self.repo.get_users(ids)}
 

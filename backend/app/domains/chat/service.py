@@ -72,11 +72,11 @@ class ChatService:
         return room
 
     async def list_rooms(self, me: "User") -> list[RoomSummary]:
-        rooms = await self.repo.list_rooms(me.id)
-        others = await self.auth.get_users({r.other(me.id) for r in rooms})
+        previews = await self.repo.list_room_previews(me.id)
+        others = await self.auth.get_users({r.other(me.id) for r, _, _ in previews})
         blocked = await self.risk.related_block_ids(me.id)
         out = []
-        for r in rooms:
+        for r, last_message, unread in previews:
             other = others.get(r.other(me.id))
             if other is None:
                 continue
@@ -84,8 +84,8 @@ class ChatService:
                 RoomSummary(
                     room=r,
                     other=other,
-                    last_message=await self.repo.last_message(r.id),
-                    unread=await self.repo.count_unread(r, me.id),
+                    last_message=last_message,
+                    unread=unread,
                     blocked=r.other(me.id) in blocked,
                 )
             )
