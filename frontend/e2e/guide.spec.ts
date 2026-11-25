@@ -141,8 +141,8 @@ test('위급한 말에는 앱 안내보다 전화가 먼저', async ({ page }) =
   const calls = log(page).getByRole('link', { name: /전화하기/ })
   await expect(calls.first()).toHaveAttribute('href', 'tel:119')
   await expect(log(page)).toContainText('앱보다 전화가 먼저예요')
-  // 시연의 ‘도움 요청’이 실제로 알림을 보내는 것처럼 보이지 않게
-  await expect(log(page)).toContainText('실제로 알림이 가지 않아요')
+  // 시연과 실제 앱 모두 자동 알림을 보내지 않는다고 밝힌다
+  await expect(log(page)).toContainText('자동 알림은 가지 않아요')
   await expect(log(page).getByRole('button', { name: '같이 가 보기' })).toHaveCount(0)
 
   await ask(page, '사는 게 힘들어 죽고 싶어')

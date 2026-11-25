@@ -526,7 +526,7 @@ export const TOPICS: Topic[] = [
     cues: [[/긴급|sos|도움요청/, 4]],
     screens: ['home'],
     reply: (ctx) => ({
-      text: '긴급 도움 요청을 기록하고 보호자나 119에 직접 전화할 수 있는 화면이에요. 자동 알림은 가지 않아요.',
+      text: '긴급 도움을 누르면 요청이 기록돼요. 자동 알림은 가지 않으니 직접 전화해 주세요.',
       actions: ctx.screen === 'home' ? [show('‘긴급’ 어디 있어요?', 'home-sos', '여기 ‘긴급’이에요. 누르면 긴급 도움 화면이 열려요.')] : undefined,
     }),
   },
