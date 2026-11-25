@@ -4,6 +4,8 @@ import { startTour } from './helpers'
 
 test('마이페이지 → 알림함: 새 소식 4개, 누르면 그 화면으로 가고 읽음 처리', async ({ page }) => {
   await startTour(page)
+  // 홈의 지연 로딩 카드가 알림을 만든 뒤 목록을 확인한다.
+  await expect(page.getByText('마음 건강 살펴볼 때예요', { exact: true })).toBeVisible()
   await page.goto('/me')
   // 시드 3개 + 홈을 열 때 쌓인 '마음 건강 살펴볼 때예요'(시연 계정은 WHO-5를 한 지 4주가 지남)
   await expect(page.getByRole('link', { name: /알림함.*새 소식 4개/ })).toBeVisible()
@@ -36,6 +38,10 @@ test('운영자 화면: 신고 처리 → 이웃이 한 신고도 바로 들어�
   await page.goto('/admin')
   await expect(page.getByText('처리 전 2건 · 전체 3건')).toBeVisible()
   const deoksu = page.getByRole('listitem', { name: '정덕수님 자동 감지' })
+  await deoksu.getByRole('button', { name: '대화 맥락 보기' }).click()
+  await expect(deoksu.getByLabel('신고 전후 대화')).toContainText('신고된 메시지')
+  await deoksu.getByRole('button', { name: '대화 맥락 닫기' }).click()
+  await expect(deoksu.getByLabel('신고 전후 대화')).toHaveCount(0)
   await deoksu.getByRole('button', { name: '7일 정지' }).click()
   await expect(deoksu).toContainText('이용 정지')
   await expect(page.getByText('처리 전 1건 · 전체 3건')).toBeVisible()

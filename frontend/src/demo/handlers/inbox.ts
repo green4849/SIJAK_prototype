@@ -112,6 +112,13 @@ export const inboxRoutes: Route[] = [
     return json(allCases())
   }],
 
+  ['GET', '/admin/cases/:id/context', (req) => {
+    requireUser(req)
+    const c = allCases().find((item) => item.id === req.params.id)
+    if (!c) return fail(404, 'not_found', '없는 신고예요.')
+    return json(c.excerpt ? [{ id: 1, sender_name: c.target_name, body: c.excerpt, created_at: c.created_at, is_reported: true }] : [])
+  }],
+
   ['POST', '/admin/cases/:id/action', (req) => {
     requireUser(req)
     const action = (req.body as { action?: CaseAction })?.action

@@ -8,6 +8,7 @@
 다른 도메인은 각 서비스의 공개 메서드로만 읽는다.
 """
 
+import logging
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta, timezone
@@ -44,6 +45,15 @@ class Case:
     reports_count: int
     created_at: datetime
     status: str
+
+
+@dataclass(frozen=True)
+class CaseMessage:
+    id: int
+    sender_name: str
+    body: str
+    created_at: datetime
+    is_reported: bool
 
 
 @dataclass(frozen=True)
@@ -116,6 +126,26 @@ class AdminService:
         # 처리 전이 위로, 위험도 높은 순, 최근 순
         out.sort(key=lambda c: (c.status != "open", -c.level, -c.created_at.timestamp()))
         return out
+
+    async def context(self, operator_id: uuid.UUID, case_id: str) -> list[CaseMessage]:
+        raw = await self._find(case_id)
+        if raw.message_id is None:
+            return []
+        messages = await self.chat.moderation_context(raw.message_id)
+        users = await self.auth.get_users({m.sender_id for m in messages})
+        logging.getLogger("uvicorn.error").info(
+            "대화 맥락 조회 operator=%s case=%s", operator_id, case_id
+        )
+        return [
+            CaseMessage(
+                id=m.id,
+                sender_name=users[m.sender_id].name if m.sender_id in users else "알 수 없음",
+                body=m.body if m.kind == "text" else "음성 메시지",
+                created_at=m.created_at,
+                is_reported=m.id == raw.message_id,
+            )
+            for m in messages
+        ]
 
     async def act(self, operator_id: uuid.UUID, case_id: str, action: str) -> Case:
         raw = await self._find(case_id)

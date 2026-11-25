@@ -210,6 +210,10 @@ class ChatService:
     def delete_voice_files(self, keys: list[str]) -> int:
         return sum(self.storage.delete(k) for k in keys)
 
+    async def moderation_context(self, message_id: int) -> list[ChatMessage]:
+        """신고 메시지 앞뒤 최대 5개. 운영자 권한은 admin router에서 확인한다."""
+        return await self.repo.message_context(message_id)
+
     async def message_texts(self, ids: set[int]) -> dict[int, str]:
         """운영자 화면(B7)의 문제 메시지 일부.
 

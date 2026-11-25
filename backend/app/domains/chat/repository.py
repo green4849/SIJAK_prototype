@@ -84,6 +84,24 @@ class ChatRepository:
     async def get_message(self, message_id: int) -> ChatMessage | None:
         return await self.session.get(ChatMessage, message_id)
 
+    async def message_context(self, message_id: int) -> list[ChatMessage]:
+        anchor = await self.get_message(message_id)
+        if anchor is None:
+            return []
+        before = await self.session.scalars(
+            select(ChatMessage)
+            .where(ChatMessage.room_id == anchor.room_id, ChatMessage.id < anchor.id)
+            .order_by(ChatMessage.id.desc())
+            .limit(5)
+        )
+        after = await self.session.scalars(
+            select(ChatMessage)
+            .where(ChatMessage.room_id == anchor.room_id, ChatMessage.id > anchor.id)
+            .order_by(ChatMessage.id)
+            .limit(5)
+        )
+        return [*reversed(list(before)), anchor, *after]
+
     async def list_messages(
         self, room_id: uuid.UUID, after_id: int = 0, limit: int = 100
     ) -> list[ChatMessage]:

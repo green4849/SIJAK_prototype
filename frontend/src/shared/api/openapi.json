@@ -610,6 +610,40 @@
         "title": "CaseActionIn",
         "type": "object"
       },
+      "CaseMessageOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_reported": {
+            "title": "Is Reported",
+            "type": "boolean"
+          },
+          "sender_name": {
+            "title": "Sender Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sender_name",
+          "body",
+          "created_at",
+          "is_reported"
+        ],
+        "title": "CaseMessageOut",
+        "type": "object"
+      },
       "CategoryOption": {
         "properties": {
           "code": {
@@ -3221,6 +3255,58 @@
           }
         ],
         "summary": "Act",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/cases/{case_id}/context": {
+      "get": {
+        "description": "신고된 메시지와 같은 방의 앞뒤 최대 5개 메시지. 음성 재생 주소는 제공하지 않는다.",
+        "operationId": "context_api_v1_admin_cases__case_id__context_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CaseMessageOut"
+                  },
+                  "title": "Response Context Api V1 Admin Cases  Case Id  Context Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Context",
         "tags": [
           "admin"
         ]

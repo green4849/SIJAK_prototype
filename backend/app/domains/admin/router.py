@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.deps import DbSession
 from app.domains.admin.repository import AdminRepository
-from app.domains.admin.schemas import AdminCaseOut, AdminWatchOut, CaseActionIn
+from app.domains.admin.schemas import AdminCaseOut, AdminWatchOut, CaseActionIn, CaseMessageOut
 from app.domains.admin.service import AdminService
 from app.domains.auth.deps import AuthServiceDep, CurrentOperator
 from app.domains.chat.deps import ChatServiceDep
@@ -35,6 +35,14 @@ AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
 async def cases(op: CurrentOperator, service: AdminServiceDep) -> list[AdminCaseOut]:
     """신고·위험 대화 — 처리 전이 위로, 위험도 높은 순"""
     return [AdminCaseOut.of(c) for c in await service.cases()]
+
+
+@router.get("/cases/{case_id}/context", response_model=list[CaseMessageOut])
+async def context(
+    case_id: str, op: CurrentOperator, service: AdminServiceDep
+) -> list[CaseMessageOut]:
+    """신고된 메시지와 같은 방의 앞뒤 최대 5개 메시지. 음성 재생 주소는 제공하지 않는다."""
+    return [CaseMessageOut(**m.__dict__) for m in await service.context(op.id, case_id)]
 
 
 @router.post("/cases/{case_id}/action", response_model=AdminCaseOut)
