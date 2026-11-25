@@ -1,9 +1,10 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.domains.chat.models import ChatMessage, ChatRoom
 
@@ -41,6 +42,42 @@ class ChatRepository:
             .order_by(ChatRoom.last_message_at.desc().nulls_last(), ChatRoom.created_at.desc())
         )
         return list(await self.session.scalars(q))
+
+    async def list_room_previews(
+        self, user_id: uuid.UUID
+    ) -> list[tuple[ChatRoom, ChatMessage | None, int]]:
+        """방 목록의 마지막 메시지와 안 읽은 수를 한 번의 조회로 가져온다."""
+        last = aliased(ChatMessage)
+        pending = aliased(ChatMessage)
+        last_id = (
+            select(func.max(last.id))
+            .where(last.room_id == ChatRoom.id)
+            .correlate(ChatRoom)
+            .scalar_subquery()
+        )
+        last_read_id = case(
+            (ChatRoom.user_a_id == user_id, ChatRoom.a_last_read_id),
+            else_=ChatRoom.b_last_read_id,
+        )
+        unread = (
+            select(func.count(pending.id))
+            .where(
+                pending.room_id == ChatRoom.id,
+                pending.id > last_read_id,
+                pending.sender_id != user_id,
+            )
+            .correlate(ChatRoom)
+            .scalar_subquery()
+        )
+        q = (
+            select(ChatRoom, ChatMessage, unread)
+            .outerjoin(ChatMessage, ChatMessage.id == last_id)
+            .where(or_(ChatRoom.user_a_id == user_id, ChatRoom.user_b_id == user_id))
+            .order_by(ChatRoom.last_message_at.desc().nulls_last(), ChatRoom.created_at.desc())
+        )
+        return [
+            (room, message, int(count)) for room, message, count in await self.session.execute(q)
+        ]
 
     # ---- messages ----
 

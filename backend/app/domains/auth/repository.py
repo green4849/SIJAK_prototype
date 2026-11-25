@@ -3,13 +3,15 @@
 트랜잭션 경계(commit)는 service가 정한다 → repository는 flush까지만.
 """
 
+import math
 import uuid
 from datetime import UTC, date, datetime
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.geo import bounding_box
 from app.domains.auth.models import RefreshToken, User, UserInterest, WithdrawalReasonCount
 
 
@@ -31,6 +33,42 @@ class AuthRepository:
         if exclude_ids:
             q = q.where(User.id.not_in(exclude_ids))
         return list(await self.session.scalars(q.order_by(User.last_login_at.desc().nulls_last())))
+
+    async def list_candidate_users(
+        self,
+        me: User,
+        *,
+        radius_km: float,
+        exclude_ids: set[uuid.UUID],
+        limit: int,
+        nearest_first: bool,
+    ) -> list[User]:
+        """반경 사각형과 지역으로 먼저 거르고 최대 limit명만 읽는다."""
+        q = select(User).where(User.status == "active")
+        if exclude_ids:
+            q = q.where(User.id.not_in(exclude_ids))
+        if me.geo_lat is None or me.geo_lng is None:
+            q = q.where(User.region_code == me.region_code)
+        else:
+            min_lat, max_lat, min_lng, max_lng = bounding_box(me.geo_lat, me.geo_lng, radius_km)
+            with_location = and_(
+                User.geo_lat.between(min_lat, max_lat),
+                User.geo_lng.between(min_lng, max_lng),
+            )
+            without_location = and_(
+                User.region_code == me.region_code,
+                or_(User.geo_lat.is_(None), User.geo_lng.is_(None)),
+            )
+            q = q.where(or_(with_location, without_location))
+            if nearest_first:
+                # 사각형 안의 후보만 대략 거리순으로 정렬한다. 정확한 반경과 거리는 friend가 계산.
+                lat_delta = User.geo_lat - me.geo_lat
+                lng_delta = (User.geo_lng - me.geo_lng) * max(
+                    math.cos(math.radians(me.geo_lat)), 0.01
+                )
+                q = q.order_by((lat_delta * lat_delta + lng_delta * lng_delta).asc().nulls_last())
+        q = q.order_by(func.coalesce(User.last_login_at, User.created_at).desc(), User.id)
+        return list(await self.session.scalars(q.limit(limit)))
 
     async def get_users(self, ids: set[uuid.UUID]) -> list[User]:
         if not ids:
