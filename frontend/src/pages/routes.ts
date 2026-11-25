@@ -17,3 +17,5 @@ export const who5History = '/me/wellbeing/history'
 export const welfareDetail = (id: string) => `/welfare/${id}`
 /** 두뇌 운동 게임 */
 export const brainGame = (game: string) => `/brain/${game}`
+/** 약관·개인정보 문서 (B6) — 로그인 없이도 열린다 */
+export const legalDoc = (kind: string) => `/legal/${kind}`

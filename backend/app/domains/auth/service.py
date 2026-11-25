@@ -16,8 +16,15 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from app.core.config import get_settings
 from app.core.errors import ConflictError, DomainError, ForbiddenError, UnauthorizedError
 from app.core.security import create_token, decode_token, encrypt, hash_phone, normalize_phone
-from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS, WITHDRAW_GRACE_DAYS
-from app.domains.auth.models import User
+from app.domains.auth.constants import (
+    CONSENT_DOCS,
+    CONSENT_VERSIONS,
+    INTERESTS,
+    MAX_INTERESTS,
+    REGIONS,
+    WITHDRAW_GRACE_DAYS,
+)
+from app.domains.auth.models import ConsentRecord, User
 from app.domains.auth.repository import AuthRepository
 from app.integrations.identity.base import (
     IdentityProvider,
@@ -39,6 +46,28 @@ class InvalidSignupInputError(DomainError):
 
     status_code = 422
     code = "invalid_profile_input"
+
+
+def _record(kind: str, agreed: bool) -> ConsentRecord:
+    # 시각은 앱에서 넣는다 — 저장 직후 응답에서 바로 읽을 수 있게 (DB 기본값은 다시 읽어 와야 함)
+    return ConsentRecord(
+        kind=kind, version=CONSENT_VERSIONS[kind], agreed=agreed, created_at=datetime.now(UTC)
+    )
+
+
+class ConsentError(DomainError):
+    """동의 항목 오류 — 필수 동의가 빠졌거나, 버전이 지금 문서와 다르거나,
+    필수 동의를 철회하려 함"""
+
+    status_code = 422
+    code = "consent_invalid"
+
+
+@dataclass(frozen=True)
+class ConsentChoice:
+    kind: str
+    version: str
+    agreed: bool
 
 
 @dataclass(frozen=True)
@@ -94,9 +123,16 @@ class AuthService:
 
     # ---------- 가입 ----------
 
-    async def signup(self, signup_token: str, region_code: str, interests: list[str]) -> LoggedIn:
+    async def signup(
+        self,
+        signup_token: str,
+        region_code: str,
+        interests: list[str],
+        consents: list[ConsentChoice],
+    ) -> LoggedIn:
         claims = decode_token(signup_token, "signup")
         self._validate_profile(region_code, interests)
+        records = self._signup_consents(consents)
 
         if await self.repo.get_user_by_ci(claims["ci"]):
             raise ConflictError(
@@ -113,6 +149,7 @@ class AuthService:
                 phone_enc=encrypt(phone),
                 pass_ci=claims["ci"],
                 region_code=region_code,
+                consents=records,
             ),
             interests=list(dict.fromkeys(interests)),  # 중복 제거, 순서 유지
         )
@@ -152,6 +189,82 @@ class AuthService:
             return  # 이미 무효한 토큰 — 로그아웃은 항상 성공 처리
         await self.repo.revoke_refresh_token(claims["jti"])
         await self.repo.commit()
+
+    # ---------- 동의 (B6·B5) ----------
+
+    @staticmethod
+    def consent_state(user: User) -> dict[str, ConsentRecord | None]:
+        """종류별 가장 최근 기록 (없으면 None)"""
+        latest: dict[str, ConsentRecord | None] = dict.fromkeys(CONSENT_DOCS)
+        for r in user.consents:  # id 순 → 뒤에 온 것이 최신
+            if r.kind in latest:
+                latest[r.kind] = r
+        return latest
+
+    @classmethod
+    def has_consent(cls, user: User, kind: str) -> bool:
+        """지금 문서 버전에 동의한 상태인지 — 문서가 바뀌면(버전 ↑) 다시 동의해야 한다"""
+        r = cls.consent_state(user).get(kind)
+        return r is not None and r.agreed and r.version == CONSENT_VERSIONS[kind]
+
+    @classmethod
+    def consent_needed(cls, user: User) -> list[str]:
+        """아직 동의하지 않은(또는 문서가 바뀐) 필수 문서 — 있으면 앱을 쓰기 전에 다시 받는다"""
+        return [
+            k for k, required in CONSENT_DOCS.items() if required and not cls.has_consent(user, k)
+        ]
+
+    async def set_consents(self, user: User, choices: list[ConsentChoice]) -> User:
+        """마이페이지·다시 동의 화면에서 — 동의하거나 선택 동의를 철회한다.
+
+        필수 동의 철회는 받지 않는다(서비스를 쓸 수 없으므로) → 탈퇴로 안내.
+        """
+        records = []
+        for c in self._checked(choices):
+            if not c.agreed and CONSENT_DOCS[c.kind]:
+                raise ConsentError(
+                    "꼭 필요한 동의라 철회할 수 없어요. "
+                    "그만 쓰시려면 마이페이지에서 탈퇴해 주세요.",
+                    code="consent_required",
+                )
+            records.append(_record(c.kind, c.agreed))
+        user.consents.extend(records)
+        await self.repo.commit()
+        return user
+
+    async def set_health_consent(self, user: User, agreed: bool) -> User:
+        """마음 건강 기록(선택) 동의·철회 — 기록 삭제는 wellbeing 이 먼저 한다"""
+        return await self.set_consents(
+            user, [ConsentChoice("health", CONSENT_VERSIONS["health"], agreed)]
+        )
+
+    @classmethod
+    def _signup_consents(cls, choices: list[ConsentChoice]) -> list[ConsentRecord]:
+        """가입 동의 — 필수는 모두 동의해야 한다. 빠진 선택 문서는 '동의 안 함'으로 남긴다"""
+        given = {c.kind: c for c in cls._checked(choices)}
+        missing = [
+            k
+            for k, required in CONSENT_DOCS.items()
+            if required and not (k in given and given[k].agreed)
+        ]
+        if missing:
+            raise ConsentError("꼭 필요한 항목에 모두 동의해 주세요.", code="consent_required")
+        return [_record(k, k in given and given[k].agreed) for k in CONSENT_DOCS]
+
+    @staticmethod
+    def _checked(choices: list[ConsentChoice]) -> list[ConsentChoice]:
+        """모르는 종류·지난 버전은 받지 않는다 — 사용자가 본 문서와 저장하는 버전이 같아야 한다"""
+        seen: set[str] = set()
+        for c in choices:
+            if c.kind not in CONSENT_DOCS or c.kind in seen:
+                raise ConsentError("동의 항목을 다시 확인해 주세요.")
+            if c.version != CONSENT_VERSIONS[c.kind]:
+                raise ConsentError(
+                    "약관이 바뀌었어요. 화면을 새로 고친 뒤 다시 동의해 주세요.",
+                    code="consent_outdated",
+                )
+            seen.add(c.kind)
+        return choices
 
     # ---------- 회원 탈퇴 (B3) ----------
 

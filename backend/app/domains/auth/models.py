@@ -1,4 +1,4 @@
-"""auth 도메인이 소유하는 테이블: users, user_interests, refresh_tokens.
+"""auth 도메인이 소유하는 테이블: users, user_interests, refresh_tokens, consent_records.
 
 보고서 ERD 대비 변경:
 - isolation_score 는 wellbeing 도메인 소유 → users 에서 제외 (Stage 7)
@@ -9,6 +9,7 @@ import uuid
 from datetime import date, datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -67,6 +68,10 @@ class User(Base):
     interests: Mapped[list["UserInterest"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
+    # 동의 기록 (B6) — 쌓인 순서대로. 지금 상태는 종류별 마지막 줄 (AuthService.consent_state)
+    consents: Mapped[list["ConsentRecord"]] = relationship(
+        cascade="all, delete-orphan", lazy="selectin", order_by="ConsentRecord.id"
+    )
 
 
 class UserInterest(Base):
@@ -81,6 +86,25 @@ class UserInterest(Base):
     weight: Mapped[float] = mapped_column(default=1.0)
 
     user: Mapped[User] = relationship(back_populates="interests")
+
+
+class ConsentRecord(Base):
+    """약관·개인정보 동의 기록 (B6·B5).
+
+    고치거나 지우지 않고 쌓기만 한다 — 언제 어느 버전에 동의·거부·철회했는지가 남는다.
+    계정이 완전히 지워질 때(탈퇴 30일 뒤) 함께 지워진다.
+    """
+
+    __tablename__ = "consent_records"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[str] = mapped_column(String(20))
+    version: Mapped[str] = mapped_column(String(20))
+    agreed: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class RefreshToken(Base):

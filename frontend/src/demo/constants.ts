@@ -36,6 +36,15 @@ export const INTERESTS: Record<string, string> = {
 
 export const MAX_INTERESTS = 5
 export const INTRO_MAX_LEN = 60
+
+/** 가입 동의 문서 (B6) — backend auth/constants.py CONSENT_DOCS(필수 여부)·CONSENT_VERSIONS */
+export const CONSENT_DOCS: Record<string, boolean> = { terms: true, privacy: true, location: true, health: false }
+export const CONSENT_VERSIONS: Record<string, string> = {
+  terms: '2026-11-25',
+  privacy: '2026-11-25',
+  location: '2026-11-25',
+  health: '2026-11-25',
+}
 export const TEXT_MAX = 500
 
 export const CATEGORIES: Record<string, string> = {

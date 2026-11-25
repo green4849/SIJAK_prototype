@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.domains.auth.models import User
 from app.domains.point.service import kst_today
-from tests.integration.helpers import signup_user
+from tests.integration.helpers import ALL_CONSENTS, signup_user
 
 API = "/api/v1"
 
@@ -46,7 +46,12 @@ async def test_withdraw_logs_out_everywhere(client: AsyncClient) -> None:
     _, v = await login()
     r = await client.post(
         f"{API}/auth/signup",
-        json={"signup_token": v["signup_token"], "region_code": "41", "interests": ["walking"]},
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "41",
+            "interests": ["walking"],
+            "consents": ALL_CONSENTS,
+        },
     )
     h = {"Authorization": f"Bearer {r.json()['access_token']}"}
     refresh_cookie = dict(client.cookies)

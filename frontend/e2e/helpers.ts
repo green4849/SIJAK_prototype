@@ -28,6 +28,16 @@ export async function verifyPhone(
   await page.getByRole('button', { name: '확인', exact: true }).click()
 }
 
+/** 가입 1/3 약관 동의 — 기본은 '모두 동의해요', health: false 면 필수만 하나씩 (B6) */
+export async function agreeTerms(page: Page, { health = true }: { health?: boolean } = {}) {
+  await expect(page.getByRole('heading', { name: /약관을 확인해 주세요/ })).toBeVisible()
+  if (health) await page.getByRole('checkbox', { name: '모두 동의해요' }).check()
+  else
+    for (const label of ['서비스 이용약관에 동의해요', '개인정보 수집·이용에 동의해요', '위치 정보 이용에 동의해요'])
+      await page.getByRole('checkbox', { name: new RegExp(label) }).check()
+  await page.getByRole('button', { name: '동의하고 다음' }).click()
+}
+
 /** 포인트가 드는 친구 신청의 확인 창 — 무료 신청이면 창이 없어 그냥 지나간다 */
 export async function confirmRequest(page: Page) {
   const ask = page.getByRole('dialog', { name: /친구 신청할까요/ })

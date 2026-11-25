@@ -1,0 +1,13 @@
+.note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.note a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  font-weight: var(--weight-semibold);
+}

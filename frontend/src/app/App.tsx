@@ -36,6 +36,9 @@ const WelfareDetailPage = lazy(() => import('@/pages/WelfareDetailPage').then((m
 const BrainPage = lazy(() => import('@/pages/BrainPage').then((m) => ({ default: m.BrainPage })))
 const BrainGamePage = lazy(() => import('@/pages/BrainGamePage').then((m) => ({ default: m.BrainGamePage })))
 const NotificationsPage = lazy(() => import('@/pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })))
+const LegalPage = lazy(() => import('@/pages/LegalPage').then((m) => ({ default: m.LegalPage })))
+const ConsentPage = lazy(() => import('@/pages/ConsentPage').then((m) => ({ default: m.ConsentPage })))
+const MyConsentsPage = lazy(() => import('@/pages/MyConsentsPage').then((m) => ({ default: m.MyConsentsPage })))
 const WithdrawPage = lazy(() => import('@/pages/WithdrawPage').then((m) => ({ default: m.WithdrawPage })))
 const AdminPage = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
 const FriendListPage = lazy(() => import('@/pages/FriendListPage').then((m) => ({ default: m.FriendListPage })))
@@ -120,11 +123,15 @@ export function App() {
               <Route path="brain/:game" element={<BrainGamePage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="me/leave" element={<WithdrawPage />} />
+              <Route path="me/consents" element={<MyConsentsPage />} />
+              <Route path="consent" element={<ConsentPage />} />
               <Route path="admin" element={<AdminPage />} />
             </Route>
           </Route>
 
           <Route element={<PlainLayout />}>
+            {/* 약관·개인정보 문서 — 로그인 여부와 상관없이 (가입 전에도 읽는다) */}
+            <Route path="legal/:doc" element={<LegalPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

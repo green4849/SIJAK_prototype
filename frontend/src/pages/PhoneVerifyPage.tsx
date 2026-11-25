@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { CodeForm, IdentityForm, useAuth, usePassVerification } from '@/features/auth'
 import { TopBar } from '@/shared/ui/TopBar'
+import styles from './PhoneVerifyPage.module.css'
+import { legalDoc } from './routes'
 
 /** ② → 휴대폰 인증. 본인인증 하나로 로그인·가입을 모두 시작 */
 export function PhoneVerifyPage() {
@@ -33,7 +35,14 @@ export function PhoneVerifyPage() {
           onBack={reset}
         />
       ) : (
-        <IdentityForm pending={pending} error={error} onSubmit={start} initial={step.name === 'identity' ? step.last : undefined} />
+        <>
+          <IdentityForm pending={pending} error={error} onSubmit={start} initial={step.name === 'identity' ? step.last : undefined} />
+          {/* 인증 정보는 본인 확인에만 쓰고, 처음 오신 분은 다음 화면에서 약관에 동의해야 저장된다 (B6) */}
+          <p className={styles.note}>
+            적어 주신 정보는 본인 확인에 써요. 처음 오신 분은 다음 화면에서 약관에 동의해야 저장돼요.{' '}
+            <Link to={legalDoc('policy')}>개인정보 처리방침</Link>
+          </p>
+        </>
       )}
     </>
   )

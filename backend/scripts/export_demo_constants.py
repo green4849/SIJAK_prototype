@@ -18,7 +18,14 @@ from dataclasses import asdict
 from pathlib import Path
 
 from app.domains.activity.models import CATEGORIES, REWARD_CATEGORIES
-from app.domains.auth.constants import INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS
+from app.domains.auth.constants import (
+    CONSENT_DOCS,
+    CONSENT_VERSIONS,
+    INTERESTS,
+    INTRO_MAX_LEN,
+    MAX_INTERESTS,
+    REGIONS,
+)
 from app.domains.chat import topics
 from app.domains.chat.service import TEXT_MAX
 from app.domains.friend import nearby, survey
@@ -78,6 +85,8 @@ def build() -> dict:
             "regions": REGIONS,
             "interests": INTERESTS,
             "max_interests": MAX_INTERESTS,
+            "consent_docs": CONSENT_DOCS,
+            "consent_versions": CONSENT_VERSIONS,
             "intro_max_len": INTRO_MAX_LEN,
         },
         "chat": {"text_max": TEXT_MAX},

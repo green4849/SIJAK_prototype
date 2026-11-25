@@ -1,12 +1,15 @@
 from fastapi import APIRouter, status
 
-from app.core.errors import NotFoundError
-from app.domains.auth.deps import CurrentUser
+from app.core.errors import ForbiddenError, NotFoundError
+from app.domains.auth.deps import AuthServiceDep, CurrentUser
+from app.domains.auth.service import AuthService
 from app.domains.wellbeing.deps import WellbeingServiceDep
 from app.domains.wellbeing.schemas import (
     AssessmentFormOut,
     AssessmentIn,
     AssessmentResultOut,
+    HealthConsentIn,
+    HealthConsentOut,
     RelationIndexOut,
     Who5StatusOut,
 )
@@ -48,4 +51,23 @@ async def assessment_form(kind: str, me: CurrentUser) -> AssessmentFormOut:
 async def submit_assessment(
     body: AssessmentIn, me: CurrentUser, service: WellbeingServiceDep
 ) -> AssessmentResultOut:
+    # 점검 결과는 건강 정보(민감정보) — 따로 동의한 분만 저장한다 (개인정보 보호법 제23조)
+    if not AuthService.has_consent(me, "health"):
+        raise ForbiddenError(
+            "마음 건강 기록에 동의해야 결과를 저장할 수 있어요.", code="health_consent_required"
+        )
     return AssessmentResultOut.of(await service.submit(me.id, body.kind, body.answers))
+
+
+@router.put("/self-assessment/consent", response_model=HealthConsentOut)
+async def set_health_consent(
+    body: HealthConsentIn,
+    me: CurrentUser,
+    auth: AuthServiceDep,
+    service: WellbeingServiceDep,
+) -> HealthConsentOut:
+    """마음 건강 기록 동의·철회. 철회하면 지금까지의 점검 기록을 먼저 지운다"""
+    if not body.agreed:
+        await service.forget_assessments(me.id)
+    user = await auth.set_health_consent(me, body.agreed)
+    return HealthConsentOut(health_consent=AuthService.has_consent(user, "health"))

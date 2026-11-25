@@ -15,6 +15,8 @@ from app.domains.auth.constants import INTERESTS, MAX_INTERESTS, REGIONS
 from app.domains.auth.deps import AuthServiceDep, CurrentUser
 from app.domains.auth.schemas import (
     AuthResult,
+    ConsentStatusOut,
+    ConsentsUpdate,
     LocationUpdate,
     LoggedInResult,
     Option,
@@ -30,8 +32,10 @@ from app.domains.auth.schemas import (
     UserOut,
     WithdrawIn,
     WithdrawOut,
+    consent_docs,
+    consent_status,
 )
-from app.domains.auth.service import LoggedIn, TokenPair
+from app.domains.auth.service import ConsentError, LoggedIn, TokenPair
 from app.integrations.identity.base import IdentityRequest
 
 router = APIRouter(tags=["auth"])
@@ -75,6 +79,7 @@ async def signup_options() -> SignupOptions:
         regions=[Option(code=k, label=v) for k, v in REGIONS.items()],
         interests=[Option(code=k, label=v) for k, v in INTERESTS.items()],
         max_interests=MAX_INTERESTS,
+        consents=consent_docs(),
     )
 
 
@@ -107,7 +112,12 @@ async def pass_verify(
 async def signup(
     body: SignupRequest, service: AuthServiceDep, response: Response
 ) -> LoggedInResult:
-    result = await service.signup(body.signup_token, body.region_code, body.interests)
+    result = await service.signup(
+        body.signup_token,
+        body.region_code,
+        body.interests,
+        [c.to_choice() for c in body.consents],
+    )
     return _logged_in(response, result)
 
 
@@ -152,6 +162,26 @@ async def update_location(
     body: LocationUpdate, user: CurrentUser, service: AuthServiceDep
 ) -> UserOut:
     return UserOut.from_user(await service.set_location(user, body.lat, body.lng))
+
+
+@router.get("/me/consents", response_model=list[ConsentStatusOut])
+async def my_consents(user: CurrentUser) -> list[ConsentStatusOut]:
+    """약관·개인정보 동의 상태 (B6) — 마이페이지 '약관 및 동의'"""
+    return consent_status(user)
+
+
+@router.post("/me/consents", response_model=UserOut)
+async def agree_consents(
+    body: ConsentsUpdate, user: CurrentUser, service: AuthServiceDep
+) -> UserOut:
+    """동의하기 — 약관이 바뀌어 다시 받을 때, 마음 건강 기록에 나중에 동의할 때.
+
+    철회는 여기서 받지 않는다: 필수는 탈퇴로, 마음 건강은 PUT /me/self-assessment/consent
+    (기록을 함께 지워야 하므로 wellbeing 이 맡는다).
+    """
+    if not all(c.agreed for c in body.items):
+        raise ConsentError("동의 철회는 해당 화면에서 해 주세요.")
+    return UserOut.from_user(await service.set_consents(user, [c.to_choice() for c in body.items]))
 
 
 @router.post("/me/withdraw", response_model=WithdrawOut)

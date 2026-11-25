@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -72,6 +72,9 @@ class WellbeingRepository:
             .limit(limit)
         )
         return list(await self.session.scalars(q))
+
+    async def delete_assessments(self, user_id: uuid.UUID) -> None:
+        await self.session.execute(delete(SelfAssessment).where(SelfAssessment.user_id == user_id))
 
     async def last_assessment(self, user_id: uuid.UUID, kind: str) -> SelfAssessment | None:
         found = await self.assessments_of(user_id, kind, 1)

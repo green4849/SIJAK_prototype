@@ -626,6 +626,33 @@ export interface paths {
         patch: operations["update_me_api_v1_me_patch"];
         trace?: never;
     };
+    "/api/v1/me/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Consents
+         * @description 약관·개인정보 동의 상태 (B6) — 마이페이지 '약관 및 동의'
+         */
+        get: operations["my_consents_api_v1_me_consents_get"];
+        put?: never;
+        /**
+         * Agree Consents
+         * @description 동의하기 — 약관이 바뀌어 다시 받을 때, 마음 건강 기록에 나중에 동의할 때.
+         *
+         *     철회는 여기서 받지 않는다: 필수는 탈퇴로, 마음 건강은 PUT /me/self-assessment/consent
+         *     (기록을 함께 지워야 하므로 wellbeing 이 맡는다).
+         */
+        post: operations["agree_consents_api_v1_me_consents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/guardians": {
         parameters: {
             query?: never;
@@ -713,6 +740,26 @@ export interface paths {
         put?: never;
         /** Submit Assessment */
         post: operations["submit_assessment_api_v1_me_self_assessment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/self-assessment/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Health Consent
+         * @description 마음 건강 기록 동의·철회. 철회하면 지금까지의 점검 기록을 먼저 지운다
+         */
+        put: operations["set_health_consent_api_v1_me_self_assessment_consent_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1357,6 +1404,54 @@ export interface components {
             user_id: string;
         };
         /**
+         * ConsentChoiceIn
+         * @description 동의 한 항목 — version 은 사용자가 본 문서의 버전 (GET /auth/options 의 consents)
+         */
+        ConsentChoiceIn: {
+            /** Agreed */
+            agreed: boolean;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "terms" | "privacy" | "location" | "health";
+            /** Version */
+            version: string;
+        };
+        /** ConsentDocOut */
+        ConsentDocOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "terms" | "privacy" | "location" | "health";
+            /** Required */
+            required: boolean;
+            /** Version */
+            version: string;
+        };
+        /** ConsentStatusOut */
+        ConsentStatusOut: {
+            /** Agreed */
+            agreed: boolean;
+            /** Decided At */
+            decided_at: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "terms" | "privacy" | "location" | "health";
+            /** Required */
+            required: boolean;
+            /** Version */
+            version: string;
+        };
+        /** ConsentsUpdate */
+        ConsentsUpdate: {
+            /** Items */
+            items: components["schemas"]["ConsentChoiceIn"][];
+        };
+        /**
          * FriendCard
          * @description 친구 찾기 카드 (④) — 전화번호·생년월일 등 개인정보는 넣지 않는다
          */
@@ -1454,6 +1549,16 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HealthConsentIn */
+        HealthConsentIn: {
+            /** Agreed */
+            agreed: boolean;
+        };
+        /** HealthConsentOut */
+        HealthConsentOut: {
+            /** Health Consent */
+            health_consent: boolean;
         };
         /**
          * LocationUpdate
@@ -1853,6 +1958,8 @@ export interface components {
         };
         /** SignupOptions */
         SignupOptions: {
+            /** Consents */
+            consents: components["schemas"]["ConsentDocOut"][];
             /** Interests */
             interests: components["schemas"]["Option"][];
             /** Max Interests */
@@ -1862,6 +1969,8 @@ export interface components {
         };
         /** SignupRequest */
         SignupRequest: {
+            /** Consents */
+            consents?: components["schemas"]["ConsentChoiceIn"][];
             /** Interests */
             interests?: string[];
             /** Region Code */
@@ -2023,6 +2132,8 @@ export interface components {
              * Format: date
              */
             birth_date: string;
+            /** Consent Needed */
+            consent_needed: boolean;
             /**
              * Gender
              * @enum {string}
@@ -2030,6 +2141,8 @@ export interface components {
             gender: "M" | "F";
             /** Has Location */
             has_location: boolean;
+            /** Health Consent */
+            health_consent: boolean;
             /**
              * Id
              * Format: uuid
@@ -3337,6 +3450,59 @@ export interface operations {
             };
         };
     };
+    my_consents_api_v1_me_consents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentStatusOut"][];
+                };
+            };
+        };
+    };
+    agree_consents_api_v1_me_consents_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_guardians_api_v1_me_guardians_get: {
         parameters: {
             query?: never;
@@ -3512,6 +3678,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssessmentResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_health_consent_api_v1_me_self_assessment_consent_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HealthConsentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthConsentOut"];
                 };
             };
             /** @description Validation Error */

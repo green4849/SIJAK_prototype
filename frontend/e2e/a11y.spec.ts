@@ -15,6 +15,7 @@ const STATIC_ROUTES = [
   '/companion', '/me/wellbeing', '/me/wellbeing/check/phq9', '/me/wellbeing/check/who5', '/me/wellbeing/history', '/sos', '/me/guardians', // C8·C10·C11 (화면·데모)
   '/welfare', '/welfare/w-1', '/brain', '/brain/match', '/brain/calc', // C7·두뇌 운동 (화면·데모)
   '/notifications', '/me/leave', '/admin', // 알림함·B3·B7 (화면·데모)
+  '/me/consents', '/legal/terms', '/legal/policy', // B6 약관·동의
 ]
 
 async function dynamicRoutes(page: Page) {

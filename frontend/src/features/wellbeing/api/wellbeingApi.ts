@@ -21,4 +21,7 @@ export const wellbeingApi = {
   form: (kind: AssessmentKind) => api.get<AssessmentForm>(`/me/self-assessment/${kind}`),
   submit: (kind: AssessmentKind, answers: number[]) =>
     api.post<AssessmentResult>('/me/self-assessment', { kind, answers } satisfies Schema<'AssessmentIn'>),
+  /** 마음 건강 기록(민감정보) 동의·철회 — 철회하면 서버가 지금까지의 점검 기록을 지운다 (B6) */
+  setHealthConsent: (agreed: boolean) =>
+    api.put<Schema<'HealthConsentOut'>>('/me/self-assessment/consent', { agreed } satisfies Schema<'HealthConsentIn'>),
 }

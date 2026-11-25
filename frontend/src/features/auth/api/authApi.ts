@@ -7,6 +7,9 @@ export type Gender = User['gender']
 export type ProfileUpdate = Schema<'ProfileUpdate'>
 export type Option = Schema<'Option'>
 export type SignupOptions = Schema<'SignupOptions'>
+export type ConsentDoc = Schema<'ConsentDocOut'>
+export type ConsentStatus = Schema<'ConsentStatusOut'>
+export type ConsentChoice = Schema<'ConsentChoiceIn'>
 /** birth_date: YYYY-MM-DD */
 export type PassStartInput = Schema<'PassStartRequest'>
 export type PassStartResult = Schema<'PassStartResponse'>
@@ -25,10 +28,10 @@ export const authApi = {
   verifyPass: (session_id: string, code: string) =>
     api.post<AuthResult>('/auth/pass/verify', { session_id, code } satisfies Schema<'PassVerifyRequest'>, noRetry),
 
-  signup: (signup_token: string, region_code: string, interests: string[]) =>
+  signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[]) =>
     api.post<LoggedInResult>(
       '/auth/signup',
-      { signup_token, region_code, interests } satisfies Schema<'SignupRequest'>,
+      { signup_token, region_code, interests, consents } satisfies Schema<'SignupRequest'>,
       noRetry,
     ),
 
@@ -43,6 +46,13 @@ export const authApi = {
   /** GPS 좌표 → 서버가 ≈1km 단위로 뭉개서 저장 */
   updateLocation: (lat: number, lng: number) =>
     api.put<User>('/me/location', { lat, lng } satisfies Schema<'LocationUpdate'>),
+
+  /** 약관·개인정보 동의 상태 (B6) */
+  consents: () => api.get<ConsentStatus[]>('/me/consents'),
+
+  /** 동의하기 — 약관이 바뀌어 다시 받을 때 (철회는 받지 않는다) */
+  agreeConsents: (items: ConsentChoice[]) =>
+    api.post<User>('/me/consents', { items } satisfies Schema<'ConsentsUpdate'>),
 
   /** 회원 탈퇴 (B3) — 백엔드 없음, 임시 계약 shared/api/draft.ts */
   withdraw: (reason: string | null) =>

@@ -28,6 +28,11 @@ export interface DUser {
   /** 동의한 경우만, 백엔드처럼 소수점 2자리(≈1km)로 뭉갠 좌표 [위도, 경도] */
   geo: [number, number] | null
   last_login: number
+  /**
+   * 약관 동의 (B6) — 종류별 마지막 결정. 없으면 시드 회원(둘러보기 등)이라 모두 동의한 것으로 본다.
+   * 백엔드는 쌓기만 하는 기록이지만 시연은 지금 상태만 있으면 된다
+   */
+  consents?: Partial<Record<string, { version: string; agreed: boolean; at: string }>>
 }
 
 export interface DFriendRequest {
