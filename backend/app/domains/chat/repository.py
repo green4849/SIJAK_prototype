@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
-from app.domains.chat.models import ChatMessage, ChatRoom
+from app.domains.chat.models import ChatMessage, ChatRoom, PendingMediaDeletion
 
 
 class ChatRepository:
@@ -83,6 +83,10 @@ class ChatRepository:
 
     async def get_message(self, message_id: int) -> ChatMessage | None:
         return await self.session.get(ChatMessage, message_id)
+
+    async def has_audio_key(self, key: str) -> bool:
+        query = select(ChatMessage.id).where(ChatMessage.audio_key == key).limit(1)
+        return await self.session.scalar(query) is not None
 
     async def message_context(self, message_id: int) -> list[ChatMessage]:
         anchor = await self.get_message(message_id)
@@ -200,3 +204,24 @@ class ChatRepository:
 
     async def commit(self) -> None:
         await self.session.commit()
+
+    async def queue_media_deletions(self, keys: list[str]) -> None:
+        if keys:
+            await self.session.execute(
+                insert(PendingMediaDeletion)
+                .values([{"key": k} for k in set(keys)])
+                .on_conflict_do_nothing()
+            )
+
+    async def pending_media_deletions(self, limit: int = 500) -> list[PendingMediaDeletion]:
+        return list(
+            await self.session.scalars(
+                select(PendingMediaDeletion).order_by(PendingMediaDeletion.created_at).limit(limit)
+            )
+        )
+
+    async def remove_media_deletion(self, row: PendingMediaDeletion) -> None:
+        await self.session.delete(row)
+
+    async def rollback(self) -> None:
+        await self.session.rollback()

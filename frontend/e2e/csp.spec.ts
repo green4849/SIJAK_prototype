@@ -27,11 +27,11 @@ async function withCsp(page: Page) {
   return violations
 }
 
-test('H42: 정책에 바깥은 지도·사진 두 곳뿐이고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
+test('H42: 정책에서 지도·사진·오류 수집 도메인만 허용하고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
   expect(CSP).toContain("frame-ancestors 'none'")
   expect(CSP).toContain("script-src 'self';")
   expect(CSP).not.toContain('unsafe-inline')
-  expect(CSP.match(/https:\/\/[^\s;]+/g)).toEqual(['https://images.unsplash.com', 'https://nominatim.openstreetmap.org'])
+  expect(CSP.match(/https:\/\/[^\s;]+/g)).toEqual(['https://images.unsplash.com', 'https://nominatim.openstreetmap.org', 'https://*.ingest.sentry.io', 'https://*.ingest.us.sentry.io', 'https://*.ingest.de.sentry.io'])
 })
 
 test('3D 시작이: three.js 가 모델 안의 그림을 blob: 주소로 fetch 하므로 connect-src 에 blob: 이 있다', () => {

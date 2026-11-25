@@ -14,6 +14,7 @@ from datetime import datetime, time, timedelta, timezone
 
 from app.core.config import get_settings
 from app.core.database import SessionLocal
+from app.core.observability import init_observability, report_exception
 from app.core.storage import get_media_storage
 from app.jobs import run_daily
 
@@ -31,7 +32,11 @@ def seconds_until_next_run(now: datetime, hour_kst: int) -> float:
 
 
 async def daily() -> int:
-    result = await run_daily(SessionLocal, get_media_storage())
+    try:
+        result = await run_daily(SessionLocal, get_media_storage())
+    except Exception as exc:
+        report_exception(exc, "daily_jobs")
+        return 1
     print(result)
     return 0
 
@@ -44,12 +49,13 @@ async def loop() -> int:
         await asyncio.sleep(wait)
         try:
             await run_daily(SessionLocal, get_media_storage())
-        except Exception:  # noqa: BLE001 — 실패해도 다음 날 다시 돈다
-            log.exception("예약 작업 실패")
+        except Exception as exc:  # noqa: BLE001 — 실패해도 다음 날 다시 돈다
+            report_exception(exc, "daily_jobs")
 
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+    init_observability()
     match sys.argv[1:]:
         case ["daily"]:
             return asyncio.run(daily())

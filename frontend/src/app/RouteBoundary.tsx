@@ -29,6 +29,12 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, State> {
     return { error }
   }
 
+  componentDidCatch(error: Error) {
+    if (import.meta.env.VITE_SENTRY_DSN) {
+      void import('@sentry/react').then(({ captureException }) => captureException(error))
+    }
+  }
+
   render() {
     const { error } = this.state
     if (!error) return this.props.children

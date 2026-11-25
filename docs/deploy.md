@@ -74,3 +74,5 @@ docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d
 - 요청 횟수 제한 기록 (`core/ratelimit.py` `MemoryRateLimitStore`)
 
 → B9에서 Redis 구현으로 바꾼 뒤에 `WEB_CONCURRENCY`를 올리거나 서버를 늘린다. 그 전에 운영(`ENV=prod`)에서 `WEB_CONCURRENCY`를 2 이상으로 주면 API가 뜨지 않는다 — 요청 제한이 워커마다 따로 세어져 느슨해지는 것을 막으려고 (H42). 메모리 기록은 1,000번 기록마다 창이 지난 키를 지워 계속 쌓이지 않는다
+
+예약 정리의 실패 재시도, S3 음성 저장, 오류 수집, 암호화 백업과 키 교체는 [운영 작업 문서](operations.md)를 따른다.

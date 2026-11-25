@@ -1,14 +1,14 @@
 """1:1 대화 (⑤). 친구끼리만 대화할 수 있다 — 낯선 사람의 접근을 막는 기본 안전장치."""
 
+import asyncio
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from app.core.config import get_settings
 from app.core.errors import DomainError, ForbiddenError, NotFoundError
-from app.core.storage import LocalMediaStorage
+from app.core.storage import MediaStorage
 from app.domains.auth.service import AuthService
 from app.domains.chat.models import ChatMessage, ChatRoom
 from app.domains.chat.repository import ChatRepository
@@ -50,7 +50,7 @@ class ChatService:
         auth: AuthService,
         friends: FriendService,
         risk: RiskService,
-        storage: LocalMediaStorage,
+        storage: MediaStorage,
         notifications: NotificationService,
     ) -> None:
         self.repo = repo
@@ -143,7 +143,7 @@ class ChatService:
             raise InvalidMessageError("녹음된 소리가 없어요. 다시 녹음해 주세요.")
         if len(data) > get_settings().voice_max_bytes:
             raise InvalidMessageError("음성이 너무 길어요. 조금 짧게 나눠서 보내 주세요.")
-        key = self.storage.save(data, ext)
+        key = await asyncio.to_thread(self.storage.save, data, ext)
         msg = ChatMessage(
             room_id=room.id,
             sender_id=me.id,
@@ -151,14 +151,27 @@ class ChatService:
             audio_key=key,
             duration_sec=max(1, min(duration_sec, 600)),
         )
-        return await self._save(room, msg)
+        try:
+            return await self._save(room, msg)
+        except Exception:
+            await self.repo.rollback()
+            if not await self.repo.has_audio_key(key):
+                await self.repo.queue_media_deletions([key])
+                await self.repo.commit()
+            raise
 
-    async def voice_file(self, me: "User", message_id: int) -> Path:
+    async def voice_file(self, me: "User", message_id: int) -> tuple[bytes, str]:
         msg = await self.repo.get_message(message_id)
         if msg is None or msg.kind != "voice" or not msg.audio_key:
             raise NotFoundError("음성을 찾을 수 없어요.")
         await self._member_room(me, msg.room_id)
-        return self.storage.path(msg.audio_key)
+        try:
+            data = await asyncio.to_thread(self.storage.read, msg.audio_key)
+        except FileNotFoundError:
+            raise NotFoundError("음성을 찾을 수 없어요.") from None
+        ext = msg.audio_key.rsplit(".", 1)[-1]
+        content_type = next(kind for kind, suffix in VOICE_TYPES.items() if suffix == ext)
+        return data, content_type
 
     # ---------- 대화 주제 (C12) ----------
 
@@ -197,18 +210,28 @@ class ChatService:
             for m in batch:
                 m.audio_key = None
                 m.body = VOICE_EXPIRED_TEXT
+            await self.repo.queue_media_deletions(keys)
             await self.repo.commit()
-            for k in keys:
-                self.storage.delete(k)
             total += len(batch)
+        await self.drain_media_deletions()
         return total
 
     async def voice_keys_in_rooms_of(self, user_id: uuid.UUID) -> list[str]:
         """탈퇴한 분을 지우기 전에 — 그 방들의 음성 파일 (방과 메시지는 DB에서 함께 지워진다)"""
         return await self.repo.voice_keys_in_rooms_of(user_id)
 
-    def delete_voice_files(self, keys: list[str]) -> int:
-        return sum(self.storage.delete(k) for k in keys)
+    async def queue_voice_deletions(self, keys: list[str]) -> None:
+        await self.repo.queue_media_deletions(keys)
+
+    async def drain_media_deletions(self) -> int:
+        total = 0
+        while batch := await self.repo.pending_media_deletions():
+            for row in batch:
+                await asyncio.to_thread(self.storage.delete, row.key)
+                await self.repo.remove_media_deletion(row)
+                await self.repo.commit()
+                total += 1
+        return total
 
     async def moderation_context(self, message_id: int) -> list[ChatMessage]:
         """신고 메시지 앞뒤 최대 5개. 운영자 권한은 admin router에서 확인한다."""

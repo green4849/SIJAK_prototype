@@ -2954,7 +2954,9 @@ export interface operations {
     voice_file_api_v1_chats_voice__message_id__get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                Range?: string | null;
+            };
             path: {
                 message_id: number;
             };

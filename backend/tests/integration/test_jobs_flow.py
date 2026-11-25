@@ -147,3 +147,78 @@ async def test_relation_index_for_everyone(
     # 0.25·0 + 0.30·0 + 0.20·70 + 0.15·0 + 0.10·70 = 21 → '위험'
     assert w["relation_score"] == 21
     assert w["signal"] == "10일째 접속이 없어요"
+
+
+async def test_voice_delete_failure_is_retried_from_database(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession], tmp_path: Path
+) -> None:
+    from app.domains.chat.models import PendingMediaDeletion
+
+    class FailingStorage(LocalMediaStorage):
+        def delete(self, key: str) -> bool:
+            raise OSError("storage unavailable")
+
+    storage = LocalMediaStorage(str(tmp_path))
+    ha, a, hb, b, rid = await _room(client)
+    _, key = await _voice(db_sessionmaker, storage, rid, a["id"], days_ago=91)
+    import pytest
+
+    with pytest.raises(OSError):
+        await expire_voice(db_sessionmaker, FailingStorage(str(tmp_path)))
+    async with db_sessionmaker() as session:
+        assert await session.get(PendingMediaDeletion, key) is not None
+    assert await expire_voice(db_sessionmaker, storage) == 0
+    assert not storage.path(key).exists()
+    async with db_sessionmaker() as session:
+        assert await session.get(PendingMediaDeletion, key) is None
+
+
+async def test_daily_job_rejects_concurrent_execution(
+    db_sessionmaker: async_sessionmaker[AsyncSession], tmp_path: Path
+) -> None:
+    import pytest
+    from sqlalchemy import text
+
+    from app.jobs import run_daily
+
+    async with db_sessionmaker() as session:
+        connection = await session.connection()
+        await connection.execute(text("SELECT pg_advisory_lock(608020261125)"))
+        try:
+            with pytest.raises(RuntimeError, match="이미 실행"):
+                await run_daily(db_sessionmaker, LocalMediaStorage(str(tmp_path)))
+        finally:
+            await connection.execute(text("SELECT pg_advisory_unlock(608020261125)"))
+
+
+async def test_data_key_rotation_is_resumable(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession], monkeypatch
+) -> None:
+    import base64
+    import os
+
+    from app.core.config import get_settings
+    from app.core.security import decrypt
+    from app.domains.emergency.models import Guardian
+    from scripts import rotate_data_key
+
+    headers, user = await signup_user(client, "키교체시험")
+    response = await client.post(
+        f"{API}/me/guardians",
+        headers=headers,
+        json={"name": "가상보호자", "relation": "이웃", "phone": "01099998888"},
+    )
+    assert response.status_code == 201
+    settings = get_settings()
+    monkeypatch.setattr(settings, "data_encryption_previous_keys", [settings.data_encryption_key])
+    monkeypatch.setattr(settings, "data_encryption_key", base64.b64encode(os.urandom(32)).decode())
+    monkeypatch.setattr(rotate_data_key, "SessionLocal", db_sessionmaker)
+    assert (await rotate_data_key.rotate(False))["needs_rotation"] == 2
+    assert (await rotate_data_key.rotate(True))["rotated"] == 2
+    assert (await rotate_data_key.rotate(True))["rotated"] == 0
+    monkeypatch.setattr(settings, "data_encryption_previous_keys", [])
+    async with db_sessionmaker() as session:
+        guardian = await session.scalar(select(Guardian))
+        assert guardian is not None and decrypt(guardian.phone_enc) == "01099998888"
+        account = await session.get(User, uuid.UUID(user["id"]))
+        assert account is not None and decrypt(account.phone_enc)
