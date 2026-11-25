@@ -17,9 +17,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.storage import LocalMediaStorage
+from app.core.observability import report_exception
+from app.core.storage import MediaStorage
 from app.domains.activity.repository import ActivityRepository
 from app.domains.activity.service import ActivityService
 from app.domains.auth.repository import AuthRepository
@@ -50,7 +52,7 @@ class _Services:
     wellbeing: WellbeingService
 
 
-def _services(session: AsyncSession, storage: LocalMediaStorage) -> _Services:
+def _services(session: AsyncSession, storage: MediaStorage) -> _Services:
     auth = AuthService(AuthRepository(session), get_identity_provider())
     risk = RiskService(RiskRepository(session))
     points = PointService(PointRepository(session))
@@ -65,7 +67,7 @@ def _services(session: AsyncSession, storage: LocalMediaStorage) -> _Services:
 
 
 async def purge_withdrawn(
-    sessions: SessionFactory, storage: LocalMediaStorage, today: date | None = None
+    sessions: SessionFactory, storage: MediaStorage, today: date | None = None
 ) -> int:
     """완전 삭제일이 된 탈퇴 계정을 지운다 (B3). 그 분이 있던 대화방의 음성 파일도 함께."""
     purged = 0
@@ -73,26 +75,29 @@ async def purge_withdrawn(
         s = _services(session, storage)
         for user in await s.auth.withdrawn_due(today):
             keys = await s.chat.voice_keys_in_rooms_of(user.id)
+            await s.chat.queue_voice_deletions(keys)
             await s.auth.purge_withdrawn(user)  # 여기서 커밋 — 성공한 뒤에만 파일을 지운다
-            s.chat.delete_voice_files(keys)
+            await s.chat.drain_media_deletions()
             purged += 1
+        await s.chat.drain_media_deletions()
     return purged
 
 
 async def expire_voice(
-    sessions: SessionFactory, storage: LocalMediaStorage, now: datetime | None = None
+    sessions: SessionFactory, storage: MediaStorage, now: datetime | None = None
 ) -> int:
     """보관 기간이 지난 음성 메시지 파일을 지운다 (B3)"""
     async with sessions() as session:
         return await _services(session, storage).chat.expire_old_voice(now or datetime.now(UTC))
 
 
-async def refresh_relation_index(sessions: SessionFactory, storage: LocalMediaStorage) -> int:
+async def refresh_relation_index(sessions: SessionFactory, storage: MediaStorage) -> int:
     """이용 중인 모든 분의 사회적 관계 지수를 계산해 이번 주 값으로 남긴다 (C11).
 
     한 분에서 오류가 나도 나머지는 계속한다.
     """
     done = 0
+    failures = 0
     async with sessions() as session:
         s = _services(session, storage)
         users = await s.auth.list_active_users()
@@ -103,17 +108,42 @@ async def refresh_relation_index(sessions: SessionFactory, storage: LocalMediaSt
                 me = await s.auth.get_active_user(user.id)
                 await s.wellbeing.relation_index(me)
                 done += 1
-            except Exception:  # noqa: BLE001 — 한 분의 실패로 전체를 멈추지 않는다
-                log.exception("관계 지수 계산 실패: %s", user.id)
+            except Exception as exc:  # noqa: BLE001 — 한 분의 실패로 전체를 멈추지 않는다
+                failures += 1
+                report_exception(exc, "relation_index")
                 await session.rollback()
+    if failures:
+        raise RuntimeError(f"관계 지수 계산 실패 {failures}건")
     return done
 
 
-async def run_daily(sessions: SessionFactory, storage: LocalMediaStorage) -> dict[str, int]:
-    result = {
-        "purged_users": await purge_withdrawn(sessions, storage),
-        "expired_voice": await expire_voice(sessions, storage),
-        "relation_index": await refresh_relation_index(sessions, storage),
-    }
-    log.info("예약 작업 끝: %s", result)
+async def _run_daily(sessions: SessionFactory, storage: MediaStorage) -> dict[str, int]:
+    result: dict[str, int] = {}
+    failures = 0
+    for name, task in (
+        ("purged_users", purge_withdrawn),
+        ("expired_voice", expire_voice),
+        ("relation_index", refresh_relation_index),
+    ):
+        try:
+            result[name] = await task(sessions, storage)
+        except Exception as exc:
+            failures += 1
+            report_exception(exc, name)
+    log.info("예약 작업 결과: %s", result)
+    if failures:
+        raise RuntimeError(f"예약 작업 실패 {failures}건")
     return result
+
+
+async def run_daily(sessions: SessionFactory, storage: MediaStorage) -> dict[str, int]:
+    # 세션 락은 사용자 삭제 중 발생하는 도메인 커밋과 독립된 연결에서 유지한다.
+    async with sessions() as guard:
+        connection = await guard.connection()
+        locked = await connection.scalar(text("SELECT pg_try_advisory_lock(608020261125)"))
+        if not locked:
+            raise RuntimeError("예약 작업이 이미 실행 중입니다")
+        try:
+            return await _run_daily(sessions, storage)
+        finally:
+            await connection.execute(text("SELECT pg_advisory_unlock(608020261125)"))

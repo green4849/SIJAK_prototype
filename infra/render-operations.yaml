@@ -1,0 +1,52 @@
+# 운영 작업 전용 Blueprint 예시. render.yaml에서 참조하지 않으므로 자동 생성되지 않는다.
+# Render Cron은 최소 월 $1 유료. 생성 전에 비용 확인과 승인 필요.
+# 음성/백업 버킷과 필요한 환경값을 먼저 준비한다. docs/operations.md 참조.
+services:
+  - type: cron
+    name: sijak-6080-operations
+    runtime: docker
+    region: singapore
+    plan: starter
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: python -m scripts.operations
+    schedule: "0 19 * * *" # 매일 한국 시각 04:00
+    autoDeployTrigger: off
+    envVars:
+      - key: ENV
+        value: prod
+      - key: DATABASE_URL
+        fromService: {type: web, name: sijak-6080-api, envVarKey: DATABASE_URL}
+      - key: JWT_SECRET
+        fromService: {type: web, name: sijak-6080-api, envVarKey: JWT_SECRET}
+      - key: DATA_ENCRYPTION_KEY
+        fromService: {type: web, name: sijak-6080-api, envVarKey: DATA_ENCRYPTION_KEY}
+      - key: PHONE_HASH_PEPPER
+        fromService: {type: web, name: sijak-6080-api, envVarKey: PHONE_HASH_PEPPER}
+      - key: CORS_ORIGINS
+        fromService: {type: web, name: sijak-6080-api, envVarKey: CORS_ORIGINS}
+      - key: IDENTITY_PROVIDER
+        fromService: {type: web, name: sijak-6080-api, envVarKey: IDENTITY_PROVIDER}
+      - key: ALLOW_MOCK_IDENTITY_IN_PROD
+        fromService: {type: web, name: sijak-6080-api, envVarKey: ALLOW_MOCK_IDENTITY_IN_PROD}
+      - key: DATA_ENCRYPTION_PREVIOUS_KEYS
+        sync: false # 처음에는 [] 입력, 키 교체 중에는 API와 같은 이전 키 목록
+      - key: SENTRY_DSN
+        sync: false # 미설정이면 빈 값
+      - key: MEDIA_STORAGE
+        value: s3
+      - key: MEDIA_S3_BUCKET
+        sync: false
+      - key: MEDIA_S3_ENDPOINT
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: BACKUP_S3_BUCKET
+        sync: false
+      - key: BACKUP_S3_ENDPOINT
+        sync: false
+      - key: BACKUP_ENCRYPTION_KEY
+        sync: false

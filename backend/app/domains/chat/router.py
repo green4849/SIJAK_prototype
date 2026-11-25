@@ -1,10 +1,11 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, File, Form, Header, Query, UploadFile
+from fastapi.responses import Response
 
 from app.core.config import get_settings
+from app.core.media_response import voice_response
 from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import CurrentUser
 from app.domains.chat.deps import ChatServiceDep
@@ -66,11 +67,17 @@ async def send_voice(
     duration_sec: Annotated[int, Form(ge=0)] = 0,
 ) -> MessageOut:
     await enforce(SEND_VOICE_PER_USER, me.id)
-    data = await audio.read()
+    data = await audio.read(get_settings().voice_max_bytes + 1)
     msg = await service.send_voice(me, room_id, data, audio.content_type or "", duration_sec)
     return MessageOut.of(msg, me.id, PREFIX)
 
 
 @router.get("/voice/{message_id}")
-async def voice_file(message_id: int, me: CurrentUser, service: ChatServiceDep) -> FileResponse:
-    return FileResponse(await service.voice_file(me, message_id))
+async def voice_file(
+    message_id: int,
+    me: CurrentUser,
+    service: ChatServiceDep,
+    range_header: Annotated[str | None, Header(alias="Range")] = None,
+) -> Response:
+    data, content_type = await service.voice_file(me, message_id)
+    return voice_response(data, content_type, range_header)
