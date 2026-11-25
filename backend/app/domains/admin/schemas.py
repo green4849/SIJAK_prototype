@@ -46,3 +46,11 @@ class AdminWatchOut(BaseModel):
     @classmethod
     def of(cls, w: WatchItem) -> "AdminWatchOut":
         return cls(**w.__dict__)
+
+
+class CaseMessageOut(BaseModel):
+    id: int
+    sender_name: str
+    body: str
+    created_at: datetime
+    is_reported: bool

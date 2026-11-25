@@ -165,6 +165,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/cases/{case_id}/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Context
+         * @description 신고된 메시지와 같은 방의 앞뒤 최대 5개 메시지. 음성 재생 주소는 제공하지 않는다.
+         */
+        get: operations["context_api_v1_admin_cases__case_id__context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/watch": {
         parameters: {
             query?: never;
@@ -1376,6 +1396,22 @@ export interface components {
              * @enum {string}
              */
             action: "warn" | "suspend" | "ban" | "dismiss";
+        };
+        /** CaseMessageOut */
+        CaseMessageOut: {
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Is Reported */
+            is_reported: boolean;
+            /** Sender Name */
+            sender_name: string;
         };
         /** CategoryOption */
         CategoryOption: {
@@ -2595,6 +2631,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminCaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    context_api_v1_admin_cases__case_id__context_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseMessageOut"][];
                 };
             };
             /** @description Validation Error */
