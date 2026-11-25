@@ -144,6 +144,7 @@ export const wellbeingRoutes: Route[] = [
       id: ev.id,
       created_at: ev.at,
       notified: s.guardians.filter((g) => g.uid === me.id).map((g) => ({ name: g.name, relation: g.relation })),
+      delivery_status: 'not_sent',
     }
     return json(out, 201)
   }],

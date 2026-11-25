@@ -16,7 +16,7 @@ import styles from './Emergency.module.css'
 const RELATIONS = ['아들', '딸', '배우자', '형제자매', '담당 복지사', '이웃'].map((v) => ({ value: v, label: v }))
 const MAX = 3
 
-/** 보호자 목록 + 추가 — 긴급 도움을 누르면 이분들께 알림이 가요 */
+/** 보호자 목록 + 추가 — 자동 알림은 아직 없고 직접 전화할 수 있다. */
 export function GuardianManager() {
   const { data, error, loading, setData, remove } = useGuardians()
   const [adding, setAdding] = useState(false)
@@ -62,7 +62,7 @@ export function GuardianManager() {
         }}
         onClose={() => setRemoving(null)}
       >
-        <p>긴급 도움을 눌러도 이분께는 알리지 않아요.</p>
+        <p>이분이 바로 전화하기 목록에서 빠져요.</p>
       </ConfirmSheet>
 
       {adding ? (

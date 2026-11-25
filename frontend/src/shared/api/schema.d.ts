@@ -1176,7 +1176,7 @@ export interface components {
             age: number;
             /**
              * Guardian Notified
-             * @description 최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지
+             * @description 최근 7일 안에 긴급 도움 요청을 기록했는지. 외부 알림 발송 여부가 아님
              */
             guardian_notified: boolean;
             /**
@@ -2008,13 +2008,19 @@ export interface components {
              */
             created_at: string;
             /**
+             * Delivery Status
+             * @description 외부 알림 발송 상태
+             * @constant
+             */
+            delivery_status: "not_sent";
+            /**
              * Id
              * Format: uuid
              */
             id: string;
             /**
              * Notified
-             * @description 알린 사람들 (보호자 + 담당 복지사)
+             * @description 요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음
              */
             notified: components["schemas"]["SosNotified"][];
         };

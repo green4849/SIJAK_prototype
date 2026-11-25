@@ -38,7 +38,7 @@ test('외롭다는 이야기가 많아지면 마음 날씨가 나빠진다 (말�
   expect(after).toBeLessThan(before)
 })
 
-test('홈 긴급 → 도움 요청 → 확인 → 보호자에게 알림', async ({ page }) => {
+test('홈 긴급 → 도움 요청 기록 → 자동 알림이 없음을 안내', async ({ page }) => {
   await startTour(page)
   await page.getByRole('link', { name: '긴급' }).click()
   await expect(page.getByRole('heading', { name: '긴급 도움' })).toBeVisible()
@@ -48,15 +48,14 @@ test('홈 긴급 → 도움 요청 → 확인 → 보호자에게 알림', async
   await expect(page.getByText('시연 화면이라 전화는 걸리지 않아요')).toBeVisible()
   await expect(page).toHaveURL(/\/sos/)
   await page.getByRole('button', { name: '도움 요청' }).click()
-  const sheet = page.getByRole('dialog', { name: '도움을 요청할까요?' })
+  const sheet = page.getByRole('dialog', { name: '도움 요청을 기록할까요?' })
   await expect(sheet).toContainText('김민수님 (아들)')
-  await sheet.getByRole('button', { name: '보호자에게 알리기' }).click()
-  // 시연에서는 보내지 않았다고 밝힌다
-  await expect(page.getByRole('heading', { name: '시연이라 보내지 않았어요' })).toBeVisible()
-  await expect(page.getByText('실제 앱에서는 이분들께 알려요.')).toBeVisible()
+  await sheet.getByRole('button', { name: '도움 요청 기록하기' }).click()
+  await expect(page.getByRole('heading', { name: '도움 요청을 기록했어요' })).toBeVisible()
+  await expect(page.getByText('보호자에게 자동으로 알리지는 않았어요. 급하면 아래에서 직접 전화해 주세요.')).toBeVisible()
 })
 
-test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 알리기', async ({ page }) => {
+test('보호자 추가·빼기, 말동무 위기 안내에서 도움 요청 기록', async ({ page }) => {
   await startTour(page)
   await page.goto('/me/guardians')
   await page.getByRole('button', { name: '보호자 추가' }).click()
@@ -74,8 +73,8 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 보호자에게 �
   await page.goto('/companion')
   await page.getByLabel('말동무에게 할 말').fill('살기 싫어요')
   await page.getByRole('button', { name: '보내기' }).click()
-  await page.getByRole('button', { name: '보호자에게 알리기' }).click()
-  await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('시연이라 보내지 않았어요')).toBeVisible()
+  await page.getByRole('button', { name: '도움 요청 기록하기' }).click()
+  await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('요청을 기록했어요. 자동 알림은 보내지 않았어요.')).toBeVisible()
 })
 
 test('요즘 마음 — 말동무 대화 정서를 따로 보여 주고, 상태마다 할 일 하나로 이어 준다', async ({ page }) => {

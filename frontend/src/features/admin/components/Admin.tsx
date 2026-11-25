@@ -89,7 +89,7 @@ export function WatchList() {
             <span className={styles.level} data-level={w.relation_score <= 20 ? 3 : w.relation_score <= 40 ? 2 : 1}>
               사회적 관계 지수 {w.relation_score}
             </span>
-            {w.guardian_notified && <span className={styles.status}>보호자에게 알림</span>}
+            {w.guardian_notified && <span className={styles.status}>긴급 도움 기록</span>}
           </div>
           <p className={styles.target}>
             {w.name}님 <span className={styles.meta}>{w.age}세 · {w.region_name}</span>

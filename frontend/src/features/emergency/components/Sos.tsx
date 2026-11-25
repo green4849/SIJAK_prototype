@@ -1,7 +1,6 @@
 import { CircleCheck, HeartHandshake, Phone, Siren, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { IS_DEMO } from '@/shared/lib/demo'
 import { toast } from '@/shared/lib/toast'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
@@ -12,7 +11,7 @@ import { useGuardians, useSos } from '../hooks/useEmergency'
 import styles from './Emergency.module.css'
 
 /**
- * 긴급 도움 (C10) — 큰 버튼 하나 → 확인 한 번 → 보호자·담당 복지사에게 알림.
+ * 긴급 도움 (C10) — 큰 버튼 하나 → 확인 한 번 → 요청을 기록한다.
  * 잘못 누르는 일을 막으려고 확인 창을 한 번 거친다 (바로 전화하기는 확인 없이).
  */
 export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
@@ -32,11 +31,11 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
         <section className={styles.done} role="status" aria-labelledby="sos-done">
           <CircleCheck aria-hidden="true" size={ICON.lg} strokeWidth={ICON_STROKE} />
           <h2 id="sos-done" className={styles.doneTitle}>
-            {IS_DEMO ? '시연이라 보내지 않았어요' : '알렸어요'}
+            도움 요청을 기록했어요
           </h2>
-          {IS_DEMO && sos.result.notified.length > 0 && <p>실제 앱에서는 이분들께 알려요.</p>}
+          <p>보호자에게 자동으로 알리지는 않았어요. 급하면 아래에서 직접 전화해 주세요.</p>
           {sos.result.notified.length > 0 && (
-            <ul className={styles.notified}>
+            <ul className={styles.notified} aria-label="등록된 보호자">
               {sos.result.notified.map((n) => (
                 <li key={n.name}>
                   {n.name}님 ({n.relation})
@@ -86,7 +85,8 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
         )}
       </section>
 
-      <Sheet open={confirm} title="도움을 요청할까요?" onClose={() => setConfirm(false)}>
+      <Sheet open={confirm} title="도움 요청을 기록할까요?" onClose={() => setConfirm(false)}>
+        <p>자동 알림은 아직 보내지 않아요. 급하면 직접 전화해 주세요.</p>
         {list.length > 0 ? (
           <ul className={styles.notified}>
             {list.map((g) => (
@@ -101,7 +101,7 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
         {sos.error && <Alert>{sos.error}</Alert>}
         {list.length > 0 && (
           <Button variant="danger" block large disabled={sos.pending} onClick={() => void send()}>
-            {sos.pending ? '알리는 중…' : '보호자에게 알리기'}
+            {sos.pending ? '기록하는 중…' : '도움 요청 기록하기'}
           </Button>
         )}
       </Sheet>
@@ -109,26 +109,24 @@ export function SosPanel({ guardiansHref }: { guardiansHref: string }) {
   )
 }
 
-/** 다른 화면(말동무 위기 안내 등)에 붙이는 '보호자에게 알리기' 버튼 — 확인 없이 바로 */
+/** 다른 화면(말동무 위기 안내 등)에 붙이는 도움 요청 기록 버튼. */
 export function NotifyGuardianButton() {
   const sos = useSos()
   async function send() {
     const r = await sos.send()
-    if (!r) return toast('알리지 못했어요. 바로 전화해 주세요.', 'error')
-    if (IS_DEMO) return toast('시연이라 보내지 않았어요', 'info')
-    const who = r.notified.map((n) => `${n.name}님`).join(', ')
-    toast(who ? `${who}께 알렸어요` : '알릴 보호자가 없어요. 바로 전화해 주세요.', who ? 'success' : 'error')
+    if (!r) return toast('요청을 기록하지 못했어요. 바로 전화해 주세요.', 'error')
+    toast('요청을 기록했어요. 자동 알림은 보내지 않았어요. 직접 전화해 주세요.', 'info')
   }
   if (sos.result)
     return (
       <p className={styles.sentNote} role="status">
         <CircleCheck aria-hidden="true" size={ICON.inline} strokeWidth={ICON_STROKE} />{' '}
-        {IS_DEMO ? '시연이라 보내지 않았어요' : '보호자에게 알렸어요'}
+        요청을 기록했어요. 자동 알림은 보내지 않았어요.
       </p>
     )
   return (
     <Button variant="secondary" block disabled={sos.pending} onClick={() => void send()}>
-      보호자에게 알리기
+      도움 요청 기록하기
     </Button>
   )
 }
