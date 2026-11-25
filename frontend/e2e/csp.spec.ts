@@ -27,11 +27,20 @@ async function withCsp(page: Page) {
   return violations
 }
 
-test('H42: 정책에 바깥은 지도·사진 두 곳뿐이고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
+test('H42: 정책의 바깥 주소는 지도·사진과 휴대폰 인증(B4)뿐이고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
   expect(CSP).toContain("frame-ancestors 'none'")
-  expect(CSP).toContain("script-src 'self';")
   expect(CSP).not.toContain('unsafe-inline')
-  expect(CSP.match(/https:\/\/[^\s;]+/g)).toEqual(['https://images.unsplash.com', 'https://nominatim.openstreetmap.org'])
+  // 스크립트는 이 사이트 것과 reCAPTCHA(인증 문자 보내기 전 사람 확인)만
+  expect(CSP).toContain("script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;")
+  expect([...new Set(CSP.match(/https:\/\/[^\s;]+/g))].sort()).toEqual([
+    'https://identitytoolkit.googleapis.com', // Firebase 전화 인증
+    'https://images.unsplash.com',
+    'https://nominatim.openstreetmap.org',
+    'https://recaptcha.google.com/recaptcha/',
+    'https://securetoken.googleapis.com', // Firebase 전화 인증 토큰
+    'https://www.google.com/recaptcha/',
+    'https://www.gstatic.com/recaptcha/',
+  ])
 })
 
 test('3D 시작이: three.js 가 모델 안의 그림을 blob: 주소로 fetch 하므로 connect-src 에 blob: 이 있다', () => {

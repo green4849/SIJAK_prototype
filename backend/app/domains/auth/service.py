@@ -116,8 +116,17 @@ class AuthService:
             self._ensure_can_login(user)
             return LoggedIn(user, await self._login(user))
 
+        same_phone = await self.repo.get_user_by_phone_hash(hash_phone(ident.phone))
+        if same_phone is not None and ident.phone_verified:
+            # 문자로 그 번호의 주인임을 확인했다 — 인증 방식이 바뀌어(Mock → Firebase) CI 가 달라도
+            # 같은 번호의 계정이 본인 계정이다. 새 CI 로 이어 두고 로그인
+            await self.repo.set_ci(same_phone, ident.ci)
+            await self._lift_expired_suspension(same_phone)
+            self._ensure_can_login(same_phone)
+            return LoggedIn(same_phone, await self._login(same_phone))
+
         self._ensure_age(ident.birth_date)
-        if await self.repo.get_user_by_phone_hash(hash_phone(ident.phone)):
+        if same_phone is not None:
             raise ConflictError("이미 다른 분이 쓰고 있는 전화번호예요.", code="phone_in_use")
         return SignupRequired(self._issue_signup_token(ident), ident.name)
 

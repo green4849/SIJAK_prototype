@@ -25,8 +25,9 @@ export const authApi = {
   startPass: (input: PassStartInput) =>
     api.post<PassStartResult>('/auth/pass/start', input, noRetry),
 
-  verifyPass: (session_id: string, code: string) =>
-    api.post<AuthResult>('/auth/pass/verify', { session_id, code } satisfies Schema<'PassVerifyRequest'>, noRetry),
+  /** proof: Mock 은 화면의 인증번호 { code }, Firebase 는 문자 확인 뒤 { id_token } */
+  verifyPass: (session_id: string, proof: { code: string } | { id_token: string }) =>
+    api.post<AuthResult>('/auth/pass/verify', { session_id, ...proof } satisfies Schema<'PassVerifyRequest'>, noRetry),
 
   signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[]) =>
     api.post<LoggedInResult>(

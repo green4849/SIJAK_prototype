@@ -51,6 +51,37 @@
 
 **서비스 이름이 이미 쓰이는 경우** Render 가 주소 뒤에 글자를 붙인다(`sijak-6080-xxxx.onrender.com`). 그때는 실제 주소로 `render.yaml` 의 `CORS_ORIGINS`·`VITE_SITE_URL`·`/api/*` rewrite `destination` 을 고쳐 커밋하고 Blueprint 를 다시 맞춘다(Sync).
 
+## 휴대폰 인증 문자 켜기 (Firebase 전화 인증, B4)
+
+지금은 `IDENTITY_PROVIDER=mock` — 화면에 인증번호가 떠서 주소를 아는 누구나 가입할 수 있다. 실제 문자로 바꾸는 순서.
+문자는 브라우저의 Firebase 가 보내고, 서버는 Firebase 가 준 확인 토큰을 Google 공개키로 검증만 한다
+(`backend/app/integrations/identity/firebase.py`) → **서비스 계정 키(비밀 파일)가 필요 없다.**
+
+> 무료(Spark) 요금제로는 인증 문자를 보낼 수 없다 — Firebase 문서: 인증 문자는 "Pay as you go (Blaze) plan only".
+> 한국 문자 한 건 값은 [Identity Platform 요금](https://cloud.google.com/identity-platform/pricing) 표에서 직접 확인할 것.
+
+1. **프로젝트** — [Firebase 콘솔](https://console.firebase.google.com) → 프로젝트 만들기 (Google 애널리틱스는 꺼도 됨)
+2. **요금제** — 왼쪽 아래 요금제 → **Blaze** 로 업그레이드(카드 등록).
+   이어서 Google Cloud 콘솔 → 결제 → **예산 및 알림**에서 월 예산(예: 5,000원)과 50%·90%·100% 알림을 만든다.
+   예산 알림은 알려 주기만 하고 멈추지는 않는다
+3. **전화 로그인 켜기** — Authentication → 시작하기 → 로그인 방법 → **전화** 사용 설정
+4. **문자 보낼 나라 제한** (요금 폭탄 막기) — Authentication → 설정 → **SMS 지역 정책** → 허용: 대한민국만
+5. **승인된 도메인** — Authentication → 설정 → 승인된 도메인 → `sijak-6080.onrender.com` 추가
+6. **웹 앱 등록** — 프로젝트 설정 → 일반 → 내 앱 → 웹(`</>`) → 앱 이름만 적고 등록 →
+   보이는 설정에서 `projectId`, `apiKey`, `appId` 세 값을 확인
+7. **API 키 제한** (권장) — Google Cloud 콘솔 → API 및 서비스 → 사용자 인증 정보 → 그 API 키 →
+   애플리케이션 제한: 웹사이트, `https://sijak-6080.onrender.com/*`
+8. **Render** — `sijak-6080-api` → Environment:
+   `FIREBASE_PROJECT_ID`·`FIREBASE_WEB_API_KEY`·`FIREBASE_APP_ID` 를 넣고,
+   `IDENTITY_PROVIDER=firebase`, `ALLOW_MOCK_IDENTITY_IN_PROD=false` 로 바꾼 뒤 **Manual Deploy**.
+   세 값 중 하나라도 비면 API 가 이유를 출력하고 뜨지 않는다 (B1 안전장치).
+   `render.yaml` 의 `IDENTITY_PROVIDER` 값도 `firebase` 로 바꿔 두어야 다음 Blueprint sync 때 mock 으로 돌아가지 않는다
+9. **확인** — 내 휴대폰으로 가입해 본다. 개발·시연용으로는 Authentication → 설정 → **테스트용 전화번호**
+   (최대 10개, 고정 인증번호, 문자가 가지 않음)를 쓰면 요금이 들지 않는다
+
+- 바꾸기 전에 Mock 으로 가입한 분도 같은 번호로 문자 인증하면 **그 계정으로 그대로 로그인**된다 (번호를 문자로 확인했으므로)
+- 이름·생년월일·성별은 본인이 적은 값이다 — 문자 인증은 번호만 확인한다. 실제 본인 확인은 PASS(B4 다음 단계)
+
 ## 업데이트
 
 `autoDeployTrigger: checksPass` — `main` 에 병합되고 **CI 가 통과하면** 두 서비스가 저절로 다시 배포된다. 새 마이그레이션은 백엔드가 시작할 때 자동 적용(`alembic upgrade head`).

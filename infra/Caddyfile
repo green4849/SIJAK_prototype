@@ -14,11 +14,12 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		# 위치(같은 동네)·마이크(음성 메시지)만 이 사이트에서 허용
 		Permissions-Policy "geolocation=(self), microphone=(self), camera=()"
-		# 이 사이트 것만 실행·불러오기. 바깥은 동네 이름 찾기(OpenStreetMap)와 활동 사진(Unsplash)뿐.
+		# 이 사이트 것만 실행·불러오기. 바깥은 동네 이름 찾기(OpenStreetMap)와 활동 사진(Unsplash),
+		# 그리고 휴대폰 인증 문자(B4: Firebase 인증 API + 보이지 않는 reCAPTCHA — google.com/recaptcha 경로만).
 		# 인라인 스크립트·스타일 없음 (React 의 style 은 CSSOM 으로 들어가 CSP 대상이 아님). 음성 메시지·3D는 blob: 을 쓴다
 		# (3D 시작이: three.js 가 모델 안의 그림을 blob: 주소로 fetch 하므로 connect-src 에도 blob:).
 		# 고치면 frontend/e2e/csp.spec.ts 가 이 줄을 읽어 여러 화면에서 위반이 없는지 본다 (H42)
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://images.unsplash.com; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: https://nominatim.openstreetmap.org; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self'; img-src 'self' data: blob: https://images.unsplash.com; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: https://nominatim.openstreetmap.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google.com/recaptcha/; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 		-Server
 	}
 

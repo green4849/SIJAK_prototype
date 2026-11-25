@@ -28,6 +28,7 @@ export function PhoneVerifyPage() {
       {step.name === 'code' ? (
         <CodeForm
           devCode={step.devCode}
+          sentTo={step.sentTo}
           pending={pending}
           error={error}
           onSubmit={verify}

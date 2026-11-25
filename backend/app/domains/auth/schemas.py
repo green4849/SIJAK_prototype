@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, date, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.core.security import normalize_phone
 from app.domains.auth.constants import (
@@ -41,14 +41,50 @@ class PassStartRequest(BaseModel):
         return digits
 
 
+class FirebaseWebConfig(BaseModel):
+    """Firebase 웹 설정 — 비밀이 아니다 (브라우저 SDK 초기화용)"""
+
+    api_key: str
+    auth_domain: str
+    project_id: str
+    app_id: str
+
+
+class SmsChallenge(BaseModel):
+    """브라우저가 Firebase 로 인증 문자를 보내야 할 때 (IDENTITY_PROVIDER=firebase)"""
+
+    provider: Literal["firebase"]
+    phone_e164: str = Field(description="문자 받을 번호 (+8210…)")
+    firebase: FirebaseWebConfig
+
+
 class PassStartResponse(BaseModel):
     session_id: str
-    dev_code: str | None = Field(description="Mock 인증 전용 — 실제 PASS에서는 항상 null")
+    dev_code: str | None = Field(description="Mock 인증 전용 — 실제 인증에서는 항상 null")
+    sms: SmsChallenge | None = Field(
+        default=None, description="있으면 브라우저가 Firebase 로 문자를 보낸다. Mock 이면 null"
+    )
 
 
 class PassVerifyRequest(BaseModel):
+    """Mock 은 화면의 인증번호(code), Firebase 는 문자 확인 뒤 받은 ID 토큰(id_token).
+
+    둘 중 하나만 보낸다.
+    """
+
     session_id: str
-    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+    code: str | None = Field(default=None, min_length=6, max_length=6, pattern=r"^\d{6}$")
+    id_token: str | None = Field(default=None, min_length=20, max_length=4096)
+
+    @model_validator(mode="after")
+    def _one_proof(self) -> "PassVerifyRequest":
+        if (self.code is None) == (self.id_token is None):
+            raise ValueError("인증번호를 다시 입력해 주세요.")
+        return self
+
+    @property
+    def proof(self) -> str:
+        return self.code or self.id_token or ""
 
 
 ConsentKind = Literal["terms", "privacy", "location", "health"]

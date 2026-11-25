@@ -49,8 +49,15 @@ class Settings(BaseSettings):
     data_encryption_key: str = _DEFAULT_ENCRYPTION_KEY
     phone_hash_pepper: str = _DEFAULT_PEPPER
 
-    # 본인인증 provider: "mock" | (추후) "pass"
-    identity_provider: Literal["mock"] = "mock"
+    # 본인인증 provider: "mock"(화면에 번호) | "firebase"(Firebase 전화 인증 문자) | (추후) "pass"
+    identity_provider: Literal["mock", "firebase"] = "mock"
+    # Firebase 전화 인증 (B4) — 웹 설정값은 비밀이 아니다(브라우저에 그대로 내려간다).
+    # 서버는 Firebase 가 준 확인 토큰을 Google 공개키로 검증만 하므로 서비스 계정 키가 필요 없다.
+    firebase_project_id: str = ""
+    firebase_web_api_key: str = ""
+    firebase_app_id: str = ""
+    # 비우면 <project_id>.firebaseapp.com
+    firebase_auth_domain: str = ""
     # 운영에서 Mock 인증(누구나 화면의 인증번호로 가입)은 기본 금지.
     # 실제 인증 계약 전 시범 운영일 때만 true
     allow_mock_identity_in_prod: bool = False
@@ -102,6 +109,18 @@ class Settings(BaseSettings):
             problems.append("PHONE_HASH_PEPPER: 기본값이거나 16자 미만")
         if any(not o.startswith("https://") for o in self.cors_origins):
             problems.append("CORS_ORIGINS: 운영에서는 https:// 주소만")
+        if self.identity_provider == "firebase":
+            missing = [
+                name
+                for name, value in (
+                    ("FIREBASE_PROJECT_ID", self.firebase_project_id),
+                    ("FIREBASE_WEB_API_KEY", self.firebase_web_api_key),
+                    ("FIREBASE_APP_ID", self.firebase_app_id),
+                )
+                if not value
+            ]
+            if missing:
+                problems.append(f"IDENTITY_PROVIDER=firebase: {', '.join(missing)} 가 비어 있음")
         if self.identity_provider == "mock" and not self.allow_mock_identity_in_prod:
             problems.append(
                 "IDENTITY_PROVIDER=mock: 누구나 가입할 수 있음 "
