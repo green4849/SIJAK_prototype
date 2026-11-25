@@ -84,7 +84,7 @@ services:
         value: geolocation=(self), microphone=(self), camera=()
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://images.unsplash.com; media-src 'self' blob:; font-src 'self'; connect-src 'self' https://nominatim.openstreetmap.org; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        value: "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://images.unsplash.com; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: https://nominatim.openstreetmap.org; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
       # 캐시: 앱 껍데기(index.html·sw.js·manifest)는 매번 확인 → 배포 즉시 반영, 해시 이름 파일은 1년
       - path: /index.html
         name: Cache-Control
