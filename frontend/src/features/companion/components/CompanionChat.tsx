@@ -16,7 +16,7 @@ import styles from './Companion.module.css'
 interface Props {
   /** 추천 활동 → 상세 화면 경로 (activity feature 경로라 페이지에서 받는다) */
   activityHref: (activityId: string) => string
-  /** 위기 안내 카드에 덧붙일 동작 (예: 보호자에게 알리기 — 다른 feature) */
+  /** 위기 안내 카드에 덧붙일 동작 (예: 도움 요청 기록 — 다른 feature) */
   crisisExtra?: ReactNode
 }
 

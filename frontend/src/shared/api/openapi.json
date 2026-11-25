@@ -196,7 +196,7 @@
             "type": "integer"
           },
           "guardian_notified": {
-            "description": "최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지",
+            "description": "최근 7일 안에 긴급 도움 요청을 기록했는지. 외부 알림 발송 여부가 아님",
             "title": "Guardian Notified",
             "type": "boolean"
           },
@@ -2079,13 +2079,19 @@
             "title": "Created At",
             "type": "string"
           },
+          "delivery_status": {
+            "const": "not_sent",
+            "description": "외부 알림 발송 상태",
+            "title": "Delivery Status",
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
             "type": "string"
           },
           "notified": {
-            "description": "알린 사람들 (보호자 + 담당 복지사)",
+            "description": "요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음",
             "items": {
               "$ref": "#/components/schemas/SosNotified"
             },
@@ -2096,7 +2102,8 @@
         "required": [
           "id",
           "created_at",
-          "notified"
+          "notified",
+          "delivery_status"
         ],
         "title": "SosOut",
         "type": "object"

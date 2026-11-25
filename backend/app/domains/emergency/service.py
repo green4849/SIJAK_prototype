@@ -7,6 +7,7 @@
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Literal
 
 from app.core.errors import DomainError
 from app.core.security import decrypt, encrypt
@@ -38,6 +39,7 @@ class SosResult:
     id: uuid.UUID
     created_at: datetime
     notified: list[dict[str, str]]
+    delivery_status: Literal["not_sent"] = "not_sent"
 
 
 def _view(g: Guardian) -> GuardianView:
@@ -79,5 +81,5 @@ class EmergencyService:
         return SosResult(id=ev.id, created_at=ev.created_at, notified=notified)
 
     async def recent_sos_user_ids(self, since: datetime) -> set[uuid.UUID]:
-        """since 이후 긴급 도움을 누른 사람 — 운영자 돌봄 목록의 '보호자 알림' 표시 (B7)"""
+        """since 이후 긴급 도움을 누른 사람 — 운영자 돌봄 목록의 요청 기록 표시 (B7)."""
         return await self.repo.sos_user_ids_since(since)
