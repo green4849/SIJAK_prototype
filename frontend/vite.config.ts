@@ -57,12 +57,38 @@ function swBuildInfo(): Plugin {
   }
 }
 
+/**
+ * 쓰지 않는 코드는 첫 화면 묶음에서 빼기 (H33 이어서).
+ * 화면은 각 기능의 index.ts 로만 불러오는데(레이어 규칙), 홈이 받은 신청 개수 하나만 쓰려 해도
+ * 그 기능의 화면 조각(가입 양식·대화방·성향조사 …)이 통째로 첫 묶음에 들어왔다 — 조각마다 CSS를
+ * 불러와 '불러오기만 해도 하는 일이 있다'고 여겨져서. 그래서 하는 일이 정말 있는 파일만 적고,
+ * 나머지는 쓰는 것만 남기게 한다. 불러오기만 해도 일을 하는 파일을 새로 만들면 여기에 더한다.
+ */
+const SIDE_EFFECT_FILES = [
+  /\.css($|\?)/, // 스타일은 불러오는 것 자체가 일
+  /\/src\/main\.tsx$/,
+  /\/src\/features\/auth\/api\/session\.ts$/, // configureAuth(...) — API 클라이언트에 토큰 갱신을 꽂는다
+  /\/src\/shared\/lib\/pwa\.ts$/, // beforeinstallprompt·appinstalled 듣기
+  /\/src\/demo\//, // 시연 서버 — 시연 빌드에서만, 들어갈 때 받는다
+]
+
 export default defineConfig({
   // GitHub Pages: https://<계정>.github.io/<저장소명>/ → VITE_BASE=/<저장소명>/ 로 빌드
   base: process.env.VITE_BASE ?? '/',
   plugins: [react(), swBuildInfo(), ogAbsolute()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+  },
+  build: {
+    rollupOptions: {
+      treeshake: {
+        // 우리 소스만 판단하고, 라이브러리는 각 패키지가 밝힌 대로 둔다
+        moduleSideEffects: (id, external) =>
+          external || id.includes('/node_modules/') || !id.includes('/src/')
+            ? true
+            : SIDE_EFFECT_FILES.some((re) => re.test(id)),
+      },
+    },
   },
   server: {
     // 개발 중 /api 요청은 백엔드로 프록시 → 프론트 코드에 백엔드 주소 하드코딩 금지
