@@ -4,6 +4,8 @@ import { startTour } from './helpers'
 
 test('마이페이지 → 알림함: 새 소식 4개, 누르면 그 화면으로 가고 읽음 처리', async ({ page }) => {
   await startTour(page)
+  // 홈의 지연 로딩 카드가 알림을 만든 뒤 목록을 확인한다.
+  await expect(page.getByText('마음 건강 살펴볼 때예요', { exact: true })).toBeVisible()
   await page.goto('/me')
   // 시드 3개 + 홈을 열 때 쌓인 '마음 건강 살펴볼 때예요'(시연 계정은 WHO-5를 한 지 4주가 지남)
   await expect(page.getByRole('link', { name: /알림함.*새 소식 4개/ })).toBeVisible()
