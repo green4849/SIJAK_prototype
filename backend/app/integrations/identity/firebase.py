@@ -12,7 +12,9 @@
 - 검증 규칙은 Firebase 문서 'Verify ID tokens using a third-party JWT library' 를 따른다:
   RS256, kid 가 Google 공개키에 있음, aud=프로젝트 id, iss=https://securetoken.google.com/<프로젝트>,
   sub(=uid) 있음, exp 미래·iat·auth_time 과거.
-- CI(1인 1계정 키)는 Firebase uid 로 만든다 — 같은 번호면 같은 uid.
+- CI(1인 1계정 키)는 문자로 확인한 번호로 만든다. 브라우저는 토큰을 받은 뒤
+  Firebase 쪽 사용자 기록을 바로 지우므로(번호를 Google 에 남겨 두지 않기)
+  다음 인증 때 uid 가 바뀔 수 있어서다.
 - 이름·생년월일·성별은 본인이 적은 값이다(문자 인증은 번호만 확인한다). 실제 본인 확인은 PASS(B4).
 """
 
@@ -121,7 +123,7 @@ class FirebasePhoneProvider:
         del self._sessions[session_id]
         r = pending.req
         return VerifiedIdentity(
-            ci=self._make_ci(claims["sub"]),
+            ci=self._make_ci(pending.phone_e164),
             name=r.name,
             birth_date=r.birth_date,
             phone=r.phone,
@@ -165,9 +167,10 @@ class FirebasePhoneProvider:
         return claims
 
     @staticmethod
-    def _make_ci(uid: str) -> str:
+    def _make_ci(phone_e164: str) -> str:
         # 실제 CI 형식(88자 base64)에 맞춘다
-        return base64.b64encode(hashlib.sha512(f"firebase|{uid}".encode()).digest()).decode()
+        raw = f"firebase-phone|{phone_e164}".encode()
+        return base64.b64encode(hashlib.sha512(raw).digest()).decode()
 
     def _gc(self) -> None:
         now = time.monotonic()

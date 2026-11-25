@@ -37,9 +37,9 @@ async def test_valid_token(provider: FirebasePhoneProvider, fb: FakeFirebase) ->
     ident = await provider.verify(s.session_id, fb.token())
     assert ident.phone_verified is True and ident.phone == "01012345678"
     assert ident.name == "김영희" and len(ident.ci) == 88
-    # 같은 uid 면 같은 CI
+    # 같은 번호면 Firebase uid 가 바뀌어도(브라우저가 기록을 지움) 같은 CI
     s2 = await provider.start(REQ)
-    assert (await provider.verify(s2.session_id, fb.token())).ci == ident.ci
+    assert (await provider.verify(s2.session_id, fb.token(uid="uid-2"))).ci == ident.ci
     # 세션은 한 번만
     with pytest.raises(IdentityVerificationFailed):
         await provider.verify(s.session_id, fb.token())

@@ -9,7 +9,7 @@
  * - summary 는 큰 글씨 요약(먼저 보이는 것), sections 는 펼쳐서 보는 전문.
  */
 
-export const LEGAL_VERSION = '2026-11-25'
+export const LEGAL_VERSION = '2026-11-26'
 
 export type ConsentKind = 'terms' | 'privacy' | 'location' | 'health'
 export type LegalKind = ConsentKind | 'policy'
@@ -50,6 +50,12 @@ const operatorLines = [
 const ENTRUSTED = [
   'Render — 앱 서버 운영 (미국 회사, 서버 위치 싱가포르)',
   'Neon — 데이터베이스 보관 (미국 회사, 서버 위치 싱가포르)',
+]
+
+/** 휴대폰 인증 문자 (B4, IDENTITY_PROVIDER=firebase) — 번호만 Google 로 간다 */
+const IDENTITY_SMS = [
+  '휴대폰 인증 문자는 Google(Firebase 인증, 미국 회사)이 보냅니다. 문자를 보내려고 휴대폰 번호만 Google 서버(미국 등)로 전달하고, 이름·생년월일은 보내지 않습니다.',
+  '인증이 끝나면 앱이 Firebase 에 남은 사용자 기록(번호·인증 시각)을 바로 지웁니다. 문자 발송 기록은 Google 이 자체 정책에 따라 처리합니다.',
 ]
 
 const terms: LegalDoc = {
@@ -179,6 +185,7 @@ const privacy: LegalDoc = {
       body: [
         '서비스 운영을 위해 아래 업체에 정보 보관을 맡깁니다. 정보는 업체의 싱가포르 서버에 저장됩니다.',
         ...ENTRUSTED,
+        ...IDENTITY_SMS,
         '다른 회사나 기관에 개인정보를 제공하지 않습니다. 법령에 따른 요청은 예외입니다.',
       ],
     },
@@ -309,6 +316,7 @@ const policy: LegalDoc = {
       body: [
         '서비스를 운영하기 위해 아래 업체에 정보 보관을 맡깁니다. 정보는 인터넷으로 업체의 싱가포르 서버에 저장되며, 이용 기간 동안 보관합니다.',
         ...ENTRUSTED,
+        ...IDENTITY_SMS,
         '동네 이름을 찾을 때 약 1km 단위로 줄인 좌표만 OpenStreetMap(영국)에 보냅니다.',
       ],
     },

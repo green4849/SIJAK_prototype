@@ -63,7 +63,11 @@ export async function sendSms(challenge: SmsChallenge): Promise<SentSms> {
       confirm: async (code) => {
         try {
           const cred = await result.confirm(code)
-          return await cred.user.getIdToken()
+          const token = await cred.user.getIdToken()
+          // 서버에 보낼 토큰만 있으면 된다 — Firebase 에 남은 사용자 기록(번호·인증 시각)은 바로 지운다.
+          // 실패해도 인증은 계속 (처리방침: 인증이 끝나면 지운다)
+          await cred.user.delete().catch(() => auth.signOut().catch(() => undefined))
+          return token
         } catch (e) {
           throw new Error(smsErrorMessage(e))
         }

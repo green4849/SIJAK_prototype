@@ -219,6 +219,10 @@ class SignupOptions(BaseModel):
     max_interests: int
     # 가입 동의 문서 — 화면은 본문(frontend shared/legal)을 보여 주고 이 버전으로 동의를 보낸다
     consents: list[ConsentDocOut]
+    sms_provider: Literal["firebase"] | None = Field(
+        default=None,
+        description="인증 문자를 보내는 곳. firebase 면 인증 전에 '번호가 Google 로 간다'고 알린다",
+    )
 
 
 def consent_docs() -> list[ConsentDocOut]:

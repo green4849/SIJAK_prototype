@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.domains.auth import deps as auth_deps
 from app.integrations.identity.firebase import FirebasePhoneProvider
 from tests.firebase_fake import PROJECT, FakeFirebase
+from tests.integration.helpers import ALL_CONSENTS
 
 API = "/api/v1"
 PERSON = {"name": "김영희", "birth_date": "1955-03-01", "phone": "010-1234-5678", "gender": "F"}
@@ -58,7 +59,12 @@ async def test_signup_with_firebase_sms(client: AsyncClient, fb: FakeFirebase) -
     assert v["status"] == "signup_required" and v["name"] == "김영희"
     r = await client.post(
         f"{API}/auth/signup",
-        json={"signup_token": v["signup_token"], "region_code": "41", "interests": ["walking"]},
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "41",
+            "interests": ["walking"],
+            "consents": ALL_CONSENTS,
+        },
     )
     assert r.status_code == 201, r.text
     client.cookies.clear()
@@ -70,6 +76,15 @@ async def test_signup_with_firebase_sms(client: AsyncClient, fb: FakeFirebase) -
         json={"session_id": start["session_id"], "id_token": fb.token()},
     )
     assert r.json()["status"] == "logged_in"
+
+
+async def test_options_say_sms_goes_via_firebase(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """인증 전 안내(번호가 Google 로 간다)를 화면이 고를 수 있게"""
+    assert (await client.get(f"{API}/auth/options")).json()["sms_provider"] is None  # Mock
+    monkeypatch.setattr(get_settings(), "identity_provider", "firebase")
+    assert (await client.get(f"{API}/auth/options")).json()["sms_provider"] == "firebase"
 
 
 async def test_wrong_number_token_rejected(client: AsyncClient, fb: FakeFirebase) -> None:
@@ -106,7 +121,12 @@ async def test_existing_account_linked_by_verified_phone(
     user = (
         await client.post(
             f"{API}/auth/signup",
-            json={"signup_token": v["signup_token"], "region_code": "41", "interests": ["walking"]},
+            json={
+                "signup_token": v["signup_token"],
+                "region_code": "41",
+                "interests": ["walking"],
+                "consents": ALL_CONSENTS,
+            },
         )
     ).json()["user"]
     client.cookies.clear()

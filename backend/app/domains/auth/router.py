@@ -82,6 +82,7 @@ async def signup_options() -> SignupOptions:
         interests=[Option(code=k, label=v) for k, v in INTERESTS.items()],
         max_interests=MAX_INTERESTS,
         consents=consent_docs(),
+        sms_provider="firebase" if settings.identity_provider == "firebase" else None,
     )
 
 

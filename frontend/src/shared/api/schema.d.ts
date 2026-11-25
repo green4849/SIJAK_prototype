@@ -1989,6 +1989,11 @@ export interface components {
             max_interests: number;
             /** Regions */
             regions: components["schemas"]["Option"][];
+            /**
+             * Sms Provider
+             * @description 인증 문자를 보내는 곳. firebase 면 인증 전에 '번호가 Google 로 간다'고 알린다
+             */
+            sms_provider?: "firebase" | null;
         };
         /** SignupRequest */
         SignupRequest: {

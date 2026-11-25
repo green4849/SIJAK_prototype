@@ -2044,6 +2044,19 @@
             },
             "title": "Regions",
             "type": "array"
+          },
+          "sms_provider": {
+            "anyOf": [
+              {
+                "const": "firebase",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "인증 문자를 보내는 곳. firebase 면 인증 전에 '번호가 Google 로 간다'고 알린다",
+            "title": "Sms Provider"
           }
         },
         "required": [
