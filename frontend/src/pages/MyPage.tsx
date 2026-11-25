@@ -1,4 +1,5 @@
 import {
+  FileText,
   Ban,
   Bell,
   BellRing,
@@ -132,6 +133,7 @@ export function MyPage() {
             <MenuItem icon={Smartphone} label="홈 화면에 아이콘 놓기" to="/me/install" />
           )}
           <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
+          <MenuItem icon={FileText} label="약관 및 동의" to="/me/consents" />
         </MenuList>
       </CardGrid>
 

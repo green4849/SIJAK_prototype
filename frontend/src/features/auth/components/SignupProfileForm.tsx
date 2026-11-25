@@ -7,6 +7,8 @@ import { TopBar } from '@/shared/ui/TopBar'
 import { authApi, type User } from '../api/authApi'
 import { setAccessToken } from '../api/session'
 import { useSignupOptions } from '../hooks/useSignupOptions'
+import { requiredAgreed, type ConsentValue } from '../lib/consent'
+import { ConsentForm } from './ConsentForm'
 import { toInterestChoices } from './interestChoices'
 import { LocationAgreement, type AgreedLocation } from './LocationAgreement'
 import styles from './form.module.css'
@@ -19,16 +21,18 @@ interface Props {
   onDone: (accessToken: string, user: User) => void
 }
 
-const STEPS = 2
+const STEPS = 3
 
 /**
  * 가입 마무리 — 한 화면에 질문 하나 (A24)
- *  1/2 좋아하는 것: 둥근 사진 3열, 여러 개
- *  2/2 사는 동네: 위치 정보 수집 동의 (A21)
+ *  1/3 약관 동의: 필수 3개 + 선택(마음 건강 기록) (B6) — 정보를 저장하기 전에 먼저 받는다
+ *  2/3 좋아하는 것: 둥근 사진 3열, 여러 개
+ *  3/3 사는 동네: 위치 정보 수집 동의 (A21)
  */
 export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) {
   const { options, error: loadError } = useSignupOptions()
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [consents, setConsents] = useState<ConsentValue>({})
   const [located, setLocated] = useState<AgreedLocation | null>(null)
   const [interests, setInterests] = useState<string[]>([])
   const [pending, setPending] = useState(false)
@@ -47,24 +51,32 @@ export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) 
 
   function goBack() {
     setError(null)
-    setStep(1)
+    setStep(step === 3 ? 2 : 1)
+    window.scrollTo({ top: 0 })
+  }
+
+  function next(to: 2 | 3) {
+    setError(null)
+    setStep(to)
     window.scrollTo({ top: 0 })
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (step === 1) {
+      if (!options || !requiredAgreed(options.consents, consents)) return setError('[필수] 항목에 모두 동의해 주세요.')
+      return next(2)
+    }
+    if (step === 2) {
       if (interests.length === 0) return
-      setError(null)
-      setStep(2)
-      window.scrollTo({ top: 0 })
-      return
+      return next(3)
     }
     if (!located) return setError('위치 정보 수집에 동의해 주세요.')
     setPending(true)
     setError(null)
     try {
-      const r = await authApi.signup(signupToken, located.regionCode, interests)
+      const choices = (options?.consents ?? []).map((d) => ({ kind: d.kind, version: d.version, agreed: !!consents[d.kind] }))
+      const r = await authApi.signup(signupToken, located.regionCode, interests, choices)
       if (r.status !== 'logged_in') return
       let user = r.user
       // 동의한 위치를 '같은 동네' 이웃 찾기용으로도 저장 — 친구 탭에서 다시 묻지 않게
@@ -80,7 +92,7 @@ export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) 
 
   // 진행 막대는 '뒤로'와 같은 줄에 (시안 C)
   const topBar = (
-    <TopBar backTo={backTo} onBack={step === 2 ? goBack : undefined} right={<StepProgress step={step} />} />
+    <TopBar backTo={backTo} onBack={step > 1 ? goBack : undefined} right={<StepProgress step={step} />} />
   )
   if (loadError || !options)
     return (
@@ -95,6 +107,23 @@ export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) 
       {topBar}
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         {step === 1 ? (
+          <>
+            <h1 className={styles.title}>
+              {name}님,
+              <br />
+              약관을 확인해 주세요
+            </h1>
+            <p className={styles.lead}>[필수] 항목에 동의해야 가입할 수 있어요.</p>
+            <ConsentForm
+              docs={options.consents}
+              value={consents}
+              onChange={(v) => {
+                setConsents(v)
+                setError(null)
+              }}
+            />
+          </>
+        ) : step === 2 ? (
           <>
             <h1 className={styles.title}>
               {name}님,
@@ -127,6 +156,10 @@ export function SignupProfileForm({ signupToken, name, backTo, onDone }: Props) 
         <div className={styles.stickyActions}>
           {error && <Alert>{error}</Alert>}
           {step === 1 ? (
+            <Button type="submit" block large>
+              동의하고 다음
+            </Button>
+          ) : step === 2 ? (
             // 아직 안 골랐으면 버튼 자체가 할 일을 알려 준다 (오류창 대신)
             <Button type="submit" block large disabled={interests.length === 0}>
               {interests.length === 0 ? (

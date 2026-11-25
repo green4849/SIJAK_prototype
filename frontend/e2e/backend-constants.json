@@ -33,6 +33,18 @@
       "volunteer": "봉사활동"
     },
     "max_interests": 5,
+    "consent_docs": {
+      "terms": true,
+      "privacy": true,
+      "location": true,
+      "health": false
+    },
+    "consent_versions": {
+      "terms": "2026-11-25",
+      "privacy": "2026-11-25",
+      "location": "2026-11-25",
+      "health": "2026-11-25"
+    },
     "intro_max_len": 60
   },
   "chat": {

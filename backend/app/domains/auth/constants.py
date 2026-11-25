@@ -48,3 +48,21 @@ INTRO_MAX_LEN = 60
 # 이 날수 뒤 개인정보를 완전히 지운다
 WITHDRAW_GRACE_DAYS = 30
 WITHDRAW_REASON_MAX_LEN = 30
+
+# 가입 동의 문서 (B6·B5). 본문은 frontend/src/shared/legal/documents.ts — 같은 버전을 쓴다.
+# 본문을 바꾸면 버전을 올린다 → 필수 문서는 다음 접속 때 다시 동의를 받고,
+# 선택 문서는 동의가 풀린다.
+#   terms    서비스 이용약관
+#   privacy  개인정보 수집·이용 (일반 개인정보)
+#   location 위치기반서비스 이용약관 + 개인위치정보 수집·이용 (위치정보법)
+#            — 동네 이웃 찾기에 꼭 필요해 필수
+#   health   마음 건강 기록 (PHQ-9·GAD-7·WHO-5 — 개인정보 보호법 제23조 민감정보)
+#            — 선택, 거부해도 가입 가능
+CONSENT_VERSION = "2026-11-25"
+CONSENT_DOCS: dict[str, bool] = {  # 종류 → 필수 여부
+    "terms": True,
+    "privacy": True,
+    "location": True,
+    "health": False,
+}
+CONSENT_VERSIONS: dict[str, str] = dict.fromkeys(CONSENT_DOCS, CONSENT_VERSION)

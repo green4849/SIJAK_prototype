@@ -2,6 +2,11 @@
 
 from httpx import AsyncClient
 
+from app.domains.auth.constants import CONSENT_VERSIONS
+
+# 가입 동의 — 필수·선택 모두 동의 (마음 건강 점검 시험이 결과를 저장할 수 있게)
+ALL_CONSENTS = [{"kind": k, "version": v, "agreed": True} for k, v in CONSENT_VERSIONS.items()]
+
 _seq = 0
 
 
@@ -30,6 +35,7 @@ async def signup_user(
             "signup_token": v["signup_token"],
             "region_code": region,
             "interests": interests or ["walking"],
+            "consents": ALL_CONSENTS,
         },
     )
     assert r.status_code == 201, r.text

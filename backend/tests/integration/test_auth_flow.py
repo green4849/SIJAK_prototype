@@ -4,6 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.core.config import get_settings
+from tests.integration.helpers import ALL_CONSENTS
 
 PERSON = {"name": "김영희", "birth_date": "1955-03-01", "phone": "010-1234-5678", "gender": "F"}
 COOKIE = "wipi_refresh"
@@ -28,6 +29,7 @@ async def _signup(client: AsyncClient, person: dict = PERSON) -> dict:
             "signup_token": v["signup_token"],
             "region_code": "41",
             "interests": ["walking", "movies"],
+            "consents": ALL_CONSENTS,
         },
     )
     assert res.status_code == 201, res.text
@@ -119,7 +121,12 @@ async def test_invalid_signup_input(client: AsyncClient) -> None:
     v = await _verify(client)
     r = await client.post(
         "/api/v1/auth/signup",
-        json={"signup_token": v["signup_token"], "region_code": "99", "interests": ["walking"]},
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "99",
+            "interests": ["walking"],
+            "consents": ALL_CONSENTS,
+        },
     )
     assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_profile_input"
 

@@ -2,7 +2,7 @@
 import { fail, json, noContent, type Route } from '../http'
 import { db, newId, save, type DAssessment, type DGuardian } from '../store'
 import { FORMS, relationIndex, resultOf, resultsWithPrevious, WHO5_INTERVAL_MS } from '../wellbeing'
-import { requireUser } from './auth'
+import { hasConsent, requireUser, setConsent } from './auth'
 import type { Schema } from '@/shared/api/types'
 
 type AssessmentIn = Schema<'AssessmentIn'>
@@ -68,8 +68,21 @@ export const wellbeingRoutes: Route[] = [
     return isKind(k) ? json(FORMS[k]) : fail(404, 'not_found', '없는 점검이에요.')
   }],
 
+  // 마음 건강 기록(민감정보) 동의·철회 — 철회하면 점검 기록을 먼저 지운다 (B6, 백엔드와 같은 순서)
+  ['PUT', '/me/self-assessment/consent', (req) => {
+    const me = requireUser(req)
+    const agreed = !!(req.body as Schema<'HealthConsentIn'>)?.agreed
+    const s = db()
+    if (!agreed) s.assessments = s.assessments.filter((a) => a.uid !== me.id)
+    setConsent(me, 'health', agreed)
+    save()
+    return json({ health_consent: hasConsent(me, 'health') } satisfies Schema<'HealthConsentOut'>)
+  }],
+
   ['POST', '/me/self-assessment', (req) => {
     const me = requireUser(req)
+    if (!hasConsent(me, 'health'))
+      return fail(403, 'health_consent_required', '마음 건강 기록에 동의해야 결과를 저장할 수 있어요.')
     const body = req.body as AssessmentIn
     if (!isKind(body?.kind)) return fail(422, 'validation_error', '점검 종류를 다시 골라 주세요.')
     const form = FORMS[body.kind]

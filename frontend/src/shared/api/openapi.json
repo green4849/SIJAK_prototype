@@ -666,6 +666,131 @@
         "title": "ChatPeer",
         "type": "object"
       },
+      "ConsentChoiceIn": {
+        "description": "동의 한 항목 — version 은 사용자가 본 문서의 버전 (GET /auth/options 의 consents)",
+        "properties": {
+          "agreed": {
+            "title": "Agreed",
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "terms",
+              "privacy",
+              "location",
+              "health"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 20,
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "agreed"
+        ],
+        "title": "ConsentChoiceIn",
+        "type": "object"
+      },
+      "ConsentDocOut": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "terms",
+              "privacy",
+              "location",
+              "health"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "required"
+        ],
+        "title": "ConsentDocOut",
+        "type": "object"
+      },
+      "ConsentStatusOut": {
+        "properties": {
+          "agreed": {
+            "title": "Agreed",
+            "type": "boolean"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "kind": {
+            "enum": [
+              "terms",
+              "privacy",
+              "location",
+              "health"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "required",
+          "agreed",
+          "decided_at"
+        ],
+        "title": "ConsentStatusOut",
+        "type": "object"
+      },
+      "ConsentsUpdate": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentChoiceIn"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ConsentsUpdate",
+        "type": "object"
+      },
       "FriendCard": {
         "description": "친구 찾기 카드 (④) — 전화번호·생년월일 등 개인정보는 넣지 않는다",
         "properties": {
@@ -888,6 +1013,32 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthConsentIn": {
+        "properties": {
+          "agreed": {
+            "title": "Agreed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "agreed"
+        ],
+        "title": "HealthConsentIn",
+        "type": "object"
+      },
+      "HealthConsentOut": {
+        "properties": {
+          "health_consent": {
+            "title": "Health Consent",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "health_consent"
+        ],
+        "title": "HealthConsentOut",
         "type": "object"
       },
       "LocationUpdate": {
@@ -1809,6 +1960,13 @@
       },
       "SignupOptions": {
         "properties": {
+          "consents": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentDocOut"
+            },
+            "title": "Consents",
+            "type": "array"
+          },
           "interests": {
             "items": {
               "$ref": "#/components/schemas/Option"
@@ -1831,13 +1989,22 @@
         "required": [
           "regions",
           "interests",
-          "max_interests"
+          "max_interests",
+          "consents"
         ],
         "title": "SignupOptions",
         "type": "object"
       },
       "SignupRequest": {
         "properties": {
+          "consents": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentChoiceIn"
+            },
+            "maxItems": 4,
+            "title": "Consents",
+            "type": "array"
+          },
           "interests": {
             "items": {
               "type": "string"
@@ -2208,6 +2375,10 @@
             "title": "Birth Date",
             "type": "string"
           },
+          "consent_needed": {
+            "title": "Consent Needed",
+            "type": "boolean"
+          },
           "gender": {
             "enum": [
               "M",
@@ -2218,6 +2389,10 @@
           },
           "has_location": {
             "title": "Has Location",
+            "type": "boolean"
+          },
+          "health_consent": {
+            "title": "Health Consent",
             "type": "boolean"
           },
           "id": {
@@ -2259,7 +2434,9 @@
           "region_name",
           "interests",
           "intro",
-          "has_location"
+          "has_location",
+          "consent_needed",
+          "health_consent"
         ],
         "title": "UserOut",
         "type": "object"
@@ -4307,6 +4484,82 @@
         ]
       }
     },
+    "/api/v1/me/consents": {
+      "get": {
+        "description": "약관·개인정보 동의 상태 (B6) — 마이페이지 '약관 및 동의'",
+        "operationId": "my_consents_api_v1_me_consents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConsentStatusOut"
+                  },
+                  "title": "Response My Consents Api V1 Me Consents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Consents",
+        "tags": [
+          "auth"
+        ]
+      },
+      "post": {
+        "description": "동의하기 — 약관이 바뀌어 다시 받을 때, 마음 건강 기록에 나중에 동의할 때.\n\n철회는 여기서 받지 않는다: 필수는 탈퇴로, 마음 건강은 PUT /me/self-assessment/consent\n(기록을 함께 지워야 하므로 wellbeing 이 맡는다).",
+        "operationId": "agree_consents_api_v1_me_consents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agree Consents",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/me/guardians": {
       "get": {
         "operationId": "list_guardians_api_v1_me_guardians_get",
@@ -4565,6 +4818,53 @@
           }
         ],
         "summary": "Submit Assessment",
+        "tags": [
+          "wellbeing"
+        ]
+      }
+    },
+    "/api/v1/me/self-assessment/consent": {
+      "put": {
+        "description": "마음 건강 기록 동의·철회. 철회하면 지금까지의 점검 기록을 먼저 지운다",
+        "operationId": "set_health_consent_api_v1_me_self_assessment_consent_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthConsentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Health Consent",
         "tags": [
           "wellbeing"
         ]

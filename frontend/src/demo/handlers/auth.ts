@@ -1,5 +1,5 @@
 /** backend/app/domains/auth 와 같은 계약 */
-import { DEMO_HOME, INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
+import { CONSENT_DOCS, CONSENT_VERSIONS, DEMO_HOME, INTERESTS, INTRO_MAX_LEN, MAX_INTERESTS, REGIONS } from '../constants'
 import { fail, json, noContent, type DemoRequest, type Route } from '../http'
 import { ageOf, db, DEMO_ME_ID, newId, save, type DUser, regionLabel } from '../store'
 import type { Schema } from '@/shared/api/types'
@@ -19,6 +19,35 @@ export function requireUser(req: DemoRequest): DUser {
   return u
 }
 
+/** 지금 문서 버전에 동의한 상태인지 — 기록이 없는 시드 회원은 모두 동의한 것으로 본다 (B6) */
+export function hasConsent(u: DUser, kind: string): boolean {
+  if (!u.consents) return true
+  const c = u.consents[kind]
+  return !!c && c.agreed && c.version === CONSENT_VERSIONS[kind]
+}
+
+export function setConsent(u: DUser, kind: string, agreed: boolean) {
+  u.consents = { ...(u.consents ?? allAgreed()), [kind]: { version: CONSENT_VERSIONS[kind], agreed, at: new Date().toISOString() } }
+}
+
+function allAgreed(): NonNullable<DUser['consents']> {
+  return Object.fromEntries(Object.keys(CONSENT_DOCS).map((k) => [k, { version: CONSENT_VERSIONS[k], agreed: true, at: '' }]))
+}
+
+type ConsentIn = Schema<'ConsentChoiceIn'>
+
+/** 백엔드 AuthService._checked 와 같은 검사 — 모르는 종류·지난 버전은 받지 않는다 */
+function checkConsents(items: ConsentIn[]) {
+  const seen = new Set<string>()
+  for (const c of items) {
+    if (!(c.kind in CONSENT_DOCS) || seen.has(c.kind)) fail(422, 'consent_invalid', '동의 항목을 다시 확인해 주세요.')
+    if (c.version !== CONSENT_VERSIONS[c.kind])
+      fail(422, 'consent_outdated', '약관이 바뀌었어요. 화면을 새로 고친 뒤 다시 동의해 주세요.')
+    seen.add(c.kind)
+  }
+  return items
+}
+
 /** 응답 모양은 백엔드 계약과 같아야 한다 — 어긋나면 타입 오류 (D3) */
 export function userOut(u: DUser): Schema<'UserOut'> {
   return {
@@ -32,6 +61,8 @@ export function userOut(u: DUser): Schema<'UserOut'> {
     interests: u.interests,
     intro: u.intro,
     has_location: u.geo !== null,
+    consent_needed: Object.entries(CONSENT_DOCS).some(([k, required]) => required && !hasConsent(u, k)),
+    health_consent: hasConsent(u, 'health'),
   }
 }
 
@@ -61,7 +92,12 @@ export const authRoutes: Route[] = [
       regions: Object.entries(REGIONS).map(([code, label]) => ({ code, label })),
       interests: Object.entries(INTERESTS).map(([code, label]) => ({ code, label })),
       max_interests: MAX_INTERESTS,
-    })],
+      consents: Object.entries(CONSENT_DOCS).map(([kind, required]) => ({
+        kind: kind as ConsentIn['kind'],
+        version: CONSENT_VERSIONS[kind],
+        required,
+      })),
+    } satisfies Schema<'SignupOptions'>)],
 
   ['POST', '/auth/pass/start', (req) => {
     const b = req.body as Body
@@ -110,9 +146,16 @@ export const authRoutes: Route[] = [
     }
     const interests = (b.interests as string[]) ?? []
     validateProfile(String(b.region_code), interests)
+    const given = new Map(checkConsents((b.consents as ConsentIn[]) ?? []).map((c) => [c.kind, c.agreed]))
+    if (Object.entries(CONSENT_DOCS).some(([k, required]) => required && !given.get(k as ConsentIn['kind'])))
+      fail(422, 'consent_required', '꼭 필요한 항목에 모두 동의해 주세요.')
+    const at = new Date().toISOString()
     const u: DUser = {
       id: newId(), ...ident, region_code: String(b.region_code), interests: [...new Set(interests)],
       intro: '', geo: null, last_login: Date.now(),
+      consents: Object.fromEntries(
+        Object.keys(CONSENT_DOCS).map((k) => [k, { version: CONSENT_VERSIONS[k], agreed: !!given.get(k as ConsentIn['kind']), at }]),
+      ),
     }
     db().users.push(u)
     return json(login(u), 201)
@@ -130,6 +173,28 @@ export const authRoutes: Route[] = [
   }],
 
   ['GET', '/me', (req) => json(userOut(requireUser(req)))],
+
+  ['GET', '/me/consents', (req) => {
+    const u = requireUser(req)
+    return json(
+      Object.entries(CONSENT_DOCS).map(([kind, required]) => ({
+        kind: kind as ConsentIn['kind'],
+        version: CONSENT_VERSIONS[kind],
+        required,
+        agreed: hasConsent(u, kind),
+        decided_at: u.consents?.[kind]?.at || null,
+      })) satisfies Schema<'ConsentStatusOut'>[],
+    )
+  }],
+
+  ['POST', '/me/consents', (req) => {
+    const u = requireUser(req)
+    const items = checkConsents(((req.body as Body).items as ConsentIn[]) ?? [])
+    if (items.some((c) => !c.agreed)) fail(422, 'consent_invalid', '동의 철회는 해당 화면에서 해 주세요.')
+    for (const c of items) setConsent(u, c.kind, true)
+    save()
+    return json(userOut(u))
+  }],
 
   ['PATCH', '/me', (req) => {
     const u = requireUser(req)

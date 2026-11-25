@@ -7,9 +7,15 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.security import normalize_phone
-from app.domains.auth.constants import INTRO_MAX_LEN, REGIONS, WITHDRAW_REASON_MAX_LEN
+from app.domains.auth.constants import (
+    CONSENT_DOCS,
+    CONSENT_VERSIONS,
+    INTRO_MAX_LEN,
+    REGIONS,
+    WITHDRAW_REASON_MAX_LEN,
+)
 from app.domains.auth.models import User
-from app.domains.auth.service import age_on
+from app.domains.auth.service import AuthService, ConsentChoice, age_on
 
 
 class PassStartRequest(BaseModel):
@@ -45,10 +51,39 @@ class PassVerifyRequest(BaseModel):
     code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
 
 
+ConsentKind = Literal["terms", "privacy", "location", "health"]
+
+
+class ConsentChoiceIn(BaseModel):
+    """동의 한 항목 — version 은 사용자가 본 문서의 버전 (GET /auth/options 의 consents)"""
+
+    kind: ConsentKind
+    version: str = Field(max_length=20)
+    agreed: bool
+
+    def to_choice(self) -> ConsentChoice:
+        return ConsentChoice(self.kind, self.version, self.agreed)
+
+
 class SignupRequest(BaseModel):
     signup_token: str
     region_code: str
     interests: list[str] = Field(default_factory=list, max_length=12)
+    # 필수(terms·privacy·location)는 모두 agreed=true 여야 가입된다. 빠진 선택 항목은 '동의 안 함'
+    consents: list[ConsentChoiceIn] = Field(default_factory=list, max_length=len(CONSENT_DOCS))
+
+
+class ConsentsUpdate(BaseModel):
+    items: list[ConsentChoiceIn] = Field(min_length=1, max_length=len(CONSENT_DOCS))
+
+
+class ConsentStatusOut(BaseModel):
+    kind: ConsentKind
+    version: str
+    required: bool
+    agreed: bool
+    # 지금 상태가 정해진 때 (동의·거부·철회). 기록이 없으면 null
+    decided_at: datetime | None
 
 
 class RefreshRequest(BaseModel):
@@ -68,6 +103,10 @@ class UserOut(BaseModel):
     interests: list[str]
     intro: str
     has_location: bool
+    # 필수 약관이 바뀌었거나 동의 기록이 없으면 true → 앱이 다시 동의 화면을 보여 준다
+    consent_needed: bool
+    # 마음 건강 기록(민감정보) 선택 동의 — false 면 자가 점검 결과를 저장하지 않는다
+    health_consent: bool
 
     @classmethod
     def from_user(cls, user: User) -> "UserOut":
@@ -82,6 +121,8 @@ class UserOut(BaseModel):
             interests=[i.category for i in user.interests],
             intro=user.intro,
             has_location=user.geo_lat is not None,
+            consent_needed=bool(AuthService.consent_needed(user)),
+            health_consent=AuthService.has_consent(user, "health"),
         )
 
 
@@ -130,10 +171,39 @@ class Option(BaseModel):
     label: str
 
 
+class ConsentDocOut(BaseModel):
+    kind: ConsentKind
+    version: str
+    required: bool
+
+
 class SignupOptions(BaseModel):
     regions: list[Option]
     interests: list[Option]
     max_interests: int
+    # 가입 동의 문서 — 화면은 본문(frontend shared/legal)을 보여 주고 이 버전으로 동의를 보낸다
+    consents: list[ConsentDocOut]
+
+
+def consent_docs() -> list[ConsentDocOut]:
+    return [
+        ConsentDocOut(kind=k, version=CONSENT_VERSIONS[k], required=r)
+        for k, r in CONSENT_DOCS.items()
+    ]  # type: ignore[arg-type]
+
+
+def consent_status(user: User) -> list[ConsentStatusOut]:
+    state = AuthService.consent_state(user)
+    return [
+        ConsentStatusOut(
+            kind=k,  # type: ignore[arg-type]
+            version=CONSENT_VERSIONS[k],
+            required=required,
+            agreed=AuthService.has_consent(user, k),
+            decided_at=state[k].created_at if state[k] else None,
+        )
+        for k, required in CONSENT_DOCS.items()
+    ]
 
 
 class WithdrawIn(BaseModel):

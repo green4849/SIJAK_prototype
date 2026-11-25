@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { Button } from '@/shared/ui/Button'
 
@@ -23,12 +23,18 @@ function Offline() {
   )
 }
 
-/** 로그인한 사람만 */
+/**
+ * 로그인한 사람만.
+ * 필수 약관에 아직 동의하지 않았으면(약관이 바뀌었거나 동의 단계 전에 가입) 다시 동의 화면부터 (B6)
+ */
 export function RequireAuth() {
-  const { status } = useAuth()
+  const { status, user } = useAuth()
+  const { pathname } = useLocation()
   if (status === 'loading') return <Loading />
   if (status === 'offline') return <Offline />
-  return status === 'authenticated' ? <Outlet /> : <Navigate to="/welcome" replace />
+  if (status !== 'authenticated') return <Navigate to="/welcome" replace />
+  if (user?.consent_needed && pathname !== '/consent') return <Navigate to="/consent" replace />
+  return <Outlet />
 }
 
 /**

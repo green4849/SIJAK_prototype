@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
 import * as C from '../src/demo/constants'
+import { CONSENT_ORDER, LEGAL_VERSION } from '../src/shared/legal/documents'
 import { match, QUESTIONS, type DSurvey } from '../src/demo/matching'
 import { GENERAL, MAX_TOPICS, NEARBY_RADIUS_KM, PHRASES, RECOMMEND_RADIUS_KM, RULE_SOURCES } from '../src/demo/rules'
 
@@ -19,6 +20,14 @@ test('H37: 지역·좋아하는 것·글자 수 (auth, chat)', () => {
   expect(C.MAX_INTERESTS).toBe(B.auth.max_interests)
   expect(C.INTRO_MAX_LEN).toBe(B.auth.intro_max_len)
   expect(C.TEXT_MAX).toBe(B.chat.text_max)
+})
+
+test('B6: 동의 문서 — 종류·필수 여부·버전이 백엔드와 같고, 약관 본문 버전도 같다', () => {
+  expect(C.CONSENT_DOCS).toEqual(B.auth.consent_docs)
+  expect(C.CONSENT_VERSIONS).toEqual(B.auth.consent_versions)
+  expect([...CONSENT_ORDER].sort()).toEqual(Object.keys(B.auth.consent_docs).sort())
+  // 본문(shared/legal/documents.ts)을 바꾸고 백엔드 버전을 안 올리면(또는 반대) 여기서 걸린다
+  for (const v of Object.values(B.auth.consent_versions)) expect(v).toBe(LEGAL_VERSION)
 })
 
 test('H37: 활동 분류·포인트', () => {

@@ -392,6 +392,12 @@ class WellbeingService:
         await self.repo.commit()
         return result_of(a, previous)
 
+    async def forget_assessments(self, user_id: uuid.UUID) -> None:
+        """마음 건강 기록 동의를 철회하면 지금까지의 점검 기록을 모두 지운다"""
+        # 개인정보 보호법 제37조 — 동의 철회 시 지체 없이 파기
+        await self.repo.delete_assessments(user_id)
+        await self.repo.commit()
+
     async def history(self, user_id: uuid.UUID) -> list[AssessmentResult]:
         return results_with_previous(await self.repo.assessments(user_id, RECENT_ASSESSMENTS))
 

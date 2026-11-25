@@ -1,0 +1,141 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* 한 항목 = 동의 줄 + 요약 + 전체 내용 */
+.item {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.item[data-on] {
+  border-color: var(--color-primary);
+}
+
+.item .row {
+  border: 0;
+  border-radius: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--card-pad) var(--card-pad);
+}
+
+/* 동의 줄 전체가 누르는 곳 (작은 체크박스만 누르게 하지 않는다) */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  padding: var(--card-pad);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+}
+
+.row[data-on] {
+  background: var(--color-primary-soft);
+}
+
+.row[data-strong][data-on] {
+  border-color: var(--color-primary);
+}
+
+.row:has(.input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-on-primary);
+}
+
+.row[data-on] .box {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: var(--text-card-title);
+  line-height: var(--leading-title);
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+}
+
+.tag {
+  color: var(--color-text-muted);
+}
+
+.tag[data-required] {
+  color: var(--color-primary);
+}
+
+/* 전체 내용 보기 — 글자 버튼이지만 손가락 크기는 지킨다 */
+.more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-tight);
+  min-height: var(--touch-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.more svg[data-open] {
+  transform: rotate(180deg);
+}
+
+.full {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+}

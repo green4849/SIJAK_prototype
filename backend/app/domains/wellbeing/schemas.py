@@ -92,6 +92,14 @@ class AssessmentFormOut(BaseModel):
         )
 
 
+class HealthConsentIn(BaseModel):
+    agreed: bool
+
+
+class HealthConsentOut(BaseModel):
+    health_consent: bool
+
+
 class AssessmentIn(BaseModel):
     kind: AssessmentKind
     answers: list[int] = Field(max_length=20, description="문항 순서대로 0~3 (WHO-5는 0~5)")

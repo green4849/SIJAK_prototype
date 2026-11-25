@@ -1,10 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
-import { verifyPhone } from './helpers'
+import { agreeTerms, verifyPhone } from './helpers'
 
 // 이 파일의 가입 흐름은 위치 동의를 쓴다 — 위치·역지오코딩(OpenStreetMap)은 고정값으로
 test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
-/** 가입 1/2(좋아하는 것)에서 하나 고르고 2/2(사는 동네)로 */
+/** 가입 1/3(약관) 동의 → 2/3(좋아하는 것)에서 하나 고르고 3/3(사는 동네)로 */
 async function toLocationStep(page: Page) {
+  await agreeTerms(page)
   await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
   await page.getByRole('button', { name: /^다음/ }).click()
 }
@@ -29,12 +30,19 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
 
   await verifyPhone(page, { name: '홍길순', year: '1957', month: '7', day: '7', phone: '01077778888', gender: '여성' })
   await expect(page).toHaveURL(/\/signup$/)
-  // 1/2 좋아하는 것 — 안 고르면 버튼이 할 일을 알려 준다
+  // 1/3 약관 — 필수에 동의하지 않으면 넘어가지 않는다, 요약 먼저·전문은 펼쳐서 (B6)
+  await expect(page.getByRole('heading', { name: /약관을 확인해 주세요/ })).toBeVisible()
+  await page.getByRole('button', { name: '동의하고 다음' }).click()
+  await expect(page.getByRole('alert')).toHaveText('[필수] 항목에 모두 동의해 주세요.')
+  await page.getByRole('button', { name: '전체 내용 보기' }).first().click()
+  await expect(page.getByRole('heading', { name: '제1조 목적' })).toBeVisible()
+  await agreeTerms(page)
+  // 2/3 좋아하는 것 — 안 고르면 버튼이 할 일을 알려 준다
   await expect(page.getByRole('heading', { name: /어떤 활동을 좋아하시나요/ })).toBeVisible()
   await expect(page.getByRole('button', { name: '하나 이상 골라 주세요' })).toBeDisabled()
   await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
   await page.getByRole('button', { name: /^다음/ }).click()
-  // 2/2 사는 동네 — 뒤로 누르면 1단계로, 고른 것은 그대로
+  // 3/3 사는 동네 — 뒤로 누르면 2단계로, 고른 것은 그대로
   await page.getByRole('button', { name: '뒤로' }).click()
   await expect(page.getByRole('button', { name: '요리·맛집 탐방' })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: /^다음/ }).click()
@@ -84,6 +92,7 @@ test.describe('위치 권한이 없으면', () => {
 test('관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ page }) => {
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
+  await agreeTerms(page)
   for (const i of ['산책·등산', '영화·공연', '요리·맛집 탐방', '여행', '운동·건강관리', '봉사활동'])
     await page.getByRole('button', { name: i }).click()
   await expect(page.locator('[aria-pressed=true]')).toHaveCount(5)
