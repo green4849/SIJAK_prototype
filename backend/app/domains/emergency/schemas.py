@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -60,7 +61,10 @@ class SosNotified(BaseModel):
 class SosOut(BaseModel):
     id: uuid.UUID
     created_at: datetime
-    notified: list[SosNotified] = Field(description="알린 사람들 (보호자 + 담당 복지사)")
+    notified: list[SosNotified] = Field(
+        description="요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음"
+    )
+    delivery_status: Literal["not_sent"] = Field(description="외부 알림 발송 상태")
 
     @classmethod
     def of(cls, r: SosResult) -> "SosOut":
@@ -68,4 +72,5 @@ class SosOut(BaseModel):
             id=r.id,
             created_at=r.created_at,
             notified=[SosNotified(**n) for n in r.notified],
+            delivery_status=r.delivery_status,
         )

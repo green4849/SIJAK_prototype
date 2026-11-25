@@ -14,5 +14,6 @@ export const adminApi = {
   cases: () => api.get<AdminCase[]>('/admin/cases'),
   act: (id: string, action: CaseAction) =>
     api.post<AdminCase>(`/admin/cases/${id}/action`, { action } satisfies Schema<'CaseActionIn'>),
+  context: (id: string) => api.get<Schema<'CaseMessageOut'>[]>(`/admin/cases/${id}/context`),
   watch: () => api.get<AdminWatch[]>('/admin/watch'),
 }

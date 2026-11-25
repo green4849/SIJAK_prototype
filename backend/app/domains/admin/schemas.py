@@ -40,9 +40,17 @@ class AdminWatchOut(BaseModel):
     last_seen_text: str = Field(description="마지막 접속 '3일 전'")
     signal: str = Field(description="최근 신호")
     guardian_notified: bool = Field(
-        description="최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지"
+        description="최근 7일 안에 긴급 도움 요청을 기록했는지. 외부 알림 발송 여부가 아님"
     )
 
     @classmethod
     def of(cls, w: WatchItem) -> "AdminWatchOut":
         return cls(**w.__dict__)
+
+
+class CaseMessageOut(BaseModel):
+    id: int
+    sender_name: str
+    body: str
+    created_at: datetime
+    is_reported: bool

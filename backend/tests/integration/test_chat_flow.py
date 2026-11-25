@@ -2,6 +2,8 @@
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from tests.integration.helpers import signup_user
 
@@ -78,6 +80,50 @@ async def test_text_voice_polling_unread(client: AsyncClient) -> None:
     assert (await client.get(f"/api/v1/chats/{rid}/messages", headers=hc)).status_code == 404
 
 
+async def test_room_list_query_count_does_not_grow_with_rooms(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    ha, a, hb, b = await _friends(client)
+
+    async def add_room(other_headers: dict, other: dict) -> None:
+        room = (await client.post(f"/api/v1/chats/with/{other['id']}", headers=ha)).json()
+        await client.post(
+            f"/api/v1/chats/{room['id']}/messages",
+            headers=other_headers,
+            json={"text": "안녕하세요"},
+        )
+
+    await add_room(hb, b)
+    engine = db_sessionmaker.kw["bind"].sync_engine
+
+    async def list_selects() -> tuple[int, int]:
+        statements: list[str] = []
+
+        def record(_conn, _cursor, statement: str, _parameters, _context, _executemany) -> None:
+            if statement.lstrip().upper().startswith("SELECT"):
+                statements.append(statement)
+
+        event.listen(engine, "before_cursor_execute", record)
+        try:
+            response = await client.get("/api/v1/chats", headers=ha)
+        finally:
+            event.remove(engine, "before_cursor_execute", record)
+        assert response.status_code == 200
+        return len(statements), len(response.json())
+
+    one_queries, one_rooms = await list_selects()
+    assert one_rooms == 1
+
+    hc, c = await signup_user(client, "이순자")
+    await client.post("/api/v1/friends/requests", headers=ha, json={"to_user_id": c["id"]})
+    await client.post("/api/v1/friends/requests", headers=hc, json={"to_user_id": a["id"]})
+    await add_room(hc, c)
+
+    two_queries, two_rooms = await list_selects()
+    assert two_rooms == 2
+    assert two_queries == one_queries
+
+
 async def test_invalid_messages(client: AsyncClient) -> None:
     ha, _, _, b = await _friends(client)
     rid = (await client.post(f"/api/v1/chats/with/{b['id']}", headers=ha)).json()["id"]
@@ -89,3 +135,53 @@ async def test_invalid_messages(client: AsyncClient) -> None:
         files={"audio": ("x.exe", b"MZ", "application/octet-stream")},
     )
     assert bad_type.status_code == 422
+
+
+@pytest.mark.parametrize("committed", [False, True])
+async def test_voice_commit_failure_preserves_persisted_files(
+    client: AsyncClient,
+    db_sessionmaker: async_sessionmaker[AsyncSession],
+    monkeypatch,
+    tmp_path,
+    committed: bool,
+) -> None:
+    from sqlalchemy import select
+
+    from app.core.storage import LocalMediaStorage
+    from app.domains.chat.models import ChatMessage, PendingMediaDeletion
+    from app.domains.chat.repository import ChatRepository
+    from app.jobs import expire_voice
+
+    ha, a, hb, b = await _friends(client)
+    room = (await client.post(f"/api/v1/chats/with/{b['id']}", headers=ha)).json()
+    original = ChatRepository.commit
+    first = True
+
+    async def fail_once(repo: ChatRepository) -> None:
+        nonlocal first
+        if first:
+            first = False
+            if committed:
+                await original(repo)
+            raise OSError("simulated lost commit acknowledgement")
+        await original(repo)
+
+    monkeypatch.setattr(ChatRepository, "commit", fail_once)
+    response = await client.post(
+        f"/api/v1/chats/{room['id']}/voice",
+        headers=ha,
+        files={"audio": ("test.webm", b"fake-webm", "audio/webm")},
+    )
+    assert response.status_code == 500
+    async with db_sessionmaker() as session:
+        messages = list(await session.scalars(select(ChatMessage)))
+        pending = list(await session.scalars(select(PendingMediaDeletion)))
+    if committed:
+        assert len(messages) == 1 and pending == []
+        assert (
+            await client.get(f"/api/v1/chats/voice/{messages[0].id}", headers=hb)
+        ).status_code == 200
+    else:
+        assert messages == [] and len(pending) == 1
+        await expire_voice(db_sessionmaker, LocalMediaStorage(str(tmp_path)))
+        assert not (tmp_path / pending[0].key).exists()

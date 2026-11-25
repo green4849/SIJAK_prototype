@@ -13,6 +13,10 @@ import { registerServiceWorker } from '@/shared/lib/pwa'
 applyPrefs(loadPrefs())
 
 async function start() {
+  if (import.meta.env.VITE_SENTRY_DSN) {
+    const { initMonitoring } = await import('@/shared/lib/monitoring')
+    await initMonitoring().catch(() => undefined)
+  }
   // 데모 빌드(서버 없음)에서만 가짜 서버를 끼운다 — 일반 빌드에서는 이 코드가 통째로 빠진다
   if (import.meta.env.VITE_DEMO === '1') {
     const demo = await import('@/demo')

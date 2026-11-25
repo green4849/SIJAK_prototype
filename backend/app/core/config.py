@@ -21,6 +21,7 @@ class Settings(BaseSettings):
         env_file=("../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
+        hide_input_in_errors=True,
     )
 
     app_name: str = "wipi"
@@ -64,6 +65,22 @@ class Settings(BaseSettings):
 
     # 음성 메시지 등 업로드 파일 저장 위치 (backend/ 기준, git 제외)
     media_dir: str = "data/media"
+    media_storage: Literal["local", "s3"] = "local"
+    media_s3_bucket: str | None = None
+    media_s3_endpoint: str | None = None
+    media_s3_region: str = "ap-southeast-1"
+    media_s3_prefix: str = "voice/"
+    sentry_dsn: str | None = None
+    release: str = "development"
+    backup_encryption_key: str | None = None
+    backup_s3_bucket: str | None = None
+    backup_s3_endpoint: str | None = None
+    backup_s3_region: str = "ap-southeast-1"
+    restore_database_url: str | None = None
+    pg_tools_container: str | None = None
+    # 이전 암호화 키는 복호화에만 사용. 실제 값은 환경 변수에만 둔다.
+    data_encryption_previous_keys: list[str] = []
+
     voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
     # 음성 메시지 파일 보관 기간 (B3, 보고서 4.6.3) — 지나면 예약 작업이 파일을 지운다
     voice_retention_days: int = 90
@@ -86,6 +103,18 @@ class Settings(BaseSettings):
 
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60
+
+    @field_validator("media_s3_endpoint", "backup_s3_endpoint", "sentry_dsn", mode="before")
+    @classmethod
+    def _optional_endpoint(cls, value: str | None) -> str | None:
+        return value or None
+
+    @field_validator("data_encryption_previous_keys")
+    @classmethod
+    def _previous_keys(cls, values: list[str]) -> list[str]:
+        if len(values) > 5 or not all(_is_32_byte_base64(key) for key in values):
+            raise ValueError("이전 암호화 키는 base64 32바이트, 최대 5개")
+        return values
 
     @field_validator("database_url")
     @classmethod
@@ -131,6 +160,12 @@ class Settings(BaseSettings):
                 "WEB_CONCURRENCY>1: 요청 횟수 제한을 워커마다 따로 셈 "
                 "(1로 두거나, 공유 저장소(Redis, B9)로 바꾼 뒤 늘리기)"
             )
+        for name, endpoint in (
+            ("MEDIA_S3_ENDPOINT", self.media_s3_endpoint),
+            ("BACKUP_S3_ENDPOINT", self.backup_s3_endpoint),
+        ):
+            if endpoint and not endpoint.startswith("https://"):
+                problems.append(f"{name}: 운영에서는 https:// 주소만")
         if problems:
             raise ValueError("운영 설정을 확인하세요 (ENV=prod):\n  - " + "\n  - ".join(problems))
 

@@ -41,12 +41,12 @@
 | [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | 🔨 Firebase 문자 ✅ · PASS ⬜ |
 | [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |
 | [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | ⬜ |
-| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | 🔨 처리·권한 ✅ · 대화 맥락 ⬜ |
-| [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ⬜ |
+| [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | ✅ |
+| [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ✅ |
 | [B9](B9-external-session.md) | 인증 세션 외부 저장 (Redis) | S | P1 | ⬜ |
 | [B10](B10-deployment.md) | 배포 구성 | M | P0 | ✅ 구성 |
-| [B11](B11-error-tracking.md) | 오류 수집·로그 | S | P1 | ⬜ |
-| [B12](B12-backup-keys.md) | 백업·키 관리 | M | P1 | ⬜ |
+| [B11](B11-error-tracking.md) | 오류 수집·로그 | S | P1 | 🔨 코드 완료·운영 설정 대기 |
+| [B12](B12-backup-keys.md) | 백업·키 관리 | M | P1 | 🔨 코드 완료·운영 설정 대기 |
 | [C1](C1-realtime-chat.md) | 실시간 대화 (WebSocket) | M | P1 | ⬜ |
 | [C2](C2-stt-tts.md) | STT/TTS 연동 | L | P1 | ⏸ |
 | [C3](C3-nearby-radius.md) | 같은 동네 반경 검색 | S | P1 | ✅ |

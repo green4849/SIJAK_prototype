@@ -27,12 +27,15 @@ async function withCsp(page: Page) {
   return violations
 }
 
-test('H42: 정책의 바깥 주소는 지도·사진과 휴대폰 인증(B4)뿐이고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
+test('H42: 정책의 바깥 주소는 지도·사진·오류 수집(Sentry)·휴대폰 인증(B4)뿐이고, 다른 사이트에 넣지 못하게(frame-ancestors) 한다', () => {
   expect(CSP).toContain("frame-ancestors 'none'")
   expect(CSP).not.toContain('unsafe-inline')
   // 스크립트는 이 사이트 것과 reCAPTCHA(인증 문자 보내기 전 사람 확인)만
   expect(CSP).toContain("script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;")
   expect([...new Set(CSP.match(/https:\/\/[^\s;]+/g))].sort()).toEqual([
+    'https://*.ingest.de.sentry.io', // 오류 수집
+    'https://*.ingest.sentry.io',
+    'https://*.ingest.us.sentry.io',
     'https://identitytoolkit.googleapis.com', // Firebase 전화 인증
     'https://images.unsplash.com',
     'https://nominatim.openstreetmap.org',

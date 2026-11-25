@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Bot, Flag, TriangleAlert } from 'lucide-react'
 import { formatRelative } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
 import { Button } from '@/shared/ui/Button'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
-import type { AdminCase, CaseStatus } from '../api/adminApi'
+import { adminApi, type AdminCase, type CaseStatus } from '../api/adminApi'
 import { useCases, useWatchList } from '../hooks/useAdmin'
 import styles from './Admin.module.css'
 
@@ -37,6 +38,20 @@ export function CaseQueue() {
 }
 
 function CaseCard({ c, busy, onAct }: { c: AdminCase; busy: boolean; onAct: (a: 'warn' | 'suspend' | 'ban' | 'dismiss') => void }) {
+  const [context, setContext] = useState<Awaited<ReturnType<typeof adminApi.context>> | null>(null)
+  const [contextError, setContextError] = useState('')
+  const [contextBusy, setContextBusy] = useState(false)
+  async function loadContext() {
+    setContextBusy(true)
+    setContextError('')
+    try {
+      setContext(await adminApi.context(c.id))
+    } catch {
+      setContextError('대화 맥락을 불러오지 못했어요. 다시 눌러 주세요.')
+    } finally {
+      setContextBusy(false)
+    }
+  }
   const SourceIcon = c.source === 'auto' ? Bot : Flag
   return (
     <li className={styles.card} data-open={c.status === 'open'} aria-label={`${c.target_name}님 ${c.source === 'auto' ? '자동 감지' : '신고'}`}>
@@ -55,6 +70,21 @@ function CaseCard({ c, busy, onAct }: { c: AdminCase; busy: boolean; onAct: (a: 
       </p>
       <p className={styles.reasons}>{c.reasons.join(' · ')}</p>
       {c.excerpt && <blockquote className={styles.excerpt}>{c.excerpt}</blockquote>}
+      <Button variant="secondary" disabled={contextBusy} onClick={() => context ? setContext(null) : void loadContext()}>
+        {contextBusy ? '불러오는 중…' : context ? '대화 맥락 닫기' : '대화 맥락 보기'}
+      </Button>
+      {contextError && <Alert>{contextError}</Alert>}
+      {context && (
+        <div aria-label="신고 전후 대화">
+          {context.length === 0 && <p>연결된 대화 메시지가 없어요.</p>}
+          {context.map((m) => (
+            <blockquote key={m.id} className={styles.excerpt}>
+              <p>{m.sender_name} · {formatRelative(m.created_at)}{m.is_reported ? ' · 신고된 메시지' : ''}</p>
+              <p>{m.body}</p>
+            </blockquote>
+          ))}
+        </div>
+      )}
       {c.status === 'open' && (
         <div className={styles.actions}>
           <Button variant="secondary" disabled={busy} onClick={() => onAct('warn')}>
@@ -89,7 +119,7 @@ export function WatchList() {
             <span className={styles.level} data-level={w.relation_score <= 20 ? 3 : w.relation_score <= 40 ? 2 : 1}>
               사회적 관계 지수 {w.relation_score}
             </span>
-            {w.guardian_notified && <span className={styles.status}>보호자에게 알림</span>}
+            {w.guardian_notified && <span className={styles.status}>긴급 도움 기록</span>}
           </div>
           <p className={styles.target}>
             {w.name}님 <span className={styles.meta}>{w.age}세 · {w.region_name}</span>

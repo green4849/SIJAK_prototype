@@ -7,7 +7,12 @@ from typing import TYPE_CHECKING, Literal
 from app.core.errors import ConflictError, DomainError, ForbiddenError, NotFoundError
 from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
-from app.domains.friend.nearby import find_nearby, within_reach
+from app.domains.friend.nearby import (
+    DEFAULT_RADIUS_KM,
+    RECOMMEND_RADIUS_KM,
+    find_nearby,
+    within_reach,
+)
 from app.domains.friend.repository import FriendRepository
 from app.domains.friend.survey import Answers, Match, match, validate
 from app.domains.notification.service import NotificationService
@@ -21,6 +26,8 @@ Relation = Literal["none", "sent", "received", "friends"]
 Tab = Literal["recommended", "nearby"]
 Rating = Literal["like", "neutral", "dislike"]
 MAX_RESULTS = 30
+# 반경·지역으로 거른 뒤에도 후보가 많은 곳에서는 최근 이용자만 점수 계산에 넣는다.
+MAX_CANDIDATES = 500
 # 평가 반영 (C12): 추천 탭에서 '이런 분 더 보여 주세요' 먼저, 평가 안 한 사람, '그저 그래요' 순.
 # '잘 안 맞아요'는 추천 탭에서 다시 보이지 않는다 (같은 동네 탭은 거리 목록이라 그대로)
 _RATING_ORDER = {"like": 0, None: 1, "neutral": 2}
@@ -81,7 +88,13 @@ class FriendService:
         ratings = await self.repo.ratings_by(me.id)
 
         if tab == "nearby":
-            pool = await self.auth.list_active_users(exclude_ids=exclude)
+            pool = await self.auth.list_candidate_users(
+                me,
+                radius_km=DEFAULT_RADIUS_KM,
+                exclude_ids=exclude,
+                limit=MAX_CANDIDATES,
+                nearest_first=True,
+            )
             found = find_nearby(me, pool)
             pairs = [(n.user, n.distance_km) for n in found]
             # 거리가 있으면 가까운 순, 없으면 최근 접속 순(조회 순서 유지)
@@ -108,7 +121,12 @@ class FriendService:
         같은 점수면 '더 보여 주세요' 한 분들의 관심사와 겹치는 분, 가까운 분 먼저.
         """
         disliked = {uid for uid, r in ratings.items() if r == "dislike"}
-        pool = await self.auth.list_active_users(exclude_ids=exclude | disliked)
+        pool = await self.auth.list_candidate_users(
+            me,
+            radius_km=RECOMMEND_RADIUS_KM,
+            exclude_ids=exclude | disliked,
+            limit=MAX_CANDIDATES,
+        )
         reach = within_reach(me, pool)
         surveys = await self.repo.surveys_of({me.id} | {n.user.id for n in reach})
         mine = surveys.get(me.id)

@@ -165,6 +165,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/cases/{case_id}/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Context
+         * @description 신고된 메시지와 같은 방의 앞뒤 최대 5개 메시지. 음성 재생 주소는 제공하지 않는다.
+         */
+        get: operations["context_api_v1_admin_cases__case_id__context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/watch": {
         parameters: {
             query?: never;
@@ -1176,7 +1196,7 @@ export interface components {
             age: number;
             /**
              * Guardian Notified
-             * @description 최근 7일 안에 긴급 도움을 눌러 보호자에게 알렸는지
+             * @description 최근 7일 안에 긴급 도움 요청을 기록했는지. 외부 알림 발송 여부가 아님
              */
             guardian_notified: boolean;
             /**
@@ -1376,6 +1396,22 @@ export interface components {
              * @enum {string}
              */
             action: "warn" | "suspend" | "ban" | "dismiss";
+        };
+        /** CaseMessageOut */
+        CaseMessageOut: {
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Is Reported */
+            is_reported: boolean;
+            /** Sender Name */
+            sender_name: string;
         };
         /** CategoryOption */
         CategoryOption: {
@@ -2053,13 +2089,19 @@ export interface components {
              */
             created_at: string;
             /**
+             * Delivery Status
+             * @description 외부 알림 발송 상태
+             * @constant
+             */
+            delivery_status: "not_sent";
+            /**
              * Id
              * Format: uuid
              */
             id: string;
             /**
              * Notified
-             * @description 알린 사람들 (보호자 + 담당 복지사)
+             * @description 요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음
              */
             notified: components["schemas"]["SosNotified"][];
         };
@@ -2647,6 +2689,37 @@ export interface operations {
             };
         };
     };
+    context_api_v1_admin_cases__case_id__context_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseMessageOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     watch_api_v1_admin_watch_get: {
         parameters: {
             query?: never;
@@ -2926,7 +2999,9 @@ export interface operations {
     voice_file_api_v1_chats_voice__message_id__get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                Range?: string | null;
+            };
             path: {
                 message_id: number;
             };

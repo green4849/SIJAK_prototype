@@ -107,6 +107,7 @@ async def test_sos_records_who_to_notify(
     r = await client.post(f"{API}/emergency/sos", headers=h)
     assert r.status_code == 201
     assert r.json()["notified"] == []
+    assert r.json()["delivery_status"] == "not_sent"
 
     for name, rel, phone in [
         ("김민수", "아들", "01098765432"),
@@ -122,6 +123,7 @@ async def test_sos_records_who_to_notify(
         {"name": "김민수", "relation": "아들"},
         {"name": "박선희", "relation": "담당 복지사"},
     ]
+    assert out["delivery_status"] == "not_sent"
     assert out["id"] and out["created_at"]
 
     async with db_sessionmaker() as s:

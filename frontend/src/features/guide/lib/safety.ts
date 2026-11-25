@@ -39,8 +39,8 @@ export function urgentReply(q: string, ctx: GuideContext): GuideReply | null {
       kind: 'safety',
       mood: 'care',
       text: '급하면 앱보다 전화가 먼저예요. 아래를 눌러 바로 전화하세요. 옆에 누가 있으면 크게 부르세요.',
-      actions: ctx.signedIn ? [...calls, { kind: 'go', label: '보호자에게 알리는 ‘긴급 도움’ 화면', to: '/sos' }] : calls,
-      note: ctx.demo && ctx.signedIn ? '시연의 ‘도움 요청’은 실제로 알림이 가지 않아요. 급하면 꼭 전화하세요.' : undefined,
+      actions: ctx.signedIn ? [...calls, { kind: 'go', label: '긴급 도움 기록·전화 화면', to: '/sos' }] : calls,
+      note: ctx.signedIn ? '‘도움 요청’은 기록만 남고 자동 알림은 가지 않아요. 급하면 꼭 전화하세요.' : undefined,
     }
   }
 

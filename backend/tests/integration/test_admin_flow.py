@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.domains.admin.models import ModerationAction
 from app.domains.auth.models import User
+from app.domains.chat.models import ChatMessage, ChatRoom
 from app.domains.wellbeing.models import RelationIndexWeek
 from app.domains.wellbeing.service import KST
 from tests.integration.helpers import signup_user
@@ -54,6 +55,7 @@ async def test_only_operators(
     for method, path in [
         ("GET", "/admin/cases"),
         ("GET", "/admin/watch"),
+        ("GET", "/admin/cases/auto-1/context"),
         ("POST", "/admin/cases/auto-1/action"),
     ]:
         r = await client.request(method, f"{API}{path}", headers=h, json={"action": "warn"})
@@ -200,3 +202,40 @@ async def test_watch_list(
     assert out[1]["signal"] == "8일째 접속이 없어요" and out[1]["last_seen_text"] == "8일 전"
     assert out[1]["guardian_notified"] is False
     assert out[2]["signal"] == "사회적 관계 지수가 '주의' 단계예요"
+
+
+async def test_case_context_is_bounded_to_reported_room(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    hop = await _operator(client, db_sessionmaker)
+    ha, a, hb, b = await _risky_chat_and_report(client)
+    cases = (await client.get(f"{API}/admin/cases", headers=hop)).json()
+    report = next(c for c in cases if c["source"] == "report")
+    async with db_sessionmaker() as session:
+        room = await session.scalar(select(ChatRoom))
+        assert room is not None
+        session.add_all(
+            [
+                ChatMessage(
+                    room_id=room.id, sender_id=uuid.UUID(a["id"]), kind="text", body=f"뒤 대화 {i}"
+                )
+                for i in range(7)
+            ]
+        )
+        await session.commit()
+    # 별도 방의 메시지는 맥락에 나오면 안 된다.
+    hc, c = await signup_user(client, "다른이웃")
+    await client.post(f"{API}/friends/requests", headers=ha, json={"to_user_id": c["id"]})
+    await client.post(f"{API}/friends/requests", headers=hc, json={"to_user_id": a["id"]})
+    other = (await client.post(f"{API}/chats/with/{c['id']}", headers=ha)).json()["id"]
+    await client.post(f"{API}/chats/{other}/messages", headers=ha, json={"text": "다른 방 비밀"})
+    r = await client.get(f"{API}/admin/cases/{report['id']}/context", headers=hop)
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 6
+    assert rows[0]["is_reported"] and rows[0]["sender_name"] == "정덕수"
+    assert [m["body"] for m in rows[1:]] == [f"뒤 대화 {i}" for i in range(5)]
+    assert all("audio_key" not in m and "room_id" not in m for m in rows)
+    assert (
+        await client.get(f"{API}/admin/cases/auto-999999/context", headers=hop)
+    ).status_code == 404

@@ -9,6 +9,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 import jwt
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.core.config import get_settings
@@ -64,12 +65,38 @@ def _aes() -> AESGCM:
 
 def encrypt(plaintext: str) -> bytes:
     """AES-256-GCM. 저장 형식: nonce(12) || ciphertext+tag."""
+    return encrypt_bytes(plaintext.encode())
+
+
+def encrypt_bytes(data: bytes) -> bytes:
     nonce = os.urandom(12)
-    return nonce + _aes().encrypt(nonce, plaintext.encode(), None)
+    return nonce + _aes().encrypt(nonce, data, None)
 
 
 def decrypt(blob: bytes) -> str:
-    return _aes().decrypt(blob[:12], blob[12:], None).decode()
+    return decrypt_bytes(blob).decode()
+
+
+def decrypt_bytes(blob: bytes) -> bytes:
+    try:
+        return _aes().decrypt(blob[:12], blob[12:], None)
+    except InvalidTag:
+        for key in get_settings().data_encryption_previous_keys:
+            try:
+                return AESGCM(base64.b64decode(key, validate=True)).decrypt(
+                    blob[:12], blob[12:], None
+                )
+            except InvalidTag:
+                continue
+        raise
+
+
+def encrypted_with_current_key(blob: bytes) -> bool:
+    try:
+        _aes().decrypt(blob[:12], blob[12:], None)
+        return True
+    except InvalidTag:
+        return False
 
 
 def hash_phone(phone: str) -> str:

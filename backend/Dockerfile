@@ -1,6 +1,6 @@
 # 백엔드 운영 이미지 (B10) — uv 로 잠금 파일 그대로 설치, 실행은 root 아닌 사용자
 #   docker build -t sijak-api backend
-FROM python:3.11-slim AS build
+FROM python:3.11-slim-trixie AS build
 COPY --from=ghcr.io/astral-sh/uv:0.8.17 /uv /usr/local/bin/uv
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
@@ -14,7 +14,9 @@ COPY scripts ./scripts
 COPY docker-entrypoint.sh ./
 RUN uv sync --frozen --no-dev
 
-FROM python:3.11-slim
+FROM python:3.11-slim-trixie
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --home /app app \
     && mkdir -p /data/media && chown app /data/media
 WORKDIR /app

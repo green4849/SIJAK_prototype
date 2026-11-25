@@ -67,3 +67,11 @@ class ChatMessage(Base):
     risk_level: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")
     risk_labels: Mapped[str] = mapped_column(String(200), default="", server_default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PendingMediaDeletion(Base):
+    """DB 정리와 같은 트랜잭션에 기록하고, 파일 삭제 성공 후에만 제거한다."""
+
+    __tablename__ = "pending_media_deletions"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

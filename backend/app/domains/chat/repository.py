@@ -1,11 +1,12 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
-from app.domains.chat.models import ChatMessage, ChatRoom
+from app.domains.chat.models import ChatMessage, ChatRoom, PendingMediaDeletion
 
 
 class ChatRepository:
@@ -42,10 +43,68 @@ class ChatRepository:
         )
         return list(await self.session.scalars(q))
 
+    async def list_room_previews(
+        self, user_id: uuid.UUID
+    ) -> list[tuple[ChatRoom, ChatMessage | None, int]]:
+        """방 목록의 마지막 메시지와 안 읽은 수를 한 번의 조회로 가져온다."""
+        last = aliased(ChatMessage)
+        pending = aliased(ChatMessage)
+        last_id = (
+            select(func.max(last.id))
+            .where(last.room_id == ChatRoom.id)
+            .correlate(ChatRoom)
+            .scalar_subquery()
+        )
+        last_read_id = case(
+            (ChatRoom.user_a_id == user_id, ChatRoom.a_last_read_id),
+            else_=ChatRoom.b_last_read_id,
+        )
+        unread = (
+            select(func.count(pending.id))
+            .where(
+                pending.room_id == ChatRoom.id,
+                pending.id > last_read_id,
+                pending.sender_id != user_id,
+            )
+            .correlate(ChatRoom)
+            .scalar_subquery()
+        )
+        q = (
+            select(ChatRoom, ChatMessage, unread)
+            .outerjoin(ChatMessage, ChatMessage.id == last_id)
+            .where(or_(ChatRoom.user_a_id == user_id, ChatRoom.user_b_id == user_id))
+            .order_by(ChatRoom.last_message_at.desc().nulls_last(), ChatRoom.created_at.desc())
+        )
+        return [
+            (room, message, int(count)) for room, message, count in await self.session.execute(q)
+        ]
+
     # ---- messages ----
 
     async def get_message(self, message_id: int) -> ChatMessage | None:
         return await self.session.get(ChatMessage, message_id)
+
+    async def has_audio_key(self, key: str) -> bool:
+        query = select(ChatMessage.id).where(ChatMessage.audio_key == key).limit(1)
+        return await self.session.scalar(query) is not None
+
+    async def message_context(self, message_id: int) -> list[ChatMessage]:
+        anchor = await self.get_message(message_id)
+        if anchor is None:
+            return []
+        before = await self.session.scalars(
+            select(ChatMessage)
+            .where(ChatMessage.room_id == anchor.room_id, ChatMessage.id < anchor.id)
+            .order_by(ChatMessage.id.desc())
+            .limit(5)
+        )
+        after = await self.session.scalars(
+            select(ChatMessage)
+            .where(ChatMessage.room_id == anchor.room_id, ChatMessage.id > anchor.id)
+            .order_by(ChatMessage.id)
+            .limit(5)
+        )
+        return [*reversed(list(before)), anchor, *after]
 
     async def list_messages(
         self, room_id: uuid.UUID, after_id: int = 0, limit: int = 100
@@ -145,3 +204,24 @@ class ChatRepository:
 
     async def commit(self) -> None:
         await self.session.commit()
+
+    async def queue_media_deletions(self, keys: list[str]) -> None:
+        if keys:
+            await self.session.execute(
+                insert(PendingMediaDeletion)
+                .values([{"key": k} for k in set(keys)])
+                .on_conflict_do_nothing()
+            )
+
+    async def pending_media_deletions(self, limit: int = 500) -> list[PendingMediaDeletion]:
+        return list(
+            await self.session.scalars(
+                select(PendingMediaDeletion).order_by(PendingMediaDeletion.created_at).limit(limit)
+            )
+        )
+
+    async def remove_media_deletion(self, row: PendingMediaDeletion) -> None:
+        await self.session.delete(row)
+
+    async def rollback(self) -> None:
+        await self.session.rollback()

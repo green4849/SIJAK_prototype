@@ -514,12 +514,10 @@ export const TOPICS: Topic[] = [
         ? {
             text: '‘보호자 추가’를 누르고 이름과 전화번호를 적으세요. 세 분까지 돼요.',
             actions: [show('어디서 추가해요?', 'guardian-add', '여기 ‘보호자 추가’를 누르세요.')],
-            demoNote: '시연에서는 알림이 실제로 가지 않아요.',
           }
         : {
-            text: '마이페이지의 ‘보호자 연결’에서 해요. 급할 때 그분께 알림이 가요.',
+            text: '마이페이지의 ‘보호자 연결’에서 해요. 급할 때 그분께 직접 전화할 수 있어요.',
             actions: [viaMe('me-guardians', '‘보호자 연결’', { on: ['guardians'], target: 'guardian-add', say: '여기 ‘보호자 추가’를 누르세요.' })],
-            demoNote: '시연에서는 알림이 실제로 가지 않아요.',
           },
   },
   {
@@ -528,9 +526,8 @@ export const TOPICS: Topic[] = [
     cues: [[/긴급|sos|도움요청/, 4]],
     screens: ['home'],
     reply: (ctx) => ({
-      text: '급할 때 보호자에게 알리는 버튼이에요. 눌러도 바로 가지는 않고 한 번 더 물어봐요.',
+      text: '긴급 도움을 누르면 요청이 기록돼요. 자동 알림은 가지 않으니 직접 전화해 주세요.',
       actions: ctx.screen === 'home' ? [show('‘긴급’ 어디 있어요?', 'home-sos', '여기 ‘긴급’이에요. 누르면 긴급 도움 화면이 열려요.')] : undefined,
-      demoNote: '시연에서는 알림이 실제로 가지 않아요. 정말 급하면 119에 전화하세요.',
     }),
   },
   {

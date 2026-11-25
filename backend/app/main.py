@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
+from app.core.observability import register_observability
 from app.domains.activity.router import router as activity_router
 from app.domains.admin.router import router as admin_router
 from app.domains.auth.router import router as auth_router
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     register_exception_handlers(app)
+    register_observability(app)
 
     api = APIRouter(prefix=settings.api_prefix)
 

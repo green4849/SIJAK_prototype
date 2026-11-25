@@ -14,6 +14,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     LargeBinary,
     String,
@@ -36,6 +37,8 @@ class User(Base):
         CheckConstraint("gender IN ('M','F')", name="gender"),
         CheckConstraint(f"status IN {USER_STATUSES}", name="status"),
         CheckConstraint(f"role IN {USER_ROLES}", name="role"),
+        Index("ix_users_status_region_code", "status", "region_code"),
+        Index("ix_users_status_geo_lat_geo_lng", "status", "geo_lat", "geo_lng"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
