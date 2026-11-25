@@ -5,8 +5,9 @@ import binascii
 from datetime import date
 from functools import lru_cache
 from typing import Literal, Self
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 저장소에 공개된 기본값 — 운영(ENV=prod)에서는 하나라도 남아 있으면 서버가 뜨지 않는다 (B1)
@@ -79,6 +80,11 @@ class Settings(BaseSettings):
     # 가입 최소 연령 — 서비스 대상은 60+, 시연·테스트 시 .env에서 0으로 낮출 수 있음
     min_signup_age: int = 60
 
+    @field_validator("database_url")
+    @classmethod
+    def _asyncpg_url(cls, value: str) -> str:
+        return to_asyncpg_url(value)
+
     @model_validator(mode="after")
     def _guard_prod(self) -> Self:
         """운영 환경 안전장치 — 문제를 모두 모아 한 번에 알려 주고 기동을 막는다."""
@@ -112,6 +118,28 @@ class Settings(BaseSettings):
         # HTTPS 전용 쿠키는 운영에서 항상
         self.cookie_secure = True
         return self
+
+
+def to_asyncpg_url(url: str) -> str:
+    """호스팅 DB(Neon·Render 등)가 주는 주소를 그대로 붙여 넣어도 되게 asyncpg 용으로 바꾼다.
+
+    - `postgres://`·`postgresql://` → `postgresql+asyncpg://`
+    - libpq 옵션 `sslmode=require` → asyncpg 의 `ssl=require`
+    - asyncpg 가 모르는 `channel_binding` 은 뺀다 (그대로 두면 연결할 때 오류)
+    다른 드라이버(`postgresql+psycopg://` 등)를 적은 주소는 건드리지 않는다.
+    """
+    parts = urlsplit(url)
+    scheme = parts.scheme
+    if scheme in ("postgres", "postgresql"):
+        scheme = "postgresql+asyncpg"
+    if scheme != "postgresql+asyncpg":
+        return url
+    query = []
+    for key, val in parse_qsl(parts.query, keep_blank_values=True):
+        if key == "channel_binding":
+            continue
+        query.append(("ssl" if key == "sslmode" else key, val))
+    return urlunsplit((scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
 
 
 def _is_32_byte_base64(value: str) -> bool:

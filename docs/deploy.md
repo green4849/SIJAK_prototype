@@ -1,5 +1,7 @@
 # 배포 (B10) — 서버 1대 운영 구성
 
+> 서버 없이 무료로 시범 운영하려면 [`deploy-render.md`](deploy-render.md) (Render + Neon).
+
 ```
 인터넷 ──443──► web (Caddy)  ── 정적 화면(frontend 빌드) + HTTPS 자동 발급
                   │ /api/*
