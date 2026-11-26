@@ -825,6 +825,35 @@
         "title": "ConsentsUpdate",
         "type": "object"
       },
+      "FirebaseWebConfig": {
+        "description": "Firebase 웹 설정 — 비밀이 아니다 (브라우저 SDK 초기화용)",
+        "properties": {
+          "api_key": {
+            "title": "Api Key",
+            "type": "string"
+          },
+          "app_id": {
+            "title": "App Id",
+            "type": "string"
+          },
+          "auth_domain": {
+            "title": "Auth Domain",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_key",
+          "auth_domain",
+          "project_id",
+          "app_id"
+        ],
+        "title": "FirebaseWebConfig",
+        "type": "object"
+      },
       "FriendCard": {
         "description": "친구 찾기 카드 (④) — 전화번호·생년월일 등 개인정보는 넣지 않는다",
         "properties": {
@@ -1503,12 +1532,23 @@
                 "type": "null"
               }
             ],
-            "description": "Mock 인증 전용 — 실제 PASS에서는 항상 null",
+            "description": "Mock 인증 전용 — 실제 인증에서는 항상 null",
             "title": "Dev Code"
           },
           "session_id": {
             "title": "Session Id",
             "type": "string"
+          },
+          "sms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SmsChallenge"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "있으면 브라우저가 Firebase 로 문자를 보낸다. Mock 이면 null"
           }
         },
         "required": [
@@ -1519,13 +1559,34 @@
         "type": "object"
       },
       "PassVerifyRequest": {
+        "description": "Mock 은 화면의 인증번호(code), Firebase 는 문자 확인 뒤 받은 ID 토큰(id_token).\n\n둘 중 하나만 보낸다.",
         "properties": {
           "code": {
-            "maxLength": 6,
-            "minLength": 6,
-            "pattern": "^\\d{6}$",
-            "title": "Code",
-            "type": "string"
+            "anyOf": [
+              {
+                "maxLength": 6,
+                "minLength": 6,
+                "pattern": "^\\d{6}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "id_token": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "minLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Token"
           },
           "session_id": {
             "title": "Session Id",
@@ -1533,8 +1594,7 @@
           }
         },
         "required": [
-          "session_id",
-          "code"
+          "session_id"
         ],
         "title": "PassVerifyRequest",
         "type": "object"
@@ -2018,6 +2078,19 @@
             },
             "title": "Regions",
             "type": "array"
+          },
+          "sms_provider": {
+            "anyOf": [
+              {
+                "const": "firebase",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "인증 문자를 보내는 곳. firebase 면 인증 전에 '번호가 Google 로 간다'고 알린다",
+            "title": "Sms Provider"
           }
         },
         "required": [
@@ -2086,6 +2159,31 @@
           "name"
         ],
         "title": "SignupRequiredResult",
+        "type": "object"
+      },
+      "SmsChallenge": {
+        "description": "브라우저가 Firebase 로 인증 문자를 보내야 할 때 (IDENTITY_PROVIDER=firebase)",
+        "properties": {
+          "firebase": {
+            "$ref": "#/components/schemas/FirebaseWebConfig"
+          },
+          "phone_e164": {
+            "description": "문자 받을 번호 (+8210…)",
+            "title": "Phone E164",
+            "type": "string"
+          },
+          "provider": {
+            "const": "firebase",
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "phone_e164",
+          "firebase"
+        ],
+        "title": "SmsChallenge",
         "type": "object"
       },
       "SosNotified": {

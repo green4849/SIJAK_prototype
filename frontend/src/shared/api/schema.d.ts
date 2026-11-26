@@ -1488,6 +1488,20 @@ export interface components {
             items: components["schemas"]["ConsentChoiceIn"][];
         };
         /**
+         * FirebaseWebConfig
+         * @description Firebase 웹 설정 — 비밀이 아니다 (브라우저 SDK 초기화용)
+         */
+        FirebaseWebConfig: {
+            /** Api Key */
+            api_key: string;
+            /** App Id */
+            app_id: string;
+            /** Auth Domain */
+            auth_domain: string;
+            /** Project Id */
+            project_id: string;
+        };
+        /**
          * FriendCard
          * @description 친구 찾기 카드 (④) — 전화번호·생년월일 등 개인정보는 넣지 않는다
          */
@@ -1784,16 +1798,25 @@ export interface components {
         PassStartResponse: {
             /**
              * Dev Code
-             * @description Mock 인증 전용 — 실제 PASS에서는 항상 null
+             * @description Mock 인증 전용 — 실제 인증에서는 항상 null
              */
             dev_code: string | null;
             /** Session Id */
             session_id: string;
+            /** @description 있으면 브라우저가 Firebase 로 문자를 보낸다. Mock 이면 null */
+            sms?: components["schemas"]["SmsChallenge"] | null;
         };
-        /** PassVerifyRequest */
+        /**
+         * PassVerifyRequest
+         * @description Mock 은 화면의 인증번호(code), Firebase 는 문자 확인 뒤 받은 ID 토큰(id_token).
+         *
+         *     둘 중 하나만 보낸다.
+         */
         PassVerifyRequest: {
             /** Code */
-            code: string;
+            code?: string | null;
+            /** Id Token */
+            id_token?: string | null;
             /** Session Id */
             session_id: string;
         };
@@ -2002,6 +2025,11 @@ export interface components {
             max_interests: number;
             /** Regions */
             regions: components["schemas"]["Option"][];
+            /**
+             * Sms Provider
+             * @description 인증 문자를 보내는 곳. firebase 면 인증 전에 '번호가 Google 로 간다'고 알린다
+             */
+            sms_provider?: "firebase" | null;
         };
         /** SignupRequest */
         SignupRequest: {
@@ -2028,6 +2056,23 @@ export interface components {
              * @enum {string}
              */
             status: "signup_required";
+        };
+        /**
+         * SmsChallenge
+         * @description 브라우저가 Firebase 로 인증 문자를 보내야 할 때 (IDENTITY_PROVIDER=firebase)
+         */
+        SmsChallenge: {
+            firebase: components["schemas"]["FirebaseWebConfig"];
+            /**
+             * Phone E164
+             * @description 문자 받을 번호 (+8210…)
+             */
+            phone_e164: string;
+            /**
+             * Provider
+             * @constant
+             */
+            provider: "firebase";
         };
         /** SosNotified */
         SosNotified: {

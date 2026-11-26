@@ -95,6 +95,10 @@ class AuthRepository:
         user.interests.extend(UserInterest(category=c) for c in wanted if c not in have)
         await self.session.flush()
 
+    async def set_ci(self, user: User, ci: str) -> None:
+        user.pass_ci = ci
+        await self.session.flush()
+
     async def touch_last_login(self, user: User) -> None:
         user.last_login_at = datetime.now(UTC)
         await self.session.flush()

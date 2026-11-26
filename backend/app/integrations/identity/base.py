@@ -24,6 +24,9 @@ class IdentitySession:
     session_id: str
     # Mock 전용: 화면에 보여줄 인증번호. 실제 provider는 None.
     dev_code: str | None = None
+    # Firebase 전용: 브라우저가 Firebase 로 인증 문자를 보낼 번호(E.164, +8210…).
+    # 문자는 서버가 아니라 브라우저의 Firebase 가 보낸다
+    client_sms_to: str | None = None
 
 
 @dataclass(frozen=True)
@@ -33,6 +36,8 @@ class VerifiedIdentity:
     birth_date: date
     phone: str
     gender: Gender
+    # 이 전화번호를 실제로 가진 사람인지 확인했는지 (문자 인증) — Mock 은 False
+    phone_verified: bool = False
 
 
 class IdentityVerificationFailed(Exception):

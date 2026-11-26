@@ -7,8 +7,13 @@ from app.integrations.identity.base import IdentityProvider
 @lru_cache
 def get_identity_provider() -> IdentityProvider:
     """설정에 따라 구현체 선택. 싱글톤 (Mock은 세션을 메모리에 들고 있음)."""
-    match get_settings().identity_provider:
+    settings = get_settings()
+    match settings.identity_provider:
         case "mock":
             from app.integrations.identity.mock_pass import MockPassProvider
 
             return MockPassProvider()
+        case "firebase":
+            from app.integrations.identity.firebase import FirebasePhoneProvider
+
+            return FirebasePhoneProvider(settings.firebase_project_id)

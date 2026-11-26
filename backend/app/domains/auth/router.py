@@ -17,6 +17,7 @@ from app.domains.auth.schemas import (
     AuthResult,
     ConsentStatusOut,
     ConsentsUpdate,
+    FirebaseWebConfig,
     LocationUpdate,
     LoggedInResult,
     Option,
@@ -28,6 +29,7 @@ from app.domains.auth.schemas import (
     SignupOptions,
     SignupRequest,
     SignupRequiredResult,
+    SmsChallenge,
     TokenResponse,
     UserOut,
     WithdrawIn,
@@ -80,6 +82,7 @@ async def signup_options() -> SignupOptions:
         interests=[Option(code=k, label=v) for k, v in INTERESTS.items()],
         max_interests=MAX_INTERESTS,
         consents=consent_docs(),
+        sms_provider="firebase" if settings.identity_provider == "firebase" else None,
     )
 
 
@@ -94,7 +97,25 @@ async def pass_start(
             name=body.name, birth_date=body.birth_date, phone=body.phone, gender=body.gender
         )
     )
-    return PassStartResponse(session_id=session.session_id, dev_code=session.dev_code)
+    return PassStartResponse(
+        session_id=session.session_id,
+        dev_code=session.dev_code,
+        sms=_firebase_challenge(session.client_sms_to) if session.client_sms_to else None,
+    )
+
+
+def _firebase_challenge(phone_e164: str) -> SmsChallenge:
+    return SmsChallenge(
+        provider="firebase",
+        phone_e164=phone_e164,
+        firebase=FirebaseWebConfig(
+            api_key=settings.firebase_web_api_key,
+            auth_domain=settings.firebase_auth_domain
+            or f"{settings.firebase_project_id}.firebaseapp.com",
+            project_id=settings.firebase_project_id,
+            app_id=settings.firebase_app_id,
+        ),
+    )
 
 
 @router.post("/auth/pass/verify", response_model=AuthResult)
@@ -102,7 +123,7 @@ async def pass_verify(
     body: PassVerifyRequest, request: Request, service: AuthServiceDep, response: Response
 ) -> AuthResult:
     await enforce(PASS_VERIFY_PER_IP, _client_ip(request))
-    result = await service.verify(body.session_id, body.code)
+    result = await service.verify(body.session_id, body.proof)
     if isinstance(result, LoggedIn):
         return _logged_in(response, result)
     return SignupRequiredResult(signup_token=result.signup_token, name=result.name)

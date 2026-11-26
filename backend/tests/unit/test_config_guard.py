@@ -58,3 +58,16 @@ def test_all_problems_reported_at_once() -> None:
     names = ["JWT_SECRET", "DATA_ENCRYPTION_KEY", "PHONE_HASH_PEPPER", "CORS_ORIGINS"]
     for name in [*names, "IDENTITY_PROVIDER"]:
         assert name in text
+
+
+def test_firebase_needs_web_config() -> None:
+    with pytest.raises(ValidationError, match="FIREBASE_PROJECT_ID"):
+        make(identity_provider="firebase", allow_mock_identity_in_prod=False)
+    ok = make(
+        identity_provider="firebase",
+        allow_mock_identity_in_prod=False,
+        firebase_project_id="sijak-6080",
+        firebase_web_api_key="AIza-test",
+        firebase_app_id="1:2:web:3",
+    )
+    assert ok.identity_provider == "firebase"

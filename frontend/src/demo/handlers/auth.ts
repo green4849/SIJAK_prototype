@@ -97,6 +97,7 @@ export const authRoutes: Route[] = [
         version: CONSENT_VERSIONS[kind],
         required,
       })),
+      sms_provider: null, // 시연은 화면에 인증번호 (문자 없음)
     } satisfies Schema<'SignupOptions'>)],
 
   ['POST', '/auth/pass/start', (req) => {
