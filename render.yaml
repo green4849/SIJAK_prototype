@@ -19,8 +19,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/health
-    # main 의 CI 가 통과한 커밋만 배포 (시연 사이트와 같은 규칙)
-    autoDeployTrigger: checksPass
+    # 자동 배포는 끔 — main 의 CI 가 성공하면 .github/workflows/render.yml 이 Deploy Hook 으로 배포한다
+    autoDeployTrigger: "off"
     envVars:
       # 이미지의 uvicorn 은 8000 에서 듣는다 (Render 기본은 10000)
       - key: PORT
@@ -62,7 +62,8 @@ services:
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    autoDeployTrigger: checksPass
+    # 자동 배포는 끔 — main 의 CI 가 성공하면 .github/workflows/render.yml 이 Deploy Hook 으로 배포한다
+    autoDeployTrigger: "off"
     envVars:
       - key: NODE_VERSION
         value: "22"
