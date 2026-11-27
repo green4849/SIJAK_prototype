@@ -85,7 +85,21 @@
 
 ## 업데이트
 
-`autoDeployTrigger: checksPass` — `main` 에 병합되고 **CI 가 통과하면** 두 서비스가 저절로 다시 배포된다. 새 마이그레이션은 백엔드가 시작할 때 자동 적용(`alembic upgrade head`).
+`main` 에 병합되고 **CI 가 통과하면** GitHub Actions(`.github/workflows/render.yml`)가 두 서비스의 **Deploy Hook** 을 불러 다시 배포한다. 새 마이그레이션은 백엔드가 시작할 때 자동 적용(`alembic upgrade head`).
+
+- Render 쪽 자동 배포는 끈다(`render.yaml` 의 `autoDeployTrigger: "off"`). 예전 `checksPass` 는 커밋마다 붙는 다른 GitHub 앱의 검사 묶음(실행 0개, 'queued' 그대로)이 끝나지 않아 자동 배포가 한 번도 일어나지 않았다
+- Hook 은 main 의 **최신 커밋**을 배포한다. 그래서 워크플로는 CI 가 검사한 커밋이 아직 main 의 최신일 때만 부르고, 그사이 main 이 앞서 나갔으면 건너뛴다(새 커밋의 CI 가 끝나면 다시 돈다)
+- 손으로 다시 배포: GitHub → Actions → **Deploy to Render** → Run workflow (그때의 main 최신 커밋, CI 결과는 보지 않음). 또는 Render 대시보드 → 서비스 → Manual Deploy
+
+### 처음 한 번 — Deploy Hook 을 GitHub 에 넣기
+1. Render 대시보드 → `sijak-6080-api` → **Settings → Deploy Hook** → 주소 복사
+2. GitHub 저장소 → **Settings → Secrets and variables → Actions → New repository secret** → 이름 `RENDER_DEPLOY_HOOK_API`, 값에 1의 주소
+3. `sijak-6080`(화면)도 같은 방법으로 → 이름 `RENDER_DEPLOY_HOOK_WEB`
+4. Render 에서 Blueprint 를 다시 맞춘다(**Blueprints → 이 Blueprint → Sync**) — 두 서비스의 Auto-Deploy 가 Off 로 바뀐다. 바뀌지 않으면 각 서비스 **Settings → Build & Deploy → Auto-Deploy** 를 직접 **Off** 로
+5. 확인: GitHub → Actions → **Deploy to Render** → Run workflow → 로그에 `api: HTTP 2xx`·`web: HTTP 2xx`, 몇 분 뒤 Render Events 에 새 배포
+
+- Hook 주소는 아는 사람 누구나 배포를 시작할 수 있는 비밀값이다 — 대화·문서·커밋에 붙이지 말고, 새어 나갔으면 Render 에서 **Regenerate** 한 뒤 Secrets 도 바꾼다
+- Secrets 가 없으면 워크플로는 경고만 남기고 넘어간다(CI·시연 사이트 배포에는 영향 없음)
 
 ## 운영 메모
 
