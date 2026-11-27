@@ -17,12 +17,13 @@ import {
   ShieldCheck,
   UserRound,
   Users,
+  Sparkles,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
-import { useMyFriends } from '@/features/friend'
+import { useMyFriends, useSurveyStatus } from '@/features/friend'
 import { useUnreadNotifications } from '@/features/inbox'
 import { useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
@@ -32,6 +33,7 @@ import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
 import { IconAction } from '@/shared/ui/IconAction'
 import { MenuItem, MenuList } from '@/shared/ui/MenuList'
 import { TopBar } from '@/shared/ui/TopBar'
+import { friendSurvey } from './routes'
 import styles from './MyPage.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
 
@@ -40,6 +42,7 @@ export function MyPage() {
   const { user, signOut } = useAuth()
   const [askLogout, setAskLogout] = useState(false)
   const friends = useMyFriends()
+  const survey = useSurveyStatus()
   const counts = useActivityCounts()
   const points = usePointSummary()
   const mood = useRelationIndex()
@@ -84,6 +87,12 @@ export function MyPage() {
             to="/notifications"
           />
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
+          {/* 성향조사 — 했으면 고치러, 안 했으면 시작하러 (C15) */}
+          <MenuItem
+            icon={Sparkles}
+            label={survey.data?.answers ? '내 취향 수정하기' : '성향조사 하기'}
+            to={survey.data?.answers ? `${friendSurvey}?edit` : friendSurvey}
+          />
           {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 */}
           <MenuItem
             icon={MapPin}

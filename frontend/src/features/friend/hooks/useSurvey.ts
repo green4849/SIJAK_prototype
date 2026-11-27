@@ -26,14 +26,6 @@ export function useSurveyStatus() {
   return useAsync(() => friendApi.survey(), [])
 }
 
-/** 추천 친구 탭에 들어왔을 때 성향조사 시작 화면으로 보낼지 (불러오는 중이면 null). '다음에 하기'는 페이지가 본다 */
-export function useSurveyGate(): boolean | null {
-  const { data, error } = useSurveyStatus()
-  if (error) return false
-  if (!data) return null
-  return !data.answers
-}
-
 type Value = string | string[]
 type Draft = Partial<Record<SurveyQuestion['key'], Value>>
 

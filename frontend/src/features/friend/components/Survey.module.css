@@ -102,3 +102,31 @@
   grid-template-columns: 1fr 2fr;
   gap: var(--space-1);
 }
+
+/* 추천 친구 위 성향조사 안내 — 오른쪽 위 'X'로 닫기 (터치 영역 56px) */
+.prompt {
+  position: relative;
+}
+
+.prompt > a {
+  padding-right: calc(var(--touch-min) + var(--space-1));
+}
+
+.promptClose {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.promptClose:active {
+  filter: var(--pressed-filter);
+}
