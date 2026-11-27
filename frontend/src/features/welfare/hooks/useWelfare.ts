@@ -2,7 +2,7 @@ import { useAsync } from '@/shared/lib/useAsync'
 import { welfareApi, type WelfareKind } from '../api/welfareApi'
 
 export function useNearbyCenters(kind: WelfareKind | 'all') {
-  return useAsync(() => welfareApi.nearby(kind), [kind])
+  return useAsync(() => welfareApi.search(kind), [kind])
 }
 
 export function useCenter(id: string) {

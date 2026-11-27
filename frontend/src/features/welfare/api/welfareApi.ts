@@ -8,8 +8,10 @@ import type { Schema } from '@/shared/api/types'
 
 export type WelfareCenter = Schema<'WelfareCenterOut'>
 export type WelfareKind = WelfareCenter['kind']
+export type WelfareSearch = Schema<'WelfareSearchOut'>
 
 export const welfareApi = {
-  nearby: (kind: WelfareKind | 'all') => api.get<WelfareCenter[]>(`/welfare/nearby?kind=${kind}`),
+  /** 5km → 10km → 20km 로 넓혀 찾고, 그래도 없으면 가장 가까운 곳 (mode 로 어떻게 찾았는지) */
+  search: (kind: WelfareKind | 'all') => api.get<WelfareSearch>(`/welfare/search?kind=${kind}`),
   center: (id: string) => api.get<WelfareCenter>(`/welfare/${id}`),
 }

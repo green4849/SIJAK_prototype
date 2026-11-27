@@ -2,7 +2,7 @@
 
 import uuid
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from app.core.errors import NotFoundError
 from app.core.geo import coarse_km, haversine_km
@@ -13,8 +13,11 @@ from app.integrations.public_data.base import FacilityRecord
 if TYPE_CHECKING:
     from app.domains.auth.models import User
 
-# 데모 시설이 4.5km 까지 있어 복지관(시·군에 한두 곳)도 들어오게 5km
+# 처음엔 5km(걸어서·버스로 다닐 만한 거리). 없으면 넓혀 가며 찾는다 — 시설이 드문 곳에서
+# 늘 빈 화면이 되지 않게. 20km 안에도 없으면 거리와 상관없이 가장 가까운 몇 곳을 거리와 함께.
 NEARBY_RADIUS_KM = 5.0
+SEARCH_RADII_KM = (5.0, 10.0, 20.0)
+NEAREST_ANYWHERE = 5
 MAX_RESULTS = 30
 SAMPLE_NOTE = "예시로 넣은 시설이에요. 이름·프로그램·여는 시간·전화번호 모두 실제가 아니에요."
 
@@ -36,22 +39,61 @@ def _distance(me: "User", c: WelfareCenter) -> float | None:
     return haversine_km(me.geo_lat, me.geo_lng, c.lat, c.lng)
 
 
+#: 무엇을 보여 주는지 — 화면 안내 문구를 고른다
+#  near: 5km 안 · wider: 넓힌 반경 안 · nearest: 20km 밖이라 가장 가까운 곳
+#  region: 위치를 몰라 같은 시·도
+#  empty: 보여 줄 시설이 없음 (위치가 있으면 데이터 자체가 없고, 없으면 그 시·도에 없음)
+SearchMode = Literal["near", "wider", "nearest", "region", "empty"]
+
+
+@dataclass(frozen=True)
+class SearchResult:
+    mode: SearchMode
+    #: near·wider 일 때 찾은 반경(km)
+    radius_km: float | None
+    centers: list[CenterView]
+
+
 class WelfareService:
     def __init__(self, repo: WelfareRepository) -> None:
         self.repo = repo
 
     async def nearby(self, me: "User", kind: str | None) -> list[CenterView]:
-        """내 위치가 있으면 반경 안을 가까운 순으로, 없으면 같은 시·도 시설(거리 없음)"""
+        """search 의 시설 목록만 (예전 /welfare/nearby 응답 모양 그대로)"""
+        return (await self.search(me, kind)).centers
+
+    async def search(self, me: "User", kind: str | None) -> SearchResult:
+        """가까운 시설.
+
+        내 위치가 있으면 5km → 10km → 20km 로 넓혀 처음 찾은 반경 안을 가까운 순으로.
+        20km 안에도 없으면 가장 가까운 몇 곳(거리 표시). 위치가 없으면 같은 시·도(거리 없음).
+        """
         if me.geo_lat is None or me.geo_lng is None:
             found = await self.repo.in_region(me.region_code, kind, MAX_RESULTS)
-            return [CenterView(c, None) for c in found]
-        within: list[tuple[float, WelfareCenter]] = []
-        for c in await self.repo.in_box(me.geo_lat, me.geo_lng, NEARBY_RADIUS_KM, kind):
-            km = haversine_km(me.geo_lat, me.geo_lng, c.lat, c.lng)
-            if km <= NEARBY_RADIUS_KM:
-                within.append((km, c))
-        within.sort(key=lambda x: (x[0], x[1].name))
-        return [CenterView(c, coarse_km(km)) for km, c in within[:MAX_RESULTS]]
+            views = [CenterView(c, None) for c in found]
+            return SearchResult("region" if views else "empty", None, views)
+
+        lat, lng = me.geo_lat, me.geo_lng
+        for radius in SEARCH_RADII_KM:
+            within: list[tuple[float, WelfareCenter]] = []
+            for c in await self.repo.in_box(lat, lng, radius, kind):
+                km = haversine_km(lat, lng, c.lat, c.lng)
+                if km <= radius:
+                    within.append((km, c))
+            if within:
+                within.sort(key=lambda x: (x[0], x[1].name))
+                views = [CenterView(c, coarse_km(km)) for km, c in within[:MAX_RESULTS]]
+                mode: SearchMode = "near" if radius == SEARCH_RADII_KM[0] else "wider"
+                return SearchResult(mode, radius, views)
+
+        # 20km 안에도 없음 — 어디든 가장 가까운 곳 (DB 가 대략 거른 뒤 정확한 거리로 다시 정렬)
+        candidates = await self.repo.nearest(lat, lng, kind, NEAREST_ANYWHERE * 4)
+        ranked = sorted(
+            ((haversine_km(lat, lng, c.lat, c.lng), c) for c in candidates),
+            key=lambda x: (x[0], x[1].name),
+        )[:NEAREST_ANYWHERE]
+        views = [CenterView(c, coarse_km(km)) for km, c in ranked]
+        return SearchResult("nearest" if views else "empty", None, views)
 
     async def detail(self, me: "User", center_id: str) -> CenterView:
         try:

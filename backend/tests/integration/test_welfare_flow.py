@@ -149,3 +149,67 @@ async def test_public_data_upsert(
     assert [(c["name"], c["sample_note"], c["phone"]) for c in out] == [
         ("공공 경로당 (새 이름)", None, "0310000000")
     ]
+
+
+async def _locate(client: AsyncClient, h: dict, lat: float, lng: float) -> None:
+    r = await client.put(f"{API}/me/location", headers=h, json={"lat": lat, "lng": lng})
+    assert r.status_code == 200, r.text
+
+
+async def test_search_widens_radius_then_nearest(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    """5km 안에 있으면 near, 없으면 10km·20km 로 넓히고, 그래도 없으면 가장 가까운 곳"""
+    await _seed(db_sessionmaker)
+    h, _ = await signup_user(client, "김영희")
+
+    await _locate(client, h, *HOME)
+    out = (await client.get(f"{API}/welfare/search", headers=h)).json()
+    assert out["mode"] == "near" and out["radius_km"] == 5.0
+    # 예전 목록 API 도 같은 시설
+    assert [c["id"] for c in out["centers"]] == [
+        c["id"] for c in (await client.get(f"{API}/welfare/nearby", headers=h)).json()
+    ]
+
+    # 동쪽으로 옮김 — 5km 안엔 없고 10km 안에 셋 (복지관 약 6km, 경로당·시니어클럽 약 10km)
+    await _locate(client, h, 37.19, 127.13)
+    out = (await client.get(f"{API}/welfare/search", headers=h)).json()
+    assert out["mode"] == "wider" and out["radius_km"] == 10.0
+    names = [c["name"] for c in out["centers"]]
+    assert names[0] == "먼 복지관 (예시)" and "아주 먼 경로당 (예시)" not in names
+    dists = [c["distance_km"] for c in out["centers"]]
+    assert dists == sorted(dists) and all(5.0 < d <= 10.0 for d in dists)
+
+    # 부산 — 20km 안에 하나도 없음 → 거리와 상관없이 가장 가까운 5곳, 거리 표시
+    await _locate(client, h, 35.18, 129.07)
+    out = (await client.get(f"{API}/welfare/search", headers=h)).json()
+    assert out["mode"] == "nearest" and out["radius_km"] is None
+    dists = [c["distance_km"] for c in out["centers"]]
+    assert len(dists) == 5 and dists == sorted(dists) and dists[0] > 200
+    assert out["centers"][-1]["name"] == "서울 경로당 (예시)"  # 부산에서 가장 먼 곳이 끝
+    # 종류를 거르면 그 종류만
+    only = (await client.get(f"{API}/welfare/search?kind=welfare_center", headers=h)).json()
+    assert only["mode"] == "nearest" and [c["name"] for c in only["centers"]] == [
+        "먼 복지관 (예시)"
+    ]
+    # 예전 목록 API 는 빈 목록 대신 같은 결과
+    assert len((await client.get(f"{API}/welfare/nearby", headers=h)).json()) == 5
+
+
+async def test_search_empty_and_region(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    h, _ = await signup_user(client, "김영희", region="41")
+    # 시설 데이터가 하나도 없으면 — 위치가 있든 없든 empty
+    out = (await client.get(f"{API}/welfare/search", headers=h)).json()
+    assert out == {"mode": "empty", "radius_km": None, "centers": []}
+    await _locate(client, h, *HOME)
+    assert (await client.get(f"{API}/welfare/search", headers=h)).json()["mode"] == "empty"
+
+    # 위치를 모르는 분: 같은 시·도에 있으면 region, 없으면 empty
+    await _seed(db_sessionmaker)
+    h2, _ = await signup_user(client, "박순자", region="41")
+    out = (await client.get(f"{API}/welfare/search", headers=h2)).json()
+    assert out["mode"] == "region" and len(out["centers"]) == 4
+    h3, _ = await signup_user(client, "최말순", region="26")
+    assert (await client.get(f"{API}/welfare/search", headers=h3)).json()["mode"] == "empty"
