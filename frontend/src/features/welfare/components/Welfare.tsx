@@ -9,6 +9,7 @@ import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { FacilityArt } from '@/shared/ui/illustrations/FacilityArt'
 import type { WelfareCenter, WelfareKind } from '../api/welfareApi'
 import { useCenter, useNearbyCenters } from '../hooks/useWelfare'
+import { searchNote } from '../lib/searchNote'
 import { distanceText, openState, walkText } from '../lib/visit'
 import styles from './Welfare.module.css'
 
@@ -18,15 +19,23 @@ const prettyPhone = (p: string) => {
   return d.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3')
 }
 
-/** 가까운 복지시설 목록 — 가까운 순 */
+/** 가까운 복지시설 목록 — 가까운 순. 근처에 없으면 서버가 넓혀 찾은 결과와 그 사실을 함께 */
 export function WelfareList({ kind, detailHref }: { kind: WelfareKind | 'all'; detailHref: (id: string) => string }) {
   const { data, error, loading } = useNearbyCenters(kind)
   if (error) return <Alert>{error}</Alert>
   if (loading && !data) return <p role="status">불러오는 중…</p>
-  if (!data?.length) return <p className={styles.empty}>가까운 곳에 이런 시설이 없어요. ‘전체’를 눌러 보세요.</p>
+  if (!data) return null
+  const note = searchNote(data, kind !== 'all')
+  if (!data.centers.length) return <p className={styles.empty}>{note}</p>
   return (
-    <CardGrid as="ul">
-      {data.map((c) => (
+    <>
+      {note && (
+        <p className={styles.searchNote} role="status">
+          {note}
+        </p>
+      )}
+      <CardGrid as="ul">
+      {data.centers.map((c) => (
         <li key={c.id}>
           <Link to={detailHref(c.id)} className={styles.item}>
             <span className={styles.thumb} data-kind={c.kind} aria-hidden="true">
@@ -44,7 +53,8 @@ export function WelfareList({ kind, detailHref }: { kind: WelfareKind | 'all'; d
           </Link>
         </li>
       ))}
-    </CardGrid>
+      </CardGrid>
+    </>
   )
 }
 
