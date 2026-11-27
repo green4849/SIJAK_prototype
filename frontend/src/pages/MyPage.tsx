@@ -25,7 +25,7 @@ import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends, useSurveyStatus } from '@/features/friend'
 import { useUnreadNotifications } from '@/features/inbox'
-import { useRelationIndex, weatherLabel } from '@/features/wellbeing'
+import { MoodBand, useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
@@ -61,22 +61,25 @@ export function MyPage() {
         }
       />
 
-      <div className={styles.profile}>
-        <Avatar name={user.name} seed={user.id} gender={user.gender} size="profile" />
-        <div className={styles.who}>
-          <p className={styles.name}>
-            {user.name}님 <span className={styles.age}>{user.age}세</span>
-          </p>
-          {user.intro ? (
-            <p className={styles.intro}>{user.intro}</p>
-          ) : (
-            <Link to="/me/profile" className={styles.introEmpty}>
-              한 줄 소개를 적어 보세요
-            </Link>
-          )}
-          <p className={styles.region}>{user.region_name}</p>
+      {/* 마음 새싹 띠 — 본인 화면에서만, 살펴본 기록이 있을 때만 */}
+      <MoodBand href="/me/wellbeing">
+        <div className={styles.profile}>
+          <Avatar name={user.name} seed={user.id} gender={user.gender} size="profile" />
+          <div className={styles.who}>
+            <p className={styles.name}>
+              {user.name}님 <span className={styles.age}>{user.age}세</span>
+            </p>
+            {user.intro ? (
+              <p className={styles.intro}>{user.intro}</p>
+            ) : (
+              <Link to="/me/profile" className={styles.introEmpty}>
+                한 줄 소개를 적어 보세요
+              </Link>
+            )}
+            <p className={styles.region}>{user.region_name}</p>
+          </div>
         </div>
-      </div>
+      </MoodBand>
 
       <CardGrid gap="section">
         <MenuList label="내 활동">
