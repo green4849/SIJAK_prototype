@@ -19,7 +19,7 @@ import { useAuth, useLocationRecheck } from '@/features/auth'
 import { useActivityCounts } from '@/features/activity'
 import { useMyFriends, useSurveyStatus } from '@/features/friend'
 import { useUnreadNotifications } from '@/features/inbox'
-import { useRelationIndex, weatherLabel } from '@/features/wellbeing'
+import { MoodBand, useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
@@ -55,33 +55,36 @@ export function MyPage() {
         }
       />
 
-      <div className={styles.profile}>
-        <Avatar name={user.name} seed={user.id} gender={user.gender} size="profile" />
-        <div className={styles.who}>
-          <p className={styles.name}>
-            {user.name}님 <span className={styles.age}>{user.age}세</span>
-          </p>
-          {user.intro ? (
-            <p className={styles.intro}>{user.intro}</p>
-          ) : (
-            <Link to="/me/profile" className={styles.introEmpty}>
-              한 줄 소개를 적어 보세요
-            </Link>
-          )}
-          {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 (누르는 것이 동의) */}
-          <p className={styles.region}>
-            <span>{user.region_name}</span>
-            <button
-              type="button"
-              className={styles.textLink}
-              onClick={location.recheck}
-              disabled={location.pending}
-            >
-              {location.pending ? '위치 확인 중…' : '위치 다시 확인'}
-            </button>
-          </p>
+      {/* 마음 새싹 띠 — 본인 화면에서만, 살펴본 기록이 있을 때만 */}
+      <MoodBand href="/me/wellbeing">
+        <div className={styles.profile}>
+          <Avatar name={user.name} seed={user.id} gender={user.gender} size="profile" />
+          <div className={styles.who}>
+            <p className={styles.name}>
+              {user.name}님 <span className={styles.age}>{user.age}세</span>
+            </p>
+            {user.intro ? (
+              <p className={styles.intro}>{user.intro}</p>
+            ) : (
+              <Link to="/me/profile" className={styles.introEmpty}>
+                한 줄 소개를 적어 보세요
+              </Link>
+            )}
+            {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 (누르는 것이 동의) */}
+            <p className={styles.region}>
+              <span>{user.region_name}</span>
+              <button
+                type="button"
+                className={styles.textLink}
+                onClick={location.recheck}
+                disabled={location.pending}
+              >
+                {location.pending ? '위치 확인 중…' : '위치 다시 확인'}
+              </button>
+            </p>
+          </div>
         </div>
-      </div>
+      </MoodBand>
 
       <CardGrid gap="section">
         <MenuList label="내 활동">
@@ -92,6 +95,12 @@ export function MyPage() {
             to="/notifications"
           />
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
+          {/* 성향조사 — 했으면 고치러, 안 했으면 시작하러 (C15) */}
+          <MenuItem
+            icon={Sparkles}
+            label={survey.data?.answers ? '내 취향 수정하기' : '성향조사 하기'}
+            to={survey.data?.answers ? `${friendSurvey}?edit` : friendSurvey}
+          />
           <MenuItem
             icon={HeartPulse}
             label="마음 건강"

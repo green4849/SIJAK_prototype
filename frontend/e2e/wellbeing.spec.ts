@@ -175,3 +175,19 @@ test('WHO-5: 점수가 많이 낮으면 마음을 돌보는 일과 상담 전화
   await page.getByRole('link', { name: '홈으로 가기' }).click()
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
 })
+
+test('마음 새싹 — 마음 건강 맨 위 새싹 카드와 마이페이지 프로필 띠 (WHO-5 점수가 높을수록 진하게)', async ({ page }) => {
+  await startTour(page)
+  // 시연 계정: WHO-5 52 → 60점
+  await page.goto('/me')
+  const band = page.getByRole('link', { name: '마음 새싹 60점 · 지난번보다 8점 ↑' })
+  await expect(band).toBeVisible()
+  await band.click()
+  await expect(page).toHaveURL(/\/me\/wellbeing$/)
+  const card = page.getByRole('link', { name: /60점 · 보통이에요/ })
+  await expect(card).toContainText('지난번보다 8점 ↑')
+  // 60점 = 5단계 중 3 (가운데 진하기)
+  await expect(card.locator('svg[data-shade]')).toHaveAttribute('data-shade', '3')
+  await card.click()
+  await expect(page).toHaveURL(/\/me\/wellbeing\/history$/)
+})

@@ -7,3 +7,4 @@ export { Who5DueCard, Who5Flow, Who5History, type Who5Links } from './components
 export { RelationSummary, type WellbeingLinks } from './components/RelationSummary'
 export { weatherLabel } from './components/weather'
 export { useRelationIndex } from './hooks/useWellbeing'
+export { MoodBand, MoodSproutCard } from './components/MoodSprout'

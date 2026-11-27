@@ -1,0 +1,126 @@
+/*
+ * 마음 새싹 진하기 5단계 (1 연함 → 5 진함). 진할수록 마음이 건강한 편.
+ * 0 = 아직 살펴보지 않음 (테두리만)
+ */
+.art,
+.band {
+  --sprout: #c9dfb4;
+  --sprout-light: #e1edd3;
+}
+[data-shade='2'] { --sprout: #a3c884; --sprout-light: #cfe3bd; }
+[data-shade='3'] { --sprout: #6f9a45; --sprout-light: #a3c884; }
+[data-shade='4'] { --sprout: #467a2a; --sprout-light: #7fae58; }
+[data-shade='5'] { --sprout: #2e5a1c; --sprout-light: #6f9a45; }
+
+.art {
+  flex: none;
+}
+
+.stem {
+  stroke: var(--sprout);
+}
+
+.leafLeft {
+  fill: var(--sprout-light);
+}
+
+.leafRight {
+  fill: var(--sprout);
+}
+
+.art[data-shade='0'] .stem {
+  stroke: var(--color-border);
+}
+
+.art[data-shade='0'] .leafLeft,
+.art[data-shade='0'] .leafRight {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+
+/* 선명한 화면: 색 진하기 대신 테두리 — 점수·단계는 글자로 늘 함께 */
+:root[data-contrast='high'] .leafLeft,
+:root[data-contrast='high'] .leafRight {
+  stroke: var(--color-text);
+  stroke-width: 2;
+}
+
+.card {
+  padding: var(--card-pad);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+:root[data-contrast='high'] .card {
+  border: 2px solid var(--color-border);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+}
+
+.caption,
+.sub {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+}
+
+.change {
+  margin: 0;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+}
+
+.change[data-dir='up'] {
+  color: var(--color-primary);
+}
+
+.chevron {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+/* 마이페이지 프로필 왼쪽 띠 */
+.band {
+  padding-left: var(--space-2);
+  border-left: 6px solid var(--sprout);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+:root[data-contrast='high'] .band {
+  border-left-color: var(--color-primary);
+}
+
+.bandLine {
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}

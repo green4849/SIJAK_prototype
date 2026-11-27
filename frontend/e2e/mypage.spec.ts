@@ -16,7 +16,7 @@ test('메뉴 줄은 자주 쓰는 것만, 나머지는 맨 아래 작은 글자 
       items.map((li) => li.querySelector('a, button')!.firstElementChild?.nextElementSibling?.textContent?.trim()),
     )
   await expect.poll(() => names('내 활동')).toEqual([
-    '알림함', '내 프로필 관리', '마음 건강', '내 포인트', '내 친구 목록', '신청한 활동', '관심 있는 활동',
+    '알림함', '내 프로필 관리', '성향조사 하기', '마음 건강', '내 포인트', '내 친구 목록', '신청한 활동', '관심 있는 활동',
   ])
   await expect.poll(() => names('도움')).toEqual(['설정', '보호자 연결', '안전하게 이용하기'])
 
