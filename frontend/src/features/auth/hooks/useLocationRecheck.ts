@@ -7,7 +7,7 @@ import { locateRegion } from '../lib/locateRegion'
 import { useAuth } from './useAuth'
 
 /**
- * 마이페이지 '위치 다시 확인' — 위치 동의를 한 번 더 받고(버튼을 누르는 것이 동의),
+ * 마이페이지 이름 아래 '위치 다시 확인' — 위치 동의를 한 번 더 받고(버튼을 누르는 것이 동의),
  * 지금 위치로 사는 곳과 '같은 동네' 위치를 함께 새로 고친다. 이사한 경우를 위해.
  */
 export function useLocationRecheck() {

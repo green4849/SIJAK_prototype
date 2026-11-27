@@ -1,19 +1,13 @@
 import {
-  FileText,
-  Ban,
-  Bell,
   BellRing,
   DoorOpen,
-  CircleHelp,
   Coins,
   Heart,
   HeartPulse,
   Phone,
   LogOut,
-  MapPin,
   NotebookPen,
   Settings,
-  Smartphone,
   ShieldCheck,
   UserRound,
   Users,
@@ -71,7 +65,18 @@ export function MyPage() {
               한 줄 소개를 적어 보세요
             </Link>
           )}
-          <p className={styles.region}>{user.region_name}</p>
+          {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 (누르는 것이 동의) */}
+          <p className={styles.region}>
+            <span>{user.region_name}</span>
+            <button
+              type="button"
+              className={styles.textLink}
+              onClick={location.recheck}
+              disabled={location.pending}
+            >
+              {location.pending ? '위치 확인 중…' : '위치 다시 확인'}
+            </button>
+          </p>
         </div>
       </div>
 
@@ -84,13 +89,6 @@ export function MyPage() {
             to="/notifications"
           />
           <MenuItem icon={UserRound} label="내 프로필 관리" to="/me/profile" />
-          {/* 사는 곳은 위치 동의로만 정해진다 — 이사했을 때 여기서 다시 확인 */}
-          <MenuItem
-            icon={MapPin}
-            label={location.pending ? '위치 확인 중…' : '위치 다시 확인'}
-            value={location.pending ? undefined : user.region_name}
-            onClick={location.recheck}
-          />
           <MenuItem
             icon={HeartPulse}
             label="마음 건강"
@@ -124,16 +122,10 @@ export function MyPage() {
         </MenuList>
 
         <MenuList label="도움">
-          <MenuItem icon={Settings} label="글자 크기 · 화면 설정" to="/me/settings" />
-          <MenuItem icon={Bell} label="알림 설정" to="/me/notifications" />
+          {/* 글자 크기·화면·진동·알림을 한 화면에서 (메뉴 줄이기 — docs/ux-changes.md) */}
+          <MenuItem icon={Settings} label="설정" to="/me/settings" />
           <MenuItem icon={Phone} label="보호자 연결" to="/me/guardians" />
           <MenuItem icon={ShieldCheck} label="안전하게 이용하기" to="/safety" />
-          <MenuItem icon={Ban} label="차단한 이웃" to="/me/blocks" />
-          {!installed && (
-            <MenuItem icon={Smartphone} label="홈 화면에 아이콘 놓기" to="/me/install" />
-          )}
-          <MenuItem icon={CircleHelp} label="도움말" to="/me/help" />
-          <MenuItem icon={FileText} label="약관 및 동의" to="/me/consents" />
         </MenuList>
       </CardGrid>
 
@@ -141,6 +133,26 @@ export function MyPage() {
         <MenuItem icon={LogOut} label="로그아웃" onClick={() => setAskLogout(true)} danger />
         <MenuItem icon={DoorOpen} label="회원 탈퇴" to="/me/leave" />
       </MenuList>
+
+      {/* 가끔 쓰는 것 — 메뉴 줄 대신 맨 아래 작은 글자 링크로 (docs/ux-changes.md) */}
+      <nav aria-label="더 보기" className={styles.more}>
+        <ul>
+          <li>
+            <Link to="/me/blocks">차단한 이웃</Link>
+          </li>
+          {!installed && (
+            <li>
+              <Link to="/me/install">홈 화면에 아이콘 놓기</Link>
+            </li>
+          )}
+          <li>
+            <Link to="/me/help">도움말</Link>
+          </li>
+          <li>
+            <Link to="/me/consents">약관 및 동의</Link>
+          </li>
+        </ul>
+      </nav>
 
       <ConfirmSheet
         open={askLogout}

@@ -60,7 +60,7 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
       <div ref={barRef} className={styles.composer} data-bottom-bar>
         {blocked ? (
           <p className={styles.blocked} role="status">
-            차단된 대화예요. 내가 차단했다면 마이페이지 ‘차단한 이웃’에서 풀 수 있어요.
+            차단된 대화예요. 내가 차단했다면 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.
           </p>
         ) : (
           <>

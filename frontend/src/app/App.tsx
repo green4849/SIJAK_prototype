@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ScrollToTop } from './ScrollToTop'
 import { AuthProvider } from '@/features/auth'
 import { HomePage } from '@/pages/HomePage'
@@ -49,7 +49,6 @@ const InstallPage = lazy(() => import('@/pages/InstallPage').then((m) => ({ defa
 const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })))
 const MyActivitiesPage = lazy(() => import('@/pages/MyActivitiesPage').then((m) => ({ default: m.MyActivitiesPage })))
 const MyPage = lazy(() => import('@/pages/MyPage').then((m) => ({ default: m.MyPage })))
-const NotificationSettingsPage = lazy(() => import('@/pages/NotificationSettingsPage').then((m) => ({ default: m.NotificationSettingsPage })))
 const PhoneVerifyPage = lazy(() => import('@/pages/PhoneVerifyPage').then((m) => ({ default: m.PhoneVerifyPage })))
 const PointsPage = lazy(() => import('@/pages/PointsPage').then((m) => ({ default: m.PointsPage })))
 const ProfileEditPage = lazy(() => import('@/pages/ProfileEditPage').then((m) => ({ default: m.ProfileEditPage })))
@@ -62,7 +61,7 @@ const SignupPage = lazy(() => import('@/pages/SignupPage').then((m) => ({ defaul
  *   Stage 1: ① /welcome ② /login(+phone·id-card·help) /signup ⑧ /safety
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
  *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
- *   C12: /me/points /me/notifications
+ *   C12: /me/points (알림 설정은 /me/settings#notify — 옛 /me/notifications 는 넘겨 준다)
  *   화면·데모만(백엔드 없음, docs/deferred.md §7): C8 /companion · C11 /me/wellbeing · C10 /sos /me/guardians · C7 /welfare · 두뇌 운동 /brain
  *     · 알림함 /notifications · B3 /me/leave · B7 /admin (운영자)
  */
@@ -110,7 +109,8 @@ export function App() {
               <Route path="me/help" element={<HelpPage />} />
               <Route path="me/install" element={<InstallPage />} />
               <Route path="me/points" element={<PointsPage />} />
-              <Route path="me/notifications" element={<NotificationSettingsPage />} />
+              {/* 알림 설정은 '설정' 화면으로 합쳤다 — 옛 주소는 그 칸으로 */}
+              <Route path="me/notifications" element={<Navigate to="/me/settings#notify" replace />} />
               <Route path="companion" element={<CompanionPage />} />
               <Route path="me/wellbeing" element={<WellbeingPage />} />
               <Route path="me/wellbeing/check/:kind" element={<AssessmentPage />} />

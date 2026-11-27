@@ -17,7 +17,7 @@ export function HelpPage() {
         <details className={styles.item}>
           <summary>글자가 너무 작아요</summary>
           <p>
-            <Link to="/me/settings">화면 설정</Link>에서 글자 크기를 &lsquo;크게&rsquo;나 &lsquo;아주
+            <Link to="/me/settings">설정</Link>에서 글자 크기를 &lsquo;크게&rsquo;나 &lsquo;아주
             크게&rsquo;로 바꿔 보세요. 누르는 즉시 바뀌어요.
           </p>
         </details>

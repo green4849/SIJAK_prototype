@@ -36,7 +36,7 @@ test('선택(마음 건강 기록)을 빼도 가입되고, 점검 전에 동의�
 test('마이페이지 → 약관 및 동의: 동의 상태·날짜, 문서 읽기, 마음 건강 동의 철회', async ({ page }) => {
   await startTour(page)
   await page.goto('/me')
-  await page.getByRole('link', { name: '약관 및 동의' }).click()
+  await page.getByRole('navigation', { name: '더 보기' }).getByRole('link', { name: '약관 및 동의' }).click()
   await expect(page.getByRole('heading', { name: '[필수] 서비스 이용약관' })).toBeVisible()
   await expect(page.getByText('동의함').first()).toBeVisible()
 
