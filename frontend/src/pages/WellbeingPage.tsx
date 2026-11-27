@@ -1,6 +1,6 @@
-import { AssessmentCards, RelationSummary } from '@/features/wellbeing'
+import { AssessmentCards, MoodSproutCard, RelationSummary } from '@/features/wellbeing'
 import { TopBar } from '@/shared/ui/TopBar'
-import { assessment } from './routes'
+import { assessment, who5History } from './routes'
 import styles from './TabPage.module.css'
 
 /** 마음 건강 수치에서 바로 이어 갈 곳 */
@@ -19,6 +19,8 @@ export function WellbeingPage() {
   return (
     <section className={styles.page}>
       <TopBar title="마음 건강" backTo="/me" />
+      {/* 마음 새싹 — WHO-5 가 높을수록 진해진다 (누르면 점수 변화 그래프) */}
+      <MoodSproutCard startHref={assessment('who5')} historyHref={who5History} />
       <RelationSummary links={LINKS} />
       <AssessmentCards hrefOf={assessment} />
     </section>
