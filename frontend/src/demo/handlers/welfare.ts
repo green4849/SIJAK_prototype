@@ -113,6 +113,17 @@ function brainStats(uid: string): BrainStatsOut {
 }
 
 export const welfareRoutes: Route[] = [
+  // 시연 시설은 모두 5km 안(오산시 양산동 기준) — 근처에 있으면 near, 그 종류가 없으면 empty
+  ['GET', '/welfare/search', (req) => {
+    requireUser(req)
+    const kind = req.query.get('kind')
+    const centers = CENTERS.filter((c) => !kind || kind === 'all' || c.kind === kind).map(out)
+    const res: Schema<'WelfareSearchOut'> = centers.length
+      ? { mode: 'near', radius_km: 5, centers }
+      : { mode: 'empty', radius_km: null, centers: [] }
+    return json(res)
+  }],
+
   ['GET', '/welfare/nearby', (req) => {
     requireUser(req)
     const kind = req.query.get('kind')

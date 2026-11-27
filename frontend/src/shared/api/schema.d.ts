@@ -1061,9 +1061,32 @@ export interface paths {
         };
         /**
          * Nearby
-         * @description 가까운 복지시설 — 내 위치가 있으면 반경 5km 안 가까운 순, 없으면 같은 시·도
+         * @description (예전 화면용) /welfare/search 의 시설 목록만.
+         *
+         *     배포 중 화면·서버 버전이 엇갈려도 깨지지 않게 둔다.
          */
         get: operations["nearby_api_v1_welfare_nearby_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/welfare/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search
+         * @description 가까운 복지시설 + 어떻게 찾았는지(mode) — 5km → 10km → 20km, 그래도 없으면 가장 가까운 곳.
+         *     내 위치가 없으면 같은 시·도. 화면은 mode 로 안내 문구를 고른다.
+         */
+        get: operations["search_api_v1_welfare_search_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2332,6 +2355,22 @@ export interface components {
             capacity: number;
             /** Name */
             name: string;
+        };
+        /** WelfareSearchOut */
+        WelfareSearchOut: {
+            /** Centers */
+            centers: components["schemas"]["WelfareCenterOut"][];
+            /**
+             * Mode
+             * @description near 5km 안 · wider 넓힌 반경(radius_km) 안 · nearest 20km 밖이라 가장 가까운 곳 · region 내 위치를 몰라 같은 시·도 · empty 보여 줄 시설 없음
+             * @enum {string}
+             */
+            mode: "near" | "wider" | "nearest" | "region" | "empty";
+            /**
+             * Radius Km
+             * @description near·wider 일 때 찾은 반경
+             */
+            radius_km: number | null;
         };
         /**
          * Who5StatusOut
@@ -4290,6 +4329,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WelfareCenterOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_api_v1_welfare_search_get: {
+        parameters: {
+            query?: {
+                kind?: ("welfare_center" | "senior_center" | "kyungrodang") | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WelfareSearchOut"];
                 };
             };
             /** @description Validation Error */

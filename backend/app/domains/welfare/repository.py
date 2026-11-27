@@ -1,3 +1,4 @@
+import math
 import uuid
 
 from sqlalchemy import select
@@ -29,6 +30,22 @@ class WelfareRepository:
         if kind:
             q = q.where(WelfareCenter.kind == kind)
         return list(await self.session.scalars(q))
+
+    async def nearest(
+        self, lat: float, lng: float, kind: str | None, limit: int
+    ) -> list[WelfareCenter]:
+        """거리와 상관없이 가까운 순 후보 — 평면 근사(경도는 위도에 맞춰 줄임)로 DB 에서 정렬.
+
+        정확한 거리는 service 가 haversine 으로 다시 계산·정렬한다 (후보를 넉넉히 받는다).
+        """
+        k = math.cos(math.radians(lat))
+        dist2 = (WelfareCenter.lat - lat) * (WelfareCenter.lat - lat) + (
+            (WelfareCenter.lng - lng) * k
+        ) * ((WelfareCenter.lng - lng) * k)
+        q = select(WelfareCenter)
+        if kind:
+            q = q.where(WelfareCenter.kind == kind)
+        return list(await self.session.scalars(q.order_by(dist2, WelfareCenter.name).limit(limit)))
 
     async def in_region(
         self, region_code: str, kind: str | None, limit: int

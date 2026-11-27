@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.domains.welfare.models import KINDS
-from app.domains.welfare.service import CenterView
+from app.domains.welfare.service import CenterView, SearchResult
 
 WelfareKind = Literal["welfare_center", "senior_center", "kyungrodang"]  # models.KINDS
 
@@ -65,4 +65,20 @@ class WelfareCenterOut(BaseModel):
                 for r in c.rooms
             ],
             sample_note=v.sample_note,
+        )
+
+
+class WelfareSearchOut(BaseModel):
+    mode: Literal["near", "wider", "nearest", "region", "empty"] = Field(
+        description="near 5km 안 · wider 넓힌 반경(radius_km) 안 · "
+        "nearest 20km 밖이라 가장 가까운 곳 · region 내 위치를 몰라 같은 시·도 · "
+        "empty 보여 줄 시설 없음"
+    )
+    radius_km: float | None = Field(description="near·wider 일 때 찾은 반경")
+    centers: list[WelfareCenterOut]
+
+    @classmethod
+    def of(cls, r: SearchResult) -> "WelfareSearchOut":
+        return cls(
+            mode=r.mode, radius_km=r.radius_km, centers=[WelfareCenterOut.of(v) for v in r.centers]
         )

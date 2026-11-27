@@ -124,11 +124,17 @@ test('받은 신청 거절과 로그아웃은 한 번 묻는다 — 그만두면
   await expect(page.getByRole('button', { name: '로그아웃' })).toBeVisible()
 })
 
-test('성향조사: 추천 친구 탭 처음 → 시작 화면 → 8문항 → 잘 맞는 이웃과 이유', async ({ page }) => {
+test('성향조사: 하단 탭 → 시작 화면 → 8문항 → 잘 맞는 이웃과 이유', async ({ page }) => {
   await startTour(page, { survey: true })
   await page.getByRole('link', { name: '친구 찾기' }).click()
-  // 아직 안 했으니 시작 화면으로
+  // 저절로 넘어가지 않는다 — 추천 위 카드로 권한다
+  await expect(page).toHaveURL(/\/friends$/)
+  await expect(page.getByRole('link', { name: /나와 잘 맞는 친구 찾기/ })).toBeVisible()
+  // 하단 '성향조사' 탭으로 들어간다 ('친구' 탭은 켜지지 않는다)
+  await mainNav(page).getByRole('link', { name: '성향조사' }).click()
   await expect(page).toHaveURL(/\/friends\/survey$/)
+  await expect(mainNav(page).getByRole('link', { name: '성향조사' })).toHaveAttribute('aria-current', 'page')
+  await expect(mainNav(page).getByRole('link', { name: /^친구/ })).not.toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
   await page.getByRole('button', { name: '시작하기' }).click()
 
@@ -182,16 +188,33 @@ test('성향조사: 추천 친구 탭 처음 → 시작 화면 → 8문항 → �
   await page.getByRole('link', { name: '내 취향 수정하기' }).click()
   await expect(page.getByText('1 / 8')).toBeVisible()
   await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toHaveCount(0)
+  // 이미 했으면 하단 탭은 다시 묻지 않고 마친 상태를 보여 준다
+  await mainNav(page).getByRole('link', { name: '성향조사' }).click()
+  await expect(page.getByRole('heading', { name: '성향조사를 이미 마쳤어요' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '내 취향 수정하기' })).toBeVisible()
 })
 
-test('성향조사: 다음에 하기 → 목록으로, 다시 와도 시작 화면 없이 탭 위 카드로 권한다', async ({ page }) => {
+test('성향조사: 안내 카드 X·질문 중 X로 닫기, 마이페이지에서 다시 들어가기', async ({ page }) => {
   await startTour(page, { survey: true })
   await page.goto('/friends')
-  await page.getByRole('link', { name: '다음에 하기' }).click()
-  await expect(page).toHaveURL(/\/friends$/)
+  // 추천 위 안내 카드 — X로 닫으면 이 기기에서는 다시 권하지 않는다
   await expect(page.getByRole('link', { name: /나와 잘 맞는 친구 찾기/ })).toBeVisible()
-  await page.goto('/')
-  await page.goto('/friends')
-  await expect(page).toHaveURL(/\/friends$/)
+  await page.getByRole('button', { name: '성향조사 안내 닫기' }).click()
+  await expect(page.getByRole('link', { name: /나와 잘 맞는 친구 찾기/ })).toHaveCount(0)
+  await page.reload()
   await expect(page.getByRole('article').first()).toBeVisible()
+  await expect(page.getByRole('link', { name: /나와 잘 맞는 친구 찾기/ })).toHaveCount(0)
+
+  // 질문을 풀다가도 오른쪽 위 '닫기'로 그만둔다 → 추천 친구로
+  await page.goto('/friends/survey')
+  await page.getByRole('button', { name: '시작하기' }).click()
+  await expect(page.getByText('1 / 8')).toBeVisible()
+  await page.getByRole('button', { name: '닫기' }).click()
+  await expect(page).toHaveURL(/\/friends$/)
+
+  // 마이페이지에서도 들어간다
+  await page.goto('/me')
+  await page.getByRole('link', { name: '성향조사 하기' }).click()
+  await expect(page).toHaveURL(/\/friends\/survey$/)
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
 })

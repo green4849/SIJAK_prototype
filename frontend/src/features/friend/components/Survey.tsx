@@ -1,12 +1,13 @@
-import { Sparkles, SlidersHorizontal } from 'lucide-react'
+import { Sparkles, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActionCard } from '@/shared/ui/ActionCard'
 import { Alert } from '@/shared/ui/Alert'
+import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { Button, ButtonLink } from '@/shared/ui/Button'
 import { InterestScene } from '@/shared/ui/illustrations/InterestScenes'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
 import { PhotoChoiceGrid } from '@/shared/ui/PhotoChoiceGrid'
-import { postponeSurvey, useSurveyForm, useSurveyStatus } from '../hooks/useSurvey'
+import { postponeSurvey, surveyPostponed, useSurveyForm, useSurveyStatus } from '../hooks/useSurvey'
 import styles from './Survey.module.css'
 
 interface FlowProps {
@@ -37,11 +38,13 @@ export function SurveyFlow({ startAt, friendsHref, art }: FlowProps) {
   if (f.loadError) return <Alert>{f.loadError}</Alert>
   if (!f.loaded) return <p role="status">불러오는 중…</p>
 
-  if (f.saved) {
+  // 방금 마쳤거나, 이미 해 둔 분이 하단 '성향조사' 탭으로 다시 들어왔을 때
+  const alreadyDone = startAt === 'intro' && step === 'intro' && f.done
+  if (f.saved || alreadyDone) {
     return (
       <div className={styles.flow}>
         {art}
-        <h2 className={styles.title}>성향조사를 마쳤어요!</h2>
+        <h2 className={styles.title}>{f.saved ? '성향조사를 마쳤어요!' : '성향조사를 이미 마쳤어요'}</h2>
         <p className={styles.lead}>
           이제 공통 관심사와 생활 방식을 바탕으로 잘 맞을 만한 동네 친구를 추천해 드릴게요.
         </p>
@@ -164,16 +167,32 @@ export function SurveyFlow({ startAt, friendsHref, art }: FlowProps) {
  */
 export function SurveyPrompt({ to, editTo }: { to: string; editTo: string }) {
   const { data } = useSurveyStatus()
+  // 'X'로 닫으면 이 기기에서는 다시 권하지 않는다 — 하고 싶으면 하단 '성향조사' 탭·마이페이지에서
+  const [hidden, setHidden] = useState(surveyPostponed)
   if (!data) return null
   if (data.answers)
     return <ActionCard variant="subtle" icon={SlidersHorizontal} accent="mint" title="내 취향 수정하기" to={editTo} />
+  if (hidden) return null
   return (
-    <ActionCard
-      icon={Sparkles}
-      accent="yellow"
-      title="나와 잘 맞는 친구 찾기"
-      description="질문 8개에 답하면 더 잘 맞는 이웃을 추천해 드려요"
-      to={to}
-    />
+    <div className={styles.prompt}>
+      <ActionCard
+        icon={Sparkles}
+        accent="yellow"
+        title="나와 잘 맞는 친구 찾기"
+        description="질문 8개에 답하면 더 잘 맞는 이웃을 추천해 드려요"
+        to={to}
+      />
+      <button
+        type="button"
+        className={styles.promptClose}
+        aria-label="성향조사 안내 닫기"
+        onClick={() => {
+          postponeSurvey()
+          setHidden(true)
+        }}
+      >
+        <X aria-hidden="true" size={ICON.sm} strokeWidth={ICON_STROKE} />
+      </button>
+    </div>
   )
 }

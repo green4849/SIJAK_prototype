@@ -121,7 +121,7 @@ for (const { prefix, scale, width } of [
     const p = (n: string) => `${prefix}-${n}`
 
     await startTour(page, { survey: true })
-    await page.goto('/friends')
+    await page.goto('/friends/survey')
     await expect(page.getByRole('button', { name: '시작하기' })).toBeVisible()
     await shot(page, p('01-intro'))
     await page.getByRole('button', { name: '시작하기' }).click()
