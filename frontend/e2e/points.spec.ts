@@ -156,10 +156,13 @@ test('C12 첫 친구 미션: 서로 대화한 친구 3명 → 500P 받기', asyn
   await expect(chip(page)).toHaveText('600P')
 })
 
-test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ page }) => {
+test('C12 알림 설정: 마이페이지 ‘설정’ 안에서 — 하루 2번까지, 바꾸면 바로 저장', async ({ page }) => {
   await startTour(page)
   await page.goto('/me')
-  await page.getByRole('link', { name: '알림 설정' }).click()
+  // 알림 설정은 따로 메뉴가 없고 ‘설정’ 화면 안에 있다
+  await expect(page.getByRole('link', { name: '알림 설정' })).toHaveCount(0)
+  await page.getByRole('list', { name: '도움' }).getByRole('link', { name: '설정' }).click()
+  await expect(page.getByRole('heading', { name: '설정', exact: true })).toBeVisible()
 
   await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByRole('button', { name: '아침 9시', exact: true })).toHaveAttribute('aria-pressed', 'true')
@@ -181,6 +184,14 @@ test('C12 알림 설정: 하루 2번까지, 바꾸면 바로 저장', async ({ p
   await page.getByRole('switch', { name: '추천 친구 알림' }).click()
   await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toHaveAttribute('aria-checked', 'false')
   await expect(noon).toHaveCount(0)
+})
+
+test('옛 ‘알림 설정’ 주소는 ‘설정’ 화면의 알림 칸으로 간다', async ({ page }) => {
+  await startTour(page)
+  await page.goto('/me/notifications')
+  await expect(page).toHaveURL(/\/me\/settings#notify$/)
+  await expect(page.getByRole('heading', { name: '설정', exact: true })).toBeVisible()
+  await expect(page.getByRole('switch', { name: '추천 친구 알림' })).toBeInViewport()
 })
 
 test('시연 대본 순서 — 평가(+10P)를 먼저 해도 네 번째 신청에서 포인트 부족 안내가 나온다', async ({ page }) => {

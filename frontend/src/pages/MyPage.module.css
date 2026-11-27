@@ -34,6 +34,62 @@
   color: var(--color-text-muted);
 }
 
+/* 사는 곳 + 옆에 작은 '위치 다시 확인' — 큰 글씨에서는 아래 줄로 내려간다 */
+.region {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-1);
+}
+
+/*
+ * 글자 링크 모양 버튼·링크 — 작아 보여도 누르는 자리는 44px 이상 (WCAG 2.5.5).
+ * 메뉴 줄처럼 무게를 두지 않고, 밑줄로 '누를 수 있다'만 알린다.
+ */
+.textLink,
+.more a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--gap-tight);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-meta);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.textLink {
+  margin-left: calc(-1 * var(--gap-tight));
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+}
+
+.textLink:disabled {
+  cursor: default;
+  text-decoration: none;
+}
+
+.more ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  /* 사이 점 대신 넓은 간격 — 줄이 바뀌어도 줄 앞에 점이 남지 않는다 */
+  column-gap: var(--space-3);
+}
+
+.more li {
+  display: inline-flex;
+  align-items: center;
+}
+
 .introEmpty {
   font-weight: var(--weight-medium);
 }

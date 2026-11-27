@@ -28,6 +28,8 @@ const NAV = 'nav[aria-label="주요 메뉴"]'
 const HOME_CARDS = 'nav[aria-label="바로 가기"]'
 const MY_MENU = 'ul[aria-label="내 활동"]'
 const HELP_MENU = 'ul[aria-label="도움"]'
+/** 마이페이지 맨 아래 작은 글자 링크 (가끔 쓰는 것) */
+const MORE_LINKS = 'nav[aria-label="더 보기"]'
 
 const target = (name: string, find: Target['find']): Target => ({ name, find })
 
@@ -84,26 +86,26 @@ export const TARGETS = {
   // 마이페이지
   'me-inbox': target('‘알림함’', (f) => f.link('/notifications', MY_MENU)),
   'me-profile': target('‘내 프로필 관리’', (f) => f.link('/me/profile', MY_MENU)),
-  'me-location': target('‘위치 다시 확인’', (f) => f.text(`${MY_MENU} button`, /^위치 다시 확인/)),
+  'me-location': target('이름 아래 ‘위치 다시 확인’', (f) => f.text('button', /^위치 다시 확인/)),
   'me-wellbeing': target('‘마음 건강’', (f) => f.link('/me/wellbeing', MY_MENU)),
   'me-points': target('‘내 포인트’', (f) => f.link('/me/points', MY_MENU)),
   'me-friends': target('‘내 친구 목록’', (f) => f.link('/me/friends', MY_MENU)),
   'me-applied': target('‘신청한 활동’', (f) => f.link('/me/activities/applied', MY_MENU)),
   'me-liked': target('‘관심 있는 활동’', (f) => f.link('/me/activities/liked', MY_MENU)),
-  'me-settings': target('‘글자 크기 · 화면 설정’', (f) => f.link('/me/settings', HELP_MENU)),
-  'me-notify': target('‘알림 설정’', (f) => f.link('/me/notifications', HELP_MENU)),
+  'me-settings': target('‘설정’', (f) => f.link('/me/settings', HELP_MENU)),
   'me-guardians': target('‘보호자 연결’', (f) => f.link('/me/guardians', HELP_MENU)),
   'me-safety': target('‘안전하게 이용하기’', (f) => f.link('/safety', HELP_MENU)),
-  'me-blocks': target('‘차단한 이웃’', (f) => f.link('/me/blocks', HELP_MENU)),
-  'me-install': target('‘홈 화면에 아이콘 놓기’', (f) => f.link('/me/install', HELP_MENU)),
-  'me-help': target('‘도움말’', (f) => f.link('/me/help', HELP_MENU)),
-  'me-logout': target('맨 아래 ‘로그아웃’', (f) => f.text('button', '로그아웃')),
-  'me-leave': target('맨 아래 ‘회원 탈퇴’', (f) => f.link('/me/leave')),
+  'me-blocks': target('맨 아래 ‘차단한 이웃’', (f) => f.link('/me/blocks', MORE_LINKS)),
+  'me-install': target('맨 아래 ‘홈 화면에 아이콘 놓기’', (f) => f.link('/me/install', MORE_LINKS)),
+  'me-help': target('맨 아래 ‘도움말’', (f) => f.link('/me/help', MORE_LINKS)),
+  'me-logout': target('아래쪽 ‘로그아웃’', (f) => f.text('button', '로그아웃')),
+  'me-leave': target('아래쪽 ‘회원 탈퇴’', (f) => f.link('/me/leave')),
 
   // 설정·그 밖
   'settings-font': target('‘글자 크기’', (f) => f.text('fieldset', /^글자 크기/)),
   'settings-contrast': target('‘화면 대비’', (f) => f.text('fieldset', /^화면 대비/)),
   'settings-vibration': target('‘진동’', (f) => f.text('fieldset', /^진동/)),
+  'settings-notify': target('‘추천 친구 알림’', (f) => f.css('section[aria-labelledby="recommend-title"]')),
   'profile-save': target('‘저장하기’ 버튼', (f) => f.text('button', '저장하기')),
   'guardian-add': target('‘보호자 추가’ 버튼', (f) => f.text('button', '보호자 추가')),
   'companion-input': target('아래 입력칸', (f) => f.css('#companion-input')),

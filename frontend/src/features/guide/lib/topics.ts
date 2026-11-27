@@ -231,7 +231,7 @@ export const TOPICS: Topic[] = [
     reply: (ctx) =>
       ctx.screen === 'blocks'
         ? { text: '다시 이야기하고 싶은 분의 ‘차단 풀기’를 누르세요.' }
-        : { text: '마이페이지의 ‘차단한 이웃’에서 풀 수 있어요.', actions: [viaMe('me-blocks', '‘차단한 이웃’')] },
+        : { text: '마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.', actions: [viaMe('me-blocks', '‘차단한 이웃’')] },
   },
 
   // ───────── 지역생활
@@ -393,7 +393,7 @@ export const TOPICS: Topic[] = [
                 '/me',
                 [
                   nav('nav-me', '마이페이지'),
-                  { on: ['me'], target: 'me-settings', say: '여기 ‘글자 크기 · 화면 설정’을 누르세요.' },
+                  { on: ['me'], target: 'me-settings', say: '여기 ‘설정’을 누르세요.' },
                   { on: ['settings'], target: 'settings-font', say: '다음에는 여기 ‘글자 크기’에서 바꾸세요.' },
                 ],
                 '설정 화면은 어디예요?',
@@ -423,8 +423,8 @@ export const TOPICS: Topic[] = [
     cues: [[/진동/, 5]],
     screens: ['settings'],
     reply: () => ({
-      text: '마이페이지의 ‘글자 크기 · 화면 설정’에서 ‘진동’을 끄면 돼요.',
-      actions: [viaMe('me-settings', '‘글자 크기 · 화면 설정’', { on: ['settings'], target: 'settings-vibration', say: '여기 ‘진동’에서 ‘끄기’를 누르세요.' })],
+      text: '마이페이지의 ‘설정’에서 ‘진동’을 끄면 돼요.',
+      actions: [viaMe('me-settings', '‘설정’', { on: ['settings'], target: 'settings-vibration', say: '여기 ‘진동’에서 ‘끄기’를 누르세요.' })],
     }),
   },
   {
@@ -452,7 +452,7 @@ export const TOPICS: Topic[] = [
     reply: (ctx) =>
       ctx.signedIn
         ? {
-            text: '마이페이지의 ‘위치 다시 확인’을 누르면 지금 계신 동네로 바뀌어요.',
+            text: '마이페이지 이름 아래 ‘위치 다시 확인’을 누르면 지금 계신 동네로 바뀌어요.',
             actions: [viaMe('me-location', '‘위치 다시 확인’')],
           }
         : { text: '가입할 때 ‘위치 정보 수집 동의’를 누르면 정해져요.' },
@@ -491,13 +491,19 @@ export const TOPICS: Topic[] = [
     id: 'notify-settings',
     ask: '알림을 끄거나 켜고 싶어요',
     cues: [[/알림(을|이)?(설정|끄|꺼|켜|시간|그만|너무|많|시끄|안오|안와|받)/, 6]],
-    screens: ['notifyset'],
+    screens: ['settings'],
     reply: (ctx) =>
-      ctx.screen === 'notifyset'
-        ? { text: '‘추천 친구 알림’을 켜거나 끄면 돼요.' }
+      ctx.screen === 'settings'
+        ? {
+            text: '‘추천 친구 알림’을 켜거나 끄면 돼요. 받는 시간도 고를 수 있어요.',
+            actions: [show('‘추천 친구 알림’ 어디 있어요?', 'settings-notify', '여기서 켜고 끄고, 받는 시간을 골라요.')],
+            demoNote: '시연에서는 알림이 실제로 오지 않아요.',
+          }
         : {
-            text: '마이페이지의 ‘알림 설정’에서 켜고 꺼요.',
-            actions: [viaMe('me-notify', '‘알림 설정’')],
+            text: '마이페이지의 ‘설정’에서 켜고 꺼요.',
+            actions: [
+              viaMe('me-settings', '‘설정’', { on: ['settings'], target: 'settings-notify', say: '여기 ‘추천 친구 알림’에서 켜고 꺼요.' }),
+            ],
             demoNote: '시연에서는 알림이 실제로 오지 않아요.',
           },
   },
@@ -566,7 +572,7 @@ export const TOPICS: Topic[] = [
       ctx.screen === 'install'
         ? { text: '적힌 순서대로 하면 휴대폰 첫 화면에 새싹 아이콘이 생겨요.' }
         : {
-            text: '휴대폰 첫 화면에 아이콘을 놓아 두면 돼요. 마이페이지의 ‘홈 화면에 아이콘 놓기’에 방법이 있어요.',
+            text: '휴대폰 첫 화면에 아이콘을 놓아 두면 돼요. 마이페이지 맨 아래 ‘홈 화면에 아이콘 놓기’에 방법이 있어요.',
             actions: [viaMe('me-install', '‘홈 화면에 아이콘 놓기’')],
           },
   },
@@ -652,7 +658,7 @@ export const TOPICS: Topic[] = [
     cues: [[/로그아웃|나가(기|고싶|려)|종료/, 5]],
     screens: ['me'],
     reply: () => ({
-      text: '마이페이지 맨 아래에 있어요. 누르면 바로 나가지니 조심하세요.',
+      text: '마이페이지 아래쪽에 있어요. 누르면 바로 나가지니 조심하세요.',
       actions: [walk('/me', [nav('nav-me', '마이페이지'), { on: ['me'], target: 'me-logout', say: '여기 ‘로그아웃’이에요. 누르면 한 번 더 물어봐요.' }], '어디 있는지 보기')],
     }),
   },
@@ -662,7 +668,7 @@ export const TOPICS: Topic[] = [
     cues: [[/탈퇴|계정(을)?(삭제|지우|없애)|그만(쓰|두|이용)|회원(을)?(그만|삭제)/, 6]],
     screens: ['leave', 'me'],
     reply: () => ({
-      text: '마이페이지 맨 아래 ‘회원 탈퇴’에 있어요. 탈퇴하면 친구와 대화, 포인트가 모두 사라져요.',
+      text: '마이페이지 아래쪽 ‘회원 탈퇴’에 있어요. 탈퇴하면 친구와 대화, 포인트가 모두 사라져요.',
       actions: [walk('/me', [nav('nav-me', '마이페이지'), { on: ['me'], target: 'me-leave', say: '여기 ‘회원 탈퇴’예요. 누르면 안내 화면이 먼저 나와요.' }], '어디 있는지 보기')],
       demoNote: '시연에서는 실제로 지워지는 것이 없어요.',
     }),
@@ -675,7 +681,7 @@ export const TOPICS: Topic[] = [
     reply: (ctx) =>
       ctx.screen === 'help'
         ? { text: '여기예요. 궁금한 줄을 누르면 답이 펼쳐져요.' }
-        : { text: '마이페이지의 ‘도움말’에 있어요. 저한테 바로 물어보셔도 돼요.', actions: [viaMe('me-help', '‘도움말’')] },
+        : { text: '마이페이지 맨 아래 ‘도움말’에 있어요. 저한테 바로 물어보셔도 돼요.', actions: [viaMe('me-help', '‘도움말’')] },
   },
   {
     id: 'privacy',

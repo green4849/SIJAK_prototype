@@ -95,7 +95,7 @@ test('C5: 마이페이지 → 홈 화면에 아이콘 놓기 안내 (아이폰�
   const page = await ctx.newPage()
   await startTour(page)
   await page.goto('/me')
-  await page.getByRole('link', { name: '홈 화면에 아이콘 놓기' }).click()
+  await page.getByRole('navigation', { name: '더 보기' }).getByRole('link', { name: '홈 화면에 아이콘 놓기' }).click()
   await expect(page.getByRole('list', { name: '아이폰에서 놓는 방법' })).toContainText('홈 화면에 추가')
   await ctx.close()
 })

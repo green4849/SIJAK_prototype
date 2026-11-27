@@ -74,7 +74,7 @@ export function SafetyMenu({ userId, name, blocked, onChanged }: Props) {
         onConfirm={() => void toggleBlock()}
         onClose={() => setAskBlock(false)}
       >
-        <p>서로 메시지를 보낼 수 없어요. 마이페이지 ‘차단한 이웃’에서 풀 수 있어요.</p>
+        <p>서로 메시지를 보낼 수 없어요. 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.</p>
         {error && <Alert>{error}</Alert>}
       </ConfirmSheet>
 

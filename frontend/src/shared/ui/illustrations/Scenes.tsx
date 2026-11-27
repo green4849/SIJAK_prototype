@@ -289,31 +289,3 @@ export function PointsScene() {
     </svg>
   )
 }
-
-/** 알림 설정 — 휴대폰을 보는 할아버지, 종, 밤에는 쉬는 달 */
-export function NotifyScene() {
-  return (
-    <svg viewBox="0 0 200 120" className={styles.spot} aria-hidden="true">
-      <ellipse cx="100" cy="114" rx="88" ry="8" fill="var(--illust-hill)" />
-      <g transform={at(30, 30, 1.3)}>
-        <SeniorFigure look={GRANDPA} />
-      </g>
-      {/* 휴대폰 */}
-      <g {...stroke}>
-        <rect x="100" y="70" width="20" height="32" rx="4" fill="var(--illust-cloth-sky)" />
-        <rect x="103.5" y="74" width="13" height="21" rx="2" fill="var(--illust-sky)" />
-      </g>
-      <Arm x1={88} y1={108} x2={104} y2={98} cloth="green" />
-      {/* 종 */}
-      <g transform={at(128, 46, 1)} {...stroke}>
-        <path d="M-9 6 Q-9 -10 0 -10 Q9 -10 9 6 L11 9 H-11Z" fill="var(--illust-sun)" />
-        <circle cx="0" cy="11.5" r="2.4" fill="var(--illust-sun)" />
-        <path d="M-15 -8 q-3 5 0 10 M15 -8 q3 5 0 10" fill="none" />
-      </g>
-      {/* 달 · 별 */}
-      <path d="M176 18 A12 12 0 1 0 186 36 A9 9 0 1 1 176 18Z" fill="var(--illust-sun)" {...stroke} />
-      <Sparkle x={160} y={52} s={0.8} />
-      <Sparkle x={190} y={58} s={0.6} />
-    </svg>
-  )
-}

@@ -24,7 +24,7 @@ const dateOf = (iso: string) => {
 }
 
 /**
- * 마이페이지 → 약관 및 동의 (B6). 무엇에 언제 동의했는지 보여 주고, 문서를 다시 읽을 수 있다.
+ * 마이페이지 맨 아래 → 약관 및 동의 (B6). 무엇에 언제 동의했는지 보여 주고, 문서를 다시 읽을 수 있다.
  * 필수 동의는 철회 대신 탈퇴로 안내하고, 선택(마음 건강 기록)만 여기서 켜고 끈다.
  */
 export function MyConsents({ docHref, leaveHref, setHealth }: Props) {

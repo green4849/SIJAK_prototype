@@ -1,4 +1,4 @@
-/** 마이페이지 '위치 다시 확인' — 이사했을 때 위치 동의를 다시 받고 사는 곳을 새로 고친다 */
+/** 마이페이지 이름 아래 '위치 다시 확인' — 이사했을 때 위치 동의를 다시 받고 사는 곳을 새로 고친다 */
 import { expect, test } from '@playwright/test'
 import { startTour } from './helpers'
 
@@ -10,11 +10,14 @@ test('위치 다시 확인 → 지금 위치의 시·도로 사는 곳이 바뀐
   )
   await startTour(page)
   await page.goto('/me')
-  const item = page.getByRole('button', { name: /위치 다시 확인/ })
-  await expect(item).toContainText('오산시 세마동')
+  // 메뉴 줄이 아니라 사는 곳 바로 옆의 작은 글자 버튼
+  await expect(page.getByRole('list', { name: '내 활동' }).getByRole('button', { name: /위치/ })).toHaveCount(0)
+  const item = page.getByRole('button', { name: '위치 다시 확인' })
+  const region = item.locator('xpath=..')
+  await expect(region).toContainText('오산시 세마동')
   await item.click()
   await expect(page.getByRole('status').filter({ hasText: '사는 곳을 부산광역시로 바꿨어요' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /위치 다시 확인/ })).toContainText('부산광역시')
+  await expect(region).toContainText('부산광역시')
 })
 
 test('오산 밖으로 옮기면 지역생활에 시연 기준을 밝히고, 자리표시(○○) 장소는 없다', async ({ page }) => {

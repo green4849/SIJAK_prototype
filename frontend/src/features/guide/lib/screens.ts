@@ -51,7 +51,7 @@ const DEMO_INFO = '시연이라 예시 정보예요. 가기 전에 전화로 확
 const ORDER = [
   'welcome', 'phone', 'idcard', 'assist', 'login', 'signup',
   'chat', 'chats', 'activity', 'activities', 'survey', 'friends',
-  'profile', 'settings', 'help', 'install', 'myfriends', 'blocks', 'myacts', 'points', 'notifyset',
+  'profile', 'settings', 'help', 'install', 'myfriends', 'blocks', 'myacts', 'points',
   'check', 'mindlog', 'wellbeing', 'guardians', 'leave', 'me',
   'safety', 'companion', 'welfaredetail', 'welfare', 'braingame', 'brain', 'inbox', 'sos', 'admin', 'home', 'other',
 ] as const
@@ -223,13 +223,13 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     suggest: ['profile', 'location', 'font'],
   },
   settings: {
-    name: '화면 설정',
+    name: '설정',
     match: /^\/me\/settings$/,
     help: () => ({
-      text: '글자 크기나 화면 색을 누르면 바로 바뀌어요.',
+      text: '글자 크기나 화면 색, 알림을 누르면 바로 바뀌어요.',
       actions: [{ kind: 'show', label: '‘글자 크기’ 어디 있어요?', target: 'settings-font', say: '여기서 ‘크게’를 눌러 보세요.' }],
     }),
-    suggest: ['font', 'contrast', 'vibration'],
+    suggest: ['font', 'notify-settings', 'vibration'],
   },
   help: {
     name: '도움말',
@@ -266,12 +266,6 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     match: /^\/me\/points$/,
     help: () => ({ text: '지금 가진 포인트와 모으는 방법이 나와 있어요.', demoNote: '시연이라 진짜 돈은 안 나가요.' }),
     suggest: ['points', 'friend-request', 'activities'],
-  },
-  notifyset: {
-    name: '알림 설정',
-    match: /^\/me\/notifications$/,
-    help: () => ({ text: '추천 친구 알림을 켜거나 끄는 곳이에요.', demoNote: '시연에서는 알림이 실제로 오지 않아요.' }),
-    suggest: ['notify-settings', 'inbox', 'font'],
   },
   check: {
     name: '마음 점검',
