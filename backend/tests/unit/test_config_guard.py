@@ -71,3 +71,19 @@ def test_firebase_needs_web_config() -> None:
         firebase_app_id="1:2:web:3",
     )
     assert ok.identity_provider == "firebase"
+
+
+def test_prod_refuses_log_sms_and_incomplete_solapi() -> None:
+    """C10 문자: 운영에서 '보낸 척'(log) 금지, solapi 는 키·시크릿·발신번호가 모두 있어야"""
+    with pytest.raises(ValidationError, match="SMS_PROVIDER=log"):
+        make(sms_provider="log")
+    with pytest.raises(ValidationError, match="SOLAPI_API_SECRET, SMS_SENDER_NUMBER"):
+        make(sms_provider="solapi", solapi_api_key="k")
+    assert make(sms_provider="off").sms_provider == "off"
+    ok = make(
+        sms_provider="solapi",
+        solapi_api_key="k",
+        solapi_api_secret="s",
+        sms_sender_number="0212345678",
+    )
+    assert ok.sms_provider == "solapi"

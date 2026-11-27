@@ -15,7 +15,7 @@
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,8 @@ from app.domains.auth.repository import AuthRepository
 from app.domains.auth.service import AuthService
 from app.domains.chat.repository import ChatRepository
 from app.domains.chat.service import ChatService
+from app.domains.emergency.repository import EmergencyRepository
+from app.domains.emergency.service import EmergencyService
 from app.domains.friend.repository import FriendRepository
 from app.domains.friend.service import FriendService
 from app.domains.notification.repository import NotificationRepository
@@ -39,6 +41,8 @@ from app.domains.risk.service import RiskService
 from app.domains.wellbeing.repository import WellbeingRepository
 from app.domains.wellbeing.service import WellbeingService
 from app.integrations.identity import get_identity_provider
+from app.integrations.sms import get_sms_sender
+from app.integrations.sms.base import SmsSender
 
 log = logging.getLogger("jobs")
 
@@ -147,3 +151,24 @@ async def run_daily(sessions: SessionFactory, storage: MediaStorage) -> dict[str
             return await _run_daily(sessions, storage)
         finally:
             await connection.execute(text("SELECT pg_advisory_unlock(608020261125)"))
+
+
+#: 긴급 도움 문자 재시도는 이 시간 안의 요청만 — 한참 지난 '긴급' 문자는 오히려 혼란을 준다
+SOS_RETRY_WINDOW = timedelta(hours=1)
+
+
+async def retry_sos_sms(
+    sessions: SessionFactory, sms: SmsSender | None = None, now: datetime | None = None
+) -> dict[str, int]:
+    """못 보낸 긴급 도움 문자 다시 보내기 — 몇 분마다 (`python -m scripts.jobs sos-retry`).
+
+    여러 번 동시에 돌아도 같은 문자를 두 번 보내지 않는다 (행 잠금 skip locked).
+    """
+    since = (now or datetime.now(UTC)) - SOS_RETRY_WINDOW
+    async with sessions() as session:
+        service = EmergencyService(EmergencyRepository(session), sms or get_sms_sender())
+        r = await service.retry_deliveries(since)
+    result = {"sos_sms_sent": r.sent, "sos_sms_failed": r.failed}
+    if r.tried:
+        log.info("긴급 도움 문자 재시도: %s", result)
+    return result

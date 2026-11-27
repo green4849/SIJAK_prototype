@@ -40,7 +40,8 @@ services:
     # 포트를 외부에 열지 않는다 — web(Caddy)만 접근
 
   # 예약 작업 (B3·C11) — api 와 같은 이미지, 매일 새벽 4시(한국)에 한 번:
-  # 탈퇴 30일 지난 계정 삭제 · 보관 기간 지난 음성 파일 정리 · 사회적 관계 지수 계산 (backend/app/jobs.py)
+  # 탈퇴 30일 지난 계정 삭제 · 보관 기간 지난 음성 파일 정리 · 사회적 관계 지수 계산 (매일)
+  # + 못 보낸 긴급 도움 문자 다시 보내기 (2분마다) — backend/app/jobs.py
   jobs:
     build: ../backend
     restart: unless-stopped

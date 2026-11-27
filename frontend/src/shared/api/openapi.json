@@ -825,6 +825,20 @@
         "title": "ConsentsUpdate",
         "type": "object"
       },
+      "EmergencyInfoOut": {
+        "properties": {
+          "sms_enabled": {
+            "description": "긴급 도움을 누르면 보호자에게 문자를 보내는지",
+            "title": "Sms Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sms_enabled"
+        ],
+        "title": "EmergencyInfoOut",
+        "type": "object"
+      },
       "FirebaseWebConfig": {
         "description": "Firebase 웹 설정 — 비밀이 아니다 (브라우저 SDK 초기화용)",
         "properties": {
@@ -2195,11 +2209,22 @@
           "relation": {
             "title": "Relation",
             "type": "string"
+          },
+          "status": {
+            "description": "이 보호자에게 보낸 문자: sent 보냄 · failed 못 보냄(예약 작업이 다시 시도) · not_sent 문자 발송이 꺼져 있어 기록만",
+            "enum": [
+              "sent",
+              "failed",
+              "not_sent"
+            ],
+            "title": "Status",
+            "type": "string"
           }
         },
         "required": [
           "name",
-          "relation"
+          "relation",
+          "status"
         ],
         "title": "SosNotified",
         "type": "object"
@@ -2212,8 +2237,13 @@
             "type": "string"
           },
           "delivery_status": {
-            "const": "not_sent",
-            "description": "외부 알림 발송 상태",
+            "description": "문자 결과 전체: sent 모두 · partial 일부 · failed 모두 못 보냄 · not_sent 발송 꺼짐 또는 보호자 없음",
+            "enum": [
+              "not_sent",
+              "sent",
+              "partial",
+              "failed"
+            ],
             "title": "Delivery Status",
             "type": "string"
           },
@@ -2223,7 +2253,7 @@
             "type": "string"
           },
           "notified": {
-            "description": "요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음",
+            "description": "요청 시 등록된 보호자와 문자 결과",
             "items": {
               "$ref": "#/components/schemas/SosNotified"
             },
@@ -4239,9 +4269,36 @@
         ]
       }
     },
+    "/api/v1/emergency": {
+      "get": {
+        "description": "확인 창에서 '문자로 알려요'와 '기록만 해요' 중 무엇을 말할지",
+        "operationId": "emergency_info_api_v1_emergency_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmergencyInfoOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Emergency Info",
+        "tags": [
+          "emergency"
+        ]
+      }
+    },
     "/api/v1/emergency/sos": {
       "post": {
-        "description": "긴급 도움 요청 — 지금은 기록만 (보호자·복지사 알림 발송은 C4)",
+        "description": "긴급 도움 요청 — 기록하고, 문자 발송이 켜져 있으면 보호자마다 문자 (결과는 보호자별로)",
         "operationId": "sos_api_v1_emergency_sos_post",
         "responses": {
           "201": {
