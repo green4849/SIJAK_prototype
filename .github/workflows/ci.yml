@@ -114,7 +114,7 @@ jobs:
         run: |
           cp infra/.env.prod.example infra/.env.prod
           sh infra/gen-secrets.sh >> infra/.env.prod
-          sed -i 's/^DOMAIN=.*/DOMAIN=localhost/; s/^ALLOW_MOCK_IDENTITY_IN_PROD=.*/ALLOW_MOCK_IDENTITY_IN_PROD=true/' infra/.env.prod
+          sed -i 's/^DOMAIN=.*/DOMAIN=localhost/; s/^AUTH_MODE=.*/AUTH_MODE=phone/; s/^ALLOW_MOCK_IDENTITY_IN_PROD=.*/ALLOW_MOCK_IDENTITY_IN_PROD=true/' infra/.env.prod
       - name: 띄우기
         run: docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build --wait --wait-timeout 180
       - name: 확인
