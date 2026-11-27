@@ -29,4 +29,7 @@
 /* #notify 로 바로 내려왔을 때 위쪽 막대에 가리지 않게 */
 .notify {
   scroll-margin-top: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
 }

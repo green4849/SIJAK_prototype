@@ -1,6 +1,6 @@
 /** backend/app/domains/point · mission · notification 과 같은 계약 (C12) */
 import { NOTIF_MAX_PER_DAY, POINTS, POINT_REASONS, TIME_SLOTS } from '../constants'
-import { fail, json, type Route } from '../http'
+import { fail, json, noContent, type Route } from '../http'
 import { balanceOf, earn, ensureWelcome, hasRef, ratingsLeftToday, usedFirstFree } from '../points'
 import { db, relatedBlocks, save, type DUser } from '../store'
 import { requireUser } from './auth'
@@ -100,6 +100,22 @@ export const pointRoutes: Route[] = [
     save()
     return json(firstFriends(me))
   }],
+
+  // 휴대폰 알림(C4) — 시연에는 보낼 서버가 없어 '준비 중'. 설정 화면은 그 안내를 보여 준다
+  ['GET', '/notifications/push', (req) => {
+    requireUser(req)
+    return json({
+      enabled: false,
+      public_key: null,
+      quiet_hours: '밤 9시부터 아침 8시까지는 소리·진동 없이 알려 드려요',
+    } satisfies Schema<'PushConfigOut'>)
+  }],
+  ['PUT', '/notifications/push/subscription', () => fail(409, 'push_disabled', '아직 휴대폰 알림을 보낼 수 없어요.')],
+  ['POST', '/notifications/push/unsubscribe', (req) => {
+    requireUser(req)
+    return noContent()
+  }],
+  ['POST', '/notifications/push/test', () => fail(409, 'push_disabled', '아직 휴대폰 알림을 보낼 수 없어요.')],
 
   ['GET', '/notifications/settings', (req) => json(prefsOut(requireUser(req)))],
 

@@ -32,6 +32,7 @@ from app.domains.emergency.repository import EmergencyRepository
 from app.domains.emergency.service import EmergencyService
 from app.domains.friend.repository import FriendRepository
 from app.domains.friend.service import FriendService
+from app.domains.notification import push
 from app.domains.notification.repository import NotificationRepository
 from app.domains.notification.service import NotificationService
 from app.domains.point.repository import PointRepository
@@ -148,7 +149,10 @@ async def run_daily(sessions: SessionFactory, storage: MediaStorage) -> dict[str
         if not locked:
             raise RuntimeError("예약 작업이 이미 실행 중입니다")
         try:
-            return await _run_daily(sessions, storage)
+            result = await _run_daily(sessions, storage)
+            # 작업 중 쌓인 소식의 휴대폰 알림(백그라운드)이 끝난 뒤에 마친다
+            await push.drain()
+            return result
         finally:
             await connection.execute(text("SELECT pg_advisory_unlock(608020261125)"))
 

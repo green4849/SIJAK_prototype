@@ -65,6 +65,13 @@ services:
         sync: false
       - key: SMS_SENDER_NUMBER
         sync: false
+      # 휴대폰 알림 Web Push (C4). 두 키가 없으면 알림함에만 쌓인다. 켜는 순서: docs/deploy-render.md 「휴대폰 알림 켜기」
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: https://sijak-6080.onrender.com
 
   - type: web
     name: sijak-6080

@@ -1,11 +1,13 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domains.notification.models import Notification, NotificationPrefs
+from app.domains.notification import push
+from app.domains.notification.models import Notification, NotificationPrefs, PushSubscription
+from app.integrations.webpush.base import PushTarget
 
 
 class NotificationRepository:
@@ -66,4 +68,60 @@ class NotificationRepository:
             .where(Notification.user_id == user_id, Notification.read_at.is_(None))
             .values(read_at=datetime.now(UTC))
         )
+        await self.session.commit()
+
+    # ---------- 휴대폰 알림 구독 (C4) ----------
+
+    async def push_targets(self, user_id: uuid.UUID) -> list[PushTarget]:
+        rows = await self.session.scalars(
+            select(PushSubscription).where(PushSubscription.user_id == user_id)
+        )
+        return [PushTarget(r.endpoint, r.p256dh, r.auth) for r in rows]
+
+    def queue_push(self, targets: list[PushTarget], msg: "push.PushMessage") -> None:
+        """이 세션이 커밋되면 보낸다 (rollback 이면 버림)"""
+        push.queue(self.session, targets, msg)
+
+    async def save_subscription(
+        self, user_id: uuid.UUID, endpoint: str, p256dh: str, auth: str, keep: int
+    ) -> None:
+        """기기 구독 등록 — 같은 기기(endpoint)가 다른 계정이었으면 이 계정으로 옮긴다.
+        한 사람에 keep 대까지, 넘으면 오래된 것부터 지운다."""
+        now = datetime.now(UTC)
+        await self.session.execute(
+            insert(PushSubscription)
+            .values(user_id=user_id, endpoint=endpoint, p256dh=p256dh, auth=auth, created_at=now)
+            .on_conflict_do_update(
+                index_elements=["endpoint"],
+                set_={"user_id": user_id, "p256dh": p256dh, "auth": auth, "created_at": now},
+            )
+        )
+        stale = (
+            select(PushSubscription.id)
+            .where(PushSubscription.user_id == user_id)
+            .order_by(PushSubscription.created_at.desc(), PushSubscription.id)
+            .offset(keep)
+        )
+        await self.session.execute(delete(PushSubscription).where(PushSubscription.id.in_(stale)))
+        await self.session.commit()
+
+    async def delete_subscription(self, user_id: uuid.UUID, endpoint: str) -> None:
+        await self.session.execute(
+            delete(PushSubscription).where(
+                PushSubscription.user_id == user_id, PushSubscription.endpoint == endpoint
+            )
+        )
+        await self.session.commit()
+
+    async def push_delivered(self, ok: list[str], gone: list[str]) -> None:
+        if gone:
+            await self.session.execute(
+                delete(PushSubscription).where(PushSubscription.endpoint.in_(gone))
+            )
+        if ok:
+            await self.session.execute(
+                update(PushSubscription)
+                .where(PushSubscription.endpoint.in_(ok))
+                .values(last_sent_at=datetime.now(UTC))
+            )
         await self.session.commit()
