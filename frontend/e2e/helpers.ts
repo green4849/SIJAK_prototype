@@ -4,8 +4,8 @@ import { expect, type Page } from '@playwright/test'
 export async function startTour(page: Page, { survey = false }: { survey?: boolean } = {}) {
   await page.goto('/?tour')
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
-  // 둘러보기 계정은 성향조사를 안 해서 추천 친구 탭에 처음 가면 시작 화면으로 간다 —
-  // 그 흐름을 보는 테스트(survey: true)가 아니면 '다음에 하기'를 누른 것으로 둔다
+  // 둘러보기 계정은 성향조사를 안 해서 추천 친구 위에 권하는 카드가 뜬다 —
+  // 그 흐름을 보는 테스트(survey: true)가 아니면 카드를 닫은('다음에 하기') 것으로 둔다
   if (!survey) await page.evaluate(() => localStorage.setItem('wipi.surveyLater', '1'))
 }
 

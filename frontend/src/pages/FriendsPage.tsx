@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { LocationConsent, useAuth } from '@/features/auth'
 import {
   FriendFinder,
   ReceivedRequests,
   SurveyPrompt,
-  surveyPostponed,
-  useSurveyGate,
   type FriendTab,
 } from '@/features/friend'
 import {
@@ -36,12 +33,7 @@ export function FriendsPage() {
   const points = usePointSummary()
   const [shortOfPoints, setShortOfPoints] = useState(false)
 
-  // 성향조사를 안 했으면 처음 들어올 때 시작 화면으로 ('다음에 하기'를 누른 뒤로는 탭 위 카드로만 권한다)
-  const navigate = useNavigate()
-  const needsSurvey = useSurveyGate()
-  useEffect(() => {
-    if (needsSurvey && !surveyPostponed()) navigate(friendSurvey, { replace: true })
-  }, [needsSurvey, navigate])
+  // 성향조사는 저절로 넘기지 않는다 — 추천 위 카드(X로 닫기)·하단 '성향조사' 탭·마이페이지에서 고른다
 
   return (
     <section className={styles.page}>
