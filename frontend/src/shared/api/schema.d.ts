@@ -205,6 +205,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/kakao/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kakao Complete */
+        post: operations["kakao_complete_api_v1_auth_kakao_complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/kakao/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kakao Start */
+        get: operations["kakao_start_api_v1_auth_kakao_start_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout": {
         parameters: {
             query?: never;
@@ -216,6 +250,23 @@ export interface paths {
         put?: never;
         /** Logout */
         post: operations["logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/method": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Auth Method */
+        get: operations["auth_method_api_v1_auth_method_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1354,6 +1405,14 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** AuthMethod */
+        AuthMethod: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "phone" | "kakao";
+        };
         /** BlockCreate */
         BlockCreate: {
             /**
@@ -1660,6 +1719,13 @@ export interface components {
         HealthConsentOut: {
             /** Health Consent */
             health_consent: boolean;
+        };
+        /** KakaoCompleteRequest */
+        KakaoCompleteRequest: {
+            /** Code */
+            code: string;
+            /** State */
+            state: string;
         };
         /**
          * LocationUpdate
@@ -2084,10 +2150,16 @@ export interface components {
         };
         /** SignupRequest */
         SignupRequest: {
+            /** Birth Date */
+            birth_date?: string | null;
             /** Consents */
             consents?: components["schemas"]["ConsentChoiceIn"][];
+            /** Gender */
+            gender?: ("M" | "F") | null;
             /** Interests */
             interests?: string[];
+            /** Name */
+            name?: string | null;
             /** Region Code */
             region_code: string;
             /** Signup Token */
@@ -2813,6 +2885,59 @@ export interface operations {
             };
         };
     };
+    kakao_complete_api_v1_auth_kakao_complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                wipi_kakao_state?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KakaoCompleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoggedInResult"] | components["schemas"]["SignupRequiredResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kakao_start_api_v1_auth_kakao_start_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     logout_api_v1_auth_logout_post: {
         parameters: {
             query?: never;
@@ -2838,6 +2963,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    auth_method_api_v1_auth_method_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthMethod"];
                 };
             };
         };

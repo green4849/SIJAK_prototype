@@ -577,7 +577,7 @@ export const TOPICS: Topic[] = [
           },
   },
 
-  // ───────── 본인 확인 (가입 전에도)
+  // ───────── 로그인 (가입 전에도)
   {
     id: 'login-code',
     ask: '인증번호가 오지 않아요',
@@ -592,13 +592,11 @@ export const TOPICS: Topic[] = [
         ? { text: '이미 들어와 계셔서 인증번호는 필요 없어요.', mood: 'happy' }
         : ctx.screen === 'phone' && ctx.variant === 'code'
           ? {
-              text: '조금 기다려도 안 오면 ‘인증번호 다시 받기’를 누르세요.',
+              text: '시연용 번호는 화면 위쪽에 있어요. 그 숫자를 입력해 주세요.',
               actions: [show('‘다시 받기’ 어디 있어요?', 'code-resend', '여기 ‘인증번호 다시 받기’를 누르세요.')],
-              demoNote: '시연이라 문자는 안 와요. 화면 위쪽에 적힌 숫자를 쓰세요.',
             }
           : {
-              text: '‘인증번호 받기’를 누르면 문자로 와요. 안 오면 ‘인증번호 다시 받기’를 누르세요.',
-              demoNote: '시연이라 문자는 안 와요. 번호는 화면 위쪽에 나와요.',
+              text: '시연용 로그인을 진행하면 다음 화면 위쪽에 번호가 나와요. 문자는 오지 않아요.',
             },
   },
   {
@@ -613,21 +611,26 @@ export const TOPICS: Topic[] = [
     reply: (ctx) =>
       ctx.signedIn
         ? { text: '이미 들어와 계세요. 다음에도 그냥 여시면 돼요.', mood: 'happy' }
-        : {
-            text: '휴대폰 인증 한 번이면 돼요.',
-            steps: ['‘시작하기’, 그다음 ‘휴대폰 인증’을 눌러요.', '빈칸을 채우고 ‘인증번호 받기’를 눌러요.', '문자로 온 숫자를 적고 ‘확인’을 눌러요.'],
+        : ctx.demo ? {
+            text: '시연용 로그인으로 시작해요.',
+            steps: ['‘시작하기’, 그다음 ‘시연용 로그인’을 눌러요.', '빈칸을 채우고 ‘인증번호 받기’를 눌러요.', '화면 위쪽 숫자를 적고 ‘확인’을 눌러요.'],
             actions: [
               walk(
                 '/login',
                 [
                   { on: ['welcome'], target: 'welcome-start', say: '먼저 여기 ‘시작하기’를 누르세요.' },
-                  { on: ['login', 'idcard'], target: 'login-phone', say: '여기 ‘휴대폰 인증’을 누르세요.' },
-                  { on: ['assist'], target: 'assist-start', say: '여기를 누르면 휴대폰 인증이 시작돼요.' },
+                  { on: ['login', 'idcard'], target: 'login-phone', say: '여기 ‘시연용 로그인’을 누르세요.' },
+                  { on: ['assist'], target: 'assist-start', say: '여기를 누르면 시연용 로그인이 시작돼요.' },
                   { on: ['phone'], target: 'phone-submit', say: '다 적고 나서 여기 ‘인증번호 받기’를 누르세요.' },
                 ],
               ),
             ],
-            demoNote: '시연이라 문자는 안 가요. 번호는 화면 위쪽에 나와요.',
+          } : {
+            text: '‘카카오 로그인’을 누르세요. 처음 오셨다면 프로필과 동네를 설정해요.',
+            actions: [walk('/login', [
+              { on: ['welcome'], target: 'welcome-start', say: '먼저 여기 ‘시작하기’를 누르세요.' },
+              { on: ['login'], target: 'login-kakao', say: '여기 ‘카카오 로그인’을 누르세요.' },
+            ])],
           },
   },
   {
@@ -639,10 +642,10 @@ export const TOPICS: Topic[] = [
     reply: (ctx) =>
       ctx.signedIn
         ? { text: '막히는 화면에서 저를 눌러 물어보세요. 가족에게 화면을 보여 주셔도 좋아요.' }
-        : {
-            text: '가족이나 복지관 직원과 같이 하셔도 돼요. 본인 휴대폰만 곁에 두세요.',
-            actions: ctx.screen === 'login' ? [show('‘함께 인증하기’ 어디 있어요?', 'login-help', '여기 ‘함께 인증하기’를 누르세요.')] : ctx.screen === 'assist' ? undefined : [{ kind: 'go', label: '‘함께 인증하기’ 화면 보기', to: '/login/help' }],
-          },
+        : ctx.demo ? {
+            text: '가족이나 복지관 직원과 같이 시연용 로그인을 진행하셔도 돼요.',
+            actions: ctx.screen === 'login' ? [show('‘함께 로그인하기’ 어디 있어요?', 'login-help', '여기 ‘함께 로그인하기’를 누르세요.')] : ctx.screen === 'assist' ? undefined : [{ kind: 'go', label: '‘함께 로그인하기’ 화면 보기', to: '/login/help' }],
+          } : { text: '가족이나 복지관 직원에게 화면을 보여 주고 카카오 로그인을 함께 진행해 보세요.' },
   },
   {
     id: 'id-card',
@@ -650,7 +653,7 @@ export const TOPICS: Topic[] = [
     audience: 'any',
     cues: [[/신분증|주민등록증|민증|운전면허/, 5]],
     screens: ['login', 'idcard'],
-    reply: () => ({ text: '신분증 인증은 아직 안 돼요. 지금은 휴대폰 인증만 돼요.', mood: 'sorry' }),
+    reply: (ctx) => ({ text: ctx.demo ? '시연 화면에서는 모의 로그인만 할 수 있어요.' : '신분증 인증은 진행하지 않아요. 카카오 계정으로 로그인해 주세요.', mood: 'sorry' }),
   },
   {
     id: 'logout',
@@ -692,7 +695,7 @@ export const TOPICS: Topic[] = [
     ],
     screens: ['safety'],
     reply: (ctx) => ({
-      text: '전화번호는 다른 분에게 보이지 않아요. 본인 확인한 분만 들어올 수 있고요.',
+      text: '전화번호는 다른 분에게 보이지 않아요. 현재는 시연용 인증이며 실제 본인확인은 준비 중이에요.',
       actions: ctx.screen === 'safety' ? undefined : [viaMe('me-safety', '‘안전하게 이용하기’')],
       demoNote: '시연 화면의 이웃은 진짜 사람이 아니에요.',
     }),

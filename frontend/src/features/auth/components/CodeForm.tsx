@@ -15,7 +15,7 @@ interface Props {
   onBack: () => void
 }
 
-/** 본인인증 2단계 — 인증번호 6자리 */
+/** 전화 로그인 2단계 — 인증번호 6자리 */
 export function CodeForm({ devCode, sentTo, pending, error, onSubmit, onResend, onBack }: Props) {
   const [code, setCode] = useState('')
 

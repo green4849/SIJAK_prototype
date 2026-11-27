@@ -5,7 +5,7 @@ import { TopBar } from '@/shared/ui/TopBar'
 import styles from './PhoneVerifyPage.module.css'
 import { legalDoc } from './routes'
 
-/** ② → 휴대폰 인증. 본인인증 하나로 로그인·가입을 모두 시작 */
+/** 설정에 따라 모의 번호 또는 Firebase 문자를 사용하는 전화 로그인. */
 export function PhoneVerifyPage() {
   const navigate = useNavigate()
   const { signIn } = useAuth()

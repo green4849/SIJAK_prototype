@@ -8,7 +8,7 @@ import { assessment } from './routes'
 import styles from './SafetyPage.module.css'
 
 /**
- * ⑧ 보안 기능 안내 — 가입 직후 한 번 보여 주고, 마이페이지에서도 다시 볼 수 있다.
+ * ⑧ 보안 기능 안내 — 마이페이지에서 볼 수 있다.
  * 문구는 실제 동작과 일치시킨다 (사람이 24시간 지켜보는 게 아니라 자동 감지).
  */
 export function SafetyPage() {
@@ -26,8 +26,8 @@ export function SafetyPage() {
         <ActionCard
           accent="mint"
           icon={ShieldCheck}
-          title="실명 인증"
-          description="본인 확인한 분만 이용해요"
+          title="카카오 계정 로그인"
+          description="로그인을 위한 연결이에요. 본인확인은 진행하지 않아요"
         />
         <ActionCard
           accent="yellow"
@@ -45,7 +45,7 @@ export function SafetyPage() {
           accent="sky"
           icon={Lock}
           title="개인정보 보호"
-          description="전화번호는 남에게 안 보여요"
+          description="프로필에 입력한 개인정보는 남에게 보여 주지 않아요"
         />
       </div>
 

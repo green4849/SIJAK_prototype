@@ -11,7 +11,7 @@ export async function startTour(page: Page, { survey = false }: { survey?: boole
 
 export const mainNav = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' })
 
-/** 휴대폰 인증 화면 입력 → 화면에 표시된 인증번호로 확인 */
+/** 시연용 로그인 정보 입력 → 화면에 표시된 번호로 확인 */
 export async function verifyPhone(
   page: Page,
   p: { name: string; year: string; month: string; day: string; phone: string; gender: '남성' | '여성' },
@@ -28,7 +28,7 @@ export async function verifyPhone(
   await page.getByRole('button', { name: '확인', exact: true }).click()
 }
 
-/** 가입 1/3 약관 동의 — 기본은 '모두 동의해요', health: false 면 필수만 하나씩 (B6) */
+/** 가입 첫 단계 약관 동의 — 기본은 '모두 동의해요', health: false 면 필수만 하나씩 (B6) */
 export async function agreeTerms(page: Page, { health = true }: { health?: boolean } = {}) {
   await expect(page.getByRole('heading', { name: /약관을 확인해 주세요/ })).toBeVisible()
   if (health) await page.getByRole('checkbox', { name: '모두 동의해요' }).check()

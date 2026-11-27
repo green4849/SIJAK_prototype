@@ -6,6 +6,7 @@ import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { WelcomePage } from '@/pages/WelcomePage'
 import { ToastHost } from '@/shared/ui/Toast'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { PlainLayout, TabLayout } from './AppLayout'
 import { OfflineBanner } from './OfflineBanner'
 import { UpdateBanner } from './UpdateBanner'
@@ -44,9 +45,9 @@ const AdminPage = lazy(() => import('@/pages/AdminPage').then((m) => ({ default:
 const FriendListPage = lazy(() => import('@/pages/FriendListPage').then((m) => ({ default: m.FriendListPage })))
 const FriendsPage = lazy(() => import('@/pages/FriendsPage').then((m) => ({ default: m.FriendsPage })))
 const HelpPage = lazy(() => import('@/pages/HelpPage').then((m) => ({ default: m.HelpPage })))
-const IdCardPage = lazy(() => import('@/pages/IdCardPage').then((m) => ({ default: m.IdCardPage })))
 const InstallPage = lazy(() => import('@/pages/InstallPage').then((m) => ({ default: m.InstallPage })))
 const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })))
+const KakaoCallbackPage = lazy(() => import('@/pages/KakaoCallbackPage').then((m) => ({ default: m.KakaoCallbackPage })))
 const MyActivitiesPage = lazy(() => import('@/pages/MyActivitiesPage').then((m) => ({ default: m.MyActivitiesPage })))
 const MyPage = lazy(() => import('@/pages/MyPage').then((m) => ({ default: m.MyPage })))
 const PhoneVerifyPage = lazy(() => import('@/pages/PhoneVerifyPage').then((m) => ({ default: m.PhoneVerifyPage })))
@@ -58,7 +59,7 @@ const SignupPage = lazy(() => import('@/pages/SignupPage').then((m) => ({ defaul
 
 /**
  * 라우트 등록 지점 — 화면 번호는 docs/design/screens-v1.png
- *   Stage 1: ① /welcome ② /login(+phone·id-card·help) /signup ⑧ /safety
+ *   Stage 1: ① /welcome ② /login(+kakao/callback, 시연용 phone·help) /signup ⑧ /safety
  *   Stage 2: ③ / ⑨ /me (+profile·settings·help)
  *   Stage 3: ④ /friends   Stage 4: ⑤ /chats   Stage 5: /me/blocks   Stage 6: ⑥⑦ /activities
  *   C12: /me/points (알림 설정은 /me/settings#notify — 옛 /me/notifications 는 넘겨 준다)
@@ -79,9 +80,9 @@ export function App() {
             <Route element={<PlainLayout />}>
               <Route path="welcome" element={<WelcomePage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="login/kakao/callback" element={<KakaoCallbackPage />} />
               <Route path="login/phone" element={<PhoneVerifyPage />} />
-              <Route path="login/id-card" element={<IdCardPage />} />
-              <Route path="login/help" element={<AssistPage />} />
+              <Route path="login/help" element={IS_DEMO ? <AssistPage /> : <Navigate to="/login" replace />} />
               <Route path="signup" element={<SignupPage />} />
             </Route>
           </Route>

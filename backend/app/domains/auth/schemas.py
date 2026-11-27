@@ -105,8 +105,21 @@ class SignupRequest(BaseModel):
     signup_token: str
     region_code: str
     interests: list[str] = Field(default_factory=list, max_length=12)
+    # 카카오 로그인 신규 회원의 직접 입력 정보. 본인확인 정보가 아니다.
+    name: str | None = Field(default=None, max_length=50)
+    birth_date: date | None = None
+    gender: Literal["M", "F"] | None = None
     # 필수(terms·privacy·location)는 모두 agreed=true 여야 가입된다. 빠진 선택 항목은 '동의 안 함'
     consents: list[ConsentChoiceIn] = Field(default_factory=list, max_length=len(CONSENT_DOCS))
+
+
+class KakaoCompleteRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=2048)
+    state: str = Field(min_length=32, max_length=128)
+
+
+class AuthMethod(BaseModel):
+    mode: Literal["phone", "kakao"]
 
 
 class ConsentsUpdate(BaseModel):

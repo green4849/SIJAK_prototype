@@ -146,7 +146,8 @@ export const authRoutes: Route[] = [
       return fail(401, 'invalid_token', '인증 정보가 올바르지 않아요.')
     }
     const interests = (b.interests as string[]) ?? []
-    validateProfile(String(b.region_code), interests)
+    validateProfile(String(b.region_code))
+    if (interests.length) validateProfile(undefined, interests)
     const given = new Map(checkConsents((b.consents as ConsentIn[]) ?? []).map((c) => [c.kind, c.agreed]))
     if (Object.entries(CONSENT_DOCS).some(([k, required]) => required && !given.get(k as ConsentIn['kind'])))
       fail(422, 'consent_required', '꼭 필요한 항목에 모두 동의해 주세요.')

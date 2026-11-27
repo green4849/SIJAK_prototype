@@ -78,6 +78,9 @@ class AuthRepository:
     async def get_user_by_ci(self, ci: str) -> User | None:
         return await self.session.scalar(select(User).where(User.pass_ci == ci))
 
+    async def get_user_by_kakao_id(self, kakao_id: str) -> User | None:
+        return await self.session.scalar(select(User).where(User.kakao_id == kakao_id))
+
     async def get_user_by_phone_hash(self, phone_hash: str) -> User | None:
         return await self.session.scalar(select(User).where(User.phone_hash == phone_hash))
 

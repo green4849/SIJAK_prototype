@@ -32,7 +32,7 @@ AI 말동무, 사기 대화 탐지, 음성 매칭 통화, 지역 복지시설 �
 backend/    FastAPI (모놀리식, 도메인 모듈 분리)
   app/core/          설정·DB·에러·보안 공용
   app/domains/<d>/   models → repository → service → schemas → router
-  app/integrations/  외부 연동 (LLM, STT, TTS, PASS, 공공데이터) — base.py 인터페이스 뒤에 구현
+  app/integrations/  외부 연동 (카카오 로그인, 시연용 Mock 인증, 공공데이터 등)
   alembic/           마이그레이션
   tests/             unit / integration
 frontend/   React + Vite + TypeScript

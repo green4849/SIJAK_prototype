@@ -39,7 +39,7 @@ function toIsoDate(y: string, m: string, d: string): string | null {
   return `${y}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`
 }
 
-/** 본인인증 1단계 — 이름·생년월일·휴대폰 번호·성별 */
+/** 시연용 모의 로그인 입력 — 이름·생년월일·휴대폰 번호·성별 */
 export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
   const [y0 = '', m0 = '', d0 = ''] = initial?.birth_date.split('-') ?? []
   const [name, setName] = useState(initial?.name ?? '')
@@ -76,7 +76,7 @@ export function IdentityForm({ pending, error, onSubmit, initial }: Props) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <h1 className={styles.title}>휴대폰 인증</h1>
+      <h1 className={styles.title}>시연용 로그인</h1>
 
       <TextField
         label="이름"

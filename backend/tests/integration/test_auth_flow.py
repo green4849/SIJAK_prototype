@@ -1,5 +1,7 @@
 """인증 전체 흐름: 본인인증 → 가입 → /me → refresh 회전 → 로그아웃 → 재로그인."""
 
+from urllib.parse import parse_qs, urlsplit
+
 import pytest
 from httpx import AsyncClient
 
@@ -47,6 +49,76 @@ async def test_signup_then_me(client: AsyncClient) -> None:
     assert me.json()["region_name"] == "경기도"
     assert sorted(me.json()["interests"]) == ["movies", "walking"]
     assert "phone" not in me.json()  # 개인정보 미노출
+
+
+async def test_signup_with_region_before_survey(client: AsyncClient) -> None:
+    """첫 이용에서는 지역으로 가입하고 성향조사 Q1에서 관심사를 고른다."""
+    v = await _verify(client)
+    res = await client.post(
+        "/api/v1/auth/signup",
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "41",
+            "interests": [],
+            "consents": ALL_CONSENTS,
+        },
+    )
+    assert res.status_code == 201, res.text
+    assert res.json()["user"]["interests"] == []
+
+
+async def test_kakao_login_signup_and_returning_member(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """카카오 ID로 로그인하고, 신규 가입 정보는 사용자가 직접 입력한다."""
+    settings = get_settings()
+    monkeypatch.setattr(settings, "auth_mode", "kakao")
+    monkeypatch.setattr(settings, "kakao_rest_api_key", "test-key")
+    monkeypatch.setattr(settings, "kakao_client_secret", "test-secret")
+    monkeypatch.setattr(settings, "kakao_redirect_uri", "http://test/login/kakao/callback")
+
+    async def fake_exchange(_: str) -> tuple[str, str]:
+        return "12345678", "카카오별명"
+
+    monkeypatch.setattr("app.domains.auth.router.exchange_user", fake_exchange)
+    assert (await client.post("/api/v1/auth/pass/start", json=PERSON)).status_code == 403
+
+    start = await client.get("/api/v1/auth/kakao/start", follow_redirects=False)
+    assert start.status_code == 302
+    state = parse_qs(urlsplit(start.headers["location"]).query)["state"][0]
+    bad = await client.post(
+        "/api/v1/auth/kakao/complete", json={"code": "sample", "state": "x" * 40}
+    )
+    assert bad.status_code == 401
+    first = await client.post(
+        "/api/v1/auth/kakao/complete", json={"code": "sample", "state": state}
+    )
+    assert first.status_code == 200
+    assert first.json()["status"] == "signup_required"
+
+    signup = await client.post(
+        "/api/v1/auth/signup",
+        json={
+            "signup_token": first.json()["signup_token"],
+            "region_code": "41",
+            "interests": [],
+            "name": "김시작",
+            "birth_date": "1955-03-01",
+            "gender": "F",
+            "consents": ALL_CONSENTS,
+        },
+    )
+    assert signup.status_code == 201, signup.text
+    assert signup.json()["user"]["name"] == "김시작"
+
+    again_start = await client.get("/api/v1/auth/kakao/start", follow_redirects=False)
+    again_state = parse_qs(urlsplit(again_start.headers["location"]).query)["state"][0]
+    again = await client.post(
+        "/api/v1/auth/kakao/complete", json={"code": "sample", "state": again_state}
+    )
+    assert again.status_code == 200
+    assert again.json()["status"] == "logged_in"
+    assert again.json()["user"]["id"] == signup.json()["user"]["id"]
 
 
 async def test_existing_member_logs_in_directly(client: AsyncClient) -> None:

@@ -10,23 +10,21 @@ test.beforeEach(async ({ page }) => {
   )
 })
 
-/** 마음 건강 기록(선택)만 빼고 가입 → 보안 안내까지 */
+/** 마음 건강 기록(선택)만 빼고 가입 → 성향조사까지 */
 async function signupWithoutHealth(page: Page) {
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '선택안함', year: '1956', month: '6', day: '6', phone: '01055556666', gender: '여성' })
   await agreeTerms(page, { health: false })
-  await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
-  await page.getByRole('button', { name: /^다음/ }).click()
   await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
   await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '가입 완료' }).click()
-  await expect(page.getByRole('heading', { name: '시작은 이렇게 지켜 드려요' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
 }
 
 test('선택(마음 건강 기록)을 빼도 가입되고, 점검 전에 동의를 따로 묻는다', async ({ page }) => {
   await signupWithoutHealth(page)
-  // 가입 직후 첫 WHO-5 — 동의하지 않았으니 동의 카드가 먼저, 미룰 수 있다
-  await page.getByRole('link', { name: '알겠어요, 시작할게요' }).click()
+  // 마음 점검에 들어가면, 선택 동의하지 않은 분께 동의 카드를 먼저 보여 준다.
+  await page.goto('/me/wellbeing/check/who5')
   await expect(page.getByRole('heading', { name: '점검 결과를 저장해도 될까요?' })).toBeVisible()
   await expect(page.getByText('나만 볼 수 있어요. 이웃·운영자에게 보여 주지 않아요.')).toBeVisible()
   await page.getByRole('button', { name: '동의하고 점검하기' }).click()

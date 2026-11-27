@@ -438,6 +438,23 @@
         "title": "AssessmentResultOut",
         "type": "object"
       },
+      "AuthMethod": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "phone",
+              "kakao"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "AuthMethod",
+        "type": "object"
+      },
       "BlockCreate": {
         "properties": {
           "user_id": {
@@ -1116,6 +1133,28 @@
           "health_consent"
         ],
         "title": "HealthConsentOut",
+        "type": "object"
+      },
+      "KakaoCompleteRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 128,
+            "minLength": 32,
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "state"
+        ],
+        "title": "KakaoCompleteRequest",
         "type": "object"
       },
       "LocationUpdate": {
@@ -2118,6 +2157,18 @@
       },
       "SignupRequest": {
         "properties": {
+          "birth_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
           "consents": {
             "items": {
               "$ref": "#/components/schemas/ConsentChoiceIn"
@@ -2126,6 +2177,21 @@
             "title": "Consents",
             "type": "array"
           },
+          "gender": {
+            "anyOf": [
+              {
+                "enum": [
+                  "M",
+                  "F"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
           "interests": {
             "items": {
               "type": "string"
@@ -2133,6 +2199,18 @@
             "maxItems": 12,
             "title": "Interests",
             "type": "array"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
           },
           "region_code": {
             "title": "Region Code",
@@ -3513,6 +3591,94 @@
         ]
       }
     },
+    "/api/v1/auth/kakao/complete": {
+      "post": {
+        "operationId": "kakao_complete_api_v1_auth_kakao_complete_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "wipi_kakao_state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Wipi Kakao State"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KakaoCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "discriminator": {
+                    "mapping": {
+                      "logged_in": "#/components/schemas/LoggedInResult",
+                      "signup_required": "#/components/schemas/SignupRequiredResult"
+                    },
+                    "propertyName": "status"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LoggedInResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SignupRequiredResult"
+                    }
+                  ],
+                  "title": "Response Kakao Complete Api V1 Auth Kakao Complete Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kakao Complete",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/kakao/start": {
+      "get": {
+        "operationId": "kakao_start_api_v1_auth_kakao_start_get",
+        "responses": {
+          "302": {
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Kakao Start",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "operationId": "logout_api_v1_auth_logout_post",
@@ -3550,6 +3716,27 @@
           }
         },
         "summary": "Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/method": {
+      "get": {
+        "operationId": "auth_method_api_v1_auth_method_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMethod"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Auth Method",
         "tags": [
           "auth"
         ]

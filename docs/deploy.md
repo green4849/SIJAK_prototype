@@ -28,14 +28,14 @@ CI의 `deploy-smoke` 작업이 push마다 이 구성을 그대로 띄워 HTTPS·
    vi infra/.env.prod                              # DOMAIN 등 수정
    ```
    - `.env.prod`는 커밋 금지(.gitignore). **비밀값은 서버 밖에도 안전하게 따로 보관** — 특히 `DATA_ENCRYPTION_KEY`를 잃으면 저장된 전화번호를 복호화할 수 없다 (B12).
-   - 실제 본인인증(B4) 계약 전 시범 운영이면 `ALLOW_MOCK_IDENTITY_IN_PROD=true` — 이 경우 누구나 화면에 뜬 번호로 가입할 수 있다는 점을 알고 켤 것.
+   - 카카오로 전환할 때 `AUTH_MODE=kakao`와 카카오 REST API 키, 클라이언트 시크릿, 등록된 Redirect URI를 설정한다. 예: `https://<도메인>/login/kakao/callback`. 설정 전에는 기존 `AUTH_MODE=phone`이 유지된다. 카카오 로그인은 본인확인이 아니며 가입 생년월일은 직접 입력값이다.
 5. **띄우기**
    ```sh
    docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build
    ```
 6. **확인** — `https://<도메인>/api/v1/health` → `{"status":"ok"}`, `https://<도메인>/` 시작 화면.
 
-설정이 안전하지 않으면(기본 비밀값, https 아닌 주소, 허락 없는 Mock 인증) API가 **이유를 모두 출력하고 뜨지 않는다** (B1):
+설정이 안전하지 않으면(기본 비밀값, https 아닌 주소, 운영 Mock 전화 로그인의 명시적 허용 누락 또는 카카오 설정 누락) API가 **이유를 모두 출력하고 뜨지 않는다** (B1):
 `docker compose -f infra/docker-compose.prod.yml logs api`
 
 ## 업데이트

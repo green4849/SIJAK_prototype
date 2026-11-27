@@ -116,7 +116,7 @@ test('받은 신청 거절과 로그아웃은 한 번 묻는다 — 그만두면
   await page.goto('/me')
   await page.getByRole('button', { name: '로그아웃' }).click()
   const logout = page.getByRole('dialog', { name: '로그아웃할까요?' })
-  await expect(logout).toContainText('휴대폰 인증')
+  await expect(logout).toContainText('시연용 로그인')
   await logout.getByRole('button', { name: '닫기' }).click()
   // 그만두면 그대로 마이페이지
   await expect(logout).toHaveCount(0)

@@ -41,15 +41,16 @@ export const TARGETS = {
   'nav-me': target('아래 ‘마이페이지’ 메뉴', (f) => f.link('/me', NAV)),
   back: target('왼쪽 위 ‘뒤로’', (f) => f.text('button', '뒤로')),
 
-  // 시작·본인 확인
+  // 시작·로그인
   'welcome-start': target('‘시작하기’ 버튼', (f) => f.link('/login')),
   'welcome-font': target('맨 위 ‘가가’ 버튼', (f) => f.css('button[aria-label="글씨 크게"]')),
-  'login-phone': target('‘휴대폰 인증’', (f) => f.link('/login/phone')),
-  'login-help': target('‘함께 인증하기’', (f) => f.link('/login/help')),
+  'login-phone': target('‘시연용 로그인’', (f) => f.link('/login/phone')),
+  'login-kakao': target('‘카카오 로그인’', (f) => f.css('button[aria-label="카카오 로그인"]')),
+  'login-help': target('‘함께 로그인하기’', (f) => f.link('/login/help')),
   'phone-submit': target('‘인증번호 받기’ 버튼', (f) => f.text('button', '인증번호 받기')),
   'code-input': target('‘인증번호’ 칸', (f) => f.css('input[autocomplete="one-time-code"]')),
   'code-resend': target('‘인증번호 다시 받기’ 버튼', (f) => f.text('button', '인증번호 다시 받기')),
-  'assist-start': target('‘함께 인증 시작하기’ 버튼', (f) => f.link('/login/phone')),
+  'assist-start': target('‘함께 로그인 시작하기’ 버튼', (f) => f.link('/login/phone')),
 
   // 홈
   'home-friends': target('‘친구 찾기’ 카드', (f) => f.link('/friends', HOME_CARDS)),
