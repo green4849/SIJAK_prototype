@@ -17,7 +17,9 @@
 ## 완료 기준
 - [x] 화면·데모, e2e (`e2e/wellbeing.spec.ts`), 접근성 스윕
 - [x] 백엔드 `domains/emergency`: 보호자 목록·추가·빼기(3명, 번호 암호화), 긴급 도움 기록 — 통합 테스트 `tests/integration/test_emergency_flow.py`
-- [ ] 문자·푸시 발송(C4), 복지사 연계, 위치(동의 시) 첨부
+- [x] 보호자 문자 발송 — `integrations/sms`(off·log·solapi), `sos_deliveries`, 바로 보내고 실패하면 한 번 더 + 예약 작업 재시도(1시간 안, 3번까지), 연달아 누르기 제한(10분 3번). 통합 테스트 `tests/integration/test_sos_sms_flow.py`
+- [ ] 실제 솔라피 키로 발송 확인 (`python -m scripts.sms_test <번호>`) — 작업 환경에서 솔라피에 접속하지 못해 아직
+- [ ] 푸시(C4), 복지사 연계, 위치(동의 시) 첨부, 문자 전달 결과(수신 확인) 조회
 
 ## 진행 기록
 - 보고서의 1393은 2024년부터 109로 통합 → 109 사용. 응급은 119

@@ -81,6 +81,14 @@ class Settings(BaseSettings):
     # 이전 암호화 키는 복호화에만 사용. 실제 값은 환경 변수에만 둔다.
     data_encryption_previous_keys: list[str] = []
 
+    # 긴급 도움 → 보호자 문자 (C10). "off"(기본): 기록만
+    # · "log": 로컬 개발 — 보내지 않고 로그만 (운영 금지)
+    # · "solapi": 실제 발송 — 솔라피 API 키·시크릿과 솔라피에 등록한 발신번호가 필요하다
+    sms_provider: Literal["off", "log", "solapi"] = "off"
+    sms_sender_number: str = ""
+    solapi_api_key: str = ""
+    solapi_api_secret: str = ""
+
     voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
     # 음성 메시지 파일 보관 기간 (B3, 보고서 4.6.3) — 지나면 예약 작업이 파일을 지운다
     voice_retention_days: int = 90
@@ -155,6 +163,22 @@ class Settings(BaseSettings):
                 "IDENTITY_PROVIDER=mock: 누구나 가입할 수 있음 "
                 "(시범 운영이면 ALLOW_MOCK_IDENTITY_IN_PROD=true)"
             )
+        if self.sms_provider == "log":
+            problems.append(
+                "SMS_PROVIDER=log: 문자를 보내지 않고 보낸 것처럼 기록됨 (off 또는 solapi)"
+            )
+        if self.sms_provider == "solapi":
+            missing = [
+                name
+                for name, value in (
+                    ("SOLAPI_API_KEY", self.solapi_api_key),
+                    ("SOLAPI_API_SECRET", self.solapi_api_secret),
+                    ("SMS_SENDER_NUMBER", self.sms_sender_number),
+                )
+                if not value
+            ]
+            if missing:
+                problems.append(f"SMS_PROVIDER=solapi: {', '.join(missing)} 가 비어 있음")
         if self.rate_limit_enabled and self.web_concurrency > 1:
             problems.append(
                 "WEB_CONCURRENCY>1: 요청 횟수 제한을 워커마다 따로 셈 "

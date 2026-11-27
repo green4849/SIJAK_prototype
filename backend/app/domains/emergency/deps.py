@@ -7,10 +7,14 @@ from fastapi import Depends
 from app.core.deps import DbSession
 from app.domains.emergency.repository import EmergencyRepository
 from app.domains.emergency.service import EmergencyService
+from app.integrations.sms import get_sms_sender
+from app.integrations.sms.base import SmsSender
 
 
-def get_emergency_service(session: DbSession) -> EmergencyService:
-    return EmergencyService(EmergencyRepository(session))
+def get_emergency_service(
+    session: DbSession, sms: Annotated[SmsSender | None, Depends(get_sms_sender)]
+) -> EmergencyService:
+    return EmergencyService(EmergencyRepository(session), sms)
 
 
 EmergencyServiceDep = Annotated[EmergencyService, Depends(get_emergency_service)]

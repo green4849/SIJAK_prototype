@@ -16,7 +16,7 @@ from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.observability import init_observability, report_exception
 from app.core.storage import get_media_storage
-from app.jobs import run_daily
+from app.jobs import retry_sos_sms, run_daily
 
 KST = timezone(timedelta(hours=9))
 log = logging.getLogger("jobs")
@@ -41,7 +41,38 @@ async def daily() -> int:
     return 0
 
 
+#: 못 보낸 긴급 도움 문자를 다시 보내는 간격 (loop 모드)
+SOS_RETRY_EVERY_SEC = 120
+
+
+async def sos_retry() -> int:
+    try:
+        print(await retry_sos_sms(SessionLocal))
+    except Exception as exc:
+        report_exception(exc, "sos_retry")
+        return 1
+    return 0
+
+
+async def _sos_retry_loop() -> None:
+    while True:
+        await asyncio.sleep(SOS_RETRY_EVERY_SEC)
+        try:
+            await retry_sos_sms(SessionLocal)
+        except Exception as exc:  # noqa: BLE001 — 다음 차례에 다시
+            report_exception(exc, "sos_retry")
+
+
 async def loop() -> int:
+    # 매일 정리 작업과 함께, 몇 분마다 못 보낸 긴급 도움 문자를 다시 보낸다
+    retry = asyncio.create_task(_sos_retry_loop())
+    try:
+        return await _daily_loop()
+    finally:
+        retry.cancel()
+
+
+async def _daily_loop() -> int:
     hour = get_settings().jobs_daily_hour_kst
     while True:
         wait = seconds_until_next_run(datetime.now(KST), hour)
@@ -61,8 +92,10 @@ def main() -> int:
             return asyncio.run(daily())
         case ["loop"]:
             return asyncio.run(loop())
+        case ["sos-retry"]:
+            return asyncio.run(sos_retry())
         case _:
-            print("사용법: python -m scripts.jobs <daily|loop>", file=sys.stderr)
+            print("사용법: python -m scripts.jobs <daily|loop|sos-retry>", file=sys.stderr)
             return 2
 
 

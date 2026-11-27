@@ -56,15 +56,20 @@ class GuardianOut(BaseModel):
 class SosNotified(BaseModel):
     name: str
     relation: str
+    status: Literal["sent", "failed", "not_sent"] = Field(
+        description="이 보호자에게 보낸 문자: sent 보냄 · failed 못 보냄(예약 작업이 다시 시도) · "
+        "not_sent 문자 발송이 꺼져 있어 기록만"
+    )
 
 
 class SosOut(BaseModel):
     id: uuid.UUID
     created_at: datetime
-    notified: list[SosNotified] = Field(
-        description="요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음"
+    notified: list[SosNotified] = Field(description="요청 시 등록된 보호자와 문자 결과")
+    delivery_status: Literal["not_sent", "sent", "partial", "failed"] = Field(
+        description="문자 결과 전체: sent 모두 · partial 일부 · failed 모두 못 보냄 · "
+        "not_sent 발송 꺼짐 또는 보호자 없음"
     )
-    delivery_status: Literal["not_sent"] = Field(description="외부 알림 발송 상태")
 
     @classmethod
     def of(cls, r: SosResult) -> "SosOut":
@@ -74,3 +79,7 @@ class SosOut(BaseModel):
             notified=[SosNotified(**n) for n in r.notified],
             delivery_status=r.delivery_status,
         )
+
+
+class EmergencyInfoOut(BaseModel):
+    sms_enabled: bool = Field(description="긴급 도움을 누르면 보호자에게 문자를 보내는지")
