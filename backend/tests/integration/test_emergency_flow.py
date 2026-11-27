@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.domains.emergency.models import Guardian, SosEvent
+from app.domains.emergency.models import Guardian, SosDelivery, SosEvent
 from tests.integration.helpers import signup_user
 
 API = "/api/v1"
@@ -119,15 +119,21 @@ async def test_sos_records_who_to_notify(
     r = await client.post(f"{API}/emergency/sos", headers=h)
     assert r.status_code == 201
     out = r.json()
+    # 문자 발송이 꺼져 있으면(기본) 기록만 — 보호자별로도 '보내지 않음'
     assert out["notified"] == [
-        {"name": "김민수", "relation": "아들"},
-        {"name": "박선희", "relation": "담당 복지사"},
+        {"name": "김민수", "relation": "아들", "status": "not_sent"},
+        {"name": "박선희", "relation": "담당 복지사", "status": "not_sent"},
     ]
     assert out["delivery_status"] == "not_sent"
     assert out["id"] and out["created_at"]
+    assert (await client.get(f"{API}/emergency", headers=h)).json() == {"sms_enabled": False}
 
     async with db_sessionmaker() as s:
         events = list(await s.scalars(select(SosEvent).order_by(SosEvent.created_at)))
+        assert (await s.scalars(select(SosDelivery))).all() == []
     assert len(events) == 2
     assert all(str(e.user_id) == me["id"] for e in events)
-    assert events[1].notified == out["notified"]
+    assert events[1].notified == [
+        {"name": "김민수", "relation": "아들"},
+        {"name": "박선희", "relation": "담당 복지사"},
+    ]

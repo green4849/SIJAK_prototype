@@ -43,3 +43,9 @@ export function useSos() {
 
   return { result, pending, error, send, reset: () => setResult(null) }
 }
+
+/** 문자 발송이 켜져 있는지 — 모르는 동안(null)에는 '보낸다'고 말하지 않는다 */
+export function useSmsEnabled(): boolean | null {
+  const { data } = useAsync(() => emergencyApi.info(), [])
+  return data ? data.sms_enabled : null
+}

@@ -133,6 +133,12 @@ export const wellbeingRoutes: Route[] = [
     return noContent()
   }],
 
+  // 시연 서버는 문자를 보내지 않는다 — 화면도 '기록만 했어요'라고 말한다
+  ['GET', '/emergency', (req) => {
+    requireUser(req)
+    return json({ sms_enabled: false } satisfies Schema<'EmergencyInfoOut'>)
+  }],
+
   ['POST', '/emergency/sos', (req) => {
     const me = requireUser(req)
     const s = db()
@@ -143,7 +149,9 @@ export const wellbeingRoutes: Route[] = [
     const out: SosOut = {
       id: ev.id,
       created_at: ev.at,
-      notified: s.guardians.filter((g) => g.uid === me.id).map((g) => ({ name: g.name, relation: g.relation })),
+      notified: s.guardians
+        .filter((g) => g.uid === me.id)
+        .map((g) => ({ name: g.name, relation: g.relation, status: 'not_sent' as const })),
       delivery_status: 'not_sent',
     }
     return json(out, 201)

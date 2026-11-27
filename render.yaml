@@ -55,6 +55,16 @@ services:
         sync: false
       - key: MIN_SIGNUP_AGE
         value: "60"
+      # 긴급 도움 → 보호자 문자 (C10). off = 기록만(화면도 그렇게 말함). 켜는 순서: docs/deploy-render.md 「긴급 도움 문자 켜기」
+      #   → 아래 세 값을 Render 화면에 넣은 뒤 SMS_PROVIDER=solapi
+      - key: SMS_PROVIDER
+        value: "off"
+      - key: SOLAPI_API_KEY
+        sync: false
+      - key: SOLAPI_API_SECRET
+        sync: false
+      - key: SMS_SENDER_NUMBER
+        sync: false
 
   - type: web
     name: sijak-6080

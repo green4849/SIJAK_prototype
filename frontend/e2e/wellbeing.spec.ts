@@ -74,7 +74,8 @@ test('보호자 추가·빼기, 말동무 위기 안내에서 도움 요청 기�
   await page.getByLabel('말동무에게 할 말').fill('살기 싫어요')
   await page.getByRole('button', { name: '보내기' }).click()
   await page.getByRole('button', { name: '도움 요청 기록하기' }).click()
-  await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('요청을 기록했어요. 자동 알림은 보내지 않았어요.')).toBeVisible()
+  // 시연 서버는 문자를 보내지 않는다 — 보낸 척하지 않고 기록만 했다고 말한다
+  await expect(page.getByRole('note', { name: '도움받을 곳' }).getByText('도움 요청을 기록했어요')).toBeVisible()
 })
 
 test('요즘 마음 — 말동무 대화 정서를 따로 보여 주고, 상태마다 할 일 하나로 이어 준다', async ({ page }) => {

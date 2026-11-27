@@ -464,6 +464,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/emergency": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Emergency Info
+         * @description 확인 창에서 '문자로 알려요'와 '기록만 해요' 중 무엇을 말할지
+         */
+        get: operations["emergency_info_api_v1_emergency_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/emergency/sos": {
         parameters: {
             query?: never;
@@ -475,7 +495,7 @@ export interface paths {
         put?: never;
         /**
          * Sos
-         * @description 긴급 도움 요청 — 지금은 기록만 (보호자·복지사 알림 발송은 C4)
+         * @description 긴급 도움 요청 — 기록하고, 문자 발송이 켜져 있으면 보호자마다 문자 (결과는 보호자별로)
          */
         post: operations["sos_api_v1_emergency_sos_post"];
         delete?: never;
@@ -1510,6 +1530,14 @@ export interface components {
             /** Items */
             items: components["schemas"]["ConsentChoiceIn"][];
         };
+        /** EmergencyInfoOut */
+        EmergencyInfoOut: {
+            /**
+             * Sms Enabled
+             * @description 긴급 도움을 누르면 보호자에게 문자를 보내는지
+             */
+            sms_enabled: boolean;
+        };
         /**
          * FirebaseWebConfig
          * @description Firebase 웹 설정 — 비밀이 아니다 (브라우저 SDK 초기화용)
@@ -2103,6 +2131,12 @@ export interface components {
             name: string;
             /** Relation */
             relation: string;
+            /**
+             * Status
+             * @description 이 보호자에게 보낸 문자: sent 보냄 · failed 못 보냄(예약 작업이 다시 시도) · not_sent 문자 발송이 꺼져 있어 기록만
+             * @enum {string}
+             */
+            status: "sent" | "failed" | "not_sent";
         };
         /** SosOut */
         SosOut: {
@@ -2113,10 +2147,10 @@ export interface components {
             created_at: string;
             /**
              * Delivery Status
-             * @description 외부 알림 발송 상태
-             * @constant
+             * @description 문자 결과 전체: sent 모두 · partial 일부 · failed 모두 못 보냄 · not_sent 발송 꺼짐 또는 보호자 없음
+             * @enum {string}
              */
-            delivery_status: "not_sent";
+            delivery_status: "not_sent" | "sent" | "partial" | "failed";
             /**
              * Id
              * Format: uuid
@@ -2124,7 +2158,7 @@ export interface components {
             id: string;
             /**
              * Notified
-             * @description 요청 시 등록된 보호자 목록. 알림 발송 완료를 뜻하지 않음
+             * @description 요청 시 등록된 보호자와 문자 결과
              */
             notified: components["schemas"]["SosNotified"][];
         };
@@ -3260,6 +3294,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    emergency_info_api_v1_emergency_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmergencyInfoOut"];
                 };
             };
         };
