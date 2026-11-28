@@ -1191,6 +1191,18 @@
       "LocationUpdate": {
         "description": "브라우저 GPS 좌표 — 서버에서 ≈1km 단위로 뭉개서 저장",
         "properties": {
+          "area_name": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Name"
+          },
           "lat": {
             "maximum": 39.0,
             "minimum": 33.0,
@@ -1202,6 +1214,17 @@
             "minimum": 124.0,
             "title": "Lng",
             "type": "number"
+          },
+          "region_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Code"
           }
         },
         "required": [
@@ -2305,6 +2328,18 @@
       },
       "SignupRequest": {
         "properties": {
+          "area_name": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Name"
+          },
           "birth_date": {
             "anyOf": [
               {

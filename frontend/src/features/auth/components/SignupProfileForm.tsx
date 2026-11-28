@@ -47,16 +47,16 @@ export function SignupProfileForm({ signupToken, name, provider, backTo, onDone 
       window.scrollTo({ top: 0 })
       return
     }
-    if (!located) return setError('위치 정보 수집에 동의해 주세요.')
+    if (!located) return setError('활동할 동네를 정해 주세요.')
     setPending(true)
     setError(null)
     try {
       const choices = (options?.consents ?? []).map((d) => ({ kind: d.kind, version: d.version, agreed: !!consents[d.kind] }))
-      const r = await authApi.signup(signupToken, located.regionCode, [], choices, provider === 'kakao' ? { ...profile, name: profile.name.trim(), gender: profile.gender as 'F' | 'M' } : undefined)
+      const r = await authApi.signup(signupToken, located.regionCode, [], choices, provider === 'kakao' ? { ...profile, name: profile.name.trim(), gender: profile.gender as 'F' | 'M' } : undefined, located.areaName)
       if (r.status !== 'logged_in') return
       let user = r.user
       setAccessToken(r.access_token)
-      user = await authApi.updateLocation(located.pos.lat, located.pos.lng).catch(() => user)
+      if (located.pos) user = await authApi.updateLocation(located.pos.lat, located.pos.lng, located.regionCode, located.areaName).catch(() => user)
       onDone(r.access_token, user)
     } catch (err) {
       setError(errorMessage(err))

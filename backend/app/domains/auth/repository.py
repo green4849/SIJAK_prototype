@@ -7,7 +7,7 @@ import math
 import uuid
 from datetime import UTC, date, datetime
 
-from sqlalchemy import and_, delete, func, or_, select, update
+from sqlalchemy import and_, case, delete, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,6 +49,8 @@ class AuthRepository:
             q = q.where(User.id.not_in(exclude_ids))
         if me.geo_lat is None or me.geo_lng is None:
             q = q.where(User.region_code == me.region_code)
+            if me.area_name:
+                q = q.order_by(case((User.area_name == me.area_name, 0), else_=1))
         else:
             min_lat, max_lat, min_lng, max_lng = bounding_box(me.geo_lat, me.geo_lng, radius_km)
             with_location = and_(

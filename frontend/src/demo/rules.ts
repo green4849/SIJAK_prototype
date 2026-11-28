@@ -64,12 +64,15 @@ export const coarseKm = (km: number) => Math.max(0.5, Math.round(km / 0.5) * 0.5
 /**
  * 내 위치가 없으면 같은 시·도(거리 없음). 있으면 반경 안을 가까운 순 + 위치를 안 알린 같은 시·도를 뒤에
  */
-export function findNearby<U extends { geo: [number, number] | null; region_code: string }>(
+export function findNearby<U extends { geo: [number, number] | null; region_code: string; area?: string }>(
   me: U,
   pool: U[],
 ): [U, number | null][] {
   const sameRegion = pool.filter((u) => u.region_code === me.region_code)
-  if (!me.geo) return sameRegion.map((u) => [u, null])
+  if (!me.geo) {
+    if (me.area) sameRegion.sort((a, b) => Number(b.area === me.area) - Number(a.area === me.area))
+    return sameRegion.map((u) => [u, null])
+  }
   const myGeo = me.geo
   const within = pool
     .filter((u) => u.geo)
@@ -77,7 +80,9 @@ export function findNearby<U extends { geo: [number, number] | null; region_code
     .filter(([, km]) => km <= NEARBY_RADIUS_KM)
     .sort((a, b) => a[1] - b[1])
     .map(([u, km]) => [u, coarseKm(km)] as [U, number])
-  return [...within, ...sameRegion.filter((u) => !u.geo).map((u) => [u, null] as [U, null])]
+  const unknown = sameRegion.filter((u) => !u.geo)
+  if (me.area) unknown.sort((a, b) => Number(b.area === me.area) - Number(a.area === me.area))
+  return [...within, ...unknown.map((u) => [u, null] as [U, null])]
 }
 
 /** 추천 친구 탭 후보 (성향조사 알고리즘 1단계) — 둘 다 위치가 있으면 5km 안, 아니면 같은 시·도 */

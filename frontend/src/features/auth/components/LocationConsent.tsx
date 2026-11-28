@@ -7,6 +7,8 @@ import { Button } from '@/shared/ui/Button'
 import { toast } from '@/shared/lib/toast'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../hooks/useAuth'
+import { locateRegion } from '../lib/locateRegion'
+import { foundAreaName } from '../lib/neighborhood'
 import styles from './LocationConsent.module.css'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
@@ -28,7 +30,9 @@ export function LocationConsent({ onDone }: Props) {
     setError(null)
     try {
       const pos = await getCurrentPosition()
-      updateUser(await authApi.updateLocation(pos.lat, pos.lng))
+      const { regions } = await authApi.options()
+      const found = await locateRegion(pos.lat, pos.lng, regions)
+      updateUser(await authApi.updateLocation(pos.lat, pos.lng, found.code, foundAreaName(found.area)))
       toast('내 위치를 동네 정도로만 저장했어요')
       onDone?.()
     } catch (e) {

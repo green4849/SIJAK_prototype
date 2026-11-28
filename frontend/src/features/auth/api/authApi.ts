@@ -37,10 +37,10 @@ export const authApi = {
   completeKakao: (code: string, state: string) =>
     api.post<AuthResult>('/auth/kakao/complete', { code, state } satisfies Schema<'KakaoCompleteRequest'>, noRetry),
 
-  signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[], profile?: KakaoSignupProfile) =>
+  signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[], profile?: KakaoSignupProfile, area_name?: string | null) =>
     api.post<LoggedInResult>(
       '/auth/signup',
-      { signup_token, region_code, interests, consents, ...profile } satisfies Schema<'SignupRequest'>,
+      { signup_token, region_code, area_name, interests, consents, ...profile } satisfies Schema<'SignupRequest'>,
       noRetry,
     ),
 
@@ -53,8 +53,8 @@ export const authApi = {
   updateMe: (patch: ProfileUpdate) => api.patch<User>('/me', patch),
 
   /** GPS 좌표 → 서버가 ≈1km 단위로 뭉개서 저장 */
-  updateLocation: (lat: number, lng: number) =>
-    api.put<User>('/me/location', { lat, lng } satisfies Schema<'LocationUpdate'>),
+  updateLocation: (lat: number, lng: number, region_code?: string, area_name?: string | null) =>
+    api.put<User>('/me/location', { lat, lng, region_code, area_name } satisfies Schema<'LocationUpdate'>),
 
   /** 약관·개인정보 동의 상태 (B6) */
   consents: () => api.get<ConsentStatus[]>('/me/consents'),

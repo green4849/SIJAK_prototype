@@ -1,76 +1,102 @@
-import { Check, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { getCurrentPosition, GeoError } from '@/shared/lib/geolocation'
 import { Alert } from '@/shared/ui/Alert'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
+import { foundAreaName, neighborhoodName } from '../lib/neighborhood'
 import { locateRegion } from '../lib/locateRegion'
 import styles from './LocationAgreement.module.css'
 
 export interface AgreedLocation {
   regionCode: string
-  pos: { lat: number; lng: number }
+  areaName: string | null
+  pos?: { lat: number; lng: number }
 }
 
 interface Props {
   regions: { code: string; label: string }[]
-  /** 동의하고 위치를 찾으면 값, 동의를 끄면 null */
   onChange: (located: AgreedLocation | null) => void
 }
 
-/**
- * 위치 정보 수집 동의 — 동의하면 그 자리에서 위치를 읽어 사는 곳을 정한다.
- * 시·도를 직접 고르는 단계는 없다 (사는 곳은 위치로만 정해진다).
- */
+/** 가입 지역은 휴대폰 위치 또는 직접 고른 읍·면·동으로 정한다. */
 export function LocationAgreement({ regions, onChange }: Props) {
-  const [agreed, setAgreed] = useState(false)
+  const [mode, setMode] = useState<'gps' | 'manual' | null>(null)
   const [locating, setLocating] = useState(false)
   const [place, setPlace] = useState<string | null>(null)
+  const [regionCode, setRegionCode] = useState('')
+  const [areaInput, setAreaInput] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  async function toggle(next: boolean) {
+  async function findWithPhone() {
+    setMode('gps')
     setError(null)
-    if (!next) {
-      setAgreed(false)
-      setPlace(null)
-      onChange(null)
-      return
-    }
-    setAgreed(true)
+    setPlace(null)
+    onChange(null)
     setLocating(true)
     try {
       const pos = await getCurrentPosition()
       const found = await locateRegion(pos.lat, pos.lng, regions)
+      const areaName = foundAreaName(found.area)
       const label = regions.find((r) => r.code === found.code)?.label ?? ''
-      setPlace([label, found.area].filter(Boolean).join(' '))
-      onChange({ regionCode: found.code, pos })
+      setPlace([label, areaName].filter(Boolean).join(' '))
+      onChange({ regionCode: found.code, areaName, pos })
     } catch (e) {
-      // 위치를 못 읽으면 동의도 되돌린다 — 화면과 실제 상태가 어긋나지 않게
-      setAgreed(false)
-      onChange(null)
-      setError(e instanceof GeoError ? e.message : '지금은 위치를 찾을 수 없어요. 잠시 후 다시 해 주세요.')
+      setMode('manual')
+      setError(`${e instanceof GeoError ? e.message : '지금은 위치를 찾을 수 없어요.'} 아래에서 동네를 직접 적어 주세요.`)
     } finally {
       setLocating(false)
     }
   }
 
+  function chooseManual() {
+    setMode('manual')
+    setPlace(null)
+    setError(null)
+    onChange(null)
+  }
+
+  function updateManual(code: string, input: string) {
+    setRegionCode(code)
+    setAreaInput(input)
+    const name = neighborhoodName(input, code)
+    onChange(code && name ? { regionCode: code, areaName: name } : null)
+    setError(null)
+  }
+
   return (
     <div className={styles.wrap}>
-      <label className={styles.agree} data-on={agreed || undefined}>
-        <input
-          type="checkbox"
-          className={styles.input}
-          checked={agreed}
-          disabled={locating}
-          onChange={(e) => toggle(e.target.checked)}
-        />
-        <span className={styles.box} aria-hidden="true">
-          {agreed && <Check size={ICON.sm} strokeWidth={3} />}
-        </span>
-        <span className={styles.text}>
-          <strong>위치 정보 수집 동의</strong>
-          <span className={styles.sub}>동네(약 1km)까지만 저장해요</span>
-        </span>
-      </label>
+      <p className={styles.lead}>정확한 주소는 받지 않아요. 동네까지만 알려 주세요.</p>
+      <div className={styles.methods} role="group" aria-label="동네 정하는 방법">
+        <button type="button" className={styles.method} data-on={mode === 'gps' || undefined} onClick={findWithPhone} disabled={locating}>
+          휴대폰 위치로 찾기
+        </button>
+        <button type="button" className={styles.method} data-on={mode === 'manual' || undefined} onClick={chooseManual} disabled={locating}>
+          동네 직접 입력
+        </button>
+      </div>
+
+      {mode === 'manual' && (
+        <div className={styles.manual}>
+          <label htmlFor="manual-region">시·도</label>
+          <select id="manual-region" value={regionCode} onChange={(e) => updateManual(e.target.value, areaInput)}>
+            <option value="">시·도를 골라 주세요</option>
+            {regions.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}
+          </select>
+          <label htmlFor="manual-area">시·군·구와 읍·면·동</label>
+          <input
+            id="manual-area"
+            value={areaInput}
+            onChange={(e) => updateManual(regionCode, e.target.value)}
+            placeholder={regionCode === '36' ? '예: 한솔동' : '예: 수원시 영통구 매탄동'}
+            maxLength={50}
+            autoComplete="off"
+          />
+          <p className={styles.hint}>도로명·번지·아파트 이름은 적지 마세요. 직접 입력하면 정확한 거리는 표시하지 않아요.</p>
+          {areaInput && !neighborhoodName(areaInput, regionCode) && (
+            <p className={styles.hint} role="status">읍·면·동 이름까지 적어 주세요.</p>
+          )}
+        </div>
+      )}
 
       <p className={styles.place} aria-live="polite">
         {locating && '동네를 찾는 중…'}
@@ -81,7 +107,6 @@ export function LocationAgreement({ regions, onChange }: Props) {
           </>
         )}
       </p>
-
       {error && <Alert>{error}</Alert>}
     </div>
   )

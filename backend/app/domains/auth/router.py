@@ -202,6 +202,7 @@ async def signup(
         name=body.name,
         birth_date=body.birth_date,
         gender=body.gender,
+        area_name=body.area_name,
     )
     return _logged_in(response, result)
 
@@ -250,7 +251,11 @@ async def update_me(body: ProfileUpdate, user: CurrentUser, service: AuthService
 async def update_location(
     body: LocationUpdate, user: CurrentUser, service: AuthServiceDep
 ) -> UserOut:
-    return UserOut.from_user(await service.set_location(user, body.lat, body.lng))
+    return UserOut.from_user(
+        await service.set_location(
+            user, body.lat, body.lng, region_code=body.region_code, area_name=body.area_name
+        )
+    )
 
 
 @router.get("/me/consents", response_model=list[ConsentStatusOut])

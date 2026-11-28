@@ -4,6 +4,7 @@ import { getCurrentPosition, GeoError } from '@/shared/lib/geolocation'
 import { toast } from '@/shared/lib/toast'
 import { authApi } from '../api/authApi'
 import { locateRegion } from '../lib/locateRegion'
+import { foundAreaName } from '../lib/neighborhood'
 import { useAuth } from './useAuth'
 
 /**
@@ -21,8 +22,7 @@ export function useLocationRecheck() {
       const pos = await getCurrentPosition()
       const { regions } = await authApi.options()
       const found = await locateRegion(pos.lat, pos.lng, regions)
-      let next = await authApi.updateLocation(pos.lat, pos.lng)
-      if (found.code !== user.region_code) next = await authApi.updateMe({ region_code: found.code })
+      const next = await authApi.updateLocation(pos.lat, pos.lng, found.code, foundAreaName(found.area))
       updateUser(next)
       const label = regions.find((r) => r.code === found.code)?.label ?? next.region_name
       // 시·도 이름은 모두 '시'·'도'로 끝나 받침이 없다 → '예요'·'로'

@@ -47,7 +47,9 @@ class FriendCard(BaseModel):
             age=age_on(u.birth_date, datetime.now(UTC).date()),
             gender=u.gender,  # type: ignore[arg-type]
             intro=u.intro,
-            region_name=REGIONS.get(u.region_code, u.region_code),
+            region_name=" ".join(
+                filter(None, [REGIONS.get(u.region_code, u.region_code), u.area_name])
+            ),
             interests=[INTERESTS.get(i.category, i.category) for i in u.interests],
             common_interests=[INTERESTS.get(x, x) for x in c.common_interests],
             distance_km=c.distance_km,

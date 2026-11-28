@@ -7,8 +7,10 @@ import pytest
 from app.domains.friend.nearby import _coarse, find_nearby, haversine_km
 
 
-def user(name: str, lat: float | None, lng: float | None, region: str = "41") -> SimpleNamespace:
-    return SimpleNamespace(name=name, geo_lat=lat, geo_lng=lng, region_code=region)
+def user(
+    name: str, lat: float | None, lng: float | None, region: str = "41", area: str | None = None
+) -> SimpleNamespace:
+    return SimpleNamespace(name=name, geo_lat=lat, geo_lng=lng, region_code=region, area_name=area)
 
 
 def test_haversine_known_distance() -> None:
@@ -44,3 +46,14 @@ def test_without_my_location_falls_back_to_same_region() -> None:
     pool = [user("같은도", 37.27, 127.01), user("다른도", 37.5, 127.0, region="11")]
     got = find_nearby(me, pool)  # type: ignore[arg-type]
     assert [(n.user.name, n.distance_km) for n in got] == [("같은도", None)]
+
+
+def test_without_my_location_prefers_same_neighborhood() -> None:
+    me = user("나", None, None, area="수원시 영통구 매탄동")
+    other = user("다른동", None, None, area="수원시 영통구 영통동")
+    same = user("같은동", None, None, area="수원시 영통구 매탄동")
+    got = find_nearby(me, [other, same])  # type: ignore[arg-type]
+    assert [(n.user.name, n.distance_km) for n in got] == [
+        ("같은동", None),
+        ("다른동", None),
+    ]

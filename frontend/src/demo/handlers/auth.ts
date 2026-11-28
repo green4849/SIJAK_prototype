@@ -159,6 +159,8 @@ export const authRoutes: Route[] = [
     const at = new Date().toISOString()
     const u: DUser = {
       id: newId(), ...ident, region_code: String(b.region_code), interests: [...new Set(interests)],
+      area: typeof b.area_name === 'string' && b.area_name.trim()
+        ? `${REGIONS[String(b.region_code)]} ${b.area_name.trim()}` : undefined,
       intro: '', geo: null, last_login: Date.now(),
       consents: Object.fromEntries(
         Object.keys(CONSENT_DOCS).map((k) => [k, { version: CONSENT_VERSIONS[k], agreed: !!given.get(k as ConsentIn['kind']), at }]),
@@ -214,6 +216,7 @@ export const authRoutes: Route[] = [
     if (b.region_code !== undefined && b.region_code !== u.region_code) {
       u.region_code = b.region_code
       u.area = undefined // 이사 — 예전 동네 이름은 지운다
+      u.geo = null
     }
     if (b.interests !== undefined) u.interests = [...new Set(b.interests)]
     if (b.show_online_status !== undefined) {
@@ -226,6 +229,13 @@ export const authRoutes: Route[] = [
 
   ['PUT', '/me/location', (req) => {
     const u = requireUser(req)
+    const b = req.body as Body
+    if (typeof b.region_code === 'string') {
+      validateProfile(b.region_code)
+      u.region_code = b.region_code
+    }
+    u.area = typeof b.area_name === 'string' && b.area_name.trim()
+      ? `${REGIONS[u.region_code]} ${b.area_name.trim()}` : undefined
     // 데모: 실제 GPS 대신 시연 동네 한가운데로 둔다 — 보는 사람이 어디 있든 '같은 동네' 이웃이 보이게.
     // (실서버는 받은 좌표를 소수점 2자리로 뭉개 저장 — backend auth.service)
     u.geo = DEMO_HOME

@@ -98,8 +98,14 @@ class FriendService:
             )
             found = find_nearby(me, [u for u in pool if self._matches_search(u, q)])
             pairs = [(n.user, n.distance_km) for n in found]
-            # 거리가 있으면 가까운 순, 없으면 최근 접속 순(조회 순서 유지)
-            pairs.sort(key=lambda p: (p[1] is None, p[1] or 0))
+            # 거리가 없으면 직접 고른 동네가 같은 분을 먼저, 그다음 조회 순서.
+            pairs.sort(
+                key=lambda p: (
+                    p[1] is None,
+                    p[1] or 0,
+                    not bool(me.area_name and p[0].area_name == me.area_name),
+                )
+            )
         else:
             return await self._recommend_by_match(me, exclude, relations, ratings, q)
 
@@ -146,6 +152,7 @@ class FriendService:
             key=lambda s: (
                 _RATING_ORDER[ratings.get(s[2].id)],
                 -s[0].score,
+                not bool(me.area_name and s[2].area_name == me.area_name),
                 -s[1],
                 s[3] if s[3] is not None else float("inf"),
             )

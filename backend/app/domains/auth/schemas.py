@@ -104,6 +104,7 @@ class ConsentChoiceIn(BaseModel):
 class SignupRequest(BaseModel):
     signup_token: str
     region_code: str
+    area_name: str | None = Field(default=None, max_length=50)
     interests: list[str] = Field(default_factory=list, max_length=12)
     # 카카오 로그인 신규 회원의 직접 입력 정보. 본인확인 정보가 아니다.
     name: str | None = Field(default=None, max_length=50)
@@ -167,7 +168,9 @@ class UserOut(BaseModel):
             age=age_on(user.birth_date, datetime.now(UTC).date()),
             gender=user.gender,  # type: ignore[arg-type]
             region_code=user.region_code,
-            region_name=REGIONS.get(user.region_code, user.region_code),
+            region_name=" ".join(
+                filter(None, [REGIONS.get(user.region_code, user.region_code), user.area_name])
+            ),
             interests=[i.category for i in user.interests],
             intro=user.intro,
             has_location=user.geo_lat is not None,
@@ -182,6 +185,8 @@ class LocationUpdate(BaseModel):
 
     lat: float = Field(ge=33.0, le=39.0)  # 대한민국 범위
     lng: float = Field(ge=124.0, le=132.0)
+    region_code: str | None = None
+    area_name: str | None = Field(default=None, max_length=50)
 
 
 class ProfileUpdate(BaseModel):

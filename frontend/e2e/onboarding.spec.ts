@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { agreeTerms, verifyPhone } from './helpers'
 
-// 이 파일의 가입 흐름은 위치 동의를 쓴다 — 위치·역지오코딩(OpenStreetMap)은 고정값으로
+// 휴대폰 위치 경로는 위치·역지오코딩(OpenStreetMap)을 고정값으로 검사한다.
 test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
 /** 가입 1/2(약관) 동의 → 2/2(사는 동네) */
 async function toLocationStep(page: Page) {
@@ -61,8 +61,8 @@ test('시연용 로그인 → 동네 → 성향조사 → 추천 → 선택형 �
   await page.getByRole('button', { name: '뒤로' }).click()
   await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toBeChecked()
   await page.getByRole('button', { name: '동의하고 다음' }).click()
-  // 위치 정보 수집 동의 → 그 자리에서 동네를 찾아 보여 준다
-  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  // 휴대폰 위치 → 그 자리에서 동네를 찾아 보여 준다
+  await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
   await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '가입 완료' }).click()
 
@@ -87,23 +87,41 @@ test('역지오코딩이 안 되면 가까운 시·도로 어림한다', async (
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '최어림', year: '1954', month: '4', day: '4', phone: '01044443333', gender: '남성' })
   await toLocationStep(page)
-  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
   await expect(page.getByText('경기도', { exact: true })).toBeVisible()
 })
 
 test.describe('위치 권한이 없으면', () => {
   test.use({ permissions: [] })
 
-  test('동의가 되돌아가고 가입을 마칠 수 없다', async ({ page }) => {
+  test('동네를 직접 적어 가입을 마칠 수 있다', async ({ page }) => {
     await page.goto('/login/phone')
     await verifyPhone(page, { name: '정거부', year: '1953', month: '5', day: '5', phone: '01033332222', gender: '여성' })
     await toLocationStep(page)
-    await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).click()
+    await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
     await expect(page.getByRole('alert')).toContainText('위치')
-    await expect(page.getByRole('checkbox', { name: /위치 정보 수집 동의/ })).not.toBeChecked()
+    await expect(page.getByLabel('시·도')).toBeVisible()
     await page.getByRole('button', { name: '가입 완료' }).click()
-    await expect(page.getByRole('alert').filter({ hasText: '위치 정보 수집에 동의해 주세요.' })).toBeVisible()
+    await expect(page.getByRole('alert').filter({ hasText: '활동할 동네를 정해 주세요.' })).toBeVisible()
+    await page.getByLabel('시·도').selectOption('41')
+    await page.getByLabel('시·군·구와 읍·면·동').fill('수원시 영통구 매탄동')
+    await page.getByRole('button', { name: '가입 완료' }).click()
+    await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
   })
+})
+
+test('휴대폰 위치를 쓰지 않고도 동네를 직접 고른다', async ({ page }) => {
+  await page.goto('/login/phone')
+  await verifyPhone(page, { name: '직접선택', year: '1953', month: '5', day: '5', phone: '01033332223', gender: '여성' })
+  await toLocationStep(page)
+  await page.getByRole('button', { name: '동네 직접 입력' }).click()
+  await page.getByLabel('시·도').selectOption('41')
+  await page.getByLabel('시·군·구와 읍·면·동').fill('영통로 123')
+  await page.getByRole('button', { name: '가입 완료' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: '활동할 동네를 정해 주세요.' })).toBeVisible()
+  await page.getByLabel('시·군·구와 읍·면·동').fill('수원시 영통구 매탄동')
+  await page.getByRole('button', { name: '가입 완료' }).click()
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
 })
 
 test('첫 이용에서 프로필 확인 후 세 선택지 중 고른다', async ({ page }) => {
@@ -111,7 +129,7 @@ test('첫 이용에서 프로필 확인 후 세 선택지 중 고른다', async 
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
   await toLocationStep(page)
-  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
   await page.getByRole('button', { name: '가입 완료' }).click()
   await completeSurvey(page)
   await page.getByRole('button', { name: '프로필 보기' }).first().click()
@@ -131,7 +149,7 @@ test('성향조사 관심사는 5개까지 — 넘으면 이유를 알려 준다
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
   await toLocationStep(page)
-  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
   await page.getByRole('button', { name: '가입 완료' }).click()
   await page.getByRole('button', { name: '시작하기' }).click()
   for (const i of ['산책·등산', '영화·공연', '요리·맛집 탐방', '여행', '운동·건강관리', '봉사활동'])

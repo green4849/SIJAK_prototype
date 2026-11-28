@@ -42,7 +42,7 @@ export const CONSENT_DOCS: Record<string, boolean> = { terms: true, privacy: tru
 export const CONSENT_VERSIONS: Record<string, string> = {
   terms: '2026-11-28',
   privacy: '2026-11-28',
-  location: '2026-11-26',
+  location: '2026-11-28',
   health: '2026-11-26',
 }
 export const TEXT_MAX = 500

@@ -38,6 +38,8 @@ def find_nearby(
     """
     same_region = [u for u in candidates if u.region_code == me.region_code]
     if me.geo_lat is None or me.geo_lng is None:
+        if me.area_name:
+            same_region.sort(key=lambda u: u.area_name != me.area_name)
         return [NearbyUser(u, None) for u in same_region]
 
     within: list[NearbyUser] = []

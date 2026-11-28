@@ -50,6 +50,8 @@ class User(Base):
     pass_ci: Mapped[str | None] = mapped_column(String(88), unique=True)
     kakao_id: Mapped[str | None] = mapped_column(String(64), unique=True)  # 카카오 로그인 회원번호
     region_code: Mapped[str] = mapped_column(String(10), index=True)
+    # 사용자가 직접 고르거나 대략 위치에서 찾은 시·군·구/읍·면·동 이름 (상세 주소 없음)
+    area_name: Mapped[str | None] = mapped_column(String(50))
     status: Mapped[str] = mapped_column(String(20), default="active")
     role: Mapped[str] = mapped_column(String(20), default="member", server_default="member")
     # 운영자 '7일 정지'(B7) — 이 시각이 지나면 다음 접속 때 active 로 돌아온다

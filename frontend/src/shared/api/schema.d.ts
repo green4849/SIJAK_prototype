@@ -1813,10 +1813,14 @@ export interface components {
          * @description 브라우저 GPS 좌표 — 서버에서 ≈1km 단위로 뭉개서 저장
          */
         LocationUpdate: {
+            /** Area Name */
+            area_name?: string | null;
             /** Lat */
             lat: number;
             /** Lng */
             lng: number;
+            /** Region Code */
+            region_code?: string | null;
         };
         /**
          * LoggedInResult
@@ -2279,6 +2283,8 @@ export interface components {
         };
         /** SignupRequest */
         SignupRequest: {
+            /** Area Name */
+            area_name?: string | null;
             /** Birth Date */
             birth_date?: string | null;
             /** Consents */

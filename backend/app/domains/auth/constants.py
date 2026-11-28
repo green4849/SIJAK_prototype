@@ -69,6 +69,6 @@ CONSENT_DOCS: dict[str, bool] = {  # 종류 → 필수 여부
 CONSENT_VERSIONS: dict[str, str] = {
     "terms": CONSENT_VERSION,
     "privacy": CONSENT_VERSION,
-    "location": "2026-11-26",
+    "location": "2026-11-28",
     "health": "2026-11-26",
 }

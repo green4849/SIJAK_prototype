@@ -8,6 +8,7 @@
   5) withdraw           : 회원 탈퇴 (B3) — 바로 deleted, 30일 뒤 완전 삭제 예정일 기록
 """
 
+import re
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta, timezone
@@ -155,10 +156,12 @@ class AuthService:
         name: str | None = None,
         birth_date: date | None = None,
         gender: str | None = None,
+        area_name: str | None = None,
     ) -> LoggedIn:
         claims = decode_token(signup_token, "signup")
         # 첫 이용 흐름에서는 지역을 정한 뒤 성향조사 Q1에서 관심사를 고른다.
         self._validate_region(region_code)
+        area_name = self._normalize_area_name(area_name)
         if interests:
             self._validate_interests(interests)
         records = self._signup_consents(consents)
@@ -186,6 +189,7 @@ class AuthService:
                     gender=gender,
                     kakao_id=claims["kakao_id"],
                     region_code=region_code,
+                    area_name=area_name,
                     consents=records,
                 ),
                 interests=list(dict.fromkeys(interests)),
@@ -209,6 +213,7 @@ class AuthService:
                 phone_enc=encrypt(phone),
                 pass_ci=claims["ci"],
                 region_code=region_code,
+                area_name=area_name,
                 consents=records,
             ),
             interests=list(dict.fromkeys(interests)),  # 중복 제거, 순서 유지
@@ -366,7 +371,12 @@ class AuthService:
         """None인 항목은 그대로 둔다 (부분 수정)."""
         if region_code is not None:
             self._validate_region(region_code)
-            user.region_code = region_code
+            if user.region_code != region_code:
+                user.region_code = region_code
+                user.area_name = None
+                user.geo_lat = None
+                user.geo_lng = None
+                user.geo_updated_at = None
         if interests is not None:
             self._validate_interests(interests)
             await self.repo.set_interests(user, interests)
@@ -387,8 +397,20 @@ class AuthService:
             user.last_seen_at = now
             await self.repo.commit()
 
-    async def set_location(self, user: User, lat: float, lng: float) -> User:
+    async def set_location(
+        self,
+        user: User,
+        lat: float,
+        lng: float,
+        *,
+        region_code: str | None = None,
+        area_name: str | None = None,
+    ) -> User:
         """GPS → 소수점 2자리(≈1.1km)로 뭉개서 저장. 원본 좌표는 남기지 않는다."""
+        if region_code is not None:
+            self._validate_region(region_code)
+            user.region_code = region_code
+        user.area_name = self._normalize_area_name(area_name)
         user.geo_lat = round(lat, 2)
         user.geo_lng = round(lng, 2)
         user.geo_updated_at = datetime.now(UTC)
@@ -530,6 +552,22 @@ class AuthService:
     def _validate_region(region_code: str) -> None:
         if region_code not in REGIONS:
             raise InvalidSignupInputError("사는 곳을 다시 골라 주세요.")
+
+    @staticmethod
+    def _normalize_area_name(area_name: str | None) -> str | None:
+        if area_name is None:
+            return None
+        cleaned = " ".join(area_name.split())
+        if not cleaned:
+            return None
+        # 길·번지·동호수 같은 상세 주소는 받지 않는다. 지역명만 저장한다.
+        if (
+            len(cleaned) > 50
+            or not re.fullmatch(r"[가-힣0-9 ]+", cleaned)
+            or not cleaned.endswith(("시", "군", "구", "읍", "면", "동", "리"))
+        ):
+            raise InvalidSignupInputError("시·군·구와 읍·면·동 이름만 적어 주세요.")
+        return cleaned
 
     @staticmethod
     def _validate_interests(interests: list[str]) -> None:

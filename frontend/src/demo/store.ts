@@ -9,7 +9,7 @@ import type { DSurvey } from './matching'
 
 type ActivityCategory = Schema<'ActivityOut'>['category']
 
-/** 화면에 보일 사는 곳 — 동네 이름이 있으면 '오산시 세마동', 없으면 시·도 (데모 전용: 실서버는 시·도) */
+/** 화면에 보일 사는 곳 — 동네 이름이 있으면 '오산시 세마동', 없으면 시·도 */
 export function regionLabel(u: { region_code: string; area?: string }, regions: Record<string, string>): string {
   return u.area ?? regions[u.region_code] ?? u.region_code
 }
@@ -21,7 +21,7 @@ export interface DUser {
   gender: 'M' | 'F'
   phone: string
   region_code: string
-  /** 동네 이름 (예: '오산시 세마동') — 위치 동의로 정한 동네. 없으면 시·도만 보인다 */
+  /** 동네 이름 (예: '경기도 오산시 세마동') — GPS 또는 직접 입력으로 정한 동네 */
   area?: string
   interests: string[]
   intro: string

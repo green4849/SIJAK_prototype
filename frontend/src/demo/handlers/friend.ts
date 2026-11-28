@@ -128,6 +128,7 @@ export const friendRoutes: Route[] = [
       (a, b) =>
         RATING_ORDER(ratings.get(a.u.id)) - RATING_ORDER(ratings.get(b.u.id)) ||
         b.m.score - a.m.score ||
+        Number(b.u.area === me.area && !!me.area) - Number(a.u.area === me.area && !!me.area) ||
         b.liked - a.liked ||
         (a.km ?? Infinity) - (b.km ?? Infinity),
     )

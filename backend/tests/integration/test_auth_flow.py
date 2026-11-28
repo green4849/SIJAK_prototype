@@ -67,6 +67,37 @@ async def test_signup_with_region_before_survey(client: AsyncClient) -> None:
     assert res.json()["user"]["interests"] == []
 
 
+async def test_signup_with_manual_neighborhood_without_gps(client: AsyncClient) -> None:
+    v = await _verify(client)
+    res = await client.post(
+        "/api/v1/auth/signup",
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "41",
+            "area_name": "수원시 영통구 매탄동",
+            "consents": ALL_CONSENTS,
+        },
+    )
+    assert res.status_code == 201, res.text
+    assert res.json()["user"]["region_name"] == "경기도 수원시 영통구 매탄동"
+    assert res.json()["user"]["has_location"] is False
+
+
+async def test_signup_rejects_detailed_address(client: AsyncClient) -> None:
+    v = await _verify(client)
+    res = await client.post(
+        "/api/v1/auth/signup",
+        json={
+            "signup_token": v["signup_token"],
+            "region_code": "41",
+            "area_name": "수원시 영통구 매탄동 123번지",
+            "consents": ALL_CONSENTS,
+        },
+    )
+    assert res.status_code == 422
+    assert res.json()["error"]["code"] == "invalid_profile_input"
+
+
 async def test_kakao_login_signup_and_returning_member(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:

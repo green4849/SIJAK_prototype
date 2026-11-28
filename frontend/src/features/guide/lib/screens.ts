@@ -132,7 +132,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     variant: (p) => p.has('h1', /활동할 동네/) ? 'region' : p.has('h1', /프로필/) ? 'profile' : 'consent',
     help: (v) =>
       v === 'region'
-        ? { text: '‘위치 정보 수집 동의’를 누른 다음, 아래 ‘가입 완료’를 누르세요.' }
+        ? { text: '‘휴대폰 위치로 찾기’나 ‘동네 직접 입력’을 고른 뒤 ‘가입 완료’를 누르세요.' }
         : v === 'profile'
           ? { text: '이름과 생년월일, 성별을 입력한 뒤 ‘다음’을 누르세요.' }
           : { text: '필수 약관에 동의한 뒤 ‘동의하고 다음’을 누르세요.' },

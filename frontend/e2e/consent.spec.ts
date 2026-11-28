@@ -15,7 +15,7 @@ async function signupWithoutHealth(page: Page) {
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '선택안함', year: '1956', month: '6', day: '6', phone: '01055556666', gender: '여성' })
   await agreeTerms(page, { health: false })
-  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '휴대폰 위치로 찾기' }).click()
   await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '가입 완료' }).click()
   await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
