@@ -45,9 +45,10 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(50))
     birth_date: Mapped[date] = mapped_column(Date)
     gender: Mapped[str] = mapped_column(String(1))
-    phone_hash: Mapped[str] = mapped_column(String(64), unique=True)  # HMAC-SHA256
-    phone_enc: Mapped[bytes] = mapped_column(LargeBinary)  # AES-256-GCM
-    pass_ci: Mapped[str] = mapped_column(String(88), unique=True)
+    phone_hash: Mapped[str | None] = mapped_column(String(64), unique=True)  # 휴대폰 인증 회원만
+    phone_enc: Mapped[bytes | None] = mapped_column(LargeBinary)  # 휴대폰 인증 회원만
+    pass_ci: Mapped[str | None] = mapped_column(String(88), unique=True)
+    kakao_id: Mapped[str | None] = mapped_column(String(64), unique=True)  # 카카오 로그인 회원번호
     region_code: Mapped[str] = mapped_column(String(10), index=True)
     status: Mapped[str] = mapped_column(String(20), default="active")
     role: Mapped[str] = mapped_column(String(20), default="member", server_default="member")

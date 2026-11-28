@@ -72,7 +72,7 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     suggest: ['font', 'what-is-app', 'login-how'],
   },
   phone: {
-    name: '휴대폰 인증',
+    name: '시연용 로그인',
     match: /^\/login\/phone$/,
     hint: '적기 어려우면 저를 눌러 주세요.',
     guest: true,
@@ -80,14 +80,14 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     help: (v) =>
       v === 'code'
         ? {
-            text: '문자로 온 숫자 여섯 자리를 적고 ‘확인’을 누르세요.',
+            text: '받은 인증번호 여섯 자리를 적고 ‘확인’을 누르세요.',
+            demoNote: '시연용 번호는 화면 위쪽에 있어요.',
             actions: [{ kind: 'show', label: '어디에 적어요?', target: 'code-input', say: '이 칸에 적어 주세요.' }],
-            demoNote: '시연이라 문자는 안 와요. 화면 위쪽에 적힌 숫자를 쓰세요.',
           }
         : {
             text: '빈칸을 다 채우고 ‘인증번호 받기’를 누르세요.',
+            demoNote: '시연이라 문자는 안 가요.',
             actions: [{ kind: 'show', label: '‘인증번호 받기’ 어디 있어요?', target: 'phone-submit', say: '다 적고 나서 여기 ‘인증번호 받기’를 누르세요.' }],
-            demoNote: '시연이라 문자는 안 가요. 번호는 다음 화면 위쪽에 나와요.',
           },
     suggest: ['login-code', 'login-assist', 'font'],
   },
@@ -96,8 +96,8 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     match: /^\/login\/id-card$/,
     guest: true,
     help: () => ({
-      text: '신분증 인증은 아직 안 돼요. ‘휴대폰으로 인증하기’를 눌러 주세요.',
-      actions: [{ kind: 'show', label: '어디를 눌러요?', target: 'login-phone', say: '여기 ‘휴대폰으로 인증하기’를 누르세요.' }],
+      text: '신분증 인증은 진행하지 않아요. 로그인 화면으로 돌아가 주세요.',
+      actions: [{ kind: 'go', label: '로그인 화면으로', to: '/login' }],
     }),
     suggest: ['login-how', 'login-assist', 'font'],
   },
@@ -106,19 +106,22 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     match: /^\/login\/help$/,
     guest: true,
     help: () => ({
-      text: '도와주실 분과 같이 보면서 ‘함께 인증 시작하기’를 누르세요.',
+      text: '도와주실 분과 같이 보면서 ‘함께 로그인 시작하기’를 누르세요.',
       actions: [{ kind: 'show', label: '어디를 눌러요?', target: 'assist-start', say: '도와주실 분과 같이 여기를 누르세요.' }],
     }),
     suggest: ['login-how', 'login-code', 'font'],
   },
   login: {
-    name: '본인 확인',
+    name: '로그인',
     match: /^\/login$/,
     hint: '혼자 하기 어려우면 저를 눌러 주세요.',
     guest: true,
-    help: () => ({
-      text: '‘휴대폰 인증’을 누르시면 돼요. 혼자 어려우면 ‘함께 인증하기’도 있어요.',
-      actions: [{ kind: 'show', label: '‘휴대폰 인증’ 어디 있어요?', target: 'login-phone', say: '여기 ‘휴대폰 인증’을 누르세요.' }],
+    help: (_v, ctx) => ctx.demo ? ({
+      text: '‘시연용 로그인’을 누르세요. 혼자 어려우면 ‘함께 로그인하기’를 눌러 주세요.',
+      actions: [{ kind: 'show', label: '어디를 눌러요?', target: 'login-phone', say: '여기 ‘시연용 로그인’을 누르세요.' }],
+    }) : ({
+      text: '‘카카오 로그인’을 누르세요.',
+      actions: [{ kind: 'show', label: '어디를 눌러요?', target: 'login-kakao', say: '여기 ‘카카오 로그인’을 누르세요.' }],
     }),
     suggest: ['login-how', 'login-assist', 'id-card'],
   },
@@ -126,11 +129,13 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     name: '가입',
     match: /^\/signup$/,
     guest: true,
-    variant: (p) => (p.has('h1', /사는 동네/) ? 'region' : 'interests'),
+    variant: (p) => p.has('h1', /활동할 동네/) ? 'region' : p.has('h1', /프로필/) ? 'profile' : 'consent',
     help: (v) =>
       v === 'region'
         ? { text: '‘위치 정보 수집 동의’를 누른 다음, 아래 ‘가입 완료’를 누르세요.' }
-        : { text: '좋아하는 것을 골라 보세요. 1개부터 5개까지 돼요.' },
+        : v === 'profile'
+          ? { text: '이름과 생년월일, 성별을 입력한 뒤 ‘다음’을 누르세요.' }
+          : { text: '필수 약관에 동의한 뒤 ‘동의하고 다음’을 누르세요.' },
     suggest: ['location', 'font', 'what-is-app'],
   },
 

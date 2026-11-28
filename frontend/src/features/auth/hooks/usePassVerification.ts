@@ -1,5 +1,5 @@
 /**
- * 본인인증 2단계 상태 머신
+ * 시연용 모의 로그인 2단계 상태 머신
  *   identity(정보 입력) → code(인증번호 입력) → done(결과)
  */
 import { useRef, useState } from 'react'

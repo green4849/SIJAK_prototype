@@ -70,12 +70,11 @@ def format_phone(digits: str) -> str:
     return f"{head}-{rest[:-4]}-{rest[-4:]}" if len(rest) > 4 else digits
 
 
-def sos_text(requester_name: str, requester_phone: str) -> str:
-    """보호자가 받는 문자 — 누가, 무엇을, 어떻게(바로 연락할 번호). 짧게"""
-    return (
-        f"[시작] {requester_name}님이 긴급 도움을 요청했어요. "
-        f"바로 연락해 주세요. {format_phone(requester_phone)}"
-    )
+def sos_text(requester_name: str, requester_phone: str | None) -> str:
+    """보호자가 받는 문자 — 누가, 무엇을, 어떻게(바로 연락할 번호). 짧게.
+    카카오로 가입한 분은 앱에 전화번호가 없어 번호 없이 보낸다 (보호자는 이미 아는 번호)."""
+    text = f"[시작] {requester_name}님이 긴급 도움을 요청했어요. 바로 연락해 주세요."
+    return f"{text} {format_phone(requester_phone)}" if requester_phone else text
 
 
 def overall_status(statuses: list[str]) -> DeliveryStatus:
@@ -122,7 +121,7 @@ class EmergencyService:
         await self.repo.commit()
 
     async def sos(
-        self, user_id: uuid.UUID, requester_name: str, requester_phone_enc: bytes
+        self, user_id: uuid.UUID, requester_name: str, requester_phone_enc: bytes | None
     ) -> SosResult:
         guardians = await self.repo.guardians(user_id)
         notified = [{"name": g.name, "relation": g.relation} for g in guardians]
@@ -136,7 +135,8 @@ class EmergencyService:
             )
 
         # 1) 보낼 것을 먼저 저장 — 보내는 도중 서버가 멈춰도 예약 작업이 이어서 보낸다
-        text = sos_text(requester_name, decrypt(requester_phone_enc))
+        phone = decrypt(requester_phone_enc) if requester_phone_enc else None
+        text = sos_text(requester_name, phone)
         deliveries = [
             SosDelivery(
                 sos_event_id=ev.id,

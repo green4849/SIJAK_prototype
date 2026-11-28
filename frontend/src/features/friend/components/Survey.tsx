@@ -17,6 +17,8 @@ interface FlowProps {
   friendsHref: string
   /** 시작이 그림 — 시작 화면(손 흔들기) · 끝 화면 */
   art?: ReactNode
+  /** 첫 가입에서 이어진 조사 — 이때는 마음 점검만 선택 사항이다. */
+  onboarding?: boolean
 }
 
 /** 문항마다 한 줄에 몇 칸 — 짧은 말은 두 칸, 문장은 한 칸 */
@@ -26,7 +28,7 @@ const COLUMNS: Record<string, 1 | 2> = { places: 2, traits: 2 }
  * 성향조사 (2026-11-24 질문지·디자인) — 시작 → 한 화면에 한 문항(8개) → 끝.
  * 시작이가 묻는 게 아니라 화면이 묻고, 시작이는 그림과 말풍선으로 곁에 있다.
  */
-export function SurveyFlow({ startAt, friendsHref, art }: FlowProps) {
+export function SurveyFlow({ startAt, friendsHref, art, onboarding = false }: FlowProps) {
   const [step, setStep] = useState<number | 'intro'>(startAt === 'intro' ? 'intro' : 0)
   const f = useSurveyForm()
 
@@ -80,9 +82,11 @@ export function SurveyFlow({ startAt, friendsHref, art }: FlowProps) {
         <Button block large onClick={() => setStep(0)}>
           시작하기
         </Button>
-        <ButtonLink variant="secondary" to={friendsHref} replace block onClick={postponeSurvey}>
-          다음에 하기
-        </ButtonLink>
+        {!onboarding && (
+          <ButtonLink variant="secondary" to={friendsHref} replace block onClick={postponeSurvey}>
+            다음에 하기
+          </ButtonLink>
+        )}
       </div>
     )
   }

@@ -62,10 +62,12 @@ export function useRecommendations(tab: FriendTab, points: PointHooks = {}) {
       } else {
         toast(`${updated.name}님께 친구 신청을 보냈어요`)
       }
+      return true
     } catch (e) {
       if (e instanceof ApiError && e.code === 'insufficient_points' && points.onInsufficientPoints)
         points.onInsufficientPoints()
       else setActionError(errorMessage(e))
+      return false
     }
   }
 

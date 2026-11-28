@@ -6,12 +6,12 @@ import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 
 const STEPS = [
   '가족이나 복지관 직원에게 이 화면을 보여 주세요.',
-  '도와주시는 분이 옆에서 휴대폰 인증을 함께 진행해요.',
-  '인증번호는 어르신 휴대폰으로 와요. 휴대폰을 곁에 두세요.',
+  '도와주시는 분이 옆에서 시연용 로그인을 함께 진행해요.',
+  '확인 번호는 화면에 표시돼요. 실제 문자는 오지 않아요.',
   '한 번만 하면 다음부터는 자동으로 들어가요.',
 ]
 
-/** ② → 함께 인증하기 — 가족·직원이 옆에서 함께 가입을 돕는 안내 */
+/** 시연용 — 가족·직원이 옆에서 가입을 돕는 안내 */
 export function AssistPage() {
   return (
     <section className={styles.page}>
@@ -25,7 +25,7 @@ export function AssistPage() {
       </ol>
       <div className={styles.actions}>
         <ButtonLink to="/login/phone" block large>
-          함께 인증 시작하기
+          함께 로그인 시작하기
         </ButtonLink>
       </div>
     </section>

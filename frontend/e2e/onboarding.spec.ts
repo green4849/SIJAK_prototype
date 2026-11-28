@@ -3,11 +3,30 @@ import { agreeTerms, verifyPhone } from './helpers'
 
 // 이 파일의 가입 흐름은 위치 동의를 쓴다 — 위치·역지오코딩(OpenStreetMap)은 고정값으로
 test.use({ permissions: ['geolocation'], geolocation: { latitude: 37.2665, longitude: 127.0473 } })
-/** 가입 1/3(약관) 동의 → 2/3(좋아하는 것)에서 하나 고르고 3/3(사는 동네)로 */
+/** 가입 1/2(약관) 동의 → 2/2(사는 동네) */
 async function toLocationStep(page: Page) {
   await agreeTerms(page)
-  await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
-  await page.getByRole('button', { name: /^다음/ }).click()
+}
+
+async function completeSurvey(page: Page) {
+  await page.getByRole('button', { name: '시작하기' }).click()
+  await page.getByRole('button', { name: '산책·등산' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: '산책하거나 운동하기' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('button', { name: '공원' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('button', { name: '평일 오전' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: '일주일에 한 번' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: /상대방의 이야기를 주로 들어주는 편/ }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('radio', { name: '조용하고 차분한 친구' }).click()
+  await page.getByRole('button', { name: '다음' }).click()
+  await page.getByRole('button', { name: '차분함' }).click()
+  await page.getByRole('button', { name: '다 했어요' }).click()
+  await page.getByRole('link', { name: '추천 친구 만나보기' }).click()
 }
 
 test.beforeEach(async ({ page }) => {
@@ -16,11 +35,11 @@ test.beforeEach(async ({ page }) => {
   )
 })
 
-test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → ③ 홈', async ({ page }) => {
+test('시연용 로그인 → 동네 → 성향조사 → 추천 → 선택형 마음 점검', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/welcome$/)
   await page.getByRole('link', { name: '시작하기' }).click()
-  await page.getByRole('link', { name: /휴대폰 인증/ }).click()
+  await page.getByRole('link', { name: /시연용 로그인/ }).click()
 
   // 클라이언트 검증: 빈 채로 누르면 안내, 고치기 시작하면 사라짐
   await page.getByRole('button', { name: '인증번호 받기' }).click()
@@ -30,31 +49,29 @@ test('① 시작 → ② 휴대폰 인증 → 가입 → ⑧ 보안 안내 → �
 
   await verifyPhone(page, { name: '홍길순', year: '1957', month: '7', day: '7', phone: '01077778888', gender: '여성' })
   await expect(page).toHaveURL(/\/signup$/)
-  // 1/3 약관 — 필수에 동의하지 않으면 넘어가지 않는다, 요약 먼저·전문은 펼쳐서 (B6)
+  // 필수 동의 후 활동 지역을 정한다.
   await expect(page.getByRole('heading', { name: /약관을 확인해 주세요/ })).toBeVisible()
   await page.getByRole('button', { name: '동의하고 다음' }).click()
   await expect(page.getByRole('alert')).toHaveText('[필수] 항목에 모두 동의해 주세요.')
   await page.getByRole('button', { name: '전체 내용 보기' }).first().click()
   await expect(page.getByRole('heading', { name: '제1조 목적' })).toBeVisible()
   await agreeTerms(page)
-  // 2/3 좋아하는 것 — 안 고르면 버튼이 할 일을 알려 준다
-  await expect(page.getByRole('heading', { name: /어떤 활동을 좋아하시나요/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: '하나 이상 골라 주세요' })).toBeDisabled()
-  await page.getByRole('button', { name: '요리·맛집 탐방' }).click()
-  await page.getByRole('button', { name: /^다음/ }).click()
-  // 3/3 사는 동네 — 뒤로 누르면 2단계로, 고른 것은 그대로
+  await expect(page.getByRole('heading', { name: '활동할 동네를 알려 주세요' })).toBeVisible()
+  // 뒤로 누르면 약관 단계로 돌아온다.
   await page.getByRole('button', { name: '뒤로' }).click()
-  await expect(page.getByRole('button', { name: '요리·맛집 탐방' })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: /^다음/ }).click()
+  await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toBeChecked()
+  await page.getByRole('button', { name: '동의하고 다음' }).click()
   // 위치 정보 수집 동의 → 그 자리에서 동네를 찾아 보여 준다
   await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
   await expect(page.getByText('경기도 수원시 영통구 매탄동')).toBeVisible()
   await page.getByRole('button', { name: '가입 완료' }).click()
 
-  await expect(page.getByRole('heading', { name: '시작은 이렇게 지켜 드려요' })).toBeVisible()
-  await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0) // 가입 직후엔 뒤로 없음
-  await page.getByRole('link', { name: '알겠어요, 시작할게요' }).click()
-  // 첫 마음 건강 살펴보기(WHO-5) — 가입할 때 처음, 미룰 수 있다
+  await expect(page.getByRole('heading', { name: '나와 잘 맞는 동네 친구 찾기' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '다음에 하기' })).toHaveCount(0)
+  await completeSurvey(page)
+  await page.getByRole('button', { name: '프로필 보기' }).first().click()
+  await page.getByRole('dialog', { name: /님과 친구가 되어 볼까요/ }).getByRole('button', { name: '나중에 보기' }).click()
+  // WHO-5는 첫 이용의 마지막 단계에서 선택할 수 있다.
   await expect(page.getByRole('heading', { name: '최근 2주 동안의 기분을 같이 살펴볼까요?' })).toBeVisible()
   await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: '나의 이전 결과 보기' })).toHaveCount(0)
@@ -89,24 +106,47 @@ test.describe('위치 권한이 없으면', () => {
   })
 })
 
-test('관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ page }) => {
+test('첫 이용에서 프로필 확인 후 세 선택지 중 고른다', async ({ page }) => {
+  await page.context().setGeolocation({ latitude: 37.193, longitude: 127.024 })
   await page.goto('/login/phone')
   await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
-  await agreeTerms(page)
+  await toLocationStep(page)
+  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '가입 완료' }).click()
+  await completeSurvey(page)
+  await page.getByRole('button', { name: '프로필 보기' }).first().click()
+  const choice = page.getByRole('dialog', { name: /님과 친구가 되어 볼까요/ })
+  await expect(choice).toContainText('프로필을 확인한 뒤 선택해 주세요.')
+  await expect(choice.getByRole('button', { name: '친구 신청하기' })).toBeVisible()
+  await expect(choice.getByRole('button', { name: '다른 친구 보기' })).toBeVisible()
+  await expect(choice.getByRole('button', { name: '나중에 보기' })).toBeVisible()
+  await choice.getByRole('button', { name: '다른 친구 보기' }).click()
+  await expect(choice).toHaveCount(0)
+  await page.getByRole('button', { name: '프로필 보기' }).first().click()
+  await choice.getByRole('button', { name: '친구 신청하기' }).click()
+  await expect(page.getByRole('heading', { name: '최근 2주 동안의 기분을 같이 살펴볼까요?' })).toBeVisible()
+})
+
+test('성향조사 관심사는 5개까지 — 넘으면 이유를 알려 준다', async ({ page }) => {
+  await page.goto('/login/phone')
+  await verifyPhone(page, { name: '이관심', year: '1955', month: '1', day: '1', phone: '01066665555', gender: '남성' })
+  await toLocationStep(page)
+  await page.getByRole('checkbox', { name: /위치 정보 수집 동의/ }).check()
+  await page.getByRole('button', { name: '가입 완료' }).click()
+  await page.getByRole('button', { name: '시작하기' }).click()
   for (const i of ['산책·등산', '영화·공연', '요리·맛집 탐방', '여행', '운동·건강관리', '봉사활동'])
     await page.getByRole('button', { name: i }).click()
   await expect(page.locator('[aria-pressed=true]')).toHaveCount(5)
   await expect(page.getByRole('alert')).toContainText('5개까지 고를 수 있어요')
 })
 
-test('신분증·함께 인증하기 안내 화면', async ({ page }) => {
+test('시연용 함께 로그인하기 안내 화면', async ({ page }) => {
   await page.goto('/login')
-  // 신분증 인증은 아직 없어 누를 수 없는 안내 카드
-  await expect(page.getByText('곧 열려요 · 지금은 휴대폰 인증만 돼요')).toBeVisible()
+  // 실서비스 로그인은 카카오만 사용한다. 시연 빌드에는 모의 로그인만 보인다.
+  await expect(page.getByRole('link', { name: /시연용 로그인/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /신분증 인증/ })).toHaveCount(0)
-  // 주소로 바로 들어오면 안내 화면
-  await page.goto('/login/id-card')
-  await expect(page.getByRole('heading', { name: '신분증 인증은 준비 중이에요' })).toBeVisible()
-  await page.getByRole('link', { name: '함께 인증하기' }).click()
+  await expect(page.getByRole('button', { name: '카카오 로그인' })).toHaveCount(0)
+  await page.goto('/login')
+  await page.getByRole('link', { name: '함께 로그인하기' }).click()
   await expect(page.getByRole('heading', { name: '함께 해요' })).toBeVisible()
 })

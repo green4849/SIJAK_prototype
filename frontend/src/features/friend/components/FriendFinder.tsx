@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Alert } from '@/shared/ui/Alert'
-import type { FriendTab } from '../api/friendApi'
+import { Button } from '@/shared/ui/Button'
+import { Sheet } from '@/shared/ui/Sheet'
+import type { FriendCardData, FriendTab } from '../api/friendApi'
 import { useRecommendations, type PointHooks } from '../hooks/useFriends'
 import { FriendActionButton } from './FriendActionButton'
 import { FriendCard } from './FriendCard'
@@ -16,11 +18,29 @@ interface Props extends PointHooks {
   header?: ReactNode
   /** 친구 신청 버튼에 붙일 포인트 ('무료' / '30P') — C12 */
   requestPrice?: string
+  /** 가입 직후 추천 → 프로필 확인 → 선택 화면 */
+  onboarding?: boolean
+  onFinish?: () => void
 }
 
 /** ④ 추천 친구 / 같은 동네 목록. 추천 탭에서는 카드마다 3단계 평가 (C12) */
-export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }: Props) {
+export function FriendFinder({ tab, chatHref, header, requestPrice, onboarding = false, onFinish, ...points }: Props) {
   const { data, loading, error, request, rate, actionError } = useRecommendations(tab, points)
+  const [selected, setSelected] = useState<FriendCardData | null>(null)
+  const [confirming, setConfirming] = useState(false)
+  const [sending, setSending] = useState(false)
+  const costs = !!requestPrice && requestPrice !== '무료'
+
+  async function sendSelected() {
+    if (!selected || sending) return
+    setSending(true)
+    const sent = await request(selected.user_id)
+    setSending(false)
+    if (sent) {
+      setSelected(null)
+      onFinish?.()
+    }
+  }
 
   return (
     <section
@@ -38,6 +58,7 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }:
           <p className={styles.empty}>
             {tab === 'nearby' ? '아직 가까운 이웃이 없어요. ‘추천 친구’도 살펴보세요.' : '추천할 이웃이 아직 없어요. ‘같은 동네’도 살펴보세요.'}
           </p>
+          {onboarding && <Button block onClick={onFinish}>다음으로</Button>}
         </div>
       )}
       {data && data.length > 0 && (
@@ -46,18 +67,45 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, ...points }:
             <FriendCard
               key={card.user_id}
               card={card}
-              actions={
+              actions={onboarding ? (
+                <Button block onClick={() => { setSelected(card); setConfirming(false) }}>프로필 보기</Button>
+              ) : (
                 <FriendActionButton
                   card={card}
                   onRequest={request}
                   chatHref={chatHref}
                   price={requestPrice}
                 />
-              }
-              footer={tab === 'recommended' ? <RecommendRating card={card} onRate={rate} /> : undefined}
+              )}
+              footer={tab === 'recommended' && !onboarding ? <RecommendRating card={card} onRate={rate} /> : undefined}
             />
           ))}
         </CardGrid>
+      )}
+      {onboarding && selected && (
+        <Sheet open title={`${selected.name}님과 친구가 되어 볼까요?`} onClose={() => setSelected(null)}>
+          <p>프로필을 확인한 뒤 선택해 주세요.</p>
+          <FriendCard card={selected} />
+          {selected.interests.length > 0 && <p>좋아하는 것: {selected.interests.join(' · ')}</p>}
+          {actionError && <Alert>{actionError}</Alert>}
+          {confirming ? (
+            <>
+              <p>신청하면 {requestPrice} 빠져요. 상대가 받지 않아도 돌려받지 못해요.</p>
+              <Button block large disabled={sending} onClick={() => void sendSelected()}>
+                {sending ? '신청하는 중…' : '친구 신청하기'}
+              </Button>
+              <Button variant="secondary" block onClick={() => setConfirming(false)}>선택지로 돌아가기</Button>
+            </>
+          ) : (
+            <>
+              <Button block large disabled={sending || selected.relation === 'sent'} onClick={() => costs ? setConfirming(true) : void sendSelected()}>
+                {selected.relation === 'sent' ? '이미 신청했어요' : sending ? '신청하는 중…' : '친구 신청하기'}
+              </Button>
+              <Button variant="secondary" block onClick={() => setSelected(null)}>다른 친구 보기</Button>
+              <Button variant="secondary" block onClick={() => { setSelected(null); onFinish?.() }}>나중에 보기</Button>
+            </>
+          )}
+        </Sheet>
       )}
     </section>
   )

@@ -53,6 +53,16 @@ services:
         sync: false
       - key: FIREBASE_APP_ID
         sync: false
+      # 로그인 방식. phone(기본) = 휴대폰 인증, kakao = 카카오 로그인.
+      # 카카오로 바꾸는 순서: docs/deploy-render.md 「카카오 로그인 켜기」 — 아래 두 키를 넣은 뒤 AUTH_MODE=kakao
+      - key: AUTH_MODE
+        value: phone
+      - key: KAKAO_REST_API_KEY
+        sync: false
+      - key: KAKAO_CLIENT_SECRET
+        sync: false
+      - key: KAKAO_REDIRECT_URI
+        value: https://sijak-6080.onrender.com/login/kakao/callback
       - key: MIN_SIGNUP_AGE
         value: "60"
       # 긴급 도움 → 보호자 문자 (C10). off = 기록만(화면도 그렇게 말함). 켜는 순서: docs/deploy-render.md 「긴급 도움 문자 켜기」

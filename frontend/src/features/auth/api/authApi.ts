@@ -16,10 +16,13 @@ export type PassStartResult = Schema<'PassStartResponse'>
 export type LoggedInResult = Schema<'LoggedInResult'>
 /** status 로 구분: 기존 회원이면 바로 로그인, 신규면 가입 단계로 */
 export type AuthResult = LoggedInResult | Schema<'SignupRequiredResult'>
+export type AuthMethod = Schema<'AuthMethod'>
+export interface KakaoSignupProfile { name: string; birth_date: string; gender: 'M' | 'F' }
 
 const noRetry = { skipAuthRetry: true }
 
 export const authApi = {
+  method: () => api.get<AuthMethod>('/auth/method', noRetry),
   options: () => api.get<SignupOptions>('/auth/options', noRetry),
 
   startPass: (input: PassStartInput) =>
@@ -29,10 +32,13 @@ export const authApi = {
   verifyPass: (session_id: string, proof: { code: string } | { id_token: string }) =>
     api.post<AuthResult>('/auth/pass/verify', { session_id, ...proof } satisfies Schema<'PassVerifyRequest'>, noRetry),
 
-  signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[]) =>
+  completeKakao: (code: string, state: string) =>
+    api.post<AuthResult>('/auth/kakao/complete', { code, state } satisfies Schema<'KakaoCompleteRequest'>, noRetry),
+
+  signup: (signup_token: string, region_code: string, interests: string[], consents: ConsentChoice[], profile?: KakaoSignupProfile) =>
     api.post<LoggedInResult>(
       '/auth/signup',
-      { signup_token, region_code, interests, consents } satisfies Schema<'SignupRequest'>,
+      { signup_token, region_code, interests, consents, ...profile } satisfies Schema<'SignupRequest'>,
       noRetry,
     ),
 

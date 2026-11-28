@@ -14,7 +14,10 @@ SAFE_PROD = {
     "data_encryption_key": base64.b64encode(os.urandom(32)).decode(),
     "phone_hash_pepper": "p" * 24,
     "cors_origins": ["https://sijak.example.kr"],
-    "allow_mock_identity_in_prod": True,
+    "auth_mode": "kakao",
+    "kakao_rest_api_key": "test-key",
+    "kakao_client_secret": "test-secret",
+    "kakao_redirect_uri": "https://sijak.example.kr/login/kakao/callback",
 }
 
 
@@ -41,7 +44,8 @@ def test_safe_prod_starts_with_secure_cookie() -> None:
         ("data_encryption_key", "not-base64!!", "DATA_ENCRYPTION_KEY"),
         ("phone_hash_pepper", "change-me-pepper", "PHONE_HASH_PEPPER"),
         ("cors_origins", ["http://localhost:5173"], "CORS_ORIGINS"),
-        ("allow_mock_identity_in_prod", False, "IDENTITY_PROVIDER"),
+        ("auth_mode", "phone", "IDENTITY_PROVIDER=mock"),
+        ("kakao_client_secret", None, "KAKAO_CLIENT_SECRET"),
         ("web_concurrency", 4, "WEB_CONCURRENCY"),
     ],
 )
@@ -56,14 +60,15 @@ def test_all_problems_reported_at_once() -> None:
         Settings(_env_file=None, env="prod")  # type: ignore[call-arg]
     text = str(e.value)
     names = ["JWT_SECRET", "DATA_ENCRYPTION_KEY", "PHONE_HASH_PEPPER", "CORS_ORIGINS"]
-    for name in [*names, "IDENTITY_PROVIDER"]:
+    for name in [*names, "IDENTITY_PROVIDER=mock"]:
         assert name in text
 
 
 def test_firebase_needs_web_config() -> None:
     with pytest.raises(ValidationError, match="FIREBASE_PROJECT_ID"):
-        make(identity_provider="firebase", allow_mock_identity_in_prod=False)
+        make(auth_mode="phone", identity_provider="firebase", allow_mock_identity_in_prod=False)
     ok = make(
+        auth_mode="phone",
         identity_provider="firebase",
         allow_mock_identity_in_prod=False,
         firebase_project_id="sijak-6080",

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LocationConsent, useAuth } from '@/features/auth'
 import {
   FriendFinder,
@@ -15,7 +16,7 @@ import {
 } from '@/features/points'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
 import { TopBar } from '@/shared/ui/TopBar'
-import { chatWith, friendSurvey } from './routes'
+import { assessment, chatWith, friendSurvey } from './routes'
 import styles from './TabPage.module.css'
 
 const TABS: { value: FriendTab; label: string }[] = [
@@ -32,8 +33,11 @@ export function FriendsPage() {
   // 포인트 (C12): 신청 버튼의 가격, 평가 안내, 모자랄 때 안내 창 — friend·points 를 여기서 조합
   const points = usePointSummary()
   const [shortOfPoints, setShortOfPoints] = useState(false)
+  const [params] = useSearchParams()
+  const onboarding = params.get('welcome') === '1'
 
   // 성향조사는 저절로 넘기지 않는다 — 추천 위 카드(X로 닫기)·하단 '성향조사' 탭·마이페이지에서 고른다
+  const navigate = useNavigate()
 
   return (
     <section className={styles.page}>
@@ -41,13 +45,15 @@ export function FriendsPage() {
 
       <ReceivedRequests onChanged={() => setVersion((v) => v + 1)} chatHref={chatWith} />
 
-      <SegmentTabs label="친구 찾는 방법" tabs={TABS} value={tab} onChange={setTab} />
+      {!onboarding && <SegmentTabs label="친구 찾는 방법" tabs={TABS} value={tab} onChange={setTab} />}
 
       <FriendFinder
         key={`${tab}-${version}-${user?.has_location}`}
         tab={tab}
+        onboarding={onboarding}
+        onFinish={() => navigate(assessment('who5'), { state: { afterSignup: true } })}
         chatHref={chatWith}
-        header={
+        header={onboarding ? undefined :
           tab === 'nearby' && user && !user.has_location ? (
             <LocationConsent />
           ) : tab === 'recommended' ? (

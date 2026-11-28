@@ -4,9 +4,10 @@ import { SignupProfileForm, useAuth } from '@/features/auth'
 interface SignupState {
   signupToken: string
   name: string
+  provider?: 'kakao'
 }
 
-/** /signup — 본인인증을 마친 신규 회원만 들어온다 */
+/** /signup — 카카오 또는 시연용 로그인에서 가입이 필요한 신규 회원만 들어온다 */
 export function SignupPage() {
   const { signIn } = useAuth()
   const state = useLocation().state as SignupState | null
@@ -18,9 +19,12 @@ export function SignupPage() {
     <SignupProfileForm
       signupToken={state.signupToken}
       name={state.name}
+      provider={state.provider}
       backTo="/login"
-      // 가입 직후 한 번: ⑧ 보안 안내 (이동은 RequireGuest가 처리)
-      onDone={(token, user) => signIn(token, user, { to: '/safety', state: { afterSignup: true } })}
+      onDone={(token, user) => {
+        try { localStorage.removeItem('wipi.surveyLater') } catch { /* 이 기기 저장소가 막힌 경우 */ }
+        signIn(token, user, { to: '/friends/survey?welcome=1' })
+      }}
     />
   )
 }

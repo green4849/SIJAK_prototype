@@ -5,7 +5,7 @@ import type { FriendCardData } from '../api/friendApi'
 
 interface Props {
   card: FriendCardData
-  onRequest: (userId: string) => Promise<void>
+  onRequest: (userId: string) => Promise<boolean>
   /** 이미 친구일 때 대화로 가는 경로 (chat feature를 모르게 페이지에서 주입) */
   chatHref: (userId: string) => string
   /** 새 친구 신청에 드는 포인트 표시 ('무료' / '30P') — 없으면 안 보임 */

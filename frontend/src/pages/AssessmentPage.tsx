@@ -32,7 +32,7 @@ const WHO5_LINKS: Who5Links = {
 export function AssessmentPage() {
   const { kind = '' } = useParams()
   const { user, updateUser } = useAuth()
-  // 가입 직후(보안 안내 다음) 첫 WHO-5 — 뒤로 가기 대신 '나중에 할게요'
+  // 가입 후 친구 선택 다음 WHO-5 — 뒤로 가기 대신 '나중에 할게요'
   const afterSignup = (useLocation().state as { afterSignup?: boolean } | null)?.afterSignup
   if (!isKind(kind)) return <NotFoundPage />
   return (

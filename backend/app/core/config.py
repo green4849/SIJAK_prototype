@@ -50,7 +50,12 @@ class Settings(BaseSettings):
     data_encryption_key: str = _DEFAULT_ENCRYPTION_KEY
     phone_hash_pepper: str = _DEFAULT_PEPPER
 
-    # 본인인증 provider: "mock"(화면에 번호) | "firebase"(Firebase 전화 인증 문자) | (추후) "pass"
+    # 기존 전화 로그인과 카카오 계정 로그인 중 하나를 운영 환경에서 선택한다.
+    auth_mode: Literal["phone", "kakao"] = "phone"
+    kakao_rest_api_key: str | None = None
+    kakao_client_secret: str | None = None
+    kakao_redirect_uri: str | None = None
+    # 전화 로그인 provider: "mock"(화면에 번호) | "firebase"(Firebase 전화 인증 문자)
     identity_provider: Literal["mock", "firebase"] = "mock"
     # Firebase 전화 인증 (B4) — 웹 설정값은 비밀이 아니다(브라우저에 그대로 내려간다).
     # 서버는 Firebase 가 준 확인 토큰을 Google 공개키로 검증만 하므로 서비스 계정 키가 필요 없다.
@@ -153,7 +158,7 @@ class Settings(BaseSettings):
             problems.append("PHONE_HASH_PEPPER: 기본값이거나 16자 미만")
         if any(not o.startswith("https://") for o in self.cors_origins):
             problems.append("CORS_ORIGINS: 운영에서는 https:// 주소만")
-        if self.identity_provider == "firebase":
+        if self.auth_mode == "phone" and self.identity_provider == "firebase":
             missing = [
                 name
                 for name, value in (
@@ -165,11 +170,25 @@ class Settings(BaseSettings):
             ]
             if missing:
                 problems.append(f"IDENTITY_PROVIDER=firebase: {', '.join(missing)} 가 비어 있음")
-        if self.identity_provider == "mock" and not self.allow_mock_identity_in_prod:
+        if (
+            self.auth_mode == "phone"
+            and self.identity_provider == "mock"
+            and not self.allow_mock_identity_in_prod
+        ):
             problems.append(
                 "IDENTITY_PROVIDER=mock: 누구나 가입할 수 있음 "
                 "(시범 운영이면 ALLOW_MOCK_IDENTITY_IN_PROD=true)"
             )
+        if self.auth_mode == "kakao" and not all(
+            (self.kakao_rest_api_key, self.kakao_client_secret, self.kakao_redirect_uri)
+        ):
+            problems.append("KAKAO_REST_API_KEY / KAKAO_CLIENT_SECRET / KAKAO_REDIRECT_URI 필요")
+        if (
+            self.auth_mode == "kakao"
+            and self.kakao_redirect_uri
+            and not self.kakao_redirect_uri.startswith("https://")
+        ):
+            problems.append("KAKAO_REDIRECT_URI: 운영에서는 https:// 주소만")
         if self.sms_provider == "log":
             problems.append(
                 "SMS_PROVIDER=log: 문자를 보내지 않고 보낸 것처럼 기록됨 (off 또는 solapi)"

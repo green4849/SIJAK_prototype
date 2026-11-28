@@ -15,6 +15,7 @@ export function FriendSurveyPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const edit = params.has('edit')
+  const onboarding = params.get('welcome') === '1'
   return (
     <section className={styles.page}>
       <TopBar
@@ -35,7 +36,8 @@ export function FriendSurveyPage() {
       <SurveyFlow
         key={edit ? 'edit' : 'start'}
         startAt={edit ? 'questions' : 'intro'}
-        friendsHref="/friends"
+        friendsHref={onboarding ? '/friends?welcome=1' : '/friends'}
+        onboarding={onboarding}
         art={<SijagiStill />}
       />
     </section>

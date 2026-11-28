@@ -21,6 +21,7 @@ import { useMyFriends, useSurveyStatus } from '@/features/friend'
 import { useUnreadNotifications } from '@/features/inbox'
 import { MoodBand, useRelationIndex, weatherLabel } from '@/features/wellbeing'
 import { usePointSummary } from '@/features/points'
+import { IS_DEMO } from '@/shared/lib/demo'
 import { useInstallState } from '@/shared/lib/pwa'
 import { Avatar } from '@/shared/ui/Avatar'
 import { ConfirmSheet } from '@/shared/ui/ConfirmSheet'
@@ -173,7 +174,7 @@ export function MyPage() {
         onConfirm={signOut}
         onClose={() => setAskLogout(false)}
       >
-        <p>다시 들어오려면 휴대폰 인증을 해야 해요.</p>
+        <p>{IS_DEMO ? '다시 들어오려면 시연용 로그인을 해 주세요.' : '카카오 계정으로 다시 로그인할 수 있어요.'}</p>
       </ConfirmSheet>
     </section>
   )

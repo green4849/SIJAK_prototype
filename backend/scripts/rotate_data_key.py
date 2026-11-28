@@ -34,7 +34,9 @@ async def rotate(apply: bool, include_media: bool = False) -> dict[str, int]:
                             break
                         for row in rows:
                             total += 1
-                            if not encrypted_with_current_key(row.phone_enc):
+                            if row.phone_enc is not None and not encrypted_with_current_key(
+                                row.phone_enc
+                            ):
                                 plaintext = decrypt(row.phone_enc)
                                 changed += 1
                                 if apply:

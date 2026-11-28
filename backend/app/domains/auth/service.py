@@ -1,10 +1,9 @@
 """auth 비즈니스 로직. FastAPI를 모른다 — 도메인 예외만 던진다.
 
-흐름 (보고서의 '신규/기존 회원' 분기를 본인인증 하나로 통합):
-  1) start_verification : 본인인증 시작
-  2) verify             : 인증 성공 →  기존 회원이면 로그인(토큰 발급)
-                                       신규면 signup_token 발급
-  3) signup             : signup_token + 지역·관심사 → 가입 + 로그인
+흐름: 서버 설정에 따라 카카오 계정 로그인 또는 전화 로그인을 제공한다.
+  1) login_with_kakao   : 카카오 회원번호 → 기존 회원 로그인 / 신규 회원 signup_token
+  2) start_verification / verify : 기존 Mock·Firebase 전화 로그인
+  3) signup             : signup_token + 직접 입력 프로필·지역·동의 → 가입 + 로그인
   4) refresh / logout   : refresh 토큰 회전·폐기
   5) withdraw           : 회원 탈퇴 (B3) — 바로 deleted, 30일 뒤 완전 삭제 예정일 기록
 """
@@ -99,7 +98,7 @@ class AuthService:
         self.identity = identity
         self.settings = get_settings()
 
-    # ---------- 본인인증 ----------
+    # ---------- 전화 로그인 ----------
 
     async def start_verification(self, req: IdentityRequest) -> IdentitySession:
         return await self.identity.start(req)
@@ -130,6 +129,20 @@ class AuthService:
             raise ConflictError("이미 다른 분이 쓰고 있는 전화번호예요.", code="phone_in_use")
         return SignupRequired(self._issue_signup_token(ident), ident.name)
 
+    async def login_with_kakao(self, kakao_id: str, nickname: str) -> LoggedIn | SignupRequired:
+        user = await self.repo.get_user_by_kakao_id(kakao_id)
+        if user is not None:
+            await self._lift_expired_suspension(user)
+            self._ensure_can_login(user)
+            return LoggedIn(user, await self._login(user))
+        token, _, _ = create_token(
+            "signup",
+            subject=f"kakao:{kakao_id}",
+            expires_in=timedelta(minutes=self.settings.signup_token_minutes),
+            extra={"provider": "kakao", "kakao_id": kakao_id},
+        )
+        return SignupRequired(token, nickname[:50] or "")
+
     # ---------- 가입 ----------
 
     async def signup(
@@ -138,11 +151,49 @@ class AuthService:
         region_code: str,
         interests: list[str],
         consents: list[ConsentChoice],
+        *,
+        name: str | None = None,
+        birth_date: date | None = None,
+        gender: str | None = None,
     ) -> LoggedIn:
         claims = decode_token(signup_token, "signup")
-        self._validate_profile(region_code, interests)
+        # 첫 이용 흐름에서는 지역을 정한 뒤 성향조사 Q1에서 관심사를 고른다.
+        self._validate_region(region_code)
+        if interests:
+            self._validate_interests(interests)
         records = self._signup_consents(consents)
 
+        if claims.get("provider") == "kakao":
+            if self.settings.auth_mode != "kakao":
+                raise UnauthorizedError("로그인을 다시 시작해 주세요.")
+            clean_name = (name or "").strip()
+            if (
+                not clean_name
+                or len(clean_name) > 50
+                or gender not in ("M", "F")
+                or birth_date is None
+            ):
+                raise InvalidSignupInputError("이름, 생년월일, 성별을 확인해 주세요.")
+            self._ensure_age(birth_date)
+            if await self.repo.get_user_by_kakao_id(claims["kakao_id"]):
+                raise ConflictError(
+                    "이미 가입된 계정이에요. 다시 로그인해 주세요.", code="already_registered"
+                )
+            user = await self.repo.add_user(
+                User(
+                    name=clean_name,
+                    birth_date=birth_date,
+                    gender=gender,
+                    kakao_id=claims["kakao_id"],
+                    region_code=region_code,
+                    consents=records,
+                ),
+                interests=list(dict.fromkeys(interests)),
+            )
+            return LoggedIn(user, await self._login(user))
+
+        if self.settings.auth_mode != "phone":
+            raise UnauthorizedError("로그인을 다시 시작해 주세요.")
         if await self.repo.get_user_by_ci(claims["ci"]):
             raise ConflictError(
                 "이미 가입된 분이에요. 처음 화면에서 다시 인증해 주세요.", code="already_registered"
