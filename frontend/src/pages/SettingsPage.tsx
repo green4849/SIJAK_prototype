@@ -36,8 +36,8 @@ const SPEECH_RATES = [
 ]
 
 const READ_ALOUD = [
-  { value: 'on', label: '읽기 켜기' },
-  { value: 'off', label: '읽기 끄기' },
+  { value: 'on', label: '사용' },
+  { value: 'off', label: '사용 안 함' },
 ]
 
 /**
