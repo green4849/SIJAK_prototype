@@ -39,13 +39,11 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: '["https://sijak-6080.onrender.com"]'
-      # 휴대폰 인증. mock = 화면에 번호가 떠서 누구나 가입할 수 있다(시범 운영 전용).
-      # Firebase 전화 인증(실제 문자)으로 바꾸는 순서: docs/deploy-render.md 「휴대폰 인증 문자 켜기」
-      #   → 아래 FIREBASE_* 세 값을 Render 화면에 넣은 뒤 IDENTITY_PROVIDER=firebase, ALLOW_MOCK…=false
+      # 전화 로그인 모드를 다시 사용할 때만 적용한다. 운영 로그인은 아래 AUTH_MODE=kakao.
       - key: IDENTITY_PROVIDER
         value: mock
       - key: ALLOW_MOCK_IDENTITY_IN_PROD
-        value: "true"
+        value: "false"
       # Firebase 웹 설정값 — 비밀은 아니지만 저장소가 공개라 Render 화면에만 넣는다
       - key: FIREBASE_PROJECT_ID
         sync: false
@@ -53,10 +51,9 @@ services:
         sync: false
       - key: FIREBASE_APP_ID
         sync: false
-      # 로그인 방식. phone(기본) = 휴대폰 인증, kakao = 카카오 로그인.
-      # 카카오로 바꾸는 순서: docs/deploy-render.md 「카카오 로그인 켜기」 — 아래 두 키를 넣은 뒤 AUTH_MODE=kakao
+      # 운영에서는 카카오 로그인만 사용한다. 비밀 키는 Render 환경값에 따로 보관한다.
       - key: AUTH_MODE
-        value: phone
+        value: kakao
       - key: KAKAO_REST_API_KEY
         sync: false
       - key: KAKAO_CLIENT_SECRET

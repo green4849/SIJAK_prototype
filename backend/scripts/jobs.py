@@ -16,7 +16,7 @@ from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.observability import init_observability, report_exception
 from app.core.storage import get_media_storage
-from app.jobs import retry_sos_sms, run_daily
+from app.jobs import retry_sos_sms, run_daily, run_recommendations
 
 KST = timezone(timedelta(hours=9))
 log = logging.getLogger("jobs")
@@ -50,6 +50,15 @@ async def sos_retry() -> int:
         print(await retry_sos_sms(SessionLocal))
     except Exception as exc:
         report_exception(exc, "sos_retry")
+        return 1
+    return 0
+
+
+async def recommend(slot: str) -> int:
+    try:
+        print(await run_recommendations(SessionLocal, get_media_storage(), slot))
+    except Exception as exc:
+        report_exception(exc, f"recommend_{slot}")
         return 1
     return 0
 
@@ -94,8 +103,14 @@ def main() -> int:
             return asyncio.run(loop())
         case ["sos-retry"]:
             return asyncio.run(sos_retry())
+        case ["recommend", slot] if slot in {"morning", "noon", "evening"}:
+            return asyncio.run(recommend(slot))
         case _:
-            print("사용법: python -m scripts.jobs <daily|loop|sos-retry>", file=sys.stderr)
+            print(
+                "사용법: python -m scripts.jobs "
+                "<daily|loop|sos-retry|recommend morning|recommend noon|recommend evening>",
+                file=sys.stderr,
+            )
             return 2
 
 

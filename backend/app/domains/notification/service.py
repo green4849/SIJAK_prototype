@@ -261,6 +261,30 @@ class NotificationService:
             notify=False,
         )
 
+    async def on_activity_reminder(
+        self, user_id: uuid.UUID, activity_id: uuid.UUID, title: str, day: str
+    ) -> bool:
+        """신청한 활동 전날 한 번만 알린다."""
+        return await self._add(
+            user_id,
+            "activity",
+            "내일 신청한 활동이 있어요",
+            f"{title} · {day}",
+            f"/activities/{activity_id}",
+            f"activity_reminder:{activity_id}:{day}",
+        )
+
+    async def on_recommendation(self, user_id: uuid.UUID, day: str, slot: str) -> bool:
+        """받기로 고른 시간에 새 이웃이 있을 때 하루 한 번만 알린다."""
+        return await self._add(
+            user_id,
+            "friend",
+            "동네 이웃 추천을 살펴보세요",
+            "관심사가 맞는 이웃을 찾아봤어요",
+            "/friends",
+            f"recommend:{day}:{slot}",
+        )
+
     async def on_new_message(self, to_id: uuid.UUID, sender_name: str, room_id: uuid.UUID) -> None:
         """새 메시지 — 휴대폰 알림만 (대화 목록이 곧 알림함). 내용은 넣지 않는다.
         같은 대화방 알림은 tag 로 하나로 합쳐진다."""
