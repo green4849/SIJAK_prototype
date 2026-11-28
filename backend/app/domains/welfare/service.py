@@ -113,15 +113,23 @@ class WelfareService:
         시설 정보만 원본을 따른다. 프로그램·모임 공간은 원본에 없어 그대로 둔다.
         """
         added = updated = 0
-        for r in records:
-            c = await self.repo.find_source("public_data", r.source_id)
-            if c is None:
-                c = WelfareCenter(source="public_data", source_id=r.source_id)
-                self.repo.add(c)
-                added += 1
-            else:
-                updated += 1
-            c.name, c.kind, c.address, c.phone = r.name, r.kind, r.address, r.phone
-            c.region_code, c.lat, c.lng, c.open_hours = r.region_code, r.lat, r.lng, r.open_hours
+        for start in range(0, len(records), 500):
+            batch = records[start : start + 500]
+            existing = await self.repo.find_sources("public_data", [r.source_id for r in batch])
+            for r in batch:
+                c = existing.get(r.source_id)
+                if c is None:
+                    c = WelfareCenter(source="public_data", source_id=r.source_id)
+                    self.repo.add(c)
+                    added += 1
+                else:
+                    updated += 1
+                c.name, c.kind, c.address, c.phone = r.name, r.kind, r.address, r.phone
+                c.region_code, c.lat, c.lng, c.open_hours = (
+                    r.region_code,
+                    r.lat,
+                    r.lng,
+                    r.open_hours,
+                )
         await self.repo.commit()
         return added, updated
