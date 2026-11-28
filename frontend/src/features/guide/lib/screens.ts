@@ -80,11 +80,13 @@ export const SCREENS: Record<ScreenId, ScreenDef> = {
     help: (v) =>
       v === 'code'
         ? {
-            text: '화면 위쪽에 보이는 숫자 여섯 자리를 적고 ‘확인’을 누르세요.',
+            text: '받은 인증번호 여섯 자리를 적고 ‘확인’을 누르세요.',
+            demoNote: '시연용 번호는 화면 위쪽에 있어요.',
             actions: [{ kind: 'show', label: '어디에 적어요?', target: 'code-input', say: '이 칸에 적어 주세요.' }],
           }
         : {
             text: '빈칸을 다 채우고 ‘인증번호 받기’를 누르세요.',
+            demoNote: '시연이라 문자는 안 가요.',
             actions: [{ kind: 'show', label: '‘인증번호 받기’ 어디 있어요?', target: 'phone-submit', say: '다 적고 나서 여기 ‘인증번호 받기’를 누르세요.' }],
           },
     suggest: ['login-code', 'login-assist', 'font'],

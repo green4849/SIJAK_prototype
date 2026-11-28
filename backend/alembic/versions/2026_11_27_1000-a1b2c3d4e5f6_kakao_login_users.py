@@ -1,7 +1,7 @@
 """카카오 로그인 회원번호와 전화번호 없는 계정 허용.
 
 Revision ID: a1b2c3d4e5f6
-Revises: f2e3171a908c
+Revises: 058a7e772065
 """
 
 import sqlalchemy as sa
@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "a1b2c3d4e5f6"
-down_revision = "f2e3171a908c"
+down_revision = "058a7e772065"
 branch_labels = None
 depends_on = None
 
