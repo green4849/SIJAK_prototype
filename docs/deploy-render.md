@@ -36,7 +36,7 @@
 
 `.github/workflows/maintenance.yml`은 한국 시각 04:00에 탈퇴 계정·오래된 음성 기록 정리, 관계 지수 계산, 다음 날 활동 알림을 실행한다. 오전 9시·오후 1시·오후 7시에는 받기로 고른 회원에게 추천 이웃이 있을 때만 알리고, 못 보낸 긴급 도움 문자는 공급자가 켜진 경우 10분마다 재시도한다. 같은 알림을 두 번 쌓지 않도록 알림 식별값으로 중복을 막는다. GitHub Actions 예약 실행은 지연될 수 있어 정확한 시각을 보장하지 않는다.
 
-저장소 변수 `ENABLE_PRODUCTION_JOBS`의 기본값은 비어 있으므로 예약·수동 실행 모두 운영 DB에 접속하지 않는다. 활성화하려면 운영 DB 접속과 비밀값 관리 방식을 먼저 승인·점검하고, 저장소 Secrets에 `JOBS_DATABASE_URL`, `JOBS_JWT_SECRET`, `JOBS_DATA_ENCRYPTION_KEY`, `JOBS_PHONE_HASH_PEPPER`, `JOBS_KAKAO_REST_API_KEY`, `JOBS_KAKAO_CLIENT_SECRET`을 Render와 같은 값으로 넣는다. 문자 발송을 켠 경우 `JOBS_SMS_PROVIDER=solapi` 변수와 `JOBS_SOLAPI_API_KEY`, `JOBS_SOLAPI_API_SECRET`, `JOBS_SMS_SENDER_NUMBER` Secrets도 필요하다. 그런 뒤 `ENABLE_PRODUCTION_JOBS=true`를 설정한다. 비밀값은 로그와 저장소 파일에 쓰지 않는다.
+저장소 변수 `ENABLE_PRODUCTION_JOBS`의 기본값은 비어 있으므로 예약·수동 실행 모두 운영 DB에 접속하지 않는다. 활성화하려면 운영 DB 접속과 비밀값 관리 방식을 먼저 승인·점검하고, 저장소 Secrets에 `JOBS_DATABASE_URL`, `JOBS_JWT_SECRET`, `JOBS_DATA_ENCRYPTION_KEY`, `JOBS_PHONE_HASH_PEPPER`, `JOBS_KAKAO_REST_API_KEY`, `JOBS_KAKAO_CLIENT_SECRET`을 Render와 같은 값으로 넣는다. 휴대폰 알림(VAPID)을 켠 경우 `JOBS_VAPID_PUBLIC_KEY`·`JOBS_VAPID_PRIVATE_KEY`도 Render 와 같은 값으로 넣는다(없으면 예약 작업의 추천·활동 알림이 알림함에만 쌓인다). 문자 발송을 켠 경우 `JOBS_SMS_PROVIDER=solapi` 변수와 `JOBS_SOLAPI_API_KEY`, `JOBS_SOLAPI_API_SECRET`, `JOBS_SMS_SENDER_NUMBER` Secrets도 필요하다. 그런 뒤 `ENABLE_PRODUCTION_JOBS=true`를 설정한다. 비밀값은 로그와 저장소 파일에 쓰지 않는다.
 
 현재 음성 저장소는 Render 임시 디스크다. GitHub Actions는 그 디스크의 파일을 직접 지울 수 없으므로, 음성 보관 기간을 지키려면 S3 저장소와 작업자의 S3 접근을 별도로 구성해야 한다. DB의 오래된 음성 기록 정리와 실제 파일 삭제를 구분해 확인한다.
 
