@@ -2,4 +2,5 @@
 interface Window {
   __demoCalls?: Record<string, number>
   __demoNetworkDown?: boolean
+  __demoServerWaking?: boolean
 }

@@ -1,9 +1,23 @@
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { Button } from '@/shared/ui/Button'
 
+/** 이만큼 넘게 걸리면 서버가 깨는 중이라고 알려 준다 — 멈춘 줄 알고 떠나지 않게 */
+const SLOW_HINT_MS = 4_000
+
 function Loading() {
-  return <p role="status">잠시만 기다려 주세요…</p>
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSlow(true), SLOW_HINT_MS)
+    return () => window.clearTimeout(timer)
+  }, [])
+  return (
+    <div role="status">
+      <p>잠시만 기다려 주세요…</p>
+      {slow && <p>서버를 깨우는 중이에요. 길면 1분쯤 걸려요. 창을 닫지 말고 기다려 주세요.</p>}
+    </div>
+  )
 }
 
 /**
@@ -16,6 +30,7 @@ function Offline() {
     <section>
       <h1>인터넷 연결이 안 돼요</h1>
       <p>와이파이나 데이터가 켜져 있는지 봐 주세요. 연결되면 저절로 이어져요.</p>
+      <p>인터넷이 켜져 있는데도 이 화면이면 서버가 잠시 멈춘 거예요. 30초마다 저절로 다시 시도해요.</p>
       <Button block onClick={retry}>
         다시 시도
       </Button>

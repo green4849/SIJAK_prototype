@@ -20,9 +20,11 @@ export type AuthMethod = Schema<'AuthMethod'>
 export interface KakaoSignupProfile { name: string; birth_date: string; gender: 'M' | 'F' }
 
 const noRetry = { skipAuthRetry: true }
+/** 앱을 열 때 처음 묻는 요청 — 잠든 서버를 무한정 기다리지 않게 (AuthProvider 가 다시 시도) */
+const startup = { skipAuthRetry: true, timeoutMs: 12_000 }
 
 export const authApi = {
-  method: () => api.get<AuthMethod>('/auth/method', noRetry),
+  method: () => api.get<AuthMethod>('/auth/method', startup),
   options: () => api.get<SignupOptions>('/auth/options', noRetry),
 
   startPass: (input: PassStartInput) =>
@@ -42,7 +44,7 @@ export const authApi = {
       noRetry,
     ),
 
-  refresh: () => api.post<Schema<'TokenResponse'>>('/auth/refresh', undefined, noRetry),
+  refresh: () => api.post<Schema<'TokenResponse'>>('/auth/refresh', undefined, startup),
 
   logout: () => api.post<void>('/auth/logout', undefined, noRetry),
 

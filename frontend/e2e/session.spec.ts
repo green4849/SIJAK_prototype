@@ -37,3 +37,21 @@ test('H31: 다시 연결되면(online) 누르지 않아도 저절로 이어진�
   })
   await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible()
 })
+
+test('잠든 서버: 인터넷 안내 대신 기다리며 \'서버를 깨우는 중\'을 알리고, 깨어나면 저절로 이어진다', async ({ page }) => {
+  await startTour(page)
+  await page.addInitScript(() => {
+    window.__demoServerWaking = true
+  })
+  await page.reload()
+
+  // 몇 초 넘게 걸리면 왜 기다리는지 알려 준다 — 연결 안내(로그아웃처럼 보이는 화면)로 가지 않는다
+  await expect(page.getByText('서버를 깨우는 중이에요', { exact: false })).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByRole('heading', { name: '인터넷 연결이 안 돼요' })).toHaveCount(0)
+
+  // 서버가 깨면 누르지 않아도 홈으로
+  await page.evaluate(() => {
+    window.__demoServerWaking = false
+  })
+  await expect(page.getByRole('heading', { name: '김시작님' })).toBeVisible({ timeout: 10_000 })
+})

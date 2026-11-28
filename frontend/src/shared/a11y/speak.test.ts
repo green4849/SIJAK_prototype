@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { speakKorean, stopSpeaking } from './speak'
+import { pickKoreanVoice, speakKorean, stopSpeaking } from './speak'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -32,4 +32,17 @@ it('한국어 음성과 설정한 속도로 읽고 중지할 수 있다', () => 
   }))
   stopSpeaking()
   expect(cancel).toHaveBeenCalledTimes(2)
+})
+
+it('가장 사람 같은 한국어 음성을 고른다 — 신경망 > 향상된 > Google > 기본', () => {
+  const v = (name: string, lang = 'ko-KR', localService = true) => ({ name, lang, localService })
+  const yuna = v('Yuna')
+  const google = v('Google 한국의', 'ko-KR', false)
+  const enhanced = v('Yuna (향상됨)')
+  const edge = v('Microsoft SunHi Online (Natural) - Korean (Korea)', 'ko-KR', false)
+  expect(pickKoreanVoice([yuna, google])).toBe(google)
+  expect(pickKoreanVoice([yuna, google, enhanced])).toBe(enhanced)
+  expect(pickKoreanVoice([yuna, enhanced, edge])).toBe(edge)
+  expect(pickKoreanVoice([v('Samantha', 'en-US'), yuna])).toBe(yuna)
+  expect(pickKoreanVoice([v('Google US English', 'en-US', false)])).toBeUndefined()
 })

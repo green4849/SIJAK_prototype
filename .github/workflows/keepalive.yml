@@ -1,0 +1,31 @@
+# 운영 서버(Render 무료) 깨워 두기 — 15분 동안 요청이 없으면 잠들어 첫 화면이 10초~1분 늦어진다.
+# 10분마다 상태 확인 주소를 한 번 불러 잠들지 않게 한다. 비밀값·DB 접속 없음.
+#
+# - GitHub 예약 실행은 몇 분씩 늦을 수 있어 가끔은 잠들 수 있다 — 그때는 화면이 '서버를 깨우는 중'으로 안내한다
+# - Render 무료 웹 서비스는 계정 전체 월 750시간 — 서비스 하나를 계속 켜 두어도 넘지 않는다(31일 = 744시간)
+# - 잠깐 멈추려면 저장소 변수 KEEPALIVE=off
+name: Keep Render awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    if: vars.KEEPALIVE != 'off'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: 상태 확인 주소 부르기
+        run: |
+          # 잠들어 있었다면 깨는 데 1분쯤 — 넉넉히 기다린다. 실패해도 다음 회차에 다시
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 https://sijak-6080.onrender.com/api/v1/health || echo 000)
+          echo "health: HTTP $code"
+          [ "$code" = 200 ] || echo "::warning::서버가 응답하지 않음 (HTTP $code) — Render 대시보드 확인"
