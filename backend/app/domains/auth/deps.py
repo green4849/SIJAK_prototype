@@ -36,7 +36,9 @@ async def get_current_user(
     if cred is None:
         raise UnauthorizedError("로그인이 필요해요.", code="not_authenticated")
     claims = decode_token(cred.credentials, "access")
-    return await service.get_active_user(uuid.UUID(claims["sub"]))
+    user = await service.get_active_user(uuid.UUID(claims["sub"]))
+    await service.mark_active(user)
+    return user
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]

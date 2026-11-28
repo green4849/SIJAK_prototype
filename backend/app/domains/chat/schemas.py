@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -18,6 +18,7 @@ class ChatPeer(BaseModel):
     gender: Literal["M", "F"] | None  # 아바타 그림(할머니·할아버지) 구분용 — A19
     region_name: str | None
     deleted: bool
+    online: bool
 
 
 class RiskWarning(BaseModel):
@@ -82,6 +83,13 @@ class RoomOut(BaseModel):
                 gender=None if deleted else u.gender,  # type: ignore[arg-type]
                 region_name=None if deleted else REGIONS.get(u.region_code, u.region_code),
                 deleted=deleted,
+                online=bool(
+                    not deleted
+                    and u.status == "active"
+                    and u.show_online_status
+                    and u.last_seen_at
+                    and u.last_seen_at >= datetime.now(UTC) - timedelta(minutes=5)
+                ),
             ),
             last_message=preview,
             last_message_at=s.room.last_message_at,

@@ -152,6 +152,7 @@ class UserOut(BaseModel):
     interests: list[str]
     intro: str
     has_location: bool
+    show_online_status: bool
     # 필수 약관이 바뀌었거나 동의 기록이 없으면 true → 앱이 다시 동의 화면을 보여 준다
     consent_needed: bool
     # 마음 건강 기록(민감정보) 선택 동의 — false 면 자가 점검 결과를 저장하지 않는다
@@ -170,6 +171,7 @@ class UserOut(BaseModel):
             interests=[i.category for i in user.interests],
             intro=user.intro,
             has_location=user.geo_lat is not None,
+            show_online_status=user.show_online_status,
             consent_needed=bool(AuthService.consent_needed(user)),
             health_consent=AuthService.has_consent(user, "health"),
         )
@@ -188,6 +190,7 @@ class ProfileUpdate(BaseModel):
     intro: str | None = Field(None, max_length=INTRO_MAX_LEN)
     region_code: str | None = None
     interests: list[str] | None = Field(None, max_length=12)
+    show_online_status: bool | None = None
 
 
 class LoggedInResult(BaseModel):

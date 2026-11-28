@@ -237,7 +237,11 @@ async def me(user: CurrentUser) -> UserOut:
 @router.patch("/me", response_model=UserOut)
 async def update_me(body: ProfileUpdate, user: CurrentUser, service: AuthServiceDep) -> UserOut:
     updated = await service.update_profile(
-        user, intro=body.intro, region_code=body.region_code, interests=body.interests
+        user,
+        intro=body.intro,
+        region_code=body.region_code,
+        interests=body.interests,
+        show_online_status=body.show_online_status,
     )
     return UserOut.from_user(updated)
 
