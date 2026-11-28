@@ -71,6 +71,9 @@ router  ──►  service  ──►  repository  ──►  DB
 5. **도메인 간 참조는 service → service 만 허용.** 다른 도메인의 repository/model을 직접 import 금지.
    - 예외: 로그인 사용자는 `app.domains.auth.deps.CurrentUser` 로 얻는다 (auth의 공개 API).
 6. 설정값·키는 `core.config.Settings` 로만 읽는다. 코드에 하드코딩 금지.
+7. **마이그레이션은 '추가만'** (운영 배포 중에는 옛 서버와 새 DB 가 잠깐 함께 돈다). 칸·표 추가, NOT NULL 칸은 `server_default` 와 함께. 칸 이름 바꾸기·지우기·타입 바꾸기는 두 번에 나눠서 — 먼저 새 칸을 추가해 코드가 옮겨 가게 배포한 뒤, 다음 배포에서 옛 칸을 지운다.
+   - 컨테이너 시작(`docker-entrypoint.sh`)은 DB 가 코드보다 새 버전이면 마이그레이션을 건너뛰고 서버를 띄운다 — 새 배포가 멈춰도 옛 서버가 살아 있게 (2026-11-28 장애)
+   - 마이그레이션은 잠금을 `MIGRATION_LOCK_TIMEOUT`(기본 30초)까지만 기다리고 실패한다(`alembic/env.py`) — 배포가 멈춰 있지 않게
 
 ## 3. 프론트 레이어 규칙 (`frontend/src`)
 

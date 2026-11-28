@@ -2,7 +2,7 @@
 
 | 영역 | 크기 | 우선 | 상태 | 브랜치 |
 |---|---|---|---|---|
-| 실서비스 필수 | L | P0 | 🔨 1단계 Firebase 문자 인증 ✅ / PASS 대기 | `feat/B4-firebase-phone` |
+| 실서비스 필수 | L | P0 | 🔨 Firebase 문자 인증 코드 ✅(#67) · 운영은 카카오 로그인(#79, 본인확인 아님) / PASS 대기 | `feat/B4-firebase-phone` |
 
 ## 왜
 현재 Mock.
