@@ -1,8 +1,7 @@
-# 비워둔 기능 (프로토타입 범위 밖)
+# 남아 있는 기능과 운영 조건
 
-프로토타입은 **프론트 완성 우선, 백엔드는 단순 구현**으로 간다.
-아래 항목은 자리(인터페이스·컬럼·TODO)만 만들어 두고 실제 로직은 비워 둔다.
-각 항목의 "꽂는 곳"만 채우면 나머지 코드는 바꿀 필요가 없도록 경계를 잡아 두었다.
+아래 항목은 코드·시연 화면·운영 설정 중 아직 끝나지 않은 부분을 기록한다.
+현재 상태는 각 작업 파일(`docs/tasks/`)과 함께 확인한다.
 
 ---
 
@@ -44,7 +43,7 @@ AI 말동무, 음성 통화(⑤ 📞), 사회적 관계 지수·자가평가, �
 | 봉사 참여 포인트 | **신청하면 바로** +100P, 취소하면 회수 | 복지관 참석 확인(운영 화면 B7 또는 기관 연동) 후 `PointService.earn_volunteer()` 를 부르도록 `activity/service.py` `apply()` 에서 옮긴다 |
 | 포인트 충전·구독 | 화면 안내만 (결제 없음) | 결제사 연동 시 `point` 도메인에 충전 사유(`REASONS`) 추가 + 영수증 테이블. 구독 = 매달 포인트 적립 작업 |
 | 대화 주제 추천 | 관심사별 문구 규칙 (`chat/topics.py`) | `suggest()` 안을 `integrations/llm` 호출로 — 최근 대화 몇 개 + 두 사람 관심사를 넣고 질문형 문구 3~4개 |
-| 추천 알림 발송 | 설정 저장만 (`notification` 도메인) | C4 푸시 알림 발송기가 `NotificationService.get()` 을 읽어 고른 시각에만, 밤 9시~아침 8시 제외 |
+| 추천 알림 발송 | 예약 작업 코드가 고른 시각에 알림을 생성하고 Web Push 키가 있으면 발송. 운영 예약 작업은 비활성화 | 운영 DB 연결·비밀값·VAPID 키를 설정하고 실기기에서 확인 (`docs/deploy-render.md`) |
 | 체험단 무료 기간 | `.env` `POINT_FREE_UNTIL=2026-11-30` 처럼 날짜 하나 | 기간을 여러 개·사용자별로 두려면 point 도메인에 프로모션 테이블 |
 
 ## 7. 화면·시연 데이터만 있는 기능 (백엔드 없음)
@@ -62,7 +61,7 @@ AI 말동무, 음성 통화(⑤ 📞), 사회적 관계 지수·자가평가, �
 | C10 긴급 도움·보호자 ✅ 백엔드 있음 | `/sos` (홈 오른쪽 위 '긴급'), `/me/guardians` | `POST /emergency/sos` · `GET·POST /me/guardians` · `DELETE /me/guardians/:id` | `domains/emergency` (guardians·sos_events). 보호자 전화번호는 users 처럼 AES-256-GCM 암호화, 3명까지. 긴급 도움은 기록하고, **문자 발송이 켜져 있으면(`SMS_PROVIDER=solapi`) 보호자마다 문자**를 바로 보낸다(실패하면 한 번 더, 남은 실패는 `scripts.jobs sos-retry`·`loop` 가 1시간 안에서 3번까지). 보호자별 결과는 `sos_deliveries`, 화면은 실제 결과대로(보냄·일부·못 보냄·기록만). 기본값 `off` 는 기록만. `GET /emergency` 로 확인 창 문구를 고른다. 연달아 누르기 10분 3번. 남은 것: 푸시(C4)·복지사 연계·위치 첨부, 문자 수신 확인(솔라피 전달 결과 조회) |
 | C7 가까운 복지시설 ✅ 백엔드·공공데이터 경로당 연동 (운영 적재 대기) | `/welfare` (지역생활 맨 위 카드), `/welfare/:id` | `GET /welfare/nearby?kind=` · `GET /welfare/:id` | `domains/welfare` (welfare_centers·programs·rooms). `GET /welfare/search`: 반경 5km → 없으면 10km → 20km 로 넓히고, 그래도 없으면 거리와 상관없이 가장 가까운 5곳(어떻게 찾았는지 `mode` 로 — 화면이 「5km 안에는 없어서 10km 안을 보여 드려요」처럼 사실대로 안내). 예전 `/welfare/nearby` 는 같은 결과의 목록만. 반경 검색은 위도·경도 사각형으로 거른 뒤 대원거리로 계산(`core/geo.py`, 친구 같은 동네와 같은 함수), 0.5km 단위. 내 위치가 없으면 같은 시·도 시설을 거리 없이. **PostGIS `ST_DWithin` 은 쓰지 않음** — CI DB(`postgres:16`)에 확장이 없고, PostGIS 이미지로 바꾸면 tiger 테이블 때문에 `alembic check` 가 실패한다. 커지면 `WelfareRepository.in_box` 만 바꾼다. 데이터: 키가 없으면 `scripts.seed` 의 **가명 예시 4곳**(`source='sample'`, 전화번호 없음 → 화면에서 전화 버튼 숨김, 응답 `sample_note` 로 '예시' 안내). 공공데이터포털 경로당은 `PUBLIC_DATA_API_KEY` + `scripts.import_welfare --all`로 가져온다. 운영 일회성 실행은 `docs/welfare-import.md`를 따른다. 노인복지관·시니어센터는 별도 출처가 필요하다 |
 | 두뇌 운동 (인지 훈련) ✅ 백엔드 있음 | `/brain` (홈 아래 카드), `/brain/match` `/brain/calc` | `GET /brain/stats` · `POST /brain/results` | `domains/brain` (brain_results). 게임은 화면에서만 돌고 서버는 기록만 — 연속 일수·이번 주(월~일)·최고 기록을 **한국 날짜**로 센다. 남은 것: 게임 종류·난이도, 사회적 관계 지수 '앱 활동' 요인에 반영 |
-| 알림함 (C4 일부) ✅ 백엔드 있음 | `/notifications` (마이페이지 '알림함') | `GET /notifications` · `POST /notifications/:id/read` · `POST /notifications/read-all` | `domains/notification` 의 `notifications` 테이블(최근 50개). 소식은 친구 신청 받음·친구 됨·위험 대화(경고 2단계 이상, 받는 사람)·활동 신청에서 `NotificationService.on_*` 로 쌓인다(같은 일은 `ref` 로 한 번만). 데모는 시드 6개 그대로. 남은 것: 활동 하루 전·마음 날씨·복지관·포인트 소식(예약 작업 필요), 푸시 발송(C4) |
-| B3 회원 탈퇴 ✅ 백엔드 있음 | `/me/leave` (마이페이지 맨 아래) | `POST /me/withdraw` | auth 서비스 `withdraw`: 바로 `status=deleted`(로그인·추천·친구 목록에서 빠짐), 모든 refresh 토큰 폐기, `users.delete_after`(한국 날짜 +30일)·`withdraw_reason` 기록. 다시 인증하면 「○월 ○일 뒤에 다시 가입할 수 있어요」. **예약 작업**(`app/jobs.py`, 운영은 compose `jobs` 서비스가 매일 새벽 4시): delete_after 가 된 계정을 행째 삭제(친구·대화·포인트 등은 외래키로 함께, 그 대화방의 음성 파일도), 지우기 전에 탈퇴 이유만 달별로 `withdrawal_reason_counts` 에. 음성 파일은 90일(`VOICE_RETENTION_DAYS`) 지나면 지우고 메시지는 「보관 기간이 지나 지운 음성 메시지예요」로. 남은 것: 대화방 목록에서 탈퇴한 분 표시 |
+| 알림함 (C4 일부) ✅ 백엔드 있음 | `/notifications` (마이페이지 '알림함') | `GET /notifications` · `POST /notifications/:id/read` · `POST /notifications/read-all` | `domains/notification` 의 `notifications` 테이블(최근 50개). 친구 신청·수락·위험 대화·활동 신청을 저장한다. 활동 하루 전·추천 친구는 예약 작업 코드가 생성하지만 운영 실행은 비활성화 상태다. Web Push 코드는 있으나 운영 키와 실기기 수신 확인이 남았다. 마음 날씨·복지관·포인트 소식은 별도 구현 필요 |
+| B3 회원 탈퇴 ✅ 백엔드 있음 | `/me/leave` (마이페이지 맨 아래) | `POST /me/withdraw` | auth 서비스 `withdraw`: 바로 `status=deleted`(로그인·추천·친구 목록에서 빠짐), 모든 refresh 토큰 폐기, `users.delete_after`(한국 날짜 +30일)·`withdraw_reason` 기록. 다시 인증하면 「○월 ○일 뒤에 다시 가입할 수 있어요」. 예약 작업 코드는 삭제일이 된 계정과 90일 지난 음성 파일을 정리한다. 대화방의 탈퇴 회원 익명 표시와 새 메시지 차단도 구현됨(#82). 운영 예약 실행은 비활성화 상태라 삭제 일정은 아직 자동 보장되지 않음 |
 | B7 운영자 화면 ✅ 백엔드 있음 | `/admin` (주소로 직접) | `GET /admin/cases` · `POST /admin/cases/:id/action` · `GET /admin/watch` | `domains/admin` (moderation_actions). **운영자 역할 필수** — `users.role='operator'`, 아니면 403(데모는 로그인만 확인). 역할은 API로 못 바꾸고 `uv run python -m scripts.set_role --user-id <회원 UUID> operator` 또는 `--kakao-id <카카오 회원번호>`로 지정한다. 기존 전화 회원은 전화번호도 가능하다. 사건 = risk 자동 감지(`auto-<id>`) + 이웃 신고(`report-<id>`), 처리는 기록으로 남고 한 번만. 7일 정지·영구 제한은 계정 상태에 바로 반영(모든 기기 로그아웃, 정지는 기한 지나면 다음 접속 때 풀림). 돌봄 목록 = 이번·지난주 사회적 관계 지수가 '정상' 아래인 사람 낮은 순, 보호자 알림 = 최근 7일 긴급 도움. 지수 일괄 계산은 예약 작업 활성화 후 실행된다. 신고 메시지 앞뒤 각 5개 대화 맥락은 운영자만 조회 가능. 남은 것: 경고 문구 발송, 지역(복지관)별 담당 범위 |
 | C14 시작이 앱 가이드 | 모든 화면 구석의 3D 시작이 (긴급·운영자 제외) | 없음 — 답은 기기 안에서 고른다(`features/guide/lib`). 서버를 부르지 않으므로 실제 서버로 띄워도 그대로 동작 | `domains/guide` + `integrations/llm`, 서버 STT/TTS(C2). `GuideEngine`(lib/types.ts) 하나만 서버 구현으로 바꾼다. 위기·위급 판단은 계속 기기에서 먼저. 되는 것/안 되는 것 표: `docs/tasks/C14-sijagi-guide.md` |

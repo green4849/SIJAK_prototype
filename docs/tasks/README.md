@@ -12,14 +12,14 @@
 |---|---|---|---|---|
 | [A1](A1-unread-badges.md) | 하단 탭·홈 카드에 안 읽은 메시지·받은 친구 신청 배지 | S | P1 | ✅ |
 | [A2](A2-chat-scroll.md) | 대화 스크롤 — 위로 읽는 중이면 끌어내리지 않기 + '새 메시지 ↓' | S | P1 | ✅ |
-| [A3](A3-chat-history.md) | 지난 대화 더 보기 (100개 초과 이력) | M | P2 | ⬜ |
+| [A3](A3-chat-history.md) | 지난 대화 더 보기 (100개 초과 이력) | M | P2 | ✅ main 반영 |
 | [A4](A4-action-feedback.md) | 동작 후 피드백 — 토스트·진동 | S | P1 | ✅ |
 | [A5](A5-voice-input.md) | 입력칸 옆 음성 입력(받아쓰기) 버튼 | M | P1 | ⬜ |
-| [A6](A6-screen-reader-tts.md) | 화면 읽어 주기(TTS) 버튼 | M | P2 | ⬜ |
-| [A7](A7-skeleton-offline.md) | 불러오는 중 스켈레톤, 연결 끊김 안내 | S | P2 | ⬜ |
-| [A8](A8-search.md) | 검색 (시안 ④⑥ 돋보기) | M | P2 | ⬜ |
+| [A6](A6-screen-reader-tts.md) | 화면 읽어 주기(TTS) 버튼 | M | P2 | ✅ main 반영 · 실기기 확인 대기 |
+| [A7](A7-skeleton-offline.md) | 불러오는 중 스켈레톤, 연결 끊김 안내 | S | P2 | ✅ main 반영 |
+| [A8](A8-search.md) | 검색 (시안 ④⑥ 돋보기) | M | P2 | ✅ main 반영 |
 | [A9](A9-profile-photo.md) | 프로필 사진 (선택) | M | P2 | ⬜ |
-| [A10](A10-online-status.md) | '지금 접속 중' 표시 (시안 ⑤) | S | P2 | ⬜ |
+| [A10](A10-online-status.md) | '지금 접속 중' 표시 (시안 ⑤) | S | P2 | ✅ main 반영 · 기본 숨김 |
 | [A11](A11-usability-test.md) | 실사용자 접근성 점검 | M | P1 | ⬜ |
 | [A12](A12-type-spacing.md) | 글자 체계·여백 정리 (디자인 리뷰 1) | M | P1 | ✅ |
 | [A13](A13-color-cards.md) | 색 역할·카드 표현 통일 (디자인 리뷰 2) | M | P1 | ✅ |
@@ -30,40 +30,40 @@
 | [A18](A18-less-text.md) | 화면 글씨 줄이기 — 설명은 시연 대본으로 | S | P1 | ✅ |
 | [A19](A19-friendly-illustrations.md) | 친근한 일러스트 되살리기 (처음 시안의 약 40%) | M | P1 | ✅ |
 | [A20](A20-activity-photos.md) | 지역생활 활동에 실제 사진 | S | P1 | ✅ |
-| [A21](A21-location-consent-region.md) | 사는 곳 = 위치 정보 수집 동의 (+ 위치 다시 확인) | S | P1 | 🔨 |
+| [A21](A21-location-consent-region.md) | 사는 곳 = 위치 정보 수집 동의 (+ 위치 다시 확인) | S | P1 | ✅ 구현 · 위치 조회 실패 시 가입 경로 점검 |
 | [A22](A22-welcome-screen.md) | 시작 화면 다듬기 — 등장 연출·글씨 크게·슬로건·배치 | S | P1 | ✅ |
 | [A23](A23-activity-card-align.md) | 지역생활 카드 정렬 — 같은 줄 카드 높이 맞춤 | S | P1 | ✅ |
 | [A24](A24-interest-select.md) | 가입 — 좋아하는 활동을 둥근 그림으로, 한 화면에 질문 하나 | S | P1 | ✅ |
-| [A25](A25-login-continuity.md) | 시작 → 본인 확인, 이어지는 화면 (새싹 전환·② 머리) | S | P1 | ✅ |
+| [A25](A25-login-continuity.md) | 시작 → 로그인, 이어지는 화면 (새싹 전환·② 머리) | S | P1 | ✅ 카카오 로그인 문구로 변경 |
 | [B1](B1-prod-secret-guard.md) | 운영 환경 기본값 차단 | S | P0 | ✅ |
 | [B2](B2-rate-limit.md) | 요청 횟수 제한 | M | P0 | ✅ |
-| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ✅ |
-| [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | 🔨 Firebase 문자 ✅ · PASS ⬜ |
-| [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | ⬜ |
-| [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | ⬜ |
+| [B3](B3-account-deletion-retention.md) | 회원 탈퇴·30일 후 완전 삭제, 음성 90일 보관 | M | P0 | ✅ 코드 · 운영 예약 실행 꺼짐 |
+| [B4](B4-real-identity.md) | 실제 본인인증 연동 | L | P0 | ⏸ 카카오 로그인만 운영 · 본인확인 미도입 |
+| [B5](B5-location-legal.md) | 위치정보 법적 요건 | M | P0 | 🔨 동의 기록 구현 · 법률 검토 대기 |
+| [B6](B6-terms-consent.md) | 약관·개인정보처리방침 + 가입 동의 | S | P0 | 🔨 화면·기록 구현 · 운영자 정보·법률 검토 대기 |
 | [B7](B7-moderation-console.md) | 신고 처리 운영 화면 | L | P0 | ✅ |
 | [B8](B8-query-performance.md) | N+1 쿼리 정리 | M | P1 | ✅ |
-| [B9](B9-external-session.md) | 인증 세션 외부 저장 (Redis) | S | P1 | ⬜ |
+| [B9](B9-external-session.md) | 다중 서버 요청 제한 저장소 (Redis) | S | P1 | ⏸ 서버 1대에서 불필요 |
 | [B10](B10-deployment.md) | 배포 구성 | M | P0 | ✅ 구성 |
 | [B11](B11-error-tracking.md) | 오류 수집·로그 | S | P1 | 🔨 코드 완료·운영 설정 대기 |
 | [B12](B12-backup-keys.md) | 백업·키 관리 | M | P1 | 🔨 코드 완료·운영 설정 대기 |
 | [C1](C1-realtime-chat.md) | 실시간 대화 (WebSocket) | M | P1 | ⬜ |
 | [C2](C2-stt-tts.md) | STT/TTS 연동 | L | P1 | ⏸ |
 | [C3](C3-nearby-radius.md) | 같은 동네 반경 검색 | S | P1 | ✅ |
-| [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | 🔨 알림함 ✅ · 발송 ⬜ |
+| [C4](C4-push-notifications.md) | 푸시 알림 | M | P1 | 🔨 알림함·Web Push 코드 ✅ · 운영 키·실기기 확인 대기 |
 | [C5](C5-pwa.md) | PWA — 홈 화면에 추가 | S | P1 | ✅ |
 | [C6](C6-risk-ml.md) | 위험 탐지 2·3단계 | L | P2 | ⬜ |
-| [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | 🔨 백엔드 ✅ · 공공데이터 키 ⬜ |
+| [C7](C7-public-data.md) | 공공데이터 복지시설·프로그램 연동 | M | P2 | 🔨 경로당 가져오기 코드·로컬 적재 ✅ · 운영 적재 대기 |
 | [C8](C8-ai-companion.md) | AI 말동무 | L | P2 | 🎭 |
 | [C9](C9-voice-call.md) | 음성 통화 (시안 ⑤ 📞) | L | P2 | ⬜ |
-| [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | ✅ (발송은 C4) |
+| [C10](C10-sos-guardian.md) | 긴급 도움(SOS)·보호자 연결 | M | P2 | ✅ 코드 · 실제 문자 발송 설정 대기 |
 | [C11](C11-wellbeing.md) | 사회적 관계 지수·자가평가 | M | P2 | ✅ (정서는 C8) |
-| [C12](C12-points-engagement.md) | 포인트·추천 평가·대화 주제·봉사모임 | L | P1 | 🔨 |
+| [C12](C12-points-engagement.md) | 포인트·추천 평가·대화 주제·봉사모임 | L | P1 | ✅ 핵심 구현 · 결제·참석 확인은 별도 |
 | [C13](C13-brain-games.md) | 두뇌 운동 (인지 훈련) | M | P2 | ✅ |
 | [C14](C14-sijagi-guide.md) | 시작이 앱 가이드 — 지금 화면을 보고 답하고 버튼을 짚어 주는 길잡이 | M | P1 | 🎭 기기 안 답변 |
 | [C15](C15-survey-matching.md) | 성향조사(8문항)와 추천 적합도 — 잘 맞는 이유를 말로 | M | P1 | ✅ |
 | [D3](D3-openapi-types.md) | API 타입 자동 생성 | M | P1 | ✅ |
-| [D4](D4-unit-tests.md) | 프론트 단위·컴포넌트 테스트 | M | P2 | ⬜ |
+| [D4](D4-unit-tests.md) | 프론트 단위·컴포넌트 테스트 | M | P2 | 🔨 Vitest 도입 · 폼·훅 보강 대기 |
 | [D5](D5-visual-regression.md) | 시각 회귀 테스트 | S | P2 | ⬜ |
 
 D1(e2e 저장소·CI), D2(브랜치·PR 흐름)는 완료 — `docs/roadmap.md` D 참고.

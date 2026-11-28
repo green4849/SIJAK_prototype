@@ -1,18 +1,18 @@
-# B9. 인증 세션 외부 저장 (Redis)
+# B9. 다중 서버 요청 제한 저장소 (Redis)
 
 | 영역 | 크기 | 우선 | 상태 | 브랜치 |
 |---|---|---|---|---|
-| 실서비스 필수 | S | P1 | ⬜ 대기 | `prod/B9-external-session` |
+| 실서비스 필수 | S | P1 | ⏸ 서버 1대·워커 1개에서 보류 | `prod/B9-external-session` |
 
 ## 왜
-Mock 인증 세션이 프로세스 메모리.
+운영 카카오 로그인은 JWT 토큰으로 처리한다. 요청 횟수 제한(`core/ratelimit.py`)은 프로세스 메모리라 서버를 여러 대·워커 여러 개로 늘릴 때 공용 저장소가 필요하다.
 
 ## 손댈 곳
-integrations/identity, docker-compose에 redis
+core/ratelimit.py `RateLimitStore`, 배포 설정
 
 ## 완료 기준
-- [ ] 요청 횟수 제한 저장소도 Redis로 (`core/ratelimit.py` `RateLimitStore` 구현 추가) — B2에서 메모리로 시작
-- [ ] 서버 여러 대에서도 인증 흐름 유지
+- [ ] 다중 서버 전환 시 요청 횟수 제한 저장소를 Redis로 교체
+- [ ] 서버 간 제한 횟수 공유 시험
 
 ## 진행 기록
 
