@@ -35,6 +35,11 @@ const SPEECH_RATES = [
   { value: '1.2', label: '빠르게' },
 ]
 
+const READ_ALOUD = [
+  { value: 'on', label: '읽기 켜기' },
+  { value: 'off', label: '읽기 끄기' },
+]
+
 /**
  * ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 · 시작이 버튼 · 휴대폰 알림 · 추천 친구 알림 (바꾸는 즉시 적용).
  * 예전 '알림 설정' 화면을 여기로 합쳤다 — 옛 주소(/me/notifications)는 #notify 로 넘어온다.
@@ -76,7 +81,7 @@ export function SettingsPage() {
       <OptionGrid
         legend="화면 읽어 주기"
         hint="화면 위쪽 버튼을 누르면 제목과 주요 안내를 읽어요. 기기에 한국어 음성이 필요해요."
-        options={VIBRATION}
+        options={READ_ALOUD}
         selected={[prefs.readAloud ? 'on' : 'off']}
         onToggle={(v) => update({ readAloud: v === 'on' })}
       />
