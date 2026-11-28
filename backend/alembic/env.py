@@ -67,7 +67,8 @@ if not re.fullmatch(r"\d+(ms|s|min)?", MIGRATION_LOCK_TIMEOUT):
 def do_run_migrations(connection: Connection) -> None:
     if connection.dialect.name == "postgresql":
         connection.exec_driver_sql(f"SET lock_timeout = '{MIGRATION_LOCK_TIMEOUT}'")
-        # SET 이 연 트랜잭션을 닫는다 — 열어 둔 채면 alembic 이 바깥 트랜잭션으로 보고 커밋하지 않는다.
+        # SET 이 연 트랜잭션을 닫는다 — 열어 둔 채면 alembic 이 바깥 트랜잭션으로 보고
+        # 커밋하지 않는다.
         # SET 은 연결(세션) 단위라 커밋 뒤에도 유지된다
         connection.commit()
     context.configure(connection=connection, target_metadata=target_metadata)
