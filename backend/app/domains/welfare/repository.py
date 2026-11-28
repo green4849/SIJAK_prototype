@@ -61,6 +61,12 @@ class WelfareRepository:
         )
         return await self.session.scalar(q)
 
+    async def find_sources(self, source: str, source_ids: list[str]) -> dict[str, WelfareCenter]:
+        q = select(WelfareCenter).where(
+            WelfareCenter.source == source, WelfareCenter.source_id.in_(source_ids)
+        )
+        return {center.source_id: center for center in await self.session.scalars(q)}
+
     def add(self, center: WelfareCenter) -> None:
         self.session.add(center)
 

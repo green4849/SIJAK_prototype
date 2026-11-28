@@ -14,6 +14,8 @@
 
 설정 파일: 저장소 맨 위 [`render.yaml`](../render.yaml) (Render Blueprint).
 
+공공데이터 경로당을 Neon 운영 DB에 넣는 일회성 실행 방법은 [경로당 데이터 가져오기](welfare-import.md)를 따른다.
+
 ## 무료 플랜이라 생기는 일 (시범 운영 전에 알아 둘 것)
 
 | 항목 | 내용 |
