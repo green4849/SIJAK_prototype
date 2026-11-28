@@ -127,10 +127,7 @@ async def upsert_records(database_url: str, records: list[FacilityRecord]) -> Im
                     for r in records[start : start + BATCH_SIZE]
                 ]
                 statement = insert(table).values(values)
-                changes = {
-                    column: getattr(statement.excluded, column)
-                    for column in UPDATE_COLUMNS
-                }
+                changes = {column: getattr(statement.excluded, column) for column in UPDATE_COLUMNS}
                 changes["updated_at"] = func.now()
                 changed = or_(
                     *(
@@ -160,11 +157,13 @@ async def database_status(database_url: str) -> None:
         async with engine.connect() as connection:
             table = await _center_table(connection)
             counts = dict(
-                (await connection.execute(
-                    select(table.c.region_code, func.count())
-                    .where(table.c.source == "public_data")
-                    .group_by(table.c.region_code)
-                )).all()
+                (
+                    await connection.execute(
+                        select(table.c.region_code, func.count())
+                        .where(table.c.source == "public_data")
+                        .group_by(table.c.region_code)
+                    )
+                ).all()
             )
             print(f"DB 공공데이터 시설: {sum(counts.values())}곳")
             for code in REGIONS:

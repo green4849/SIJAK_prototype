@@ -93,9 +93,7 @@ class DataGoKrWelfareSource:
                 break
             except HTTPError as exc:
                 if exc.code not in RETRYABLE_HTTP_CODES or attempt == 2:
-                    raise RuntimeError(
-                        f"공공데이터포털 {page}쪽 HTTP {exc.code} 오류"
-                    ) from None
+                    raise RuntimeError(f"공공데이터포털 {page}쪽 HTTP {exc.code} 오류") from None
             except (URLError, TimeoutError, ConnectionError) as exc:
                 if attempt == 2:
                     raise RuntimeError(
