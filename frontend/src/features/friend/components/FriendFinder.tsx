@@ -10,6 +10,7 @@ import { RecommendRating } from './RecommendRating'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
 import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
+import { SkeletonList } from '@/shared/ui/SkeletonList'
 
 interface Props extends PointHooks {
   tab: FriendTab
@@ -51,7 +52,7 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, onboarding =
       {header}
       {error && <Alert>{error}</Alert>}
       {actionError && <Alert>{actionError}</Alert>}
-      {loading && !data && <p role="status">이웃을 찾고 있어요…</p>}
+      {loading && !data && <SkeletonList label="이웃을 찾고 있어요." />}
       {data && data.length === 0 && (
         <div>
           <CoupleScene size="small" />

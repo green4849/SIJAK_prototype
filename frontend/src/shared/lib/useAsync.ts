@@ -32,5 +32,12 @@ export function useAsync<T>(load: () => Promise<T>, deps: unknown[]) {
     void reload()
   }, [reload])
 
+  useEffect(() => {
+    // 오프라인 안내가 사라질 때 현재 화면의 목록도 다시 불러온다.
+    const onReconnect = () => { void reload() }
+    window.addEventListener('online', onReconnect)
+    return () => window.removeEventListener('online', onReconnect)
+  }, [reload])
+
   return { data, error, loading, reload, setData }
 }
