@@ -27,7 +27,9 @@ test('B6: 동의 문서 — 종류·필수 여부·버전이 백엔드와 같고
   expect(C.CONSENT_VERSIONS).toEqual(B.auth.consent_versions)
   expect([...CONSENT_ORDER].sort()).toEqual(Object.keys(B.auth.consent_docs).sort())
   // 본문(shared/legal/documents.ts)을 바꾸고 백엔드 버전을 안 올리면(또는 반대) 여기서 걸린다
-  for (const v of Object.values(B.auth.consent_versions)) expect(v).toBe(LEGAL_VERSION)
+  for (const kind of ['terms', 'privacy'] as const) {
+    expect(B.auth.consent_versions[kind]).toBe(LEGAL_VERSION)
+  }
 })
 
 test('H37: 활동 분류·포인트', () => {

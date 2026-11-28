@@ -58,12 +58,17 @@ WITHDRAW_REASON_MAX_LEN = 30
 #            — 동네 이웃 찾기에 꼭 필요해 필수
 #   health   마음 건강 기록 (PHQ-9·GAD-7·WHO-5 — 개인정보 보호법 제23조 민감정보)
 #            — 선택, 거부해도 가입 가능
-# 2026-11-26: 휴대폰 인증 문자(Firebase, Google)를 맡기는 곳에 추가
-CONSENT_VERSION = "2026-11-26"
+# 2026-11-28: 운영 카카오 로그인과 직접 입력 정보에 맞춰 약관·동의 문구 수정
+CONSENT_VERSION = "2026-11-28"
 CONSENT_DOCS: dict[str, bool] = {  # 종류 → 필수 여부
     "terms": True,
     "privacy": True,
     "location": True,
     "health": False,
 }
-CONSENT_VERSIONS: dict[str, str] = dict.fromkeys(CONSENT_DOCS, CONSENT_VERSION)
+CONSENT_VERSIONS: dict[str, str] = {
+    "terms": CONSENT_VERSION,
+    "privacy": CONSENT_VERSION,
+    "location": "2026-11-26",
+    "health": "2026-11-26",
+}

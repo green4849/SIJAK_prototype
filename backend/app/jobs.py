@@ -15,7 +15,7 @@
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta, timezone
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,6 +46,7 @@ from app.integrations.sms import get_sms_sender
 from app.integrations.sms.base import SmsSender
 
 log = logging.getLogger("jobs")
+KST = timezone(timedelta(hours=9))
 
 SessionFactory = Callable[[], AsyncSession]
 
@@ -55,6 +56,9 @@ class _Services:
     auth: AuthService
     chat: ChatService
     wellbeing: WellbeingService
+    friends: FriendService
+    activities: ActivityService
+    notifications: NotificationService
 
 
 def _services(session: AsyncSession, storage: MediaStorage) -> _Services:
@@ -68,7 +72,80 @@ def _services(session: AsyncSession, storage: MediaStorage) -> _Services:
     wellbeing = WellbeingService(
         WellbeingRepository(session), chat, friends, activities, notifications
     )
-    return _Services(auth, chat, wellbeing)
+    return _Services(auth, chat, wellbeing, friends, activities, notifications)
+
+
+async def remind_activities(
+    sessions: SessionFactory, storage: MediaStorage, today: date | None = None
+) -> int:
+    """한국 날짜 기준 내일 시작하는 활동의 신청자에게 한 번씩 알린다."""
+    tomorrow = (today or datetime.now(KST).date()) + timedelta(days=1)
+    start = datetime.combine(tomorrow, time.min, tzinfo=KST)
+    end = start + timedelta(days=1)
+    async with sessions() as session:
+        rows = await ActivityRepository(session).applications_starting_between(start, end)
+        applications = [(user_id, a.id, a.title) for user_id, a in rows]
+    sent = failures = 0
+    for user_id, activity_id, title in applications:
+        async with sessions() as session:
+            try:
+                s = _services(session, storage)
+                users = await s.auth.get_users({user_id})
+                if (
+                    user_id not in users
+                    or users[user_id].status != "active"
+                    or s.auth.consent_needed(users[user_id])
+                ):
+                    continue
+                if await s.notifications.on_activity_reminder(
+                    user_id, activity_id, title, tomorrow.isoformat()
+                ):
+                    sent += 1
+                await session.commit()
+            except Exception as exc:  # noqa: BLE001 — 다른 신청자에게는 계속
+                failures += 1
+                report_exception(exc, "activity_reminder")
+                await session.rollback()
+    if failures:
+        raise RuntimeError(f"활동 알림 실패 {failures}건")
+    return sent
+
+
+async def run_recommendations(
+    sessions: SessionFactory, storage: MediaStorage, slot: str, today: date | None = None
+) -> int:
+    """고른 시간에 추천 이웃이 있는 회원만 알린다. ref로 중복 실행을 막는다."""
+    from app.domains.notification.models import TIME_SLOTS
+
+    if slot not in TIME_SLOTS:
+        raise ValueError("알 수 없는 추천 시간")
+    day = (today or datetime.now(KST).date()).isoformat()
+    async with sessions() as session:
+        user_ids = [u.id for u in await _services(session, storage).auth.list_active_users()]
+    sent = failures = 0
+    for user_id in user_ids:
+        async with sessions() as session:
+            try:
+                s = _services(session, storage)
+                prefs = await s.notifications.get(user_id)
+                if not prefs.recommend_enabled or slot not in prefs.recommend_times:
+                    continue
+                me = await s.auth.get_active_user(user_id)
+                if s.auth.consent_needed(me):
+                    continue
+                if not await s.friends.recommend(me, "recommended"):
+                    continue
+                if await s.notifications.on_recommendation(user_id, day, slot):
+                    sent += 1
+                await session.commit()
+            except Exception as exc:  # noqa: BLE001 — 다른 회원에게는 계속
+                failures += 1
+                report_exception(exc, "recommendation_reminder")
+                await session.rollback()
+    await push.drain()
+    if failures:
+        raise RuntimeError(f"추천 알림 실패 {failures}건")
+    return sent
 
 
 async def purge_withdrawn(
@@ -129,6 +206,7 @@ async def _run_daily(sessions: SessionFactory, storage: MediaStorage) -> dict[st
         ("purged_users", purge_withdrawn),
         ("expired_voice", expire_voice),
         ("relation_index", refresh_relation_index),
+        ("activity_reminders", remind_activities),
     ):
         try:
             result[name] = await task(sessions, storage)

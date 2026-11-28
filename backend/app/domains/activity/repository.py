@@ -47,6 +47,17 @@ class ActivityRepository:
         q = select(ActivityApplication.activity_id).where(ActivityApplication.user_id == user_id)
         return list(await self.session.scalars(q))
 
+    async def applications_starting_between(
+        self, start: datetime, end: datetime
+    ) -> list[tuple[uuid.UUID, Activity]]:
+        """내일 시작하는 활동의 현재 신청자를 반환한다. 회원 상태는 호출자가 확인한다."""
+        q = (
+            select(ActivityApplication.user_id, Activity)
+            .join(Activity, Activity.id == ActivityApplication.activity_id)
+            .where(Activity.starts_at >= start, Activity.starts_at < end)
+        )
+        return [(user_id, activity) for user_id, activity in (await self.session.execute(q))]
+
     async def liked_ids(self, user_id: uuid.UUID) -> list[uuid.UUID]:
         q = select(ActivityLike.activity_id).where(ActivityLike.user_id == user_id)
         return list(await self.session.scalars(q))
