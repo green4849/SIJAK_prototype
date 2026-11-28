@@ -4,8 +4,8 @@ import { useAsync } from '@/shared/lib/useAsync'
 import { toast } from '@/shared/lib/toast'
 import { activityApi, type ActivityData, type Category, type MineKind } from '../api/activityApi'
 
-export function useActivityList(category: Category) {
-  return useAsync(() => activityApi.list(category), [category])
+export function useActivityList(category: Category, q = '') {
+  return useAsync(() => activityApi.list(category, q), [category, q])
 }
 
 export function useMyActivities(kind: MineKind) {

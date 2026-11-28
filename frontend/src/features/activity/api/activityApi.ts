@@ -8,8 +8,13 @@ export type Category = 'all' | ActivityData['category']
 export type MineKind = 'applied' | 'liked'
 
 export const activityApi = {
-  list: (category: Category) =>
-    api.get<ActivityData[]>(category === 'all' ? '/activities' : `/activities?category=${category}`),
+  list: (category: Category, q = '') => {
+    const params = new URLSearchParams()
+    if (category !== 'all') params.set('category', category)
+    if (q) params.set('q', q)
+    const query = params.toString()
+    return api.get<ActivityData[]>(`/activities${query ? `?${query}` : ''}`)
+  },
   detail: (id: string) => api.get<ActivityData>(`/activities/${id}`),
   apply: (id: string) => api.post<ActivityData>(`/activities/${id}/application`),
   cancel: (id: string) => api.delete<ActivityData>(`/activities/${id}/application`),

@@ -3169,6 +3169,17 @@
               ],
               "title": "Category"
             }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 50,
+              "title": "Q",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -4698,6 +4709,17 @@
                 "nearby"
               ],
               "title": "Tab",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 50,
+              "title": "Q",
               "type": "string"
             }
           }

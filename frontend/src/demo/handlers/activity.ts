@@ -62,10 +62,13 @@ export const activityRoutes: Route[] = [
   ['GET', '/activities', (req) => {
     const me = requireUser(req)
     const cat = req.query.get('category')
+    const needle = (req.query.get('q') ?? '').trim().toLocaleLowerCase()
     const now = new Date().toISOString()
     const upcoming = db().activities.filter((a) => a.ends_at >= now && (!cat || !CATEGORIES[cat] || a.category === cat))
     const mine = upcoming.filter((a) => a.region_code === me.region_code)
-    return json((mine.length ? mine : upcoming).sort(byStart).map((a) => out(a, me)))
+    return json((mine.length ? mine : upcoming)
+      .filter((a) => !needle || a.title.toLocaleLowerCase().includes(needle) || a.place.toLocaleLowerCase().includes(needle))
+      .sort(byStart).map((a) => out(a, me)))
   }],
 
   ['GET', '/activities/:id', (req) => json(out(find(req.params.id), requireUser(req)))],

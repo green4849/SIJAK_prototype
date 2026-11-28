@@ -71,6 +71,11 @@ async def test_list_apply_capacity_like(client: AsyncClient, db_sessionmaker) ->
     health = (await client.get("/api/v1/activities?category=health", headers=ha)).json()
     assert [a["title"] for a in health] == ["건강 걷기"]
     assert health[0]["category_label"] == "건강"
+    by_title = (await client.get("/api/v1/activities?q=걷기", headers=ha)).json()
+    assert [a["title"] for a in by_title] == ["건강 걷기"]
+    by_place = (await client.get("/api/v1/activities?q=회관", headers=ha)).json()
+    assert [a["title"] for a in by_place] == ["영화 상영"]
+    assert (await client.get("/api/v1/activities?q=없는장소", headers=ha)).json() == []
 
     # 신청 (정원 2)
     walk = ids["walk"]

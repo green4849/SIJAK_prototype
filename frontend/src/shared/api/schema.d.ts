@@ -2651,6 +2651,7 @@ export interface operations {
         parameters: {
             query?: {
                 category?: string | null;
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -3633,6 +3634,7 @@ export interface operations {
         parameters: {
             query?: {
                 tab?: "recommended" | "nearby";
+                q?: string;
             };
             header?: never;
             path?: never;

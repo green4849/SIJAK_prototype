@@ -100,10 +100,13 @@ export const friendRoutes: Route[] = [
     const me = requireUser(req)
     const rel = relations(me.id)
     const blocked = relatedBlocks(me.id)
+    const needle = (req.query.get('q') ?? '').trim().toLocaleLowerCase()
     // 이미 친구이거나, 나에게 신청을 보낸 분(위 '나에게 온 친구 신청'에 따로 나온다)은 뺀다
     const pool = db().users.filter((u) => {
       const r = rel.get(u.id)?.[0]
+      const fields = [u.name, u.intro, ...u.interests.map((i) => INTERESTS[i] ?? i)]
       return u.id !== me.id && r !== 'friends' && r !== 'received' && !blocked.has(u.id)
+        && (!needle || fields.some((field) => field.toLocaleLowerCase().includes(needle)))
     })
     if (req.query.get('tab') === 'nearby') {
       const near = findNearby(me, pool).slice(0, 30)

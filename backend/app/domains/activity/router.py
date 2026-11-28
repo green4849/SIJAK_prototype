@@ -19,9 +19,12 @@ async def categories() -> list[CategoryOption]:
 
 @router.get("", response_model=list[ActivityOut])
 async def list_activities(
-    me: CurrentUser, service: ActivityServiceDep, category: str | None = None
+    me: CurrentUser,
+    service: ActivityServiceDep,
+    category: str | None = None,
+    q: Annotated[str, Query(max_length=50)] = "",
 ) -> list[ActivityOut]:
-    return [ActivityOut.of(v) for v in await service.browse(me, category)]
+    return [ActivityOut.of(v) for v in await service.browse(me, category, q)]
 
 
 @router.get("/mine", response_model=list[ActivityOut])
