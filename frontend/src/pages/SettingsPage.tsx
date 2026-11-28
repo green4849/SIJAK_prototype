@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { authApi, useAuth } from '@/features/auth'
 import { NotificationSettings, PushSettings } from '@/features/notification'
+import { Alert } from '@/shared/ui/Alert'
 import type { Contrast, FontScale } from '@/shared/a11y/preferences'
 import { useA11yPrefs } from '@/shared/a11y/useA11yPrefs'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
@@ -46,7 +48,23 @@ const READ_ALOUD = [
  */
 export function SettingsPage() {
   const { prefs, update } = useA11yPrefs()
+  const { user, updateUser } = useAuth()
+  const [presenceError, setPresenceError] = useState('')
+  const [presenceBusy, setPresenceBusy] = useState(false)
   const { hash } = useLocation()
+
+  async function setPresence(visible: boolean) {
+    if (presenceBusy) return
+    setPresenceBusy(true)
+    setPresenceError('')
+    try {
+      updateUser(await authApi.updateMe({ show_online_status: visible }))
+    } catch {
+      setPresenceError('접속 상태 설정을 저장하지 못했어요. 다시 시도해 주세요.')
+    } finally {
+      setPresenceBusy(false)
+    }
+  }
 
   // 옛 '알림 설정' 주소·알림 안내로 들어오면 알림 칸을 바로 보여 준다
   useEffect(() => {
@@ -92,6 +110,15 @@ export function SettingsPage() {
         onToggle={(v) => update({ speechRate: Number(v) as typeof prefs.speechRate })}
         columns={3}
       />}
+
+      {user && <OptionGrid
+        legend="접속 상태 표시"
+        hint="켜면 활동 중일 때 친구에게 ‘지금 접속 중’으로 보여요. 끄면 이 기능의 활동 시각을 지워요."
+        options={[{ value: 'off', label: '숨기기' }, { value: 'on', label: '보이기' }]}
+        selected={[user.show_online_status ? 'on' : 'off']}
+        onToggle={(v) => void setPresence(v === 'on')}
+      />}
+      {presenceError && <Alert>{presenceError}</Alert>}
 
       {/* C14 — 구석의 '물어보기' 버튼이 거슬리면 숨긴다. 숨겨도 도움말에서 부를 수 있다 */}
       <OptionGrid

@@ -361,6 +361,7 @@ class AuthService:
         intro: str | None = None,
         region_code: str | None = None,
         interests: list[str] | None = None,
+        show_online_status: bool | None = None,
     ) -> User:
         """None인 항목은 그대로 둔다 (부분 수정)."""
         if region_code is not None:
@@ -371,8 +372,20 @@ class AuthService:
             await self.repo.set_interests(user, interests)
         if intro is not None:
             user.intro = " ".join(intro.split())  # 줄바꿈·연속 공백 정리
+        if show_online_status is not None:
+            user.show_online_status = show_online_status
+            user.last_seen_at = datetime.now(UTC) if show_online_status else None
         await self.repo.commit()
         return user
+
+    async def mark_active(self, user: User) -> None:
+        """접속 표시를 켠 회원만 기록한다. 1분 안의 반복 요청은 DB에 다시 쓰지 않는다."""
+        if not user.show_online_status:
+            return
+        now = datetime.now(UTC)
+        if user.last_seen_at is None or user.last_seen_at < now - timedelta(minutes=1):
+            user.last_seen_at = now
+            await self.repo.commit()
 
     async def set_location(self, user: User, lat: float, lng: float) -> User:
         """GPS → 소수점 2자리(≈1.1km)로 뭉개서 저장. 원본 좌표는 남기지 않는다."""

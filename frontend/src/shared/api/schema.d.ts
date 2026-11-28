@@ -1612,6 +1612,8 @@ export interface components {
             gender: ("M" | "F") | null;
             /** Name */
             name: string;
+            /** Online */
+            online: boolean;
             /** Region Name */
             region_name: string | null;
             /**
@@ -2074,6 +2076,8 @@ export interface components {
             intro?: string | null;
             /** Region Code */
             region_code?: string | null;
+            /** Show Online Status */
+            show_online_status?: boolean | null;
         };
         /** PushConfigOut */
         PushConfigOut: {
@@ -2499,6 +2503,8 @@ export interface components {
             region_code: string;
             /** Region Name */
             region_name: string;
+            /** Show Online Status */
+            show_online_status: boolean;
         };
         /** ValidationError */
         ValidationError: {

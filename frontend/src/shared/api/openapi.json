@@ -715,6 +715,10 @@
             "title": "Name",
             "type": "string"
           },
+          "online": {
+            "title": "Online",
+            "type": "boolean"
+          },
           "region_name": {
             "anyOf": [
               {
@@ -738,7 +742,8 @@
           "age",
           "gender",
           "region_name",
-          "deleted"
+          "deleted",
+          "online"
         ],
         "title": "ChatPeer",
         "type": "object"
@@ -1818,6 +1823,17 @@
               }
             ],
             "title": "Region Code"
+          },
+          "show_online_status": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Show Online Status"
           }
         },
         "title": "ProfileUpdate",
@@ -2801,6 +2817,10 @@
           "region_name": {
             "title": "Region Name",
             "type": "string"
+          },
+          "show_online_status": {
+            "title": "Show Online Status",
+            "type": "boolean"
           }
         },
         "required": [
@@ -2814,6 +2834,7 @@
           "interests",
           "intro",
           "has_location",
+          "show_online_status",
           "consent_needed",
           "health_consent"
         ],

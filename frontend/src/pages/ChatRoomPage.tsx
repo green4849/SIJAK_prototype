@@ -48,6 +48,7 @@ export function ChatRoomPage() {
           {!room.peer.deleted && <p className={styles.meta}>
             {room.peer.age}세 · {room.peer.region_name}
           </p>}
+          {room.peer.online && <p className={styles.online}>지금 접속 중</p>}
           {IS_DEMO && <p className={styles.meta}>시연 · 미리 써 둔 답장</p>}
         </div>
       </header>

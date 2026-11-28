@@ -1,5 +1,8 @@
 """⑤ 대화: 친구만 대화 가능 → 텍스트·음성 → 폴링(after) → 안 읽은 개수"""
 
+import uuid
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import event
@@ -32,6 +35,38 @@ async def test_only_friends_can_chat(client: AsyncClient) -> None:
     _, b = await signup_user(client, "박철수")
     r = await client.post(f"/api/v1/chats/with/{b['id']}", headers=ha)
     assert r.status_code == 403 and r.json()["error"]["code"] == "not_friends"
+
+
+async def test_online_status_requires_opt_in_and_recent_activity(
+    client: AsyncClient, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    from app.domains.auth.models import User
+
+    ha, _, hb, b = await _friends(client)
+    rid = (await client.post(f"/api/v1/chats/with/{b['id']}", headers=ha)).json()["id"]
+    url = f"/api/v1/chats/{rid}"
+    assert (await client.get(url, headers=ha)).json()["peer"]["online"] is False
+
+    enabled = await client.patch("/api/v1/me", headers=hb, json={"show_online_status": True})
+    assert enabled.status_code == 200 and enabled.json()["show_online_status"] is True
+    assert (await client.get(url, headers=ha)).json()["peer"]["online"] is True
+
+    async with db_sessionmaker() as session:
+        other = await session.get(User, uuid.UUID(b["id"]))
+        assert other is not None
+        other.last_seen_at = datetime.now(UTC) - timedelta(minutes=6)
+        await session.commit()
+    assert (await client.get(url, headers=ha)).json()["peer"]["online"] is False
+
+    # 공개 설정이 켜진 상태에서 다시 접속하면 활동 시각이 갱신된다.
+    await client.get("/api/v1/me", headers=hb)
+    assert (await client.get(url, headers=ha)).json()["peer"]["online"] is True
+
+    disabled = await client.patch("/api/v1/me", headers=hb, json={"show_online_status": False})
+    assert disabled.status_code == 200 and disabled.json()["show_online_status"] is False
+    async with db_sessionmaker() as session:
+        other = await session.get(User, uuid.UUID(b["id"]))
+        assert other is not None and other.last_seen_at is None
 
 
 async def test_text_voice_polling_unread(client: AsyncClient) -> None:

@@ -26,6 +26,7 @@ function peer(u: DUser): Schema<'ChatPeer'> {
     user_id: u.id, name: deleted ? '탈퇴한 회원' : u.name,
     age: deleted ? null : ageOf(u.birth_date), gender: deleted ? null : u.gender,
     region_name: deleted ? null : regionLabel(u, REGIONS), deleted,
+    online: !deleted && Boolean(u.show_online_status) && Date.now() - u.last_login < 5 * 60_000,
   }
 }
 
