@@ -51,6 +51,10 @@ jobs:
       SOLAPI_API_SECRET: ${{ secrets.JOBS_SOLAPI_API_SECRET }}
       SMS_SENDER_NUMBER: ${{ secrets.JOBS_SMS_SENDER_NUMBER }}
       MEDIA_STORAGE: local
+      # 휴대폰 알림(C4) — Render 와 같은 키. 비어 있으면 알림함에만 쌓고 휴대폰 알림은 보내지 않는다
+      VAPID_PUBLIC_KEY: ${{ secrets.JOBS_VAPID_PUBLIC_KEY }}
+      VAPID_PRIVATE_KEY: ${{ secrets.JOBS_VAPID_PRIVATE_KEY }}
+      VAPID_SUBJECT: https://sijak-6080.onrender.com
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
