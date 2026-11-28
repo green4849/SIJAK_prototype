@@ -117,6 +117,7 @@ async def test_withdrawn_peer_is_anonymous_and_cannot_receive_new_messages(
         "gender": None,
         "region_name": None,
         "deleted": True,
+        "online": False,
     }
     listed = (await client.get(f"{API}/chats", headers=ha)).json()
     assert listed[0]["peer"] == shown
