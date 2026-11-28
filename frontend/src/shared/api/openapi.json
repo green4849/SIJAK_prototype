@@ -4357,6 +4357,17 @@
               "title": "After",
               "type": "integer"
             }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Before",
+              "type": "integer"
+            }
           }
         ],
         "responses": {

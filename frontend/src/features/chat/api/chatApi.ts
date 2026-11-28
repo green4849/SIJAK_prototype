@@ -16,6 +16,8 @@ export const chatApi = {
   openWith: (userId: string) => api.post<ChatRoomData>(`/chats/with/${userId}`),
   messages: (roomId: string, after = 0) =>
     api.get<ChatMessageData[]>(`/chats/${roomId}/messages?after=${after}`),
+  olderMessages: (roomId: string, before: number) =>
+    api.get<ChatMessageData[]>(`/chats/${roomId}/messages?before=${before}`),
   sendText: (roomId: string, text: string) =>
     api.post<ChatMessageData>(`/chats/${roomId}/messages`, { text } satisfies Schema<'TextMessageCreate'>),
   sendVoice: (roomId: string, audio: Blob, durationSec: number) => {

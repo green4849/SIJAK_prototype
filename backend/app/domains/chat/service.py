@@ -100,12 +100,12 @@ class ChatService:
     # ---------- 메시지 ----------
 
     async def messages(
-        self, me: "User", room_id: uuid.UUID, after_id: int = 0
+        self, me: "User", room_id: uuid.UUID, after_id: int = 0, before_id: int = 0
     ) -> list[ChatMessage]:
-        """조회하면 읽음 처리까지 한다"""
+        """최신/새 메시지는 읽음 처리하고, 이전 페이지 조회는 읽음 상태를 유지한다."""
         room = await self._member_room(me, room_id)
-        msgs = await self.repo.list_messages(room.id, after_id)
-        if msgs:
+        msgs = await self.repo.list_messages(room.id, after_id, before_id)
+        if msgs and not before_id:
             self.repo.mark_read(room, me.id, msgs[-1].id)
             await self.repo.commit()
         return msgs

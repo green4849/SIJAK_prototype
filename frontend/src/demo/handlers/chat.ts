@@ -143,9 +143,14 @@ export const chatRoutes: Route[] = [
     const me = requireUser(req)
     const r = memberRoom(req.params.roomId, me.id)
     const after = Number(req.query.get('after') ?? 0)
+    const before = Number(req.query.get('before') ?? 0)
+    if (!Number.isInteger(after) || after < 0 || !Number.isInteger(before) || before < 0 || (after && before))
+      return fail(422, 'invalid_message_cursor', '대화 조회 위치를 확인해 주세요.')
     let msgs = db().messages.filter((m) => m.room === r.id)
-    msgs = after ? msgs.filter((m) => m.id > after) : msgs.slice(-100)
-    if (msgs.length) {
+    msgs = before ? msgs.filter((m) => m.id < before).slice(-100)
+      : after ? msgs.filter((m) => m.id > after).slice(0, 100)
+        : msgs.slice(-100)
+    if (msgs.length && !before) {
       r.read[me.id] = Math.max(r.read[me.id] ?? 0, msgs.at(-1)!.id)
       save()
     }

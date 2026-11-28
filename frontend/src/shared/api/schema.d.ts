@@ -3439,6 +3439,7 @@ export interface operations {
         parameters: {
             query?: {
                 after?: number;
+                before?: number;
             };
             header?: never;
             path: {

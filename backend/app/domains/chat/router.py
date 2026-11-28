@@ -5,6 +5,7 @@ from fastapi import APIRouter, File, Form, Header, Query, UploadFile
 from fastapi.responses import Response
 
 from app.core.config import get_settings
+from app.core.errors import DomainError
 from app.core.media_response import voice_response
 from app.core.ratelimit import Rule, enforce
 from app.domains.auth.deps import CurrentUser
@@ -17,6 +18,11 @@ PREFIX = get_settings().api_prefix
 # 요청 횟수 제한 (B2) — 사람이 손으로 보내는 속도보다 넉넉하게, 도배는 막게
 SEND_TEXT_PER_USER = Rule("chat_text:user", limit=20, window_sec=60, action="메시지 보내기")
 SEND_VOICE_PER_USER = Rule("chat_voice:user", limit=10, window_sec=60, action="음성 메시지 보내기")
+
+
+class InvalidMessageCursorError(DomainError):
+    status_code = 422
+    code = "invalid_message_cursor"
 
 
 @router.post("/with/{user_id}", response_model=RoomOut)
@@ -46,8 +52,14 @@ async def messages(
     me: CurrentUser,
     service: ChatServiceDep,
     after: Annotated[int, Query(ge=0)] = 0,
+    before: Annotated[int, Query(ge=0)] = 0,
 ) -> list[MessageOut]:
-    return [MessageOut.of(m, me.id, PREFIX) for m in await service.messages(me, room_id, after)]
+    if after and before:
+        raise InvalidMessageCursorError("이전 대화와 새 대화를 함께 조회할 수 없어요.")
+    return [
+        MessageOut.of(m, me.id, PREFIX)
+        for m in await service.messages(me, room_id, after_id=after, before_id=before)
+    ]
 
 
 @router.post("/{room_id}/messages", response_model=MessageOut, status_code=201)
