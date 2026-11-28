@@ -42,6 +42,8 @@ export function LocationAgreement({ regions, onChange }: Props) {
       onChange({ regionCode: found.code, areaName, pos })
     } catch (e) {
       setMode('manual')
+      const previousName = neighborhoodName(areaInput, regionCode)
+      if (regionCode && previousName) onChange({ regionCode, areaName: previousName })
       setError(`${e instanceof GeoError ? e.message : '지금은 위치를 찾을 수 없어요.'} 아래에서 동네를 직접 적어 주세요.`)
     } finally {
       setLocating(false)
