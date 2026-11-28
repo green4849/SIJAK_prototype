@@ -1,32 +1,50 @@
-/**
- * 소리 내어 읽기 — 브라우저 내장 음성 합성(Web Speech API).
- * 서버 TTS(C2)를 붙이기 전까지 화면 글을 읽어 주는 데 쓴다. 지원하지 않는 기기에서는 아무 일도 하지 않는다.
- */
+export type SpeakResult = 'speaking' | 'unavailable' | 'no-korean-voice'
 
+/** 시작이와 말동무가 이미 사용하는 음성 지원 확인. */
 export const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window
 
-function koreanVoice(): SpeechSynthesisVoice | undefined {
-  return window.speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith('ko'))
-}
-
-/** 읽기 시작 (이미 읽는 중이면 끊고 새로). 끝나면 onEnd */
+/** 시작이와 말동무의 기존 읽기 동작. */
 export function speak(text: string, onEnd?: () => void) {
   if (!canSpeak()) return
   try {
     const synth = window.speechSynthesis
     synth.cancel()
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'ko-KR'
-    u.rate = 0.9 // 어르신 듣기 편하게 조금 천천히
-    const voice = koreanVoice()
-    if (voice) u.voice = voice
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'ko-KR'
+    utterance.rate = 0.9
+    const voice = synth.getVoices().find((item) => item.lang.toLowerCase().startsWith('ko'))
+    if (voice) utterance.voice = voice
     if (onEnd) {
-      u.onend = onEnd
-      u.onerror = onEnd
+      utterance.onend = onEnd
+      utterance.onerror = onEnd
     }
-    synth.speak(u)
+    synth.speak(utterance)
   } catch {
     onEnd?.()
+  }
+}
+
+/** 브라우저의 음성 합성만 사용한다. 읽을 문장은 외부 서버로 보내지 않는다. */
+export function speakKorean(text: string, rate: number, onEnd: () => void): SpeakResult {
+  if (!canSpeak() || !('SpeechSynthesisUtterance' in window))
+    return 'unavailable'
+  try {
+    const voices = window.speechSynthesis.getVoices()
+    const korean = voices.find((voice) => voice.lang.toLowerCase().startsWith('ko'))
+    // 일부 브라우저는 첫 클릭 때 음성 목록을 늦게 채운다. 목록이 비어 있으면 ko-KR 기본 음성으로 시도한다.
+    if (voices.length && !korean) return 'no-korean-voice'
+
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'ko-KR'
+    utterance.rate = rate
+    if (korean) utterance.voice = korean
+    utterance.onend = onEnd
+    utterance.onerror = onEnd
+    window.speechSynthesis.speak(utterance)
+    return 'speaking'
+  } catch {
+    return 'unavailable'
   }
 }
 

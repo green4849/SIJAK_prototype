@@ -17,7 +17,29 @@
   margin-left: auto;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-1);
 }
+
+.read {
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.read:focus-visible { outline: 3px solid var(--color-primary); }
+
+.speechNotice { margin: var(--space-1) 0 0; color: var(--color-text-muted); }
 
 /* 꺾쇠 그림의 왼쪽 빈 여백(26px 아이콘의 약 7px)만큼 당겨 그림이 정렬선(--gutter)에 닿게 */
 .back {
