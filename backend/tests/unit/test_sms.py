@@ -36,6 +36,12 @@ def test_sos_text_is_short() -> None:
     assert len(t) <= 60
 
 
+def test_sos_text_without_phone() -> None:
+    """카카오로 가입해 앱에 전화번호가 없는 분 — 번호 없이 (보호자는 이미 아는 번호)"""
+    expected = "[시작] 김시작님이 긴급 도움을 요청했어요. 바로 연락해 주세요."
+    assert sos_text("김시작", None) == expected
+
+
 @pytest.mark.parametrize(
     ("statuses", "overall"),
     [

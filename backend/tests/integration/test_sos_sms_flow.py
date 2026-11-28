@@ -91,6 +91,28 @@ async def test_sos_texts_every_guardian(
     assert decrypt(rows[0].phone_enc) == "01098765432"
 
 
+async def test_sos_from_account_without_phone(
+    client: AsyncClient, sms: FakeSms, db_sessionmaker: async_sessionmaker[AsyncSession]
+) -> None:
+    """카카오로 가입한 분은 앱에 전화번호가 없다 — 그래도 보호자에게 문자가 간다 (번호 없이)"""
+    from app.domains.auth.models import User
+
+    h, me = await signup_user(client, "김영희")
+    async with db_sessionmaker() as s:
+        await s.execute(
+            update(User).where(User.id == me["id"]).values(phone_enc=None, phone_hash=None)
+        )
+        await s.commit()
+    await _guardians(client, h, ("김민수", "아들", "01098765432"))
+
+    r = await client.post(f"{API}/emergency/sos", headers=h)
+    assert r.status_code == 201, r.text
+    assert r.json()["delivery_status"] == "sent"
+    assert sms.sent == [
+        ("01098765432", "[시작] 김영희님이 긴급 도움을 요청했어요. 바로 연락해 주세요.")
+    ]
+
+
 async def test_partial_failure_then_job_retry(
     client: AsyncClient, sms: FakeSms, db_sessionmaker: async_sessionmaker[AsyncSession]
 ) -> None:
