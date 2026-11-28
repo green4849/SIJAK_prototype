@@ -29,6 +29,17 @@ const CONTRASTS = [
   { value: 'high', label: '선명한 화면' },
 ]
 
+const SPEECH_RATES = [
+  { value: '0.8', label: '천천히' },
+  { value: '1', label: '보통' },
+  { value: '1.2', label: '빠르게' },
+]
+
+const READ_ALOUD = [
+  { value: 'on', label: '사용' },
+  { value: 'off', label: '사용 안 함' },
+]
+
 /**
  * ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 · 시작이 버튼 · 휴대폰 알림 · 추천 친구 알림 (바꾸는 즉시 적용).
  * 예전 '알림 설정' 화면을 여기로 합쳤다 — 옛 주소(/me/notifications)는 #notify 로 넘어온다.
@@ -66,6 +77,21 @@ export function SettingsPage() {
         selected={[prefs.vibration ? 'on' : 'off']}
         onToggle={(v) => update({ vibration: v === 'on' })}
       />
+
+      <OptionGrid
+        legend="화면 읽어 주기"
+        hint="화면 위쪽 버튼을 누르면 제목과 주요 안내를 읽어요. 기기에 한국어 음성이 필요해요."
+        options={READ_ALOUD}
+        selected={[prefs.readAloud ? 'on' : 'off']}
+        onToggle={(v) => update({ readAloud: v === 'on' })}
+      />
+      {prefs.readAloud && <OptionGrid
+        legend="읽기 속도"
+        options={SPEECH_RATES}
+        selected={[String(prefs.speechRate)]}
+        onToggle={(v) => update({ speechRate: Number(v) as typeof prefs.speechRate })}
+        columns={3}
+      />}
 
       {/* C14 — 구석의 '물어보기' 버튼이 거슬리면 숨긴다. 숨겨도 도움말에서 부를 수 있다 */}
       <OptionGrid
