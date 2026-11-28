@@ -10,7 +10,19 @@ fi
 
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   echo "[entrypoint] alembic upgrade head"
-  alembic upgrade head
+  # DB 가 이 코드보다 새 버전이면(다른 배포가 먼저 마이그레이션을 적용) 실패하지 않고 그대로 띄운다.
+  # 마이그레이션은 '추가만' 하는 규칙이라(docs/dev-order.md) 옛 코드도 새 DB 에서 돈다 —
+  # 새 배포가 멈췄을 때 옛 서버까지 꺼져 전체가 멈추는 일을 막는다 (2026-11-28 장애)
+  if ! out=$(alembic upgrade head 2>&1); then
+    echo "$out"
+    case "$out" in
+      *"Can't locate revision"*)
+        echo "[entrypoint] DB 가 이 코드보다 새 버전 — 마이그레이션 없이 서버를 띄웁니다" ;;
+      *) exit 1 ;;
+    esac
+  else
+    echo "$out"
+  fi
 fi
 
 # 앞단 프록시(Caddy)가 넘겨 준 실제 사용자 IP를 믿는다 — 요청 횟수 제한(B2)이 IP를 보므로.

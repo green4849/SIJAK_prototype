@@ -2,7 +2,7 @@
 
 | 영역 | 크기 | 우선 | 상태 | 브랜치 |
 |---|---|---|---|---|
-| 기능 확장 | M | P2 | ✅ 화면·데모·백엔드(기록) / 발송은 C4 | `feat/C11-C10-wellbeing-sos` → `feat/C10-guardians-sos` |
+| 기능 확장 | M | P2 | ✅ 기록 · 보호자 문자 코드(#73) / 운영 문자 꺼짐(솔라피 키 대기) | `feat/C11-C10-wellbeing-sos` → `feat/C10-guardians-sos` |
 
 ## 왜
 보고서 4.4.1 '긴급 도움(상단 고정) → 1393, 보호자 알림', API `/emergency/sos`.
