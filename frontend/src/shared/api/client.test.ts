@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { api, ApiError, configureAuth, errorMessage, setTransport } from './client'
+import { api, ApiError, configureAuth, errorMessage, isServerWaking, RequestTimeoutError, setTransport } from './client'
 
 const json = (status: number, body: unknown = {}) =>
   new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -82,5 +82,40 @@ describe('api — 응답 해석', () => {
     expect(new Headers(transport.mock.calls[0][1].headers).get('Content-Type')).toBe('application/json')
     expect(new Headers(transport.mock.calls[1][1].headers).get('Content-Type')).toBeNull()
     expect(transport.mock.calls[0][0]).toBe('/api/v1/a')
+  })
+})
+
+describe('잠든 서버 — 시간 제한과 깨는 중 판별', () => {
+  it('timeoutMs 안에 응답이 없으면 요청을 끊고 RequestTimeoutError', async () => {
+    vi.useFakeTimers()
+    try {
+      // 서버가 답하지 않는 상황: abort 될 때까지 끝나지 않는 전송
+      setTransport((_url, init) => new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+      }))
+      const p = api.post('/auth/refresh', undefined, { skipAuthRetry: true, timeoutMs: 12_000 })
+      const caught = p.catch((e: unknown) => e)
+      await vi.advanceTimersByTimeAsync(12_000)
+      const e = await caught
+      expect(e).toBeInstanceOf(RequestTimeoutError)
+      expect(isServerWaking(e)).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('시간 제한이 없으면 신호를 붙이지 않는다 (지금까지와 같게)', async () => {
+    const transport = vi.fn().mockResolvedValue(json(200, { ok: 1 }))
+    setTransport(transport)
+    await api.get('/x')
+    expect(transport.mock.calls[0][1].signal).toBeUndefined()
+  })
+
+  it('앞단 502·503·504 는 깨는 중, 연결 끊김(TypeError)·401 은 아니다', () => {
+    expect(isServerWaking(new ApiError(502, 'unknown_error', ''))).toBe(true)
+    expect(isServerWaking(new ApiError(503, 'unknown_error', ''))).toBe(true)
+    expect(isServerWaking(new ApiError(504, 'unknown_error', ''))).toBe(true)
+    expect(isServerWaking(new ApiError(401, 'invalid_token', ''))).toBe(false)
+    expect(isServerWaking(new TypeError('Failed to fetch'))).toBe(false)
   })
 })

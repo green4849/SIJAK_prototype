@@ -41,6 +41,20 @@ export function configureAuth(hooks: AuthHooks) {
 interface RequestOptions {
   /** true면 401이어도 토큰 갱신·재시도를 하지 않는다 (인증 API 자체용) */
   skipAuthRetry?: boolean
+  /** 이 시간(ms) 안에 응답이 없으면 RequestTimeoutError — 잠든 서버를 무한정 기다리지 않게 */
+  timeoutMs?: number
+}
+
+/** 서버가 제때 답하지 않음 (무료 서버가 잠들었다 깨는 중일 때 등). 연결 끊김(TypeError)과 구분한다 */
+export class RequestTimeoutError extends Error {
+  constructor() {
+    super('서버 응답이 늦어요. 잠시 후 다시 시도해 주세요.')
+  }
+}
+
+/** 서버가 깨어나는 중으로 보이는 오류 — 기다렸다 다시 시도하면 된다 (시간 초과, 앞단 게이트웨이 502·503·504) */
+export function isServerWaking(e: unknown): boolean {
+  return e instanceof RequestTimeoutError || (e instanceof ApiError && [502, 503, 504].includes(e.status))
 }
 
 /**
@@ -54,7 +68,13 @@ export function setTransport(t: Transport) {
   transport = t
 }
 
-async function send(method: string, path: string, body: unknown, token: string | null) {
+async function send(
+  method: string,
+  path: string,
+  body: unknown,
+  token: string | null,
+  timeoutMs?: number,
+) {
   const headers: Record<string, string> = {}
   if (token) headers.Authorization = `Bearer ${token}`
   const isForm = body instanceof FormData
@@ -62,12 +82,23 @@ async function send(method: string, path: string, body: unknown, token: string |
 
   // 절대 경로(/api/v1/...)로 받은 URL도 그대로 쓸 수 있게
   const url = path.startsWith(API_PREFIX) ? path : `${API_PREFIX}${path}`
-  return transport(url, {
+  const init: RequestInit = {
     method,
     headers,
     credentials: 'same-origin', // refresh 쿠키 전송
     body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
-  })
+  }
+  if (!timeoutMs) return transport(url, init)
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  try {
+    return await transport(url, { ...init, signal: ctrl.signal })
+  } catch (e) {
+    if (ctrl.signal.aborted) throw new RequestTimeoutError()
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 async function request<T>(
@@ -76,11 +107,11 @@ async function request<T>(
   body?: unknown,
   opts: RequestOptions = {},
 ): Promise<T> {
-  let res = await send(method, path, body, auth.getAccessToken())
+  let res = await send(method, path, body, auth.getAccessToken(), opts.timeoutMs)
 
   if (res.status === 401 && !opts.skipAuthRetry) {
     const fresh = await auth.refreshAccessToken()
-    if (fresh) res = await send(method, path, body, fresh)
+    if (fresh) res = await send(method, path, body, fresh, opts.timeoutMs)
   }
 
   if (!res.ok) {
