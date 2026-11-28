@@ -14,8 +14,8 @@ export type SurveyAnswers = Schema<'SurveyAnswers'>
 export type SurveyQuestion = Schema<'SurveyQuestion'>
 
 export const friendApi = {
-  recommendations: (tab: FriendTab) =>
-    api.get<FriendCardData[]>(`/friends/recommendations?tab=${tab}`),
+  recommendations: (tab: FriendTab, q = '') =>
+    api.get<FriendCardData[]>(`/friends/recommendations?tab=${tab}&q=${encodeURIComponent(q)}`),
   friends: () => api.get<FriendCardData[]>('/friends'),
   received: () => api.get<FriendCardData[]>('/friends/requests'),
   request: (toUserId: string) =>

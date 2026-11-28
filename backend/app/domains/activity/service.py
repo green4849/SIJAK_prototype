@@ -45,7 +45,9 @@ class ActivityService:
         self.points = points
         self.notifications = notifications
 
-    async def browse(self, me: "User", category: str | None = None) -> list[ActivityView]:
+    async def browse(
+        self, me: "User", category: str | None = None, q: str = ""
+    ) -> list[ActivityView]:
         """내 지역 활동. 내 지역에 하나도 없으면 전체를 보여 준다 (빈 화면 방지)."""
         if category and category not in CATEGORIES:
             category = None
@@ -55,6 +57,11 @@ class ActivityService:
         )
         if not items:
             items = await self.repo.list_upcoming(after=now, region_code=None, category=category)
+        needle = q.strip().casefold()
+        if needle:
+            items = [
+                a for a in items if needle in a.title.casefold() or needle in a.place.casefold()
+            ]
         return await self._views(me, items)
 
     async def detail(self, me: "User", activity_id: uuid.UUID) -> ActivityView:

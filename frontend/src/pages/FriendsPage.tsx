@@ -15,7 +15,9 @@ import {
   usePointSummary,
 } from '@/features/points'
 import { SegmentTabs } from '@/shared/ui/SegmentTabs'
+import { SearchField } from '@/shared/ui/SearchField'
 import { TopBar } from '@/shared/ui/TopBar'
+import { useDebouncedValue } from '@/shared/lib/useDebouncedValue'
 import { assessment, chatWith, friendSurvey } from './routes'
 import styles from './TabPage.module.css'
 
@@ -28,6 +30,8 @@ const TABS: { value: FriendTab; label: string }[] = [
 export function FriendsPage() {
   const { user } = useAuth()
   const [tab, setTab] = useState<FriendTab>('recommended')
+  const [search, setSearch] = useState('')
+  const query = useDebouncedValue(search.trim())
   // 받은 신청을 수락하면 목록을 새로 불러온다
   const [version, setVersion] = useState(0)
   // 포인트 (C12): 신청 버튼의 가격, 평가 안내, 모자랄 때 안내 창 — friend·points 를 여기서 조합
@@ -46,10 +50,12 @@ export function FriendsPage() {
       <ReceivedRequests onChanged={() => setVersion((v) => v + 1)} chatHref={chatWith} />
 
       {!onboarding && <SegmentTabs label="친구 찾는 방법" tabs={TABS} value={tab} onChange={setTab} />}
+      {!onboarding && <SearchField label="이웃 검색" placeholder="이름·소개·관심사" value={search} onChange={setSearch} />}
 
       <FriendFinder
         key={`${tab}-${version}-${user?.has_location}`}
         tab={tab}
+        query={onboarding ? '' : query}
         onboarding={onboarding}
         onFinish={() => navigate(assessment('who5'), { state: { afterSignup: true } })}
         chatHref={chatWith}

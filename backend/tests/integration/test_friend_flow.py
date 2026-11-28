@@ -17,6 +17,15 @@ async def test_recommend_request_accept(client: AsyncClient) -> None:
     assert rec[0]["common_interests"] == ["영화·공연"]
     assert rec[0]["relation"] == "none"
     assert "phone" not in rec[0] and "birth_date" not in rec[0]
+    assert [
+        c["name"]
+        for c in (await client.get("/api/v1/friends/recommendations?q=철수", headers=ha)).json()
+    ] == ["박철수"]
+    assert [
+        c["name"]
+        for c in (await client.get("/api/v1/friends/recommendations?q=영화", headers=ha)).json()
+    ] == ["박철수"]
+    assert (await client.get("/api/v1/friends/recommendations?q=없는사람", headers=ha)).json() == []
 
     # 같은 동네 — 위치를 아직 안 알렸으면 같은 시·도, 거리 없음 (반경 검색은 test_nearby_radius)
     near = (await client.get("/api/v1/friends/recommendations?tab=nearby", headers=ha)).json()
