@@ -4,6 +4,7 @@ import { useMyFriends } from '../hooks/useFriends'
 import { FriendCard } from './FriendCard'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
+import { SkeletonList } from '@/shared/ui/SkeletonList'
 
 /** ⑨ → 내 친구 목록 */
 export function MyFriendList({ chatHref }: { chatHref: (userId: string) => string }) {
@@ -12,7 +13,7 @@ export function MyFriendList({ chatHref }: { chatHref: (userId: string) => strin
   return (
     <section className={styles.section} aria-busy={loading}>
       {error && <Alert>{error}</Alert>}
-      {loading && !data && <p role="status">불러오는 중…</p>}
+      {loading && !data && <SkeletonList label="친구 목록을 불러오는 중이에요." />}
       {data && data.length === 0 && (
         <p className={styles.empty}>
           아직 친구가 없어요.

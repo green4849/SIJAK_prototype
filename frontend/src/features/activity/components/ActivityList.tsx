@@ -6,6 +6,7 @@ import { ActivityThumb } from './ActivityThumb'
 import styles from './ActivityList.module.css'
 import { ICON, ICON_STROKE } from '@/shared/ui/icon'
 import { CardGrid } from '@/shared/ui/CardGrid'
+import { SkeletonList } from '@/shared/ui/SkeletonList'
 
 interface Props {
   items: ActivityData[] | null
@@ -18,7 +19,7 @@ interface Props {
 /** ⑥ 활동 목록 — 한 줄 전체가 눌리는 큰 항목 */
 export function ActivityList({ items, loading, error, detailHref, emptyText }: Props) {
   if (error) return <Alert>{error}</Alert>
-  if (loading && !items) return <p role="status">불러오는 중…</p>
+  if (loading && !items) return <SkeletonList label="활동 목록을 불러오는 중이에요." />
   if (!items || items.length === 0) return <p className={styles.empty}>{emptyText}</p>
 
   return (

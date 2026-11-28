@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { formatRelative } from '@/shared/lib/datetime'
 import { Alert } from '@/shared/ui/Alert'
 import { Avatar } from '@/shared/ui/Avatar'
+import { SkeletonList } from '@/shared/ui/SkeletonList'
 import { useChatRooms } from '../hooks/useChatRooms'
 import styles from './ChatRoomList.module.css'
 
@@ -16,7 +17,7 @@ export function ChatRoomList({ roomHref, empty }: Props) {
   const { data, loading, error } = useChatRooms()
 
   if (error) return <Alert>{error}</Alert>
-  if (loading && !data) return <p role="status">불러오는 중…</p>
+  if (loading && !data) return <SkeletonList label="대화 목록을 불러오는 중이에요." />
   if (!data || data.length === 0) return <>{empty}</>
 
   return (
