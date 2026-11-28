@@ -682,24 +682,49 @@
       "ChatPeer": {
         "properties": {
           "age": {
-            "title": "Age",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean"
           },
           "gender": {
-            "enum": [
-              "M",
-              "F"
+            "anyOf": [
+              {
+                "enum": [
+                  "M",
+                  "F"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Gender",
-            "type": "string"
+            "title": "Gender"
           },
           "name": {
             "title": "Name",
             "type": "string"
           },
           "region_name": {
-            "title": "Region Name",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Name"
           },
           "user_id": {
             "format": "uuid",
@@ -712,7 +737,8 @@
           "name",
           "age",
           "gender",
-          "region_name"
+          "region_name",
+          "deleted"
         ],
         "title": "ChatPeer",
         "type": "object"
@@ -4355,6 +4381,17 @@
               "default": 0,
               "minimum": 0,
               "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Before",
               "type": "integer"
             }
           }

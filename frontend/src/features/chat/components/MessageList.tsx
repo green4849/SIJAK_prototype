@@ -23,7 +23,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
   if (messages.length === 0)
     return (
       <p className={styles.empty}>
-        {peer.name}님께 먼저 인사를 건네 보세요.
+        {peer.deleted ? '이 회원은 탈퇴했어요.' : `${peer.name}님께 먼저 인사를 건네 보세요.`}
         <br />
         글로 써도 되고, ‘말하기’를 눌러 말로 보내도 돼요.
       </p>
@@ -31,7 +31,7 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
 
   return (
     <>
-      <ol className={styles.list} aria-label={`${peer.name}님과의 대화`} aria-live="polite">
+      <ol className={styles.list} aria-label={`${peer.name}${peer.deleted ? '' : '님'}과의 대화`} aria-live="polite">
         {messages.map((m, i) => {
           const prev = messages[i - 1]
           const newDay = !prev || !isSameDay(prev.created_at, m.created_at)
@@ -49,10 +49,10 @@ export function MessageList({ peer, messages, renderAfter }: Props) {
                   (continued ? (
                     <span className={styles.avatarSpace} aria-hidden="true" />
                   ) : (
-                    <Avatar name={peer.name} seed={peer.user_id} gender={peer.gender} size="bubble" />
+                    <Avatar name={peer.name} seed={peer.user_id} gender={peer.gender ?? undefined} size="bubble" />
                   ))}
                 <div className={styles.stack}>
-                  <span className="sr-only">{m.mine ? '내가 보냄' : `${peer.name}님`}: </span>
+                  <span className="sr-only">{m.mine ? '내가 보냄' : `${peer.name}${peer.deleted ? '' : '님'}`}: </span>
                   <div className={styles.bubble}>
                     {m.kind === 'voice' && m.audio_url ? (
                       <VoiceMessage audioUrl={m.audio_url} durationSec={m.duration_sec ?? 0} />

@@ -63,6 +63,16 @@ async def test_text_voice_polling_unread(client: AsyncClient) -> None:
     rooms_b = (await client.get("/api/v1/chats", headers=hb)).json()
     assert rooms_b[0]["unread"] == 2 and rooms_b[0]["last_message"] == "🎤 음성 메시지"
 
+    # 지난 대화 조회는 커서보다 오래된 메시지만 돌려주며 읽음 표시를 바꾸지 않는다.
+    older = await client.get(f"/api/v1/chats/{rid}/messages?before={voice['id']}", headers=hb)
+    assert older.status_code == 200
+    assert [m["id"] for m in older.json()] == [m1.json()["id"]]
+    assert (await client.get("/api/v1/chats", headers=hb)).json()[0]["unread"] == 2
+    invalid_cursor = await client.get(
+        f"/api/v1/chats/{rid}/messages?after=1&before={voice['id']}", headers=hb
+    )
+    assert invalid_cursor.status_code == 422
+
     # 상대가 열면 읽음 처리
     msgs = (await client.get(f"/api/v1/chats/{rid}/messages", headers=hb)).json()
     assert [m["kind"] for m in msgs] == ["text", "voice"] and not msgs[0]["mine"]

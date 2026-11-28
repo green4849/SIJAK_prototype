@@ -97,6 +97,37 @@ async def test_withdrawn_user_disappears_from_friends_and_recommendations(
     assert r.status_code >= 400
 
 
+async def test_withdrawn_peer_is_anonymous_and_cannot_receive_new_messages(
+    client: AsyncClient,
+) -> None:
+    ha, a = await signup_user(client, "김영희")
+    hb, b = await signup_user(client, "박정호")
+    await client.post(f"{API}/friends/requests", headers=ha, json={"to_user_id": b["id"]})
+    await client.post(f"{API}/friends/requests", headers=hb, json={"to_user_id": a["id"]})
+    room = (await client.post(f"{API}/chats/with/{b['id']}", headers=ha)).json()
+    rid = room["id"]
+    assert room["peer"]["deleted"] is False
+    assert (await client.post(f"{API}/me/withdraw", headers=hb, json={})).status_code == 200
+
+    shown = (await client.get(f"{API}/chats/{rid}", headers=ha)).json()["peer"]
+    assert shown == {
+        "user_id": b["id"],
+        "name": "탈퇴한 회원",
+        "age": None,
+        "gender": None,
+        "region_name": None,
+        "deleted": True,
+    }
+    listed = (await client.get(f"{API}/chats", headers=ha)).json()
+    assert listed[0]["peer"] == shown
+    assert (await client.get(f"{API}/chats/{rid}/topics", headers=ha)).json() == []
+    sending = await client.post(
+        f"{API}/chats/{rid}/messages", headers=ha, json={"text": "안녕하세요"}
+    )
+    assert sending.status_code == 403
+    assert sending.json()["error"]["code"] == "user_deleted"
+
+
 async def test_withdraw_reason_is_optional_and_short(client: AsyncClient) -> None:
     h, _ = await signup_user(client, "김영희")
     r = await client.post(f"{API}/me/withdraw", headers=h, json={"reason": "가" * 31})

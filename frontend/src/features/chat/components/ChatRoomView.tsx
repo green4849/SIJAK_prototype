@@ -12,14 +12,34 @@ interface Props {
   roomId: string
   peer: ChatPeer
   blocked?: boolean
+  withdrawn?: boolean
   renderAfterMessage?: (m: ChatMessageData) => ReactNode
 }
 
 /** ⑤ 대화방 본문 — 메시지 목록 + 아래 고정 입력줄 */
-export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage }: Props) {
-  const { messages, loading, error, sendText, sendVoice } = useMessages(roomId)
+export function ChatRoomView({ roomId, peer, blocked = false, withdrawn = false, renderAfterMessage }: Props) {
+  const {
+    messages, loading, error, hasOlder, loadingOlder, olderError, loadOlder, sendText, sendVoice,
+  } = useMessages(roomId)
   const topics = useTopics(roomId)
   const [prefill, setPrefill] = useState<{ text: string; seq: number }>()
+  const olderAnchor = useRef<{ firstId: number; top: number; height: number } | null>(null)
+
+  async function showOlder() {
+    olderAnchor.current = {
+      firstId: messages[0]?.id ?? 0,
+      top: window.scrollY,
+      height: document.documentElement.scrollHeight,
+    }
+    if (!(await loadOlder())) olderAnchor.current = null
+  }
+
+  useLayoutEffect(() => {
+    const anchor = olderAnchor.current
+    if (!anchor || messages[0]?.id === anchor.firstId) return
+    window.scrollTo({ top: anchor.top + document.documentElement.scrollHeight - anchor.height })
+    olderAnchor.current = null
+  }, [messages])
   // 입력줄은 화면 아래 고정 — 대화 주제를 펼치면 높아지므로 실제 높이만큼 목록 아래를 비운다
   const barRef = useRef<HTMLDivElement>(null)
   const [barHeight, setBarHeight] = useState<number>()
@@ -54,13 +74,28 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
         {loading ? (
           <p role="status">대화를 불러오는 중…</p>
         ) : (
-          <MessageList peer={peer} messages={messages} renderAfter={renderAfterMessage} />
+          <>
+            {hasOlder && (
+              <button
+                type="button"
+                className={styles.older}
+                onClick={() => void showOlder()}
+                disabled={loadingOlder}
+              >
+                {loadingOlder ? '지난 대화를 불러오는 중…' : '지난 대화 더 보기'}
+              </button>
+            )}
+            {olderError && <Alert>{olderError}</Alert>}
+            <MessageList peer={peer} messages={messages} renderAfter={renderAfterMessage} />
+          </>
         )}
       </div>
       <div ref={barRef} className={styles.composer} data-bottom-bar>
-        {blocked ? (
+        {withdrawn || blocked ? (
           <p className={styles.blocked} role="status">
-            차단된 대화예요. 내가 차단했다면 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.
+            {withdrawn
+              ? '탈퇴한 회원과는 더 이상 대화할 수 없어요.'
+              : '차단된 대화예요. 내가 차단했다면 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.'}
           </p>
         ) : (
           <>
