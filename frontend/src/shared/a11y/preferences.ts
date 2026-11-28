@@ -13,13 +13,16 @@ export interface A11yPrefs {
   vibration: boolean
   /** 화면 구석의 '시작이에게 물어보기' 버튼을 보일지 (C14) — 꺼도 도움말에서 부를 수 있다 */
   guide: boolean
+  /** 상단의 '화면 읽어 주기' 버튼과 읽기 속도 (A6) */
+  readAloud: boolean
+  speechRate: 0.8 | 1 | 1.2
 }
 
 const KEY = 'wipi.a11y'
 
 function systemDefaults(): A11yPrefs {
   const high = typeof matchMedia === 'function' && matchMedia('(prefers-contrast: more)').matches
-  return { fontScale: 1, contrast: high ? 'high' : 'normal', vibration: true, guide: true }
+  return { fontScale: 1, contrast: high ? 'high' : 'normal', vibration: true, guide: true, readAloud: true, speechRate: 1 }
 }
 
 export function loadPrefs(): A11yPrefs {
@@ -33,6 +36,8 @@ export function loadPrefs(): A11yPrefs {
       contrast: p.contrast === 'high' ? 'high' : defaults.contrast,
       vibration: p.vibration !== false,
       guide: p.guide !== false,
+      readAloud: p.readAloud !== false,
+      speechRate: [0.8, 1, 1.2].includes(p.speechRate as number) ? p.speechRate as A11yPrefs['speechRate'] : 1,
     }
   } catch {
     return defaults // 사생활 보호 모드 등에서 저장소 접근 불가

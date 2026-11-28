@@ -32,22 +32,23 @@ export function ChatRoomPage() {
     <section className={styles.page}>
       <TopBar
         backTo="/chats"
-        right={
+        right={!room.peer.deleted && (
           <SafetyMenu
             userId={room.peer.user_id}
             name={room.peer.name}
             blocked={room.blocked}
             onChanged={reload}
           />
-        }
+        )}
       />
       <header className={styles.peer}>
-        <Avatar name={room.peer.name} seed={room.peer.user_id} gender={room.peer.gender} size="header" />
+        <Avatar name={room.peer.name} seed={room.peer.user_id} gender={room.peer.gender ?? undefined} size="header" />
         <div>
-          <h1 className={styles.name}>{room.peer.name}님</h1>
-          <p className={styles.meta}>
+          <h1 className={styles.name}>{room.peer.name}{room.peer.deleted ? '' : '님'}</h1>
+          {!room.peer.deleted && <p className={styles.meta}>
             {room.peer.age}세 · {room.peer.region_name}
-          </p>
+          </p>}
+          {room.peer.online && <p className={styles.online}>지금 접속 중</p>}
           {IS_DEMO && <p className={styles.meta}>시연 · 미리 써 둔 답장</p>}
         </div>
       </header>
@@ -57,6 +58,7 @@ export function ChatRoomPage() {
         roomId={room.id}
         peer={room.peer}
         blocked={room.blocked}
+        withdrawn={room.peer.deleted}
         renderAfterMessage={renderWarning}
       />
 

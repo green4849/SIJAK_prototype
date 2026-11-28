@@ -16,6 +16,10 @@ export function requireUser(req: DemoRequest): DUser {
   if (!id || s.me !== id) return fail(401, 'not_authenticated', '로그인이 필요해요.')
   const u = s.users.find((x) => x.id === id)
   if (!u) return fail(401, 'user_not_found', '다시 로그인해 주세요.')
+  if (u.show_online_status && Date.now() - u.last_login > 60_000) {
+    u.last_login = Date.now()
+    save()
+  }
   return u
 }
 
@@ -61,6 +65,7 @@ export function userOut(u: DUser): Schema<'UserOut'> {
     interests: u.interests,
     intro: u.intro,
     has_location: u.geo !== null,
+    show_online_status: u.show_online_status ?? false,
     consent_needed: Object.entries(CONSENT_DOCS).some(([k, required]) => required && !hasConsent(u, k)),
     health_consent: hasConsent(u, 'health'),
   }
@@ -200,7 +205,7 @@ export const authRoutes: Route[] = [
 
   ['PATCH', '/me', (req) => {
     const u = requireUser(req)
-    const b = req.body as { intro?: string; region_code?: string; interests?: string[] }
+    const b = req.body as { intro?: string; region_code?: string; interests?: string[]; show_online_status?: boolean }
     validateProfile(b.region_code, b.interests)
     if (b.intro !== undefined) {
       if (b.intro.length > INTRO_MAX_LEN) fail(422, 'validation_error', `소개는 ${INTRO_MAX_LEN}자까지 쓸 수 있어요.`)
@@ -211,6 +216,10 @@ export const authRoutes: Route[] = [
       u.area = undefined // 이사 — 예전 동네 이름은 지운다
     }
     if (b.interests !== undefined) u.interests = [...new Set(b.interests)]
+    if (b.show_online_status !== undefined) {
+      u.show_online_status = b.show_online_status
+      if (b.show_online_status) u.last_login = Date.now()
+    }
     save()
     return json(userOut(u))
   }],

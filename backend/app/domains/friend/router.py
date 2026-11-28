@@ -24,9 +24,12 @@ FRIEND_REQUEST_PER_USER = Rule("friend_request:user", limit=30, window_sec=3600,
 
 @router.get("/recommendations", response_model=list[FriendCard])
 async def recommendations(
-    me: CurrentUser, service: FriendServiceDep, tab: Annotated[Tab, Query()] = "recommended"
+    me: CurrentUser,
+    service: FriendServiceDep,
+    tab: Annotated[Tab, Query()] = "recommended",
+    q: Annotated[str, Query(max_length=50)] = "",
 ) -> list[FriendCard]:
-    return [FriendCard.of(c) for c in await service.recommend(me, tab)]
+    return [FriendCard.of(c) for c in await service.recommend(me, tab, q)]
 
 
 @router.get("/survey", response_model=SurveyOut)

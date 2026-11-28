@@ -107,12 +107,17 @@ class ChatRepository:
         return [*reversed(list(before)), anchor, *after]
 
     async def list_messages(
-        self, room_id: uuid.UUID, after_id: int = 0, limit: int = 100
+        self, room_id: uuid.UUID, after_id: int = 0, before_id: int = 0, limit: int = 100
     ) -> list[ChatMessage]:
         q = select(ChatMessage).where(ChatMessage.room_id == room_id)
         if after_id:
             q = q.where(ChatMessage.id > after_id).order_by(ChatMessage.id).limit(limit)
             return list(await self.session.scalars(q))
+        if before_id:
+            rows = await self.session.scalars(
+                q.where(ChatMessage.id < before_id).order_by(ChatMessage.id.desc()).limit(limit)
+            )
+            return list(reversed(list(rows)))
         # 처음 열 때는 최근 limit개
         rows = await self.session.scalars(q.order_by(ChatMessage.id.desc()).limit(limit))
         return list(reversed(list(rows)))

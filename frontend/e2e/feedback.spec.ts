@@ -59,7 +59,7 @@ test('A4: 설정에서 진동을 끄면 토스트만', async ({ page }) => {
   await recordVibration(page)
   await startTour(page)
   await page.goto('/me/settings')
-  await page.getByRole('radio', { name: '끄기' }).click()
+  await page.getByRole('group', { name: '진동' }).getByRole('radio', { name: '끄기' }).click()
 
   await page.goto('/friends')
   await page.getByRole('article', { name: '김영희님' }).getByRole('button', { name: '친구 신청' }).click()

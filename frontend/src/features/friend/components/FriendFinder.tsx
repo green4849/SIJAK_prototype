@@ -10,9 +10,11 @@ import { RecommendRating } from './RecommendRating'
 import styles from './FriendList.module.css'
 import { CardGrid } from '@/shared/ui/CardGrid'
 import { CoupleScene } from '@/shared/ui/illustrations/Scenes'
+import { SkeletonList } from '@/shared/ui/SkeletonList'
 
 interface Props extends PointHooks {
   tab: FriendTab
+  query?: string
   chatHref: (userId: string) => string
   /** 목록 위에 끼워 넣을 것 (예: 위치 동의 카드, 평가 포인트 안내) */
   header?: ReactNode
@@ -24,8 +26,8 @@ interface Props extends PointHooks {
 }
 
 /** ④ 추천 친구 / 같은 동네 목록. 추천 탭에서는 카드마다 3단계 평가 (C12) */
-export function FriendFinder({ tab, chatHref, header, requestPrice, onboarding = false, onFinish, ...points }: Props) {
-  const { data, loading, error, request, rate, actionError } = useRecommendations(tab, points)
+export function FriendFinder({ tab, query = '', chatHref, header, requestPrice, onboarding = false, onFinish, ...points }: Props) {
+  const { data, loading, error, request, rate, actionError } = useRecommendations(tab, query, points)
   const [selected, setSelected] = useState<FriendCardData | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [sending, setSending] = useState(false)
@@ -51,12 +53,12 @@ export function FriendFinder({ tab, chatHref, header, requestPrice, onboarding =
       {header}
       {error && <Alert>{error}</Alert>}
       {actionError && <Alert>{actionError}</Alert>}
-      {loading && !data && <p role="status">이웃을 찾고 있어요…</p>}
+      {loading && !data && <SkeletonList label="이웃을 찾고 있어요." />}
       {data && data.length === 0 && (
         <div>
           <CoupleScene size="small" />
           <p className={styles.empty}>
-            {tab === 'nearby' ? '아직 가까운 이웃이 없어요. ‘추천 친구’도 살펴보세요.' : '추천할 이웃이 아직 없어요. ‘같은 동네’도 살펴보세요.'}
+            {query ? '검색 결과가 없어요. 다른 이름이나 관심사를 입력해 보세요.' : tab === 'nearby' ? '아직 가까운 이웃이 없어요. ‘추천 친구’도 살펴보세요.' : '추천할 이웃이 아직 없어요. ‘같은 동네’도 살펴보세요.'}
           </p>
           {onboarding && <Button block onClick={onFinish}>다음으로</Button>}
         </div>

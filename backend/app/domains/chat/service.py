@@ -100,12 +100,12 @@ class ChatService:
     # ---------- 메시지 ----------
 
     async def messages(
-        self, me: "User", room_id: uuid.UUID, after_id: int = 0
+        self, me: "User", room_id: uuid.UUID, after_id: int = 0, before_id: int = 0
     ) -> list[ChatMessage]:
-        """조회하면 읽음 처리까지 한다"""
+        """최신/새 메시지는 읽음 처리하고, 이전 페이지 조회는 읽음 상태를 유지한다."""
         room = await self._member_room(me, room_id)
-        msgs = await self.repo.list_messages(room.id, after_id)
-        if msgs:
+        msgs = await self.repo.list_messages(room.id, after_id, before_id)
+        if msgs and not before_id:
             self.repo.mark_read(room, me.id, msgs[-1].id)
             await self.repo.commit()
         return msgs
@@ -182,6 +182,8 @@ class ChatService:
     async def topics(self, me: "User", room_id: uuid.UUID) -> list[Topic]:
         room = await self._member_room(me, room_id)
         other = (await self.auth.get_users({room.other(me.id)}))[room.other(me.id)]
+        if other.status == "deleted":
+            return []
         return suggest([i.category for i in me.interests], [i.category for i in other.interests])
 
     # ---------- 다른 도메인용 공개 메서드 ----------
@@ -258,6 +260,9 @@ class ChatService:
 
     async def _sendable_room(self, me: "User", room_id: uuid.UUID) -> ChatRoom:
         room = await self._member_room(me, room_id)
+        other = (await self.auth.get_users({room.other(me.id)})).get(room.other(me.id))
+        if other is None or other.status == "deleted":
+            raise ForbiddenError("탈퇴한 회원에게는 메시지를 보낼 수 없어요.", code="user_deleted")
         if await self.risk.is_blocked_between(me.id, room.other(me.id)):
             raise ForbiddenError("차단 중인 분께는 메시지를 보낼 수 없어요.", code="blocked")
         return room

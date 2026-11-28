@@ -1605,16 +1605,17 @@ export interface components {
         /** ChatPeer */
         ChatPeer: {
             /** Age */
-            age: number;
-            /**
-             * Gender
-             * @enum {string}
-             */
-            gender: "M" | "F";
+            age: number | null;
+            /** Deleted */
+            deleted: boolean;
+            /** Gender */
+            gender: ("M" | "F") | null;
             /** Name */
             name: string;
+            /** Online */
+            online: boolean;
             /** Region Name */
-            region_name: string;
+            region_name: string | null;
             /**
              * User Id
              * Format: uuid
@@ -2075,6 +2076,8 @@ export interface components {
             intro?: string | null;
             /** Region Code */
             region_code?: string | null;
+            /** Show Online Status */
+            show_online_status?: boolean | null;
         };
         /** PushConfigOut */
         PushConfigOut: {
@@ -2500,6 +2503,8 @@ export interface components {
             region_code: string;
             /** Region Name */
             region_name: string;
+            /** Show Online Status */
+            show_online_status: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -2652,6 +2657,7 @@ export interface operations {
         parameters: {
             query?: {
                 category?: string | null;
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -3439,6 +3445,7 @@ export interface operations {
         parameters: {
             query?: {
                 after?: number;
+                before?: number;
             };
             header?: never;
             path: {
@@ -3633,6 +3640,7 @@ export interface operations {
         parameters: {
             query?: {
                 tab?: "recommended" | "nearby";
+                q?: string;
             };
             header?: never;
             path?: never;

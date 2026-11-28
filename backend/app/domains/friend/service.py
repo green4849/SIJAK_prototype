@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 from app.core.errors import ConflictError, DomainError, ForbiddenError, NotFoundError
+from app.domains.auth.constants import INTERESTS
 from app.domains.auth.service import AuthService
 from app.domains.friend.models import FriendRequest
 from app.domains.friend.nearby import (
@@ -79,7 +80,7 @@ class FriendService:
 
     # ---------- 추천 ----------
 
-    async def recommend(self, me: "User", tab: Tab) -> list[Candidate]:
+    async def recommend(self, me: "User", tab: Tab, q: str = "") -> list[Candidate]:
         relations = await self._relations(me.id)
         # 이미 친구인 사람은 추천에서 뺀다 (친구 목록에서 따로 보여 줌)
         exclude = {me.id} | {uid for uid, (rel, _) in relations.items() if rel == "friends"}
@@ -95,12 +96,12 @@ class FriendService:
                 limit=MAX_CANDIDATES,
                 nearest_first=True,
             )
-            found = find_nearby(me, pool)
+            found = find_nearby(me, [u for u in pool if self._matches_search(u, q)])
             pairs = [(n.user, n.distance_km) for n in found]
             # 거리가 있으면 가까운 순, 없으면 최근 접속 순(조회 순서 유지)
             pairs.sort(key=lambda p: (p[1] is None, p[1] or 0))
         else:
-            return await self._recommend_by_match(me, exclude, relations, ratings)
+            return await self._recommend_by_match(me, exclude, relations, ratings, q)
 
         return [
             self._candidate(u, my_interests, relations, distance, ratings.get(u.id))
@@ -113,6 +114,7 @@ class FriendService:
         exclude: set[uuid.UUID],
         relations: dict[uuid.UUID, tuple[Relation, uuid.UUID]],
         ratings: dict[uuid.UUID, str],
+        q: str = "",
     ) -> list[Candidate]:
         """추천 친구 탭 — 성향조사 알고리즘 (friend/survey.py).
 
@@ -127,7 +129,7 @@ class FriendService:
             exclude_ids=exclude | disliked,
             limit=MAX_CANDIDATES,
         )
-        reach = within_reach(me, pool)
+        reach = [n for n in within_reach(me, pool) if self._matches_search(n.user, q)]
         surveys = await self.repo.surveys_of({me.id} | {n.user.id for n in reach})
         mine = surveys.get(me.id)
         my_list = [i.category for i in me.interests]
@@ -274,6 +276,18 @@ class FriendService:
         return [
             self._candidate(u, mine, relations) for u in users.values() if u.status != "deleted"
         ]
+
+    @staticmethod
+    def _matches_search(user: "User", q: str) -> bool:
+        needle = q.strip().casefold()
+        return not needle or any(
+            needle in value.casefold()
+            for value in (
+                user.name,
+                user.intro,
+                *(INTERESTS.get(i.category, i.category) for i in user.interests),
+            )
+        )
 
     async def _candidate_for(self, me: "User", other: "User") -> Candidate:
         return self._candidate(

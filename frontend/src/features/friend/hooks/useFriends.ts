@@ -20,8 +20,8 @@ const RATING_TOAST: Record<Rating, string> = {
 }
 
 /** 추천 목록 + 신청 (카드 상태를 즉시 '신청했어요'로 바꾼다) + 평가 */
-export function useRecommendations(tab: FriendTab, points: PointHooks = {}) {
-  const state = useAsync(() => friendApi.recommendations(tab), [tab])
+export function useRecommendations(tab: FriendTab, q = '', points: PointHooks = {}) {
+  const state = useAsync(() => friendApi.recommendations(tab, q), [tab, q])
   const [actionError, setActionError] = useState<string | null>(null)
 
   // 신청해 둔 이웃이 받아 주면 카드를 바로 '대화하기'로 — 보낸 신청이 있는 동안만 살핀다

@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -14,9 +14,11 @@ from app.domains.chat.topics import Topic
 class ChatPeer(BaseModel):
     user_id: uuid.UUID
     name: str
-    age: int
-    gender: Literal["M", "F"]  # 아바타 그림(할머니·할아버지) 구분용 — A19
-    region_name: str
+    age: int | None
+    gender: Literal["M", "F"] | None  # 아바타 그림(할머니·할아버지) 구분용 — A19
+    region_name: str | None
+    deleted: bool
+    online: bool
 
 
 class RiskWarning(BaseModel):
@@ -68,6 +70,7 @@ class RoomOut(BaseModel):
     @classmethod
     def of(cls, s: RoomSummary) -> "RoomOut":
         u = s.other
+        deleted = u.status == "deleted"
         preview = None
         if s.last_message:
             preview = "🎤 음성 메시지" if s.last_message.kind == "voice" else s.last_message.body
@@ -75,10 +78,18 @@ class RoomOut(BaseModel):
             id=s.room.id,
             peer=ChatPeer(
                 user_id=u.id,
-                name=u.name,
-                age=age_on(u.birth_date, datetime.now(UTC).date()),
-                gender=u.gender,  # type: ignore[arg-type]
-                region_name=REGIONS.get(u.region_code, u.region_code),
+                name="탈퇴한 회원" if deleted else u.name,
+                age=None if deleted else age_on(u.birth_date, datetime.now(UTC).date()),
+                gender=None if deleted else u.gender,  # type: ignore[arg-type]
+                region_name=None if deleted else REGIONS.get(u.region_code, u.region_code),
+                deleted=deleted,
+                online=bool(
+                    not deleted
+                    and u.status == "active"
+                    and u.show_online_status
+                    and u.last_seen_at
+                    and u.last_seen_at >= datetime.now(UTC) - timedelta(minutes=5)
+                ),
             ),
             last_message=preview,
             last_message_at=s.room.last_message_at,
