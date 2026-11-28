@@ -88,3 +88,59 @@ self.addEventListener('fetch', (event) => {
     )
   }
 })
+
+/*
+ * 휴대폰 알림 (C4, Web Push) — 서버가 보낸 {title, body, link, tag, quiet} 를 알림으로 보여 주고,
+ * 누르면 열린 앱 창에서 그 화면(link)을 연다(없으면 새 창).
+ *  - quiet: 밤 9시~아침 8시 — 소리·진동 없이
+ *  - tag: 같은 대화방 알림은 하나로 합쳐진다 (renotify 로 새로 왔음은 알린다)
+ */
+const ICON = new URL('icons/icon-192.png', SCOPE).href
+
+/** 앱 안 경로만 (/chats/…) — 다른 사이트 주소로는 열지 않는다 */
+function appUrl(link) {
+  const path = typeof link === 'string' && link.startsWith('/') && !link.startsWith('//') ? link.slice(1) : ''
+  return new URL(path, SCOPE).href
+}
+
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    // 형식이 다르면 기본 문구로
+  }
+  const title = data.title || '시작'
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || '새 소식이 있어요',
+      icon: ICON,
+      badge: ICON,
+      lang: 'ko',
+      tag: data.tag || undefined,
+      renotify: Boolean(data.tag),
+      silent: Boolean(data.quiet),
+      data: { url: appUrl(data.link) },
+    }),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = event.notification.data?.url || SHELL
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (wins) => {
+      const win = wins.find((w) => w.url.startsWith(SCOPE.href))
+      if (win) {
+        try {
+          const focused = await win.focus()
+          await focused.navigate(url)
+          return
+        } catch {
+          // 이 창을 옮길 수 없으면(서비스 워커가 맡지 않은 창) 새 창으로
+        }
+      }
+      await self.clients.openWindow(url)
+    }),
+  )
+})

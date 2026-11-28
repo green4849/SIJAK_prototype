@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { unsubscribeDevice } from '@/shared/lib/push'
 import { authApi, type User } from '../api/authApi'
 import {
   isSessionRejected,
@@ -80,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
+    // 이 기기 휴대폰 알림부터 끈다 — 같은 기기를 다음 사람이 써도 앞 사람 알림이 오지 않게 (C4)
+    await unsubscribeDevice()
     await authApi.logout().catch(() => undefined)
     setAccessToken(null)
   }, [])

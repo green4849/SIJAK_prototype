@@ -1,30 +1,60 @@
-"""알림 설정 (C12) + 알림함 (C4 일부).
+"""알림 설정 (C12) + 알림함·휴대폰 알림 (C4).
 
 - 설정: 회의 원안 '하루 3~4번 추천 푸시' → 하루 2번까지, 받는 시간을 직접 고른다.
-  실제 발송(Web Push·FCM)은 C4 — 발송기는 이 설정을 읽어 TIME_SLOTS 시각에만 보낸다.
+  (추천 친구 알림을 그 시각에 보내는 일은 예약 작업이 필요해 다음 단계 — docs/tasks/C4)
 - 알림함: 다른 도메인(friend·chat·activity)이 아래 `on_*` 메서드로 소식을 쌓는다.
   문구는 여기 한 곳에 모은다. 쌓기는 커밋하지 않는다 → 부른 쪽의 커밋과 함께 저장·취소된다.
+- 휴대폰 알림(Web Push): 소식을 쌓을 때 같은 내용을 '커밋되면 보낼 것'으로 담는다 (push.py).
+  메시지 내용은 알림에 넣지 않는다 — 잠금 화면에 대화가 보이지 않게.
 """
 
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
 
+from app.core.config import get_settings
 from app.core.errors import DomainError, NotFoundError
+from app.domains.notification import push
 from app.domains.notification.models import (
     DEFAULT_TIMES,
     INBOX_LIMIT,
     MAX_PER_DAY,
+    MAX_PUSH_DEVICES,
     TIME_SLOTS,
     Notification,
     NotificationPrefs,
 )
+from app.domains.notification.push import PushMessage
 from app.domains.notification.repository import NotificationRepository
 
 
 class InvalidNotificationPrefsError(DomainError):
     status_code = 422
     code = "invalid_notification_prefs"
+
+
+class InvalidPushSubscriptionError(DomainError):
+    status_code = 422
+    code = "invalid_push_subscription"
+
+
+class PushDisabledError(DomainError):
+    status_code = 409
+    code = "push_disabled"
+
+
+@dataclass(frozen=True)
+class PushConfig:
+    #: 서버가 휴대폰 알림을 보낼 수 있는지 (VAPID 키가 있는지)
+    enabled: bool
+    #: 브라우저 구독에 쓸 공개 키 (applicationServerKey)
+    public_key: str | None
+
+
+@dataclass(frozen=True)
+class PushTestResult:
+    sent: int
+    failed: int
 
 
 @dataclass(frozen=True)
@@ -90,6 +120,66 @@ class NotificationService:
         )
         return await self.get(user_id)
 
+    # ---------- 휴대폰 알림 (C4) ----------
+
+    def push_config(self) -> PushConfig:
+        enabled = push.sender() is not None
+        return PushConfig(enabled, get_settings().vapid_public_key if enabled else None)
+
+    async def subscribe_push(
+        self, user_id: uuid.UUID, endpoint: str, p256dh: str, auth: str
+    ) -> None:
+        if not push.allowed_endpoint(endpoint):
+            raise InvalidPushSubscriptionError("이 브라우저의 알림 주소는 쓸 수 없어요.")
+        await self.repo.save_subscription(user_id, endpoint, p256dh, auth, MAX_PUSH_DEVICES)
+
+    async def unsubscribe_push(self, user_id: uuid.UUID, endpoint: str) -> None:
+        await self.repo.delete_subscription(user_id, endpoint)
+
+    async def test_push(self, user_id: uuid.UUID) -> PushTestResult:
+        """설정 화면 '시험 알림 보내기' — 기다렸다가 결과를 알려 준다"""
+        if push.sender() is None:
+            raise PushDisabledError("아직 휴대폰 알림을 보낼 수 없어요.")
+        targets = await self.repo.push_targets(user_id)
+        if not targets:
+            raise NotFoundError("이 계정으로 알림을 켠 기기가 없어요.")
+        d = await push.send_now(
+            targets,
+            PushMessage(
+                "시험 알림이에요",
+                "이렇게 새 소식을 알려 드릴게요",
+                "/me/settings",
+                "test",
+                ttl=600,
+            ),
+        )
+        await push.record(d)
+        return PushTestResult(d.sent, d.failed)
+
+    async def _push(self, user_id: uuid.UUID, msg: PushMessage) -> None:
+        """커밋되면 그 사람의 기기로 보내도록 담는다 (발송기가 꺼져 있으면 아무것도 안 함)"""
+        if push.sender() is None:
+            return
+        self.repo.queue_push(await self.repo.push_targets(user_id), msg)
+
+    async def _add(
+        self,
+        user_id: uuid.UUID,
+        kind: str,
+        title: str,
+        body: str,
+        link: str,
+        ref: str,
+        *,
+        tag: str | None = None,
+        notify: bool = True,
+    ) -> bool:
+        """알림함에 쌓고, 새로 쌓였으면 휴대폰 알림도 (같은 일은 한 번만)"""
+        added = await self.repo.add(user_id, kind, title, body, link, ref)
+        if added and notify:
+            await self._push(user_id, PushMessage(title, body, link, tag or ref))
+        return added
+
     # ---------- 알림함 ----------
 
     async def inbox(self, user_id: uuid.UUID) -> list[InboxItem]:
@@ -105,7 +195,7 @@ class NotificationService:
     # ---------- 다른 도메인용: 소식 쌓기 (커밋은 부른 쪽) ----------
 
     async def on_friend_request(self, to_id: uuid.UUID, from_id: uuid.UUID, from_name: str) -> None:
-        await self.repo.add(
+        await self._add(
             to_id,
             "friend",
             "새 친구 신청",
@@ -117,7 +207,7 @@ class NotificationService:
     async def on_became_friends(
         self, to_id: uuid.UUID, other_id: uuid.UUID, other_name: str
     ) -> None:
-        await self.repo.add(
+        await self._add(
             to_id,
             "friend",
             "친구가 되었어요",
@@ -136,18 +226,19 @@ class NotificationService:
     ) -> None:
         """위험 대화 감지 — 받는 사람에게 (대화 화면 경고와 같은 내용)"""
         what = _with_subject_particle(labels[0]) if labels else "조심할 말이"
-        await self.repo.add(
+        await self._add(
             to_id,
             "safety",
             "조심하세요",
             f"{sender_name}님 메시지에 {what} 있어요",
             f"/chats/{room_id}",
             f"risk:{message_id}",
+            tag=f"chat:{room_id}",
         )
 
     async def on_who5_due(self, user_id: uuid.UUID, last_id: int) -> bool:
         """WHO-5 4주 재측정 — 지난 점검 하나에 한 번만. 새로 쌓였으면 True"""
-        return await self.repo.add(
+        return await self._add(
             user_id,
             "wellbeing",
             "마음 건강 살펴볼 때예요",
@@ -159,11 +250,28 @@ class NotificationService:
     async def on_activity_applied(
         self, user_id: uuid.UUID, activity_id: uuid.UUID, title: str, schedule_text: str
     ) -> None:
-        await self.repo.add(
+        # 휴대폰 알림은 보내지 않는다 — 방금 스스로 한 일
+        await self._add(
             user_id,
             "activity",
             "신청한 활동",
             f"{title} · {schedule_text}",
             f"/activities/{activity_id}",
             f"activity:{activity_id}",
+            notify=False,
+        )
+
+    async def on_new_message(self, to_id: uuid.UUID, sender_name: str, room_id: uuid.UUID) -> None:
+        """새 메시지 — 휴대폰 알림만 (대화 목록이 곧 알림함). 내용은 넣지 않는다.
+        같은 대화방 알림은 tag 로 하나로 합쳐진다."""
+        await self._push(
+            to_id,
+            PushMessage(
+                f"{sender_name}님이 메시지를 보냈어요",
+                "눌러서 확인해 보세요",
+                f"/chats/{room_id}",
+                f"chat:{room_id}",
+                ttl=12 * 3600,
+                urgency="high",
+            ),
         )

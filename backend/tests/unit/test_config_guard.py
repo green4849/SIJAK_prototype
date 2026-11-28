@@ -92,3 +92,16 @@ def test_prod_refuses_log_sms_and_incomplete_solapi() -> None:
         sms_sender_number="0212345678",
     )
     assert ok.sms_provider == "solapi"
+
+
+def test_prod_vapid_keys_come_in_pairs() -> None:
+    """C4 휴대폰 알림: 공개·비밀 키는 둘 다 있거나 둘 다 없어야, subject 는 mailto: 또는 https://"""
+    with pytest.raises(ValidationError, match="VAPID_PUBLIC_KEY"):
+        make(vapid_public_key="pub")
+    with pytest.raises(ValidationError, match="VAPID_PUBLIC_KEY"):
+        make(vapid_private_key="priv")
+    with pytest.raises(ValidationError, match="VAPID_SUBJECT"):
+        make(vapid_public_key="pub", vapid_private_key="priv", vapid_subject="ops@example.com")
+    ok = make(vapid_public_key="pub", vapid_private_key="priv", vapid_subject="mailto:o@e.com")
+    assert ok.vapid_private_key == "priv"
+    assert make().vapid_public_key == ""

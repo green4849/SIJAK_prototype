@@ -1797,6 +1797,112 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "PushConfigOut": {
+        "properties": {
+          "enabled": {
+            "description": "서버가 휴대폰 알림을 보낼 수 있는지",
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "public_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "브라우저 구독에 쓸 VAPID 공개 키 (enabled 일 때)",
+            "title": "Public Key"
+          },
+          "quiet_hours": {
+            "description": "소리 없이 보내는 시간 안내 문구",
+            "title": "Quiet Hours",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "public_key",
+          "quiet_hours"
+        ],
+        "title": "PushConfigOut",
+        "type": "object"
+      },
+      "PushKeysIn": {
+        "properties": {
+          "auth": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Auth",
+            "type": "string"
+          },
+          "p256dh": {
+            "maxLength": 200,
+            "minLength": 20,
+            "title": "P256Dh",
+            "type": "string"
+          }
+        },
+        "required": [
+          "p256dh",
+          "auth"
+        ],
+        "title": "PushKeysIn",
+        "type": "object"
+      },
+      "PushSubscriptionIn": {
+        "description": "브라우저 PushSubscription.toJSON() 그대로 (expirationTime 은 쓰지 않음)",
+        "properties": {
+          "endpoint": {
+            "maxLength": 1000,
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "keys": {
+            "$ref": "#/components/schemas/PushKeysIn"
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "title": "PushSubscriptionIn",
+        "type": "object"
+      },
+      "PushTestOut": {
+        "properties": {
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "sent": {
+            "title": "Sent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sent",
+          "failed"
+        ],
+        "title": "PushTestOut",
+        "type": "object"
+      },
+      "PushUnsubscribeIn": {
+        "properties": {
+          "endpoint": {
+            "maxLength": 1000,
+            "title": "Endpoint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
+        ],
+        "title": "PushUnsubscribeIn",
+        "type": "object"
+      },
       "RatingCreate": {
         "properties": {
           "rating": {
@@ -5588,6 +5694,140 @@
           }
         ],
         "summary": "Inbox",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/push": {
+      "get": {
+        "description": "서버가 휴대폰 알림을 보낼 수 있는지와 구독에 쓸 공개 키",
+        "operationId": "push_config_api_v1_notifications_push_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushConfigOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Push Config",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/push/subscription": {
+      "put": {
+        "description": "이 기기에서 알림 받기 — 같은 기기가 다른 계정이었으면 이 계정으로 옮긴다",
+        "operationId": "push_subscribe_api_v1_notifications_push_subscription_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushSubscriptionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Push Subscribe",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/push/test": {
+      "post": {
+        "description": "내 기기들로 시험 알림 한 통",
+        "operationId": "push_test_api_v1_notifications_push_test_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushTestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Push Test",
+        "tags": [
+          "notification"
+        ]
+      }
+    },
+    "/api/v1/notifications/push/unsubscribe": {
+      "post": {
+        "description": "이 기기에서 알림 끄기 (내 구독만)",
+        "operationId": "push_unsubscribe_api_v1_notifications_push_unsubscribe_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushUnsubscribeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Push Unsubscribe",
         "tags": [
           "notification"
         ]

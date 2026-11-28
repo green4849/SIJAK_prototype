@@ -94,6 +94,13 @@ class Settings(BaseSettings):
     solapi_api_key: str = ""
     solapi_api_secret: str = ""
 
+    # 휴대폰 알림 Web Push (C4). 두 키가 모두 있어야 보낸다 — 만들기: scripts.vapid_keys
+    # · 공개 키는 화면에 내려간다(구독에 씀). 비밀 키는 서버에만
+    # · subject: 푸시 서비스가 문제 있을 때 연락할 곳 — mailto:주소 또는 https://사이트
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_subject: str = "https://sijak-6080.onrender.com"
+
     voice_max_bytes: int = 2_000_000  # 약 1~2분 분량
     # 음성 메시지 파일 보관 기간 (B3, 보고서 4.6.3) — 지나면 예약 작업이 파일을 지운다
     voice_retention_days: int = 90
@@ -198,6 +205,10 @@ class Settings(BaseSettings):
             ]
             if missing:
                 problems.append(f"SMS_PROVIDER=solapi: {', '.join(missing)} 가 비어 있음")
+        if bool(self.vapid_public_key) != bool(self.vapid_private_key):
+            problems.append("VAPID_PUBLIC_KEY·VAPID_PRIVATE_KEY: 둘 다 넣거나 둘 다 비우기")
+        if self.vapid_private_key and not self.vapid_subject.startswith(("mailto:", "https://")):
+            problems.append("VAPID_SUBJECT: mailto:주소 또는 https:// 주소")
         if self.rate_limit_enabled and self.web_concurrency > 1:
             problems.append(
                 "WEB_CONCURRENCY>1: 요청 횟수 제한을 워커마다 따로 셈 "

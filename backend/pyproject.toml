@@ -16,6 +16,7 @@ dependencies = [
     "python-multipart>=0.0.32",
     "boto3>=1.44.11",
     "sentry-sdk>=3.0.0",
+    "pywebpush>=2.0",
 ]
 
 [dependency-groups]

@@ -125,9 +125,12 @@ class ChatService:
         msg.risk_level = result.level
         msg.risk_labels = ",".join(result.labels)
         if result.level >= NOTIFY_RISK_LEVEL:
+            # '조심하세요' 알림 하나로 — 새 메시지 알림을 따로 보내지 않는다
             await self.notifications.on_risky_message(
                 room.other(me.id), me.name, result.labels, room.id, msg.id
             )
+        else:
+            await self.notifications.on_new_message(room.other(me.id), me.name, room.id)
         return await self._save(room, msg)
 
     async def send_voice(
@@ -152,6 +155,7 @@ class ChatService:
             duration_sec=max(1, min(duration_sec, 600)),
         )
         try:
+            await self.notifications.on_new_message(room.other(me.id), me.name, room.id)
             return await self._save(room, msg)
         except Exception:
             await self.repo.rollback()
