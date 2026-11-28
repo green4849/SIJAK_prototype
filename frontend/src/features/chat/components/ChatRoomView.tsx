@@ -12,11 +12,12 @@ interface Props {
   roomId: string
   peer: ChatPeer
   blocked?: boolean
+  withdrawn?: boolean
   renderAfterMessage?: (m: ChatMessageData) => ReactNode
 }
 
 /** ⑤ 대화방 본문 — 메시지 목록 + 아래 고정 입력줄 */
-export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage }: Props) {
+export function ChatRoomView({ roomId, peer, blocked = false, withdrawn = false, renderAfterMessage }: Props) {
   const {
     messages, loading, error, hasOlder, loadingOlder, olderError, loadOlder, sendText, sendVoice,
   } = useMessages(roomId)
@@ -90,9 +91,11 @@ export function ChatRoomView({ roomId, peer, blocked = false, renderAfterMessage
         )}
       </div>
       <div ref={barRef} className={styles.composer} data-bottom-bar>
-        {blocked ? (
+        {withdrawn || blocked ? (
           <p className={styles.blocked} role="status">
-            차단된 대화예요. 내가 차단했다면 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.
+            {withdrawn
+              ? '탈퇴한 회원과는 더 이상 대화할 수 없어요.'
+              : '차단된 대화예요. 내가 차단했다면 마이페이지 맨 아래 ‘차단한 이웃’에서 풀 수 있어요.'}
           </p>
         ) : (
           <>

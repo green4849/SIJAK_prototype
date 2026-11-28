@@ -21,9 +21,11 @@ const other = (r: DRoom, me: string) => (r.a === me ? r.b : r.a)
 
 /** 응답 모양은 백엔드 계약과 같아야 한다 — 어긋나면 타입 오류 (D3) */
 function peer(u: DUser): Schema<'ChatPeer'> {
+  const deleted = Boolean(db().withdrawn[u.id])
   return {
-    user_id: u.id, name: u.name, age: ageOf(u.birth_date), gender: u.gender,
-    region_name: regionLabel(u, REGIONS),
+    user_id: u.id, name: deleted ? '탈퇴한 회원' : u.name,
+    age: deleted ? null : ageOf(u.birth_date), gender: deleted ? null : u.gender,
+    region_name: deleted ? null : regionLabel(u, REGIONS), deleted,
   }
 }
 
@@ -64,6 +66,8 @@ function memberRoom(id: string, me: string) {
 
 function sendable(id: string, me: string) {
   const r = memberRoom(id, me)
+  if (db().withdrawn[other(r, me)])
+    fail(403, 'user_deleted', '탈퇴한 회원에게는 메시지를 보낼 수 없어요.')
   if (relatedBlocks(me).has(other(r, me)))
     fail(403, 'blocked', '차단 중인 분께는 메시지를 보낼 수 없어요.')
   return r
@@ -83,7 +87,7 @@ function addMessage(r: DRoom, m: Omit<DMessage, 'id' | 'room' | 'created_at'>) {
 function scheduleReply(r: DRoom, me: string) {
   const who = other(r, me)
   setTimeout(() => {
-    if (relatedBlocks(me).has(who)) return
+    if (relatedBlocks(me).has(who) || db().withdrawn[who]) return
     addMessage(r, {
       sender: who, kind: 'text', body: REPLIES[Math.floor(Math.random() * REPLIES.length)],
       duration_sec: null, risk_level: 0, risk_labels: [],
@@ -135,6 +139,7 @@ export const chatRoutes: Route[] = [
     const r = db().rooms.find((x) => x.id === req.params.roomId && (x.a === me.id || x.b === me.id))
     if (!r) return fail(404, 'not_found', '대화방을 찾을 수 없어요.')
     const them = userById(other(r, me.id))
+    if (db().withdrawn[other(r, me.id)]) return json([])
     const topics: Schema<'TopicOut'>[] = suggestTopics(me.interests, them?.interests ?? [], (c) => INTERESTS[c] ?? c)
     return json(topics)
   }],

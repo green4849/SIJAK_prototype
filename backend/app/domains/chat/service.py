@@ -182,6 +182,8 @@ class ChatService:
     async def topics(self, me: "User", room_id: uuid.UUID) -> list[Topic]:
         room = await self._member_room(me, room_id)
         other = (await self.auth.get_users({room.other(me.id)}))[room.other(me.id)]
+        if other.status == "deleted":
+            return []
         return suggest([i.category for i in me.interests], [i.category for i in other.interests])
 
     # ---------- 다른 도메인용 공개 메서드 ----------
@@ -258,6 +260,9 @@ class ChatService:
 
     async def _sendable_room(self, me: "User", room_id: uuid.UUID) -> ChatRoom:
         room = await self._member_room(me, room_id)
+        other = (await self.auth.get_users({room.other(me.id)})).get(room.other(me.id))
+        if other is None or other.status == "deleted":
+            raise ForbiddenError("탈퇴한 회원에게는 메시지를 보낼 수 없어요.", code="user_deleted")
         if await self.risk.is_blocked_between(me.id, room.other(me.id)):
             raise ForbiddenError("차단 중인 분께는 메시지를 보낼 수 없어요.", code="blocked")
         return room

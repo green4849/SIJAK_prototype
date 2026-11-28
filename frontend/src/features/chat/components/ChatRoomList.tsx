@@ -24,9 +24,9 @@ export function ChatRoomList({ roomHref, empty }: Props) {
       {data.map((r) => (
         <li key={r.id}>
           <Link to={roomHref(r.id)} className={styles.item}>
-            <Avatar name={r.peer.name} seed={r.peer.user_id} gender={r.peer.gender} />
+            <Avatar name={r.peer.name} seed={r.peer.user_id} gender={r.peer.gender ?? undefined} />
             <span className={styles.main}>
-              <span className={styles.name}>{r.peer.name}님</span>
+              <span className={styles.name}>{r.peer.name}{r.peer.deleted ? '' : '님'}</span>
               <span className={styles.preview}>{r.last_message ?? '아직 나눈 이야기가 없어요'}</span>
             </span>
             <span className={styles.side}>

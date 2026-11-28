@@ -1605,16 +1605,15 @@ export interface components {
         /** ChatPeer */
         ChatPeer: {
             /** Age */
-            age: number;
-            /**
-             * Gender
-             * @enum {string}
-             */
-            gender: "M" | "F";
+            age: number | null;
+            /** Deleted */
+            deleted: boolean;
+            /** Gender */
+            gender: ("M" | "F") | null;
             /** Name */
             name: string;
             /** Region Name */
-            region_name: string;
+            region_name: string | null;
             /**
              * User Id
              * Format: uuid
