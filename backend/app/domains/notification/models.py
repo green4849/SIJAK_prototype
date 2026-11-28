@@ -1,7 +1,7 @@
 """notification 도메인: 알림 받는 방식 설정 (C12) + 알림함 (C4 일부).
 
 알림함은 푸시로 보낼 소식을 앱 안에도 쌓아 둔 목록 — 푸시를 못 봤거나 꺼 둔 분도 볼 수 있게.
-실제 발송(Web Push·FCM)은 C4.
+휴대폰 알림(Web Push)은 기기마다 구독(push_subscriptions)을 두고 커밋 뒤에 보낸다 (push.py).
 """
 
 import uuid
@@ -13,6 +13,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -66,3 +67,27 @@ class Notification(Base):
     ref: Mapped[str | None] = mapped_column(String(80))
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+MAX_PUSH_DEVICES = 10  # 한 사람이 알림을 받는 기기(브라우저) 수 — 넘으면 오래된 것부터 정리
+
+
+class PushSubscription(Base):
+    """휴대폰 알림을 받을 기기(브라우저) 하나 — 브라우저 PushSubscription 그대로 (C4).
+
+    endpoint 는 기기마다 하나라 유니크 — 같은 기기에서 다른 계정이 켜면 그 계정으로 옮긴다.
+    """
+
+    __tablename__ = "push_subscriptions"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    # 푸시 서비스 주소 — 허용한 호스트만 저장한다 (push.allowed_endpoint, SSRF 방지)
+    endpoint: Mapped[str] = mapped_column(Text, unique=True)
+    # 브라우저가 준 암호화 키 (공개 키·인증 비밀) — 알림 내용을 기기만 풀 수 있게
+    p256dh: Mapped[str] = mapped_column(String(200))
+    auth: Mapped[str] = mapped_column(String(100))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { NotificationSettings } from '@/features/notification'
+import { NotificationSettings, PushSettings } from '@/features/notification'
 import type { Contrast, FontScale } from '@/shared/a11y/preferences'
 import { useA11yPrefs } from '@/shared/a11y/useA11yPrefs'
 import { OptionGrid } from '@/shared/ui/OptionGrid'
@@ -30,7 +30,7 @@ const CONTRASTS = [
 ]
 
 /**
- * ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 · 시작이 버튼 · 추천 친구 알림 (바꾸는 즉시 적용).
+ * ⑨ → 설정: 글자 크기 4단계 · 고대비 · 진동 · 시작이 버튼 · 휴대폰 알림 · 추천 친구 알림 (바꾸는 즉시 적용).
  * 예전 '알림 설정' 화면을 여기로 합쳤다 — 옛 주소(/me/notifications)는 #notify 로 넘어온다.
  */
 export function SettingsPage() {
@@ -82,6 +82,7 @@ export function SettingsPage() {
       </div>
 
       <div id="notify" className={styles.notify}>
+        <PushSettings />
         <NotificationSettings />
       </div>
     </section>
